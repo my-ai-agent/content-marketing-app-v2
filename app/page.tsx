@@ -59,7 +59,10 @@ export default function Home() {
           <h3 className="text-2xl font-semibold text-gray-900 mb-4">
             Ready to multiply your cultural stories?
           </h3>
-          <button className="btn-primary text-lg px-8 py-3">
+          <button 
+  className="btn-primary text-lg px-8 py-3"
+  onClick={() => alert('Get Started clicked! This will redirect to your signup/onboarding flow.')}
+>
             Get Started
           </button>
         </div>
