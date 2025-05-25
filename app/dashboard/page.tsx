@@ -42,9 +42,12 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">Create New Story</h3>
             <p className="text-gray-600 mb-4">Start transforming your cultural narrative into multiple formats.</p>
-            <button className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
-              Create Story
-            </button>
+            <Link
+  href="/dashboard/create"
+  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+>
+  Create Story
+</Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
