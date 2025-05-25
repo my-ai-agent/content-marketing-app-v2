@@ -53,9 +53,12 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">My Stories</h3>
             <p className="text-gray-600 mb-4">View and manage your existing cultural stories.</p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
-              View Stories
-            </button>
+            <Link
+  href="/dashboard/stories"
+  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+>
+  View Stories
+</Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
