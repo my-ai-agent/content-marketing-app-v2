@@ -63,10 +63,12 @@ export default function Dashboard() {
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">Analytics</h3>
-            <p className="text-gray-600 mb-4">Track performance across your content formats.</p>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors">
-              View Analytics
-            </button>
+            <Link
+  href="/dashboard/analytics"
+  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+>
+  View Analytics
+</Link>
           </div>
         </div>
       </div>
