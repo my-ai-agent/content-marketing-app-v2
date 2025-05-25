@@ -1,4 +1,5 @@
 'use client'
+// Force redeploy to include settings page
   import Link from 'next/link'
 
 export default function Home() {
