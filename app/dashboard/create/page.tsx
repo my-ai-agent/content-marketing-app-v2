@@ -12,8 +12,8 @@ const planLimits = {
   enterprise: { platforms: 7 }
 };
 const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
-   return (
-    <main className="min-h-screen bg-gray-50">
+  return (
+ <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
