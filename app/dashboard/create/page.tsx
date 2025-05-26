@@ -34,7 +34,7 @@ export default function CreateStory() {
               Cultural Story Multiplication Tool
             </h2>
             <p className="text-sm text-gray-600">
-              Transform your cultural narrative into 12 different formats for maximum reach and revenue.
+              Transform your cultural narrative into 10 different formats for maximum reach and revenue.
             </p>
           </div>
           
@@ -96,7 +96,7 @@ export default function CreateStory() {
             {/* Content Formats */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Content Formats to Generate (Choose up to 12)
+                Select Content Formats to Generate (Choose up to 10)
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
