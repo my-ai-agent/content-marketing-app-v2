@@ -1,7 +1,7 @@
 'use client'                                           // Line 1 ✅
 import Link from 'next/link'                          // Line 2 ✅  
 import { useState } from 'react'                      // Line 3 (ADD THIS)
-export default function CreateStory() {               // Line 4 (move from line 3)
+export default function CreateStory() {
  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
 const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
  const currentPlan = 'free'; // This would come from user settings
@@ -151,8 +151,7 @@ const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platform
         {selectedFormats.includes('Social Media Posts') && (
           <div className="mt-6">
             <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
-           <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
-<div className="flex justify-between items-center mb-3">
+           <div className="flex justify-between items-center mb-3">
   <span className="text-sm text-gray-600">
     Platforms selected: {selectedSocialPlatforms.length}/{maxPlatforms}
   </span>
