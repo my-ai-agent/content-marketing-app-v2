@@ -122,7 +122,19 @@ const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>
     }
   }}
 />
-                    <span className="ml-2 text-sm text-gray-700">{format}</span>
+                    <span className="ml-2 text-sm text-gray-700">
+  {format === 'Social Media Posts' ? (
+    <span className="group relative">
+      Social Media Posts 
+      <span className="ml-1 text-blue-500">ⓘ</span>
+      <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+        Check this to select specific platforms below
+      </div>
+    </span>
+  ) : (
+    format
+  )}
+</span>
                   </label>
                 ))}
               </div>
