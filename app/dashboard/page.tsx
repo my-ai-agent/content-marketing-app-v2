@@ -40,7 +40,7 @@ export default function Dashboard() {
             <div>
               <h3 className="text-sm font-medium text-blue-800 capitalize">{currentPlan} Plan</h3>
               <p className="text-sm text-blue-600">
-                {storiesThisWeek} of {planLimits.storiesPerWeek === 999 ? 'unlimited' : planLimits.storiesPerWeek} stories used this week
+                {storiesThisWeek} of {planLimits.storiesPerWeek === 999 ? 'unlimited' : planLimits.storiesPerWeek} stories used this week • {planLimits.platforms} platforms available
               </p>
             </div>
             <div className="flex items-center space-x-4">
