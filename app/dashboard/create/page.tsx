@@ -2,8 +2,8 @@
 import Link from 'next/link'                          // Line 2 ✅  
 import { useState } from 'react'                      // Line 3 (ADD THIS)
 export default function CreateStory() {               // Line 4 (move from line 3)
-  const [selectedFormats, setSelectedFormats] = useState([]); // Line 5 ✅
-  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState([]); // Line 6 ✅
+ const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
+const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]); 
   return (                                            // Line 7 (remove the |)
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
