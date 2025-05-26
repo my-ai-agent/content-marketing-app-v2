@@ -176,6 +176,9 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
 >
   {isGenerating ? 'Generating...' : !canGenerate ? 'Complete Form First' : 'Generate Content Formats'}
 </button>
+              </div>
+          </div>
+        </div>
               {/* Generated Content Results */}
         {generatedContent && (
           <div className="mt-8 space-y-6">
