@@ -34,7 +34,7 @@ export default function CreateStory() {
               Cultural Story Multiplication Tool
             </h2>
             <p className="text-sm text-gray-600">
-              Transform your cultural narrative into 10 different formats for maximum reach and revenue.
+              Transform your cultural narrative into 7 different formats for maximum reach and revenue.
             </p>
           </div>
           
@@ -96,13 +96,11 @@ export default function CreateStory() {
             {/* Content Formats */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Content Formats to Generate (Choose up to 10)
+                Select Content Formats to Generate (Choose up to 7)
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
-                  'Blog Post', 'Social Media Series', 'Children\'s Book', 'Documentary Script',
-                  'Podcast Episodes', 'Workshop Curriculum', 'Art Installation', 'Mobile App',
-                  'Board Game', 'Theatrical Performance', 'Digital Experience', 'Educational Video'
+                  'Social Media Posts', 'Blog Article', 'Video Script', 'Website Copy', 'Email Newsletter', 'Press Release', 'Podcast Episode Outline'
                 ].map((format) => (
                   <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
