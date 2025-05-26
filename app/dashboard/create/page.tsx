@@ -1,15 +1,17 @@
-import Link from 'next/link'
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
+
 export default function CreateStory() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState({
-  culturalIntegrity: false,
-  selectedFormats: []
-});
+    culturalIntegrity: false,
+    selectedFormats: [] as string[]
+  });
 
-const canGenerate = formData.culturalIntegrity && formData.selectedFormats.length > 0;
+  const canGenerate = formData.culturalIntegrity && formData.selectedFormats.length > 0;
+
   const generateContent = async () => {
     setIsGenerating(true);
     
@@ -24,6 +26,7 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
       setIsGenerating(false);
     }, 2000);
   };
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -57,7 +60,7 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
               Cultural Story Multiplication Tool
             </h2>
             <p className="text-sm text-gray-600">
-              Transform your cultural narrative into 12 different formats for maximum reach and revenue.
+              Transform your cultural narrative into 10 different formats for maximum reach and revenue.
             </p>
           </div>
           
@@ -119,26 +122,26 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
             {/* Content Formats */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Content Formats to Generate (Choose up to 12)
+                Select Content Formats to Generate (Choose up to 10)
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   'LinkedIn', 'Facebook', 'Blog', 'Instagram', 'Press Release', 'General Letter', 'Twitter',
-'Board Report', 'Staff Meeting Agenda', 'Stakeholder PR Newsletter'
+                  'Board Report', 'Staff Meeting Agenda', 'Stakeholder PR Newsletter'
                 ].map((format) => (
                   <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <input 
-  type="checkbox" 
-  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-  checked={formData.selectedFormats.includes(format)}
-  onChange={(e) => {
-    if (e.target.checked) {
-      setFormData({...formData, selectedFormats: [...formData.selectedFormats, format]});
-    } else {
-      setFormData({...formData, selectedFormats: formData.selectedFormats.filter(f => f !== format)});
-    }
-  }}
-/>
+                      type="checkbox" 
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={formData.selectedFormats.includes(format)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData({...formData, selectedFormats: [...formData.selectedFormats, format]});
+                        } else {
+                          setFormData({...formData, selectedFormats: formData.selectedFormats.filter(f => f !== format)});
+                        }
+                      }}
+                    />
                     <span className="ml-2 text-sm text-gray-700">{format}</span>
                   </label>
                 ))}
@@ -150,11 +153,11 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
               <h3 className="text-sm font-medium text-yellow-800 mb-2">Cultural Integrity Commitment</h3>
               <label className="flex items-start">
                 <input 
-  type="checkbox" 
-  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
-  checked={formData.culturalIntegrity}
-  onChange={(e) => setFormData({...formData, culturalIntegrity: e.target.checked})}
-/>
+                  type="checkbox" 
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
+                  checked={formData.culturalIntegrity}
+                  onChange={(e) => setFormData({...formData, culturalIntegrity: e.target.checked})}
+                />
                 <span className="ml-2 text-sm text-yellow-700">
                   I confirm that I have the right to share this cultural story and commit to maintaining its integrity and respect throughout all content adaptations.
                 </span>
@@ -170,16 +173,17 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
                 Save Draft
               </Link>
               <button 
-  onClick={generateContent}
-  disabled={isGenerating || !canGenerate}
-  className={`${isGenerating || !canGenerate ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-medium py-3 px-8 rounded-lg transition-colors`}
->
-  {isGenerating ? 'Generating...' : !canGenerate ? 'Complete Form First' : 'Generate Content Formats'}
-</button>
-              </div>
+                onClick={generateContent}
+                disabled={isGenerating || !canGenerate}
+                className={`${isGenerating || !canGenerate ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-medium py-3 px-8 rounded-lg transition-colors`}
+              >
+                {isGenerating ? 'Generating...' : !canGenerate ? 'Complete Form First' : 'Generate Content Formats'}
+              </button>
+            </div>
           </div>
         </div>
-              {/* Generated Content Results */}
+
+        {/* Generated Content Results */}
         {generatedContent && (
           <div className="mt-8 space-y-6">
             <h3 className="text-xl font-bold text-gray-900">Generated Content</h3>
@@ -212,9 +216,6 @@ const canGenerate = formData.culturalIntegrity && formData.selectedFormats.lengt
             </div>
           </div>
         )}
-            </div>
-          </div>
-        </div>
       </div>
     </main>
   )
