@@ -1,3 +1,4 @@
+'use client'
 import Link from 'next/link'
 // Add after line 1
 const PLAN_LIMITS = {
