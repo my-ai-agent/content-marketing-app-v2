@@ -1,6 +1,17 @@
 import Link from 'next/link'
-
+// Add after line 1
+const PLAN_LIMITS = {
+  free: { storiesPerWeek: 1, platforms: 2, users: 2 },
+  basic: { storiesPerWeek: 5, platforms: 3, users: 2 },
+  professional: { storiesPerWeek: 5, platforms: 5, users: 2 },
+  enterprise: { storiesPerWeek: 999, platforms: 7, users: 5 }
+};
 export default function Dashboard() {
+  // Add after line 9, before line 10 (return ()
+  const currentPlan = 'free';
+  const storiesThisWeek = 0;
+  const planLimits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS];
+  const canCreateStory = storiesThisWeek < planLimits.storiesPerWeek;
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -22,6 +33,32 @@ export default function Dashboard() {
                 Settings
               </Link>
             </div>
+            {/* Usage Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-sm font-medium text-blue-800 capitalize">{currentPlan} Plan</h3>
+              <p className="text-sm text-blue-600">
+                {storiesThisWeek} of {planLimits.storiesPerWeek === 999 ? 'unlimited' : planLimits.storiesPerWeek} stories used this week
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="w-32 bg-blue-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full" 
+                  style={{ width: `${planLimits.storiesPerWeek === 999 ? 20 : (storiesThisWeek / planLimits.storiesPerWeek) * 100}%` }}
+                ></div>
+              </div>
+              {currentPlan === 'free' && (
+                <button className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-1 px-3 rounded">
+                  Upgrade
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
           </div>
         </div>
       </div>
@@ -43,10 +80,20 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold mb-3">Create New Story</h3>
             <p className="text-gray-600 mb-4">Start transforming your cultural narrative into multiple formats.</p>
             <Link
-  href="/dashboard/create"
-  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+  href={canCreateStory ? "/dashboard/create" : "#"}
+  className={`${
+    canCreateStory 
+      ? "bg-green-600 hover:bg-green-700" 
+      : "bg-gray-400 cursor-not-allowed"
+  } text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center`}
+  onClick={(e) => {
+    if (!canCreateStory) {
+      e.preventDefault();
+      alert(`You've reached your ${planLimits.storiesPerWeek} story limit for this week. Upgrade to create more stories.`);
+    }
+  }}
 >
-  Create Story
+  Create Story {!canCreateStory && '(Limit Reached)'}
 </Link>
           </div>
 
