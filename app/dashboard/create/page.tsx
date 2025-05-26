@@ -4,6 +4,12 @@ import { useState } from 'react'
 export default function CreateStory() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [formData, setFormData] = useState({
+  culturalIntegrity: false,
+  selectedFormats: []
+});
+
+const canGenerate = formData.culturalIntegrity && formData.selectedFormats.length > 0;
   const generateContent = async () => {
     setIsGenerating(true);
     
@@ -117,12 +123,22 @@ export default function CreateStory() {
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
-                  'Blog Post', 'Social Media Series', 'Children\'s Book', 'Documentary Script',
-                  'Podcast Episodes', 'Workshop Curriculum', 'Art Installation', 'Mobile App',
-                  'Board Game', 'Theatrical Performance', 'Digital Experience', 'Educational Video'
+                  'LinkedIn', 'Facebook', 'Blog', 'Instagram', 'Press Release', 'General Letter', 'Twitter',
+'Board Report', 'Staff Meeting Agenda', 'Stakeholder PR Newsletter'
                 ].map((format) => (
                   <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <input 
+  type="checkbox" 
+  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  checked={formData.selectedFormats.includes(format)}
+  onChange={(e) => {
+    if (e.target.checked) {
+      setFormData({...formData, selectedFormats: [...formData.selectedFormats, format]});
+    } else {
+      setFormData({...formData, selectedFormats: formData.selectedFormats.filter(f => f !== format)});
+    }
+  }}
+/>
                     <span className="ml-2 text-sm text-gray-700">{format}</span>
                   </label>
                 ))}
@@ -133,7 +149,12 @@ export default function CreateStory() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-yellow-800 mb-2">Cultural Integrity Commitment</h3>
               <label className="flex items-start">
-                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1" />
+                <input 
+  type="checkbox" 
+  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
+  checked={formData.culturalIntegrity}
+  onChange={(e) => setFormData({...formData, culturalIntegrity: e.target.checked})}
+/>
                 <span className="ml-2 text-sm text-yellow-700">
                   I confirm that I have the right to share this cultural story and commit to maintaining its integrity and respect throughout all content adaptations.
                 </span>
@@ -150,10 +171,10 @@ export default function CreateStory() {
               </Link>
               <button 
   onClick={generateContent}
-  disabled={isGenerating}
-  className={`${isGenerating ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-medium py-3 px-8 rounded-lg transition-colors`}
+  disabled={isGenerating || !canGenerate}
+  className={`${isGenerating || !canGenerate ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-medium py-3 px-8 rounded-lg transition-colors`}
 >
-  {isGenerating ? 'Generating...' : 'Generate Content Formats'}
+  {isGenerating ? 'Generating...' : !canGenerate ? 'Complete Form First' : 'Generate Content Formats'}
 </button>
               {/* Generated Content Results */}
         {generatedContent && (
