@@ -1,6 +1,23 @@
 import Link from 'next/link'
-
+'use client'
+import { useState } from 'react'
 export default function CreateStory() {
+  const [generatedContent, setGeneratedContent] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const generateContent = async () => {
+    setIsGenerating(true);
+    
+    // Simulate content generation (replace with real API call later)
+    setTimeout(() => {
+      const mockContent = {
+        blogPost: "This is a generated blog post about your cultural story...",
+        socialMedia: "🌟 Share your cultural story! #CulturalHeritage #Storytelling",
+        email: "Subject: Your Cultural Story\n\nDear Reader,\n\nWe're excited to share this meaningful cultural narrative..."
+      };
+      setGeneratedContent(mockContent);
+      setIsGenerating(false);
+    }, 2000);
+  };
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -131,9 +148,46 @@ export default function CreateStory() {
               >
                 Save Draft
               </Link>
-              <button className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
-                Generate Content Formats
+              <button 
+  onClick={generateContent}
+  disabled={isGenerating}
+  className={`${isGenerating ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-medium py-3 px-8 rounded-lg transition-colors`}
+>
+  {isGenerating ? 'Generating...' : 'Generate Content Formats'}
+</button>
+              {/* Generated Content Results */}
+        {generatedContent && (
+          <div className="mt-8 space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">Generated Content</h3>
+            
+            {/* Blog Post */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h4 className="font-semibold mb-2">Blog Post</h4>
+              <p className="text-gray-700 mb-4">{generatedContent.blogPost}</p>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => navigator.clipboard.writeText(generatedContent.blogPost)}>
+                Copy to Clipboard
               </button>
+            </div>
+
+            {/* Social Media */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h4 className="font-semibold mb-2">Social Media</h4>
+              <p className="text-gray-700 mb-4">{generatedContent.socialMedia}</p>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => navigator.clipboard.writeText(generatedContent.socialMedia)}>
+                Copy to Clipboard
+              </button>
+            </div>
+
+            {/* Email */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h4 className="font-semibold mb-2">Email</h4>
+              <p className="text-gray-700 mb-4 whitespace-pre-line">{generatedContent.email}</p>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => navigator.clipboard.writeText(generatedContent.email)}>
+                Copy to Clipboard
+              </button>
+            </div>
+          </div>
+        )}
             </div>
           </div>
         </div>
