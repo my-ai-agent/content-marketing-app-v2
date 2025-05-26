@@ -84,7 +84,7 @@ export default function CreateStory() {
                 Target Audience
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {['Children', 'Youth', 'Adults', 'Elders', 'Educators', 'Tourists', 'Local Community', 'Global Audience'].map((audience) => (
+                {['Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers', 'Families', 'Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiasts'].map((audience) => (
                   <label key={audience} className="flex items-center">
                     <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                     <span className="ml-2 text-sm text-gray-700">{audience}</span>
