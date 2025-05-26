@@ -1,7 +1,10 @@
-import Link from 'next/link'
-
-export default function CreateStory() {
-  return (
+'use client'                                           // Line 1 ✅
+import Link from 'next/link'                          // Line 2 ✅  
+import { useState } from 'react'                      // Line 3 (ADD THIS)
+export default function CreateStory() {               // Line 4 (move from line 3)
+  const [selectedFormats, setSelectedFormats] = useState([]); // Line 5 ✅
+  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState([]); // Line 6 ✅
+  return (                                            // Line 7 (remove the |)
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
@@ -103,12 +106,52 @@ export default function CreateStory() {
                   'Social Media Posts', 'Blog Article', 'Video Script', 'Website Copy', 'Email Newsletter', 'Press Release', 'Podcast Episode Outline'
                 ].map((format) => (
                   <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <input 
+  type="checkbox" 
+  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  checked={selectedFormats.includes(format)}
+  onChange={(e) => {
+    if (e.target.checked) {
+      setSelectedFormats([...selectedFormats, format]);
+    } else {
+      setSelectedFormats(selectedFormats.filter(f => f !== format));
+      // Clear social platforms if Social Media Posts is unchecked
+      if (format === 'Social Media Posts') {
+        setSelectedSocialPlatforms([]);
+      }
+    }
+  }}
+/>
                     <span className="ml-2 text-sm text-gray-700">{format}</span>
                   </label>
                 ))}
               </div>
             </div>
+            {/* Social Media Platform Selection */}
+        {selectedFormats.includes('Social Media Posts') && (
+          <div className="mt-6">
+            <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {['Instagram', 'Facebook', 'Twitter', 'LinkedIn'].map((platform) => (
+                <label key={platform} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    checked={selectedSocialPlatforms.includes(platform)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedSocialPlatforms([...selectedSocialPlatforms, platform]);
+                      } else {
+                        setSelectedSocialPlatforms(selectedSocialPlatforms.filter(p => p !== platform));
+                      }
+                    }}
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{platform}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
             {/* Cultural Sensitivity */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
