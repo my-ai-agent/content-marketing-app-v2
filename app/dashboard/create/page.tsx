@@ -3,7 +3,15 @@ import Link from 'next/link'                          // Line 2 ✅
 import { useState } from 'react'                      // Line 3 (ADD THIS)
 export default function CreateStory() {               // Line 4 (move from line 3)
  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
-const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]); 
+const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
+ const currentPlan = 'free'; // This would come from user settings
+const planLimits = {
+  free: { platforms: 3 },
+  basic: { platforms: 3 }, 
+  professional: { platforms: 5 },
+  enterprise: { platforms: 7 }
+};
+const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
   return (                                            // Line 7 (remove the |)
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -126,7 +134,7 @@ const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>
   {format === 'Social Media Posts' ? (
     <span className="group relative">
       Social Media Posts 
-      <span className="ml-1 text-blue-500">ⓘ</span>
+      <span className="ml-2 text-blue-500 text-base font-semibold">⬇️</span>
       <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
         Check this to select specific platforms below
       </div>
@@ -143,6 +151,18 @@ const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>
         {selectedFormats.includes('Social Media Posts') && (
           <div className="mt-6">
             <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
+           <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
+<div className="flex justify-between items-center mb-3">
+  <span className="text-sm text-gray-600">
+    Platforms selected: {selectedSocialPlatforms.length}/{maxPlatforms}
+  </span>
+  {selectedSocialPlatforms.length >= maxPlatforms && (
+    <span className="text-xs text-orange-600 font-medium">
+      Upgrade to select more platforms
+    </span>
+  )}
+</div>
+<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {['Instagram', 'Facebook', 'Twitter', 'LinkedIn'].map((platform) => (
                 <label key={platform} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -150,6 +170,7 @@ const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>
                     type="checkbox" 
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
                     checked={selectedSocialPlatforms.includes(platform)}
+                   disabled={selectedSocialPlatforms.length >= maxPlatforms && !selectedSocialPlatforms.includes(platform)}
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedSocialPlatforms([...selectedSocialPlatforms, platform]);
