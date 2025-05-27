@@ -5,6 +5,13 @@ import { useState } from 'react'
 export default function CreateStory() {
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
+  // Optional: controlled form state for better practice (not strictly required for syntax, but prevents React warnings)
+  const [story, setStory] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [category, setCategory] = useState('');
+  const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
+  const [integrityChecked, setIntegrityChecked] = useState(false);
+
   const currentPlan = 'free'; // This would come from user settings
   const planLimits = {
     free: { platforms: 3 },
@@ -14,7 +21,20 @@ export default function CreateStory() {
   };
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
 
-    return (
+  // All possible values
+  const audienceOptions = [
+    'Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers',
+    'Families', 'Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiasts'
+  ];
+
+  const formatOptions = [
+    'Social Media Posts', 'Blog Article', 'Video Script', 'Website Copy',
+    'Email Newsletter', 'Press Release', 'Podcast Episode Outline'
+  ];
+
+  const socialPlatforms = ['Instagram', 'Facebook', 'Twitter', 'LinkedIn'];
+
+  return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
@@ -59,7 +79,10 @@ export default function CreateStory() {
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                placeholder="Share your cultural story, tradition, or narrative that you want to transform into multiple content formats..." />
+                placeholder="Share your cultural story, tradition, or narrative that you want to transform into multiple content formats..."
+                value={story}
+                onChange={e => setStory(e.target.value)}
+              />
             </div>
 
             {/* Story Details */}
@@ -71,13 +94,20 @@ export default function CreateStory() {
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Māori, Pacific Islander, etc." />
+                  placeholder="e.g., Māori, Pacific Islander, etc."
+                  value={origin}
+                  onChange={e => setOrigin(e.target.value)}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Story Category
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={category}
+                  onChange={e => setCategory(e.target.value)}
+                >
                   <option value="">Select category...</option>
                   <option value="tradition">Traditional Practice</option>
                   <option value="legend">Legend/Myth</option>
@@ -95,9 +125,22 @@ export default function CreateStory() {
                 Target Audience
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {['Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers', 'Families', 'Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiasts'].map((audience) => (
+                {audienceOptions.map((audience) => (
                   <label key={audience} className="flex items-center">
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <input
+                      type="checkbox"
+                      name="targetAudience"
+                      value={audience}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={targetAudiences.includes(audience)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setTargetAudiences([...targetAudiences, audience]);
+                        } else {
+                          setTargetAudiences(targetAudiences.filter(a => a !== audience));
+                        }
+                      }}
+                    />
                     <span className="ml-2 text-sm text-gray-700">{audience}</span>
                   </label>
                 ))}
@@ -110,12 +153,12 @@ export default function CreateStory() {
                 Select Content Formats to Generate (Choose up to 7)
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  'Social Media Posts', 'Blog Article', 'Video Script', 'Website Copy', 'Email Newsletter', 'Press Release', 'Podcast Episode Outline'
-                ].map((format) => (
+                {formatOptions.map((format) => (
                   <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <input 
                       type="checkbox" 
+                      name="contentFormats"
+                      value={format}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       checked={selectedFormats.includes(format)}
                       onChange={(e) => {
@@ -123,13 +166,13 @@ export default function CreateStory() {
                           setSelectedFormats([...selectedFormats, format]);
                         } else {
                           setSelectedFormats(selectedFormats.filter(f => f !== format));
-                          // Clear social platforms if Social Media Posts is unchecked
                           if (format === 'Social Media Posts') {
                             setSelectedSocialPlatforms([]);
                           }
                         }
-                      }
-                        <span className="ml-2 text-sm text-gray-700">
+                      }}
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
                       {format === 'Social Media Posts' ? (
                         <span className="group relative">
                           Social Media Posts 
@@ -162,10 +205,12 @@ export default function CreateStory() {
                   )}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {['Instagram', 'Facebook', 'Twitter', 'LinkedIn'].map((platform) => (
+                  {socialPlatforms.map((platform) => (
                     <label key={platform} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                       <input 
                         type="checkbox" 
+                        name="socialPlatforms"
+                        value={platform}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
                         checked={selectedSocialPlatforms.includes(platform)}
                         disabled={selectedSocialPlatforms.length >= maxPlatforms && !selectedSocialPlatforms.includes(platform)}
@@ -188,7 +233,12 @@ export default function CreateStory() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-yellow-800 mb-2">Cultural Integrity Commitment</h3>
               <label className="flex items-start">
-                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1" />
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
+                  checked={integrityChecked}
+                  onChange={e => setIntegrityChecked(e.target.checked)}
+                />
                 <span className="ml-2 text-sm text-yellow-700">
                   I confirm that I have the right to share this cultural story and commit to maintaining its integrity and respect throughout all content adaptations.
                 </span>
