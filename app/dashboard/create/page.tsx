@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 export default function CreateStory() {
-  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
-  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
+  const [selectedDemographics, setSelectedDemographics] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   // Optional: controlled form state for better practice (not strictly required for syntax, but prevents React warnings)
   const [story, setStory] = useState('');
   const [origin, setOrigin] = useState('');
@@ -12,15 +12,16 @@ export default function CreateStory() {
   const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
   const [integrityChecked, setIntegrityChecked] = useState(false);
 
-  const currentPlan = 'free'; // This would come from user settings
   const planLimits = {
-    free: { platforms: 3 },
-    basic: { platforms: 3 }, 
-    professional: { platforms: 5 },
-    enterprise: { platforms: 7 }
-  };
+  free: { platforms: 3, demographics: 3, interests: 2 },
+  basic: { platforms: 3, demographics: 3, interests: 2 }, 
+  professional: { platforms: 5, demographics: 5, interests: 3 },
+  enterprise: { platforms: 7, demographics: 7, interests: 5 }
+};
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
-
+  const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
+  const maxInterests = planLimits[currentPlan as keyof typeof planLimits].interests;
+  
   // All possible values
   const audienceOptions = [
     'Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers',
@@ -83,34 +84,79 @@ export default function CreateStory() {
               />
             </div>
             
-            {/* Target Audience */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Target Audience
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {audienceOptions.map((audience) => (
-                  <label key={audience} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="targetAudience"
-                      value={audience}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={targetAudiences.includes(audience)}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          setTargetAudiences([...targetAudiences, audience]);
-                        } else {
-                          setTargetAudiences(targetAudiences.filter(a => a !== audience));
-                        }
-                      }}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{audience}</span>
-                  </label>
-                ))}
-              </div>
+            {/* Demographics */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Demographics (Select up to {maxDemographics})
+            </label>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm text-gray-600">
+                Demographics selected: {selectedDemographics.length}/{maxDemographics}
+              </span>
+              {selectedDemographics.length >= maxDemographics && (
+                <span className="text-xs text-orange-600 font-medium">
+                  Upgrade to select more demographics
+                </span>
+              )}
             </div>
-
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {['Female Travellers', 'Families', 'Young Adults', 'Business Travellers', 'Solo Travellers', 'Seniors'].map((demo) => (
+                <label key={demo} className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedDemographics.includes(demo)}
+                    disabled={selectedDemographics.length >= maxDemographics && !selectedDemographics.includes(demo)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedDemographics([...selectedDemographics, demo]);
+                      } else {
+                        setSelectedDemographics(selectedDemographics.filter(d => d !== demo));
+                      }
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{demo}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+            {/* Interests */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Interests (Select up to {maxInterests})
+            </label>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm text-gray-600">
+                Interests selected: {selectedInterests.length}/{maxInterests}
+              </span>
+              {selectedInterests.length >= maxInterests && (
+                <span className="text-xs text-orange-600 font-medium">
+                  Upgrade to select more interests
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {['Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiast', 'Relaxation & Pamper', 'Visiting Friends & Relatives', 'Backpackers & Budget Travellers'].map((interest) => (
+                <label key={interest} className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedInterests.includes(interest)}
+                    disabled={selectedInterests.length >= maxInterests && !selectedInterests.includes(interest)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedInterests([...selectedInterests, interest]);
+                      } else {
+                        setSelectedInterests(selectedInterests.filter(i => i !== interest));
+                      }
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{interest}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+       
             {/* Content Formats */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
