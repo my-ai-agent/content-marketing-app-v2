@@ -14,7 +14,7 @@ export default function CreateStory() {
   };
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
 
-  return (
+    return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
