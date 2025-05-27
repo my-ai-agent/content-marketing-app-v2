@@ -11,7 +11,7 @@ export default function CreateStory() {
   const [category, setCategory] = useState('');
   const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
   const [integrityChecked, setIntegrityChecked] = useState(false);
-
+  const currentPlan = 'free'; // This would come from user settings
   const planLimits = {
   free: { platforms: 3, demographics: 3, interests: 2 },
   basic: { platforms: 3, demographics: 3, interests: 2 }, 
