@@ -15,10 +15,10 @@ export default function CreateStory() {
   const [integrityChecked, setIntegrityChecked] = useState(false);
   const currentPlan = 'free'; // This would come from user settings
   const planLimits = {
-    free: { platforms: 3, demographics: 3, interests: 2 },
-    basic: { platforms: 3, demographics: 3, interests: 2 }, 
-    professional: { platforms: 5, demographics: 5, interests: 3 },
-    enterprise: { platforms: 7, demographics: 7, interests: 5 }
+    free: { platforms: 2, demographics: 3, interests: 3 },
+    basic: { platforms: 5, demographics: 3, interests: 3 }, 
+    professional: { platforms: 5, demographics: 5, interests: 5 },
+    enterprise: { platforms: 10, demographics: 8, interests: 6 }
   };
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
   const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
