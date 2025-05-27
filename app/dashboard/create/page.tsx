@@ -59,8 +59,7 @@ export default function CreateStory() {
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                placeholder="Share your cultural story, tradition, or narrative that you want to transform into multiple content formats..."
-              />
+                placeholder="Share your cultural story, tradition, or narrative that you want to transform into multiple content formats..." />
             </div>
 
             {/* Story Details */}
@@ -72,8 +71,7 @@ export default function CreateStory() {
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Māori, Pacific Islander, etc."
-                />
+                  placeholder="e.g., Māori, Pacific Islander, etc." />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -130,9 +128,8 @@ export default function CreateStory() {
                             setSelectedSocialPlatforms([]);
                           }
                         }
-                      }}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">
+                      }
+                        <span className="ml-2 text-sm text-gray-700">
                       {format === 'Social Media Posts' ? (
                         <span className="group relative">
                           Social Media Posts 
