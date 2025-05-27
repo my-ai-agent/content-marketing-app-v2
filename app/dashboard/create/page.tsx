@@ -64,10 +64,10 @@ export default function CreateStory() {
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
-              Cultural Story Multiplication Tool
+              Story Multiplication Tool
             </h2>
             <p className="text-sm text-gray-600">
-              Transform your cultural narrative into 7 different formats for maximum reach and revenue.
+              Transform your narrative into 7 different formats for maximum reach and revenue.
             </p>
           </div>
           
@@ -75,50 +75,16 @@ export default function CreateStory() {
             {/* Story Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Original Cultural Story
+                Original Story
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                placeholder="Share your cultural story, tradition, or narrative that you want to transform into multiple content formats..."
+                placeholder="Share your story, tradition, or narrative that you want to transform into multiple content formats..."
                 value={story}
                 onChange={e => setStory(e.target.value)}
               />
             </div>
-
-            {/* Story Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cultural Origin
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Māori, Pacific Islander, etc."
-                  value={origin}
-                  onChange={e => setOrigin(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Story Category
-                </label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                >
-                  <option value="">Select category...</option>
-                  <option value="tradition">Traditional Practice</option>
-                  <option value="legend">Legend/Myth</option>
-                  <option value="family">Family Story</option>
-                  <option value="historical">Historical Event</option>
-                  <option value="wisdom">Cultural Wisdom</option>
-                  <option value="celebration">Celebration/Festival</option>
-                </select>
-              </div>
-            </div>
-
+            
             {/* Target Audience */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -240,7 +206,7 @@ export default function CreateStory() {
                   onChange={e => setIntegrityChecked(e.target.checked)}
                 />
                 <span className="ml-2 text-sm text-yellow-700">
-                  I confirm that I have the right to share this cultural story and commit to maintaining its integrity and respect throughout all content adaptations.
+                  I will only share approved cultural stories and I commit to maintaining its integrity throughout all content adaptations.
                 </span>
               </label>
             </div>
