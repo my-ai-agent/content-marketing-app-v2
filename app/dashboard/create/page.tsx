@@ -5,6 +5,8 @@ import { useState } from 'react'
 export default function CreateStory() {
   const [selectedDemographics, setSelectedDemographics] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
+  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
   // Optional: controlled form state for better practice (not strictly required for syntax, but prevents React warnings)
   const [story, setStory] = useState('');
   const [origin, setOrigin] = useState('');
@@ -13,15 +15,15 @@ export default function CreateStory() {
   const [integrityChecked, setIntegrityChecked] = useState(false);
   const currentPlan = 'free'; // This would come from user settings
   const planLimits = {
-  free: { platforms: 3, demographics: 3, interests: 2 },
-  basic: { platforms: 3, demographics: 3, interests: 2 }, 
-  professional: { platforms: 5, demographics: 5, interests: 3 },
-  enterprise: { platforms: 7, demographics: 7, interests: 5 }
-};
+    free: { platforms: 3, demographics: 3, interests: 2 },
+    basic: { platforms: 3, demographics: 3, interests: 2 }, 
+    professional: { platforms: 5, demographics: 5, interests: 3 },
+    enterprise: { platforms: 7, demographics: 7, interests: 5 }
+  };
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
   const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
   const maxInterests = planLimits[currentPlan as keyof typeof planLimits].interests;
-  
+
   // All possible values
   const audienceOptions = [
     'Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers',
@@ -38,25 +40,25 @@ export default function CreateStory() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-3">
-    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Story</h1>
-    <div className="flex space-x-3">
-      <Link
-        href="/"
-        className="text-sm text-gray-600 hover:text-gray-900"
-      >
-        Home
-      </Link>
-      <Link
-        href="/dashboard"
-        className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors"
-      >
-        Dashboard
-      </Link>
-    </div>
-  </div>
-</div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-3">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Story</h1>
+          <div className="flex space-x-3">
+            <Link
+              href="/"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Home
+            </Link>
+            <Link
+              href="/dashboard"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors"
+            >
+              Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -85,77 +87,78 @@ export default function CreateStory() {
             </div>
             
             {/* Demographics */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Demographics (Select up to {maxDemographics})
-            </label>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm text-gray-600">
-                Demographics selected: {selectedDemographics.length}/{maxDemographics}
-              </span>
-              {selectedDemographics.length >= maxDemographics && (
-                <span className="text-xs text-orange-600 font-medium">
-                  Upgrade to select more demographics
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Demographics (Select up to {maxDemographics})
+              </label>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-gray-600">
+                  Demographics selected: {selectedDemographics.length}/{maxDemographics}
                 </span>
-              )}
+                {selectedDemographics.length >= maxDemographics && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    Upgrade to select more demographics
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {['Female Travellers', 'Families', 'Young Adults', 'Business Travellers', 'Solo Travellers', 'Seniors'].map((demo) => (
+                  <label key={demo} className="flex items-center">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedDemographics.includes(demo)}
+                      disabled={selectedDemographics.length >= maxDemographics && !selectedDemographics.includes(demo)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDemographics([...selectedDemographics, demo]);
+                        } else {
+                          setSelectedDemographics(selectedDemographics.filter(d => d !== demo));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{demo}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {['Female Travellers', 'Families', 'Young Adults', 'Business Travellers', 'Solo Travellers', 'Seniors'].map((demo) => (
-                <label key={demo} className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedDemographics.includes(demo)}
-                    disabled={selectedDemographics.length >= maxDemographics && !selectedDemographics.includes(demo)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedDemographics([...selectedDemographics, demo]);
-                      } else {
-                        setSelectedDemographics(selectedDemographics.filter(d => d !== demo));
-                      }
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{demo}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+            
             {/* Interests */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Interests (Select up to {maxInterests})
-            </label>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm text-gray-600">
-                Interests selected: {selectedInterests.length}/{maxInterests}
-              </span>
-              {selectedInterests.length >= maxInterests && (
-                <span className="text-xs text-orange-600 font-medium">
-                  Upgrade to select more interests
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Interests (Select up to {maxInterests})
+              </label>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-gray-600">
+                  Interests selected: {selectedInterests.length}/{maxInterests}
                 </span>
-              )}
+                {selectedInterests.length >= maxInterests && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    Upgrade to select more interests
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {['Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiast', 'Relaxation & Pamper', 'Visiting Friends & Relatives', 'Backpackers & Budget Travellers'].map((interest) => (
+                  <label key={interest} className="flex items-center">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedInterests.includes(interest)}
+                      disabled={selectedInterests.length >= maxInterests && !selectedInterests.includes(interest)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedInterests([...selectedInterests, interest]);
+                        } else {
+                          setSelectedInterests(selectedInterests.filter(i => i !== interest));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{interest}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {['Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiast', 'Relaxation & Pamper', 'Visiting Friends & Relatives', 'Backpackers & Budget Travellers'].map((interest) => (
-                <label key={interest} className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedInterests.includes(interest)}
-                    disabled={selectedInterests.length >= maxInterests && !selectedInterests.includes(interest)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedInterests([...selectedInterests, interest]);
-                      } else {
-                        setSelectedInterests(selectedInterests.filter(i => i !== interest));
-                      }
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{interest}</span>
-                </label>
-              ))}
-            </div>
-          </div>
        
             {/* Content Formats */}
             <div>
@@ -171,6 +174,7 @@ export default function CreateStory() {
                       value={format}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       checked={selectedFormats.includes(format)}
+                      disabled={selectedFormats.length >= 7 && !selectedFormats.includes(format)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setSelectedFormats([...selectedFormats, format]);
@@ -187,9 +191,9 @@ export default function CreateStory() {
                         <span className="group relative">
                           Social Media Posts 
                           <span className="ml-2 text-blue-500 text-base font-semibold">⬇️</span>
-                          <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                          <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
                             Check this to select specific platforms below
-                          </div>
+                          </span>
                         </span>
                       ) : (
                         format
