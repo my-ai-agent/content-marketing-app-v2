@@ -23,7 +23,7 @@ const PLAN_LIMITS = {
     platforms: 5, 
     demographics: 3, 
     lifestyles: 3, 
-    users: 5,
+    users: 2,
     price: '$197/month'
   },
   enterprise: { 
@@ -31,7 +31,7 @@ const PLAN_LIMITS = {
     platforms: 10, 
     demographics: 6, 
     lifestyles: 6, 
-    users: 2,
+    users: 5,
     price: '$497/month',
     whitePaper: true
   }
