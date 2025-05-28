@@ -9,7 +9,10 @@ export default function Home() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">CCC-Content Marketing Pro™</h1>
+            <div className="flex items-center">
+  <img src="/logos/1.png" alt="Speak Click Send" className="h-10 w-auto mr-3" />
+  <h1 className="text-2xl font-bold text-gray-900">CCC-Content Marketing Pro™</h1>
+</div>
             <Link 
               href="/dashboard/settings"
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
