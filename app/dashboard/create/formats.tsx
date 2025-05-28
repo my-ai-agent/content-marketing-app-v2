@@ -121,6 +121,9 @@ export default function Formats() {
             <div className="flex items-center justify-center mb-4">
   <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
 </div>
+<div className="flex items-center justify-center mb-4">
+  <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
+</div>
 <h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
   Choose Your Content Formats
 </h2>
