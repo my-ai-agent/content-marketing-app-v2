@@ -12,10 +12,10 @@ export default function Formats() {
   // Plan limits
   const currentPlan = 'free';
   const planLimits = {
-    free: { platforms: 2, formats: 7 },
-    basic: { platforms: 5, formats: 7 }, 
-    professional: { platforms: 5, formats: 7 },
-    enterprise: { platforms: 10, formats: 7 }
+   free: { platforms: 2, formats: 7 },
+basic: { platforms: 3, formats: 7 },
+professional: { platforms: 5, formats: 7 },
+enterprise: { platforms: 10, formats: 7 } 
   };
   const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
   const maxFormats = planLimits[currentPlan as keyof typeof planLimits].formats;
