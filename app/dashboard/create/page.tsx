@@ -106,8 +106,12 @@ export default function CreateStory() {
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white shadow rounded-lg p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-2">
-              **Speak Click Send** - Share Your Story
+            <div className="flex items-center justify-center mb-4">
+  <img src="/logos/4.png" alt="Speak" className="h-16 w-auto" />
+</div>
+<h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
+  Share Your Story
+</h2>
             </h2>
             <p className="text-sm text-gray-600">
               Share your cultural story through writing, speaking, or with photos. Choose the method that feels most natural to you.
