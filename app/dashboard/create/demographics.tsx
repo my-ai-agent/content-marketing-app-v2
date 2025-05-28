@@ -11,9 +11,9 @@ export default function Demographics() {
   const currentPlan = 'free';
   const planLimits = {
     free: { demographics: 3, interests: 3 },
-    basic: { demographics: 3, interests: 3 }, 
-    professional: { demographics: 5, interests: 5 },
-    enterprise: { demographics: 8, interests: 6 }
+basic: { demographics: 3, interests: 3 },
+professional: { demographics: 3, interests: 3 },
+enterprise: { demographics: 6, interests: 6 }
   };
   const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
   const maxInterests = planLimits[currentPlan as keyof typeof planLimits].interests;
