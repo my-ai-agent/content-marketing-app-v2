@@ -65,17 +65,17 @@ export default function CreateStory() {
   };
 
   const getContentForNext = () => {
-    switch (inputMethod) {
-      case 'write':
-        return story.trim();
-      case 'speak':
-        return story.trim();
-      case 'photo':
-        return uploadedImage || imageCaption.trim();
-      default:
-        return false;
-    }
-  };
+  switch (inputMethod) {
+    case 'write':
+      return story.trim().length > 0;
+    case 'speak':
+      return story.trim().length > 0;
+    case 'photo':
+      return uploadedImage || imageCaption.trim().length > 0;
+    default:
+      return false;
+  }
+};
 
   return (
     <main className="min-h-screen bg-gray-50">
