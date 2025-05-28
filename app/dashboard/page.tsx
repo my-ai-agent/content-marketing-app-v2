@@ -72,8 +72,8 @@ export default function Dashboard() {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
             <h3 className="text-xl font-semibold mb-3">Create New Story</h3>
             <p className="text-gray-600 mb-4">Start transforming your narrative into multiple formats.</p>
             <Link
@@ -94,7 +94,7 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
             <h3 className="text-xl font-semibold mb-3">My Stories</h3>
             <p className="text-gray-600 mb-4">View and manage your existing stories.</p>
             <Link
@@ -105,7 +105,7 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
             <h3 className="text-xl font-semibold mb-3">Analytics</h3>
             <Link
               href="/dashboard/analytics"
