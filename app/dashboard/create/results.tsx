@@ -135,7 +135,10 @@ export default function Results() {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">Generated Content</h1>
+          <div className="flex items-center justify-center mb-4">
+  <img src="/logos/4.png" alt="Send" className="h-16 w-auto" />
+</div>
+<h1 className="text-xl font-bold text-gray-900 text-center">Generated Content</h1>
           <Link
             href="/dashboard"
             className="text-sm text-blue-600 hover:text-blue-800"
