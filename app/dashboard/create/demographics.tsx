@@ -81,9 +81,12 @@ export default function Demographics() {
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white shadow rounded-lg p-6 space-y-8">
           <div className="text-center mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-2">
-              Who Is Your Target Audience?
-            </h2>
+            <div className="flex items-center justify-center mb-4">
+  <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
+</div>
+<h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
+  Who Is Your Target Audience?
+</h2>
             <p className="text-sm text-gray-600">
               Select demographics and interests to help us tailor your content for maximum engagement.
             </p>
