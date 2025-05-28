@@ -9,7 +9,7 @@ const PLAN_LIMITS = {
 };
 export default function Dashboard() {
   // Add after line 9, before line 10 (return ()
-  const currentPlan = 'free';
+  const currentPlan = 'FREE PLAN';
   const storiesThisWeek = 0;
   const planLimits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS];
   const canCreateStory = storiesThisWeek < planLimits.storiesPerWeek;
@@ -27,11 +27,7 @@ export default function Dashboard() {
               >
                 Home
               </Link>
-              <Link 
-                href="/dashboard/settings"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Settings
+              
               </Link>
             </div>
             {/* Usage Banner */}
@@ -39,7 +35,7 @@ export default function Dashboard() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-medium text-blue-800 capitalize">{currentPlan} Plan</h3>
+              <h3 className="text-sm font-medium text-blue-800 capitalize">**{currentPlan.toUpperCase()}**
               <p className="text-sm text-blue-600">
                 {storiesThisWeek} of {planLimits.storiesPerWeek === 999 ? 'unlimited' : planLimits.storiesPerWeek} stories used this week • {planLimits.platforms} platforms available
               </p>
@@ -53,7 +49,7 @@ export default function Dashboard() {
               </div>
               {currentPlan === 'free' && (
                 <button className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-1 px-3 rounded">
-                  Upgrade
+                  **FREE PLAN**
                 </button>
               )}
             </div>
@@ -71,7 +67,7 @@ export default function Dashboard() {
             Welcome to Your Content Marketing Dashboard
           </h2>
           <p className="text-lg text-gray-600">
-            Start creating and managing your cultural story content here.
+            Start creating and managing your story content here.
           </p>
         </div>
 
@@ -79,7 +75,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">Create New Story</h3>
-            <p className="text-gray-600 mb-4">Start transforming your cultural narrative into multiple formats.</p>
+            <p className="text-gray-600 mb-4">Start transforming your narrative into multiple formats.</p>
             <Link
   href={canCreateStory ? "/dashboard/create" : "#"}
   className={`${
@@ -119,6 +115,7 @@ export default function Dashboard() {
 </Link>
           </div>
         </div>
+        <p className="text-center text-gray-600 mt-8">**Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**</p>
       </div>
     </main>
   )
