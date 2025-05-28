@@ -2,10 +2,39 @@
 import Link from 'next/link'
 
 const PLAN_LIMITS = {
-  free: { storiesPerWeek: 1, platforms: 2, users: 2 },
-  basic: { storiesPerWeek: 5, platforms: 3, users: 2 },
-  professional: { storiesPerWeek: 5, platforms: 5, users: 2 },
-  enterprise: { storiesPerWeek: 999, platforms: 7, users: 5 }
+  free: { 
+    storiesPerWeek: 1, 
+    platforms: 2, 
+    demographics: 3, 
+    lifestyles: 3, 
+    users: 2,
+    price: 'FREE'
+  },
+  basic: { 
+    storiesPerWeek: 5, 
+    platforms: 3, 
+    demographics: 3, 
+    lifestyles: 3, 
+    users: 2,
+    price: '$97/month'
+  },
+  professional: { 
+    storiesPerWeek: 5, 
+    platforms: 5, 
+    demographics: 3, 
+    lifestyles: 3, 
+    users: 5,
+    price: '$197/month'
+  },
+  enterprise: { 
+    storiesPerWeek: 999, 
+    platforms: 10, 
+    demographics: 6, 
+    lifestyles: 6, 
+    users: 2,
+    price: '$497/month',
+    whitePaper: true
+  }
 };
 
 export default function Dashboard() {
