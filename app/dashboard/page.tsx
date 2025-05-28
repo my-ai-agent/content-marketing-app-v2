@@ -1,18 +1,19 @@
 'use client'
 import Link from 'next/link'
-// Add after line 1
+
 const PLAN_LIMITS = {
   free: { storiesPerWeek: 1, platforms: 2, users: 2 },
   basic: { storiesPerWeek: 5, platforms: 3, users: 2 },
   professional: { storiesPerWeek: 5, platforms: 5, users: 2 },
   enterprise: { storiesPerWeek: 999, platforms: 7, users: 5 }
 };
+
 export default function Dashboard() {
-  // Add after line 9, before line 10 (return ()
-  const currentPlan = 'FREE PLAN';
+  const currentPlan = 'free';
   const storiesThisWeek = 0;
   const planLimits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS];
   const canCreateStory = storiesThisWeek < planLimits.storiesPerWeek;
+  
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -27,15 +28,17 @@ export default function Dashboard() {
               >
                 Home
               </Link>
-              
-              </Link>
             </div>
-            {/* Usage Banner */}
+          </div>
+        </div>
+      </div>
+
+      {/* Usage Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-medium text-blue-800 capitalize">**{currentPlan.toUpperCase()}**
+              <h3 className="text-sm font-medium text-blue-800 capitalize">**FREE PLAN**</h3>
               <p className="text-sm text-blue-600">
                 {storiesThisWeek} of {planLimits.storiesPerWeek === 999 ? 'unlimited' : planLimits.storiesPerWeek} stories used this week • {planLimits.platforms} platforms available
               </p>
@@ -53,9 +56,6 @@ export default function Dashboard() {
                 </button>
               )}
             </div>
-          </div>
-        </div>
-      </div>
           </div>
         </div>
       </div>
@@ -77,44 +77,45 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold mb-3">Create New Story</h3>
             <p className="text-gray-600 mb-4">Start transforming your narrative into multiple formats.</p>
             <Link
-  href={canCreateStory ? "/dashboard/create" : "#"}
-  className={`${
-    canCreateStory 
-      ? "bg-green-600 hover:bg-green-700" 
-      : "bg-gray-400 cursor-not-allowed"
-  } text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center`}
-  onClick={(e) => {
-    if (!canCreateStory) {
-      e.preventDefault();
-      alert(`You've reached your ${planLimits.storiesPerWeek} story limit for this week. Upgrade to create more stories.`);
-    }
-  }}
->
-  Create Story {!canCreateStory && '(Limit Reached)'}
-</Link>
+              href={canCreateStory ? "/dashboard/create" : "#"}
+              className={`${
+                canCreateStory 
+                  ? "bg-green-600 hover:bg-green-700" 
+                  : "bg-gray-400 cursor-not-allowed"
+              } text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center`}
+              onClick={(e) => {
+                if (!canCreateStory) {
+                  e.preventDefault();
+                  alert(`You've reached your ${planLimits.storiesPerWeek} story limit for this week. Upgrade to create more stories.`);
+                }
+              }}
+            >
+              Create Story {!canCreateStory && '(Limit Reached)'}
+            </Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">My Stories</h3>
-            <p className="text-gray-600 mb-4">View and manage your existing cultural stories.</p>
+            <p className="text-gray-600 mb-4">View and manage your existing stories.</p>
             <Link
-  href="/dashboard/stories"
-  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
->
-  View Stories
-</Link>
+              href="/dashboard/stories"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+            >
+              View Stories
+            </Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-3">Analytics</h3>
             <Link
-  href="/dashboard/analytics"
-  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
->
-  View Analytics
-</Link>
+              href="/dashboard/analytics"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors inline-block text-center"
+            >
+              View Analytics
+            </Link>
           </div>
         </div>
+        
         <p className="text-center text-gray-600 mt-8">**Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**</p>
       </div>
     </main>
