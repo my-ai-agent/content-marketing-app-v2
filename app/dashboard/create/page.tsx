@@ -49,7 +49,7 @@ export default function CreateStory() {
         alert('File size must be less than 10MB');
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedImage(e.target?.result as string);
@@ -65,17 +65,17 @@ export default function CreateStory() {
   };
 
   const getContentForNext = () => {
-  switch (inputMethod) {
-    case 'write':
-      return story.trim().length > 0;
-    case 'speak':
-      return story.trim().length > 0;
-    case 'photo':
-      return uploadedImage || imageCaption.trim().length > 0;
-    default:
-      return false;
-  }
-};
+    switch (inputMethod) {
+      case 'write':
+        return story.trim().length > 0;
+      case 'speak':
+        return story.trim().length > 0;
+      case 'photo':
+        return !!uploadedImage || imageCaption.trim().length > 0;
+      default:
+        return false;
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -107,11 +107,10 @@ export default function CreateStory() {
         <div className="bg-white shadow rounded-lg p-6">
           <div className="mb-6">
             <div className="flex items-center justify-center mb-4">
-  <img src="/logos/4.png" alt="Speak" className="h-16 w-auto" />
-</div>
-<h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
-  Share Your Story
-</h2>
+              <img src="/logos/4.png" alt="Speak" className="h-16 w-auto" />
+            </div>
+            <h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
+              Share Your Story
             </h2>
             <p className="text-sm text-gray-600">
               Share your cultural story through writing, speaking, or with photos. Choose the method that feels most natural to you.
@@ -122,10 +121,11 @@ export default function CreateStory() {
           <div className="mb-6">
             <div className="grid grid-cols-3 bg-gray-100 rounded-lg p-1 gap-1">
               <button
+                type="button"
                 onClick={() => setInputMethod('write')}
                 className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
                   inputMethod === 'write'
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -135,10 +135,11 @@ export default function CreateStory() {
                 </div>
               </button>
               <button
+                type="button"
                 onClick={() => setInputMethod('speak')}
                 className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
                   inputMethod === 'speak'
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -148,10 +149,11 @@ export default function CreateStory() {
                 </div>
               </button>
               <button
+                type="button"
                 onClick={() => setInputMethod('photo')}
                 className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
                   inputMethod === 'photo'
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -190,7 +192,7 @@ export default function CreateStory() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <div className="mb-4">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    🎤
+                    <span role="img" aria-label="Microphone">🎤</span>
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Record Your Story</h3>
                   <p className="text-sm text-gray-600 mb-4">
@@ -198,6 +200,7 @@ export default function CreateStory() {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={handleSpeak}
                   className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
                 >
@@ -207,7 +210,7 @@ export default function CreateStory() {
                   Voice feature powered by real-time AI language interpretation
                 </p>
               </div>
-              
+
               {/* Transcribed text area for voice input */}
               {story && (
                 <div className="mt-4">
@@ -230,14 +233,14 @@ export default function CreateStory() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Photo Story
               </label>
-              
+
               {/* Photo Upload Area */}
               <div className="space-y-4">
                 {!uploadedImage ? (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                     <div className="text-center">
                       <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        📷
+                        <span role="img" aria-label="Camera">📷</span>
                       </div>
                       <h3 className="text-sm font-medium text-gray-900 mb-2">Add a Photo to Your Story</h3>
                       <p className="text-sm text-gray-600 mb-4">
@@ -245,12 +248,14 @@ export default function CreateStory() {
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
+                          type="button"
                           onClick={() => cameraInputRef.current?.click()}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
                           📱 Take Photo
                         </button>
                         <button
+                          type="button"
                           onClick={() => fileInputRef.current?.click()}
                           className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
@@ -270,6 +275,7 @@ export default function CreateStory() {
                       className="w-full h-64 object-cover rounded-lg"
                     />
                     <button
+                      type="button"
                       onClick={removeImage}
                       className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
                     >
@@ -332,6 +338,7 @@ export default function CreateStory() {
               Save Draft
             </Link>
             <button
+              type="button"
               onClick={handleNext}
               disabled={!getContentForNext()}
               className={`font-medium py-3 px-8 rounded-lg transition-colors ${
