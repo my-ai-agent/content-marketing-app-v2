@@ -3,276 +3,167 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 export default function CreateStory() {
-  const [selectedDemographics, setSelectedDemographics] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
-  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
-  // Optional: controlled form state for better practice (not strictly required for syntax, but prevents React warnings)
   const [story, setStory] = useState('');
-  const [origin, setOrigin] = useState('');
-  const [category, setCategory] = useState('');
-  const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
-  const [integrityChecked, setIntegrityChecked] = useState(false);
-  const currentPlan = 'free'; // This would come from user settings
-  const planLimits = {
-    free: { platforms: 2, demographics: 3, interests: 3 },
-    basic: { platforms: 5, demographics: 3, interests: 3 }, 
-    professional: { platforms: 5, demographics: 5, interests: 5 },
-    enterprise: { platforms: 10, demographics: 8, interests: 6 }
+  const [canSpeak, setCanSpeak] = useState(false);
+
+  const handleNext = () => {
+    if (story.trim()) {
+      // Store story in localStorage for next page
+      localStorage.setItem('currentStory', story);
+      // Navigate to demographics page
+      window.location.href = '/dashboard/create/demographics';
+    } else {
+      alert('Please enter your story before continuing.');
+    }
   };
-  const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
-  const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
-  const maxInterests = planLimits[currentPlan as keyof typeof planLimits].interests;
 
-  // All possible values
-  const audienceOptions = [
-    'Female Travellers', 'Seniors', 'Health & Pampering', 'Business Travellers',
-    'Families', 'Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiasts'
-  ];
-
-  const formatOptions = [
-    'Social Media Posts', 'Blog Article', 'Video Script', 'Website Copy',
-    'Email Newsletter', 'Press Release', 'Podcast Episode Outline'
-  ];
-
-  const socialPlatforms = ['Instagram', 'Facebook', 'Twitter', 'LinkedIn'];
+  const handleSpeak = () => {
+    // Voice recording functionality to be implemented
+    alert('Voice recording feature coming soon!');
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Story</h1>
-          <div className="flex space-x-3">
-            <Link
-              href="/"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Home
-            </Link>
-            <Link
-              href="/dashboard"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors"
-            >
-              Dashboard
-            </Link>
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold text-gray-900">Step 1: Your Story</h1>
+          <Link
+            href="/dashboard"
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            ← Dashboard
+          </Link>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="max-w-2xl mx-auto px-4 mb-6">
+        <div className="flex items-center">
+          <div className="flex-1 bg-blue-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full w-1/3"></div>
           </div>
+          <span className="ml-3 text-sm text-gray-600">Step 1 of 3</span>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">
-              Story Multiplication Tool
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-2">
+              **Speak Click Send** - Share Your Story
             </h2>
             <p className="text-sm text-gray-600">
-              Transform your narrative into 7 different formats for maximum reach and revenue.
+              Write or speak your original story that you want to transform into multiple content formats.
             </p>
           </div>
-          
-          <div className="p-6 space-y-6">
-            {/* Story Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Original Story
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                placeholder="Share your story, tradition, or narrative that you want to transform into multiple content formats..."
-                value={story}
-                onChange={e => setStory(e.target.value)}
-              />
-            </div>
-            
-            {/* Demographics */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Demographics (Select up to {maxDemographics})
-              </label>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-sm text-gray-600">
-                  Demographics selected: {selectedDemographics.length}/{maxDemographics}
-                </span>
-                {selectedDemographics.length >= maxDemographics && (
-                  <span className="text-xs text-orange-600 font-medium">
-                    Upgrade to select more demographics
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {['Female Travellers', 'Families', 'Young Adults', 'Business Travellers', 'Solo Travellers', 'Seniors'].map((demo) => (
-                  <label key={demo} className="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedDemographics.includes(demo)}
-                      disabled={selectedDemographics.length >= maxDemographics && !selectedDemographics.includes(demo)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedDemographics([...selectedDemographics, demo]);
-                        } else {
-                          setSelectedDemographics(selectedDemographics.filter(d => d !== demo));
-                        }
-                      }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{demo}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            
-            {/* Interests */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Interests (Select up to {maxInterests})
-              </label>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-sm text-gray-600">
-                  Interests selected: {selectedInterests.length}/{maxInterests}
-                </span>
-                {selectedInterests.length >= maxInterests && (
-                  <span className="text-xs text-orange-600 font-medium">
-                    Upgrade to select more interests
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {['Cultural Interest', 'Adventure Seekers', 'Food & Wine Enthusiast', 'Relaxation & Pamper', 'Visiting Friends & Relatives', 'Backpackers & Budget Travellers'].map((interest) => (
-                  <label key={interest} className="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedInterests.includes(interest)}
-                      disabled={selectedInterests.length >= maxInterests && !selectedInterests.includes(interest)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedInterests([...selectedInterests, interest]);
-                        } else {
-                          setSelectedInterests(selectedInterests.filter(i => i !== interest));
-                        }
-                      }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{interest}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-       
-            {/* Content Formats */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Content Formats to Generate (Choose up to 7)
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {formatOptions.map((format) => (
-                  <label key={format} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <input 
-                      type="checkbox" 
-                      name="contentFormats"
-                      value={format}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={selectedFormats.includes(format)}
-                      disabled={selectedFormats.length >= 7 && !selectedFormats.includes(format)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedFormats([...selectedFormats, format]);
-                        } else {
-                          setSelectedFormats(selectedFormats.filter(f => f !== format));
-                          if (format === 'Social Media Posts') {
-                            setSelectedSocialPlatforms([]);
-                          }
-                        }
-                      }}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">
-                      {format === 'Social Media Posts' ? (
-                        <span className="group relative">
-                          Social Media Posts 
-                          <span className="ml-2 text-blue-500 text-base font-semibold">⬇️</span>
-                          <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
-                            Check this to select specific platforms below
-                          </span>
-                        </span>
-                      ) : (
-                        format
-                      )}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
 
-            {/* Social Media Platform Selection */}
-            {selectedFormats.includes('Social Media Posts') && (
-              <div className="mt-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-3">Select Social Media Platforms</h4>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm text-gray-600">
-                    Platforms selected: {selectedSocialPlatforms.length}/{maxPlatforms}
-                  </span>
-                  {selectedSocialPlatforms.length >= maxPlatforms && (
-                    <span className="text-xs text-orange-600 font-medium">
-                      Upgrade to select more platforms
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {socialPlatforms.map((platform) => (
-                    <label key={platform} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                      <input 
-                        type="checkbox" 
-                        name="socialPlatforms"
-                        value={platform}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                        checked={selectedSocialPlatforms.includes(platform)}
-                        disabled={selectedSocialPlatforms.length >= maxPlatforms && !selectedSocialPlatforms.includes(platform)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedSocialPlatforms([...selectedSocialPlatforms, platform]);
-                          } else {
-                            setSelectedSocialPlatforms(selectedSocialPlatforms.filter(p => p !== platform));
-                          }
-                        }}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{platform}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Cultural Sensitivity */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-yellow-800 mb-2">Cultural Integrity Commitment</h3>
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
-                  checked={integrityChecked}
-                  onChange={e => setIntegrityChecked(e.target.checked)}
-                />
-                <span className="ml-2 text-sm text-yellow-700">
-                  I will only share approved cultural stories and I commit to maintaining its integrity throughout all content adaptations.
-                </span>
-              </label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-between pt-4 border-t border-gray-200">
-              <Link
-                href="/dashboard"
-                className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+          {/* Input Method Toggle */}
+          <div className="mb-4">
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setCanSpeak(false)}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  !canSpeak 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                Save Draft
-              </Link>
-              <button className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
-                Generate Content Formats
+                ✍️ Write
+              </button>
+              <button
+                onClick={() => setCanSpeak(true)}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  canSpeak 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                🎤 Speak
               </button>
             </div>
           </div>
+
+          {/* Story Input */}
+          {!canSpeak ? (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Original Story
+              </label>
+              <textarea
+                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                rows={8}
+                placeholder="Share your story, tradition, or narrative here. Be as detailed as you like - the more context you provide, the better we can adapt it for different audiences and platforms..."
+                value={story}
+                onChange={e => setStory(e.target.value)}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                {story.length} characters
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Voice Recording
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="mb-4">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    🎤
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Record Your Story</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Click the button below to start recording your story. Our AI will transcribe and help you craft it for different platforms.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSpeak}
+                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                >
+                  🔴 Start Recording
+                </button>
+                <p className="text-xs text-gray-500 mt-3">
+                  Voice feature powered by real-time AI language interpretation
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Cultural Integrity Notice */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <h3 className="text-sm font-medium text-yellow-800 mb-1">Cultural Respect</h3>
+            <p className="text-sm text-yellow-700">
+              Please ensure your story respects cultural values and traditions. We're here to help you share authentic narratives responsibly.
+            </p>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex justify-between">
+            <Link
+              href="/dashboard"
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
+            >
+              Save Draft
+            </Link>
+            <button
+              onClick={handleNext}
+              disabled={!story.trim()}
+              className={`font-medium py-3 px-8 rounded-lg transition-colors ${
+                story.trim()
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Next: Audience →
+            </button>
+          </div>
         </div>
+
+        {/* Footer */}
+        <p className="text-center text-gray-500 text-sm mt-6 mb-4">
+          **Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**
+        </p>
       </div>
     </main>
   )
