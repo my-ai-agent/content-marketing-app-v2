@@ -3,24 +3,9 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 export default function Formats() {
-  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
-  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([]);
-  const [story, setStory] = useState('');
-  const [demographics, setDemographics] = useState<string[]>([]);
-  const [interests, setInterests] = useState<string[]>([]);
-
-  // Plan limits
-  const currentPlan = 'free';
-  const planLimits = {
-   free: { platforms: 2, formats: 7 },
-basic: { platforms: 3, formats: 7 },
-professional: { platforms: 5, formats: 7 },
-enterprise: { platforms: 10, formats: 7 } 
-  };
-  const maxPlatforms = planLimits[currentPlan as keyof typeof planLimits].platforms;
-  const maxFormats = planLimits[currentPlan as keyof typeof planLimits].formats;
-
-  const formatOptions = [
+  import { getPlanLimits } from '../../../../../config/plans';
+  const userPlan = 'free'; // TODO: Get from user data
+  const planLimits = getPlanLimits(userPlan);
     { name: 'Social Media Posts', icon: '📱', desc: 'Instagram, Facebook, Twitter, LinkedIn' },
     { name: 'Blog Article', icon: '📝', desc: 'SEO-optimized long-form content' },
     { name: 'Video Script', icon: '🎥', desc: 'YouTube, TikTok, or promotional videos' },
