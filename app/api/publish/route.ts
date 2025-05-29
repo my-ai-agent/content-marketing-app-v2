@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { PublishRequest, PublishResult } from '../../types/platform'
+import type { PublishRequest, PublishResult } from '@/app/types/platform'
 
 export async function POST(request: NextRequest) {
   try {
