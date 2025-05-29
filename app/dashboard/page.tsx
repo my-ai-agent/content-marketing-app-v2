@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { PLANS } from '../../../config/plans';
+import { PLANS } from '../config/plans';
 
 export default function Dashboard() {
   const currentPlan = 'free';
