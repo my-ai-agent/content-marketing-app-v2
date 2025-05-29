@@ -3,30 +3,9 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 export default function Demographics() {
-  const [selectedDemographics, setSelectedDemographics] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [story, setStory] = useState('');
-
-  // Plan limits
-  const currentPlan = 'free';
-  const planLimits = {
-    free: { demographics: 3, interests: 3 },
-basic: { demographics: 3, interests: 3 },
-professional: { demographics: 3, interests: 3 },
-enterprise: { demographics: 6, interests: 6 }
-  };
-  const maxDemographics = planLimits[currentPlan as keyof typeof planLimits].demographics;
-  const maxInterests = planLimits[currentPlan as keyof typeof planLimits].interests;
-
-  // Load story from previous page
-  useEffect(() => {
-    const savedStory = localStorage.getItem('currentStory');
-    if (savedStory) {
-      setStory(savedStory);
-    }
-  }, []);
-
-  const handleNext = () => {
+  import { getPlanLimits } from '../../../../../config/plans';
+  const userPlan = 'free'; // TODO: Get from user data
+  const planLimits = getPlanLimits(userPlan);
     if (selectedDemographics.length > 0 && selectedInterests.length > 0) {
       // Save selections
       localStorage.setItem('selectedDemographics', JSON.stringify(selectedDemographics));
