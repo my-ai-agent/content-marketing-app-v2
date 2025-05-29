@@ -1,25 +1,48 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { getPlanLimits } from '../../../config/plans';
+import { getPlanLimits } from '../../../config/plans'
+
 export default function Demographics() {
-  
-  const userPlan = 'free'; // TODO: Get from user data
-  const planLimits = getPlanLimits(userPlan);
+  // Mock current plan; replace with real user plan if available
+  const userPlan = 'free'
+  const planLimits = getPlanLimits(userPlan)
+  const maxDemographics = planLimits.demographics
+  const maxInterests = planLimits.lifestyles
+
+  const [selectedDemographics, setSelectedDemographics] = useState<string[]>([])
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+  const [story, setStory] = useState('Your story will appear here.')
+
+  // Load story from localStorage (or previous step)
+  useEffect(() => {
+    const savedStory = localStorage.getItem('currentStory')
+    if (savedStory) setStory(savedStory)
+  }, [])
+
+  const handleNext = () => {
     if (selectedDemographics.length > 0 && selectedInterests.length > 0) {
       // Save selections
-      localStorage.setItem('selectedDemographics', JSON.stringify(selectedDemographics));
-      localStorage.setItem('selectedInterests', JSON.stringify(selectedInterests));
+      localStorage.setItem('selectedDemographics', JSON.stringify(selectedDemographics))
+      localStorage.setItem('selectedInterests', JSON.stringify(selectedInterests))
       // Navigate to formats page
-      window.location.href = '/dashboard/create/formats';
+      window.location.href = '/dashboard/create/formats'
     } else {
-      alert('Please select at least one demographic and one interest before continuing.');
+      alert('Please select at least one demographic and one interest before continuing.')
     }
-  };
+  }
 
   const handleBack = () => {
-    window.location.href = '/dashboard/create';
-  };
+    window.location.href = '/dashboard/create'
+  }
+
+  // Available options
+  const allDemographics = [
+    'Female Travellers', 'Families', 'Young Adults (18-35)', 'Business Travellers', 'Solo Travellers', 'Seniors (55+)' 
+  ]
+  const allInterests = [
+    'Cultural Experiences', 'Adventure & Outdoor Activities', 'Food & Wine', 'Relaxation & Wellness', 'History & Heritage', 'Photography & Social Media'
+  ]
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -61,11 +84,11 @@ export default function Demographics() {
         <div className="bg-white shadow rounded-lg p-6 space-y-8">
           <div className="text-center mb-6">
             <div className="flex items-center justify-center mb-4">
-  <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
-</div>
-<h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
-  Who Is Your Target Audience?
-</h2>
+              <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
+            </div>
+            <h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
+              Who Is Your Target Audience?
+            </h2>
             <p className="text-sm text-gray-600">
               Select demographics and interests to help us tailor your content for maximum engagement.
             </p>
@@ -87,27 +110,27 @@ export default function Demographics() {
               )}
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {['Female Travellers', 'Families', 'Young Adults (18-35)', 'Business Travellers', 'Solo Travellers', 'Seniors (55+)'].map((demo) => (
+              {allDemographics.map((demo) => (
                 <label key={demo} className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={selectedDemographics.includes(demo)}
                     disabled={selectedDemographics.length >= maxDemographics && !selectedDemographics.includes(demo)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedDemographics([...selectedDemographics, demo]);
+                        setSelectedDemographics([...selectedDemographics, demo])
                       } else {
-                        setSelectedDemographics(selectedDemographics.filter(d => d !== demo));
+                        setSelectedDemographics(selectedDemographics.filter(d => d !== demo))
                       }
                     }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-3 text-sm text-gray-700 font-medium">{demo}</span>
                 </label>
               ))}
             </div>
           </div>
-          
+
           {/* Interests Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -124,20 +147,20 @@ export default function Demographics() {
               )}
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {['Cultural Experiences', 'Adventure & Outdoor Activities', 'Food & Wine', 'Relaxation & Wellness', 'History & Heritage', 'Photography & Social Media'].map((interest) => (
+              {allInterests.map((interest) => (
                 <label key={interest} className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={selectedInterests.includes(interest)}
                     disabled={selectedInterests.length >= maxInterests && !selectedInterests.includes(interest)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedInterests([...selectedInterests, interest]);
+                        setSelectedInterests([...selectedInterests, interest])
                       } else {
-                        setSelectedInterests(selectedInterests.filter(i => i !== interest));
+                        setSelectedInterests(selectedInterests.filter(i => i !== interest))
                       }
                     }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-3 text-sm text-gray-700 font-medium">{interest}</span>
                 </label>
@@ -148,12 +171,14 @@ export default function Demographics() {
           {/* Plan Upgrade Prompt */}
           {(selectedDemographics.length >= maxDemographics || selectedInterests.length >= maxInterests) && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">🚀 Want More Options?</h3>
+              <h3 className="text-sm font-medium text-blue-800 mb-2">
+                🚀 Want More Options?
+              </h3>
               <p className="text-sm text-blue-700 mb-3">
                 Upgrade to Professional plan to select up to 5 demographics and 5 interests for more targeted content.
               </p>
               <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
-                **FREE PLAN** → Upgrade
+                FREE PLAN → Upgrade
               </button>
             </div>
           )}
@@ -182,7 +207,7 @@ export default function Demographics() {
 
         {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-6 mb-4">
-          **Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**
+          <b>Speak Click Send</b> is another <b>CCC Marketing Pro™ Saas 2025</b>
         </p>
       </div>
     </main>
