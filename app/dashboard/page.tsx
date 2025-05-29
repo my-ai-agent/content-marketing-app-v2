@@ -1,4 +1,4 @@
-// ...existing imports
+import Link from 'next/link'
 import { PLANS } from '../config/plans';
 
 export default function Dashboard() {
@@ -14,7 +14,6 @@ export default function Dashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             </div>
             <div className="flex space-x-4">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">Home</Link>
               <span 
                 className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full ml-2 cursor-default"
                 aria-label="Current Plan"
