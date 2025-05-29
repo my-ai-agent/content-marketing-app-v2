@@ -1,11 +1,32 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { getPlanLimits } from '../../../config/plans';
+import { getPlanLimits } from '../../../config/plans'
+
 export default function Formats() {
-  
-  const userPlan = 'free'; // TODO: Get from user data
-  const planLimits = getPlanLimits(userPlan);
+  // Mock current plan; replace with real user plan if available
+  const userPlan = 'free'
+  const planLimits = getPlanLimits(userPlan)
+  const maxFormats = planLimits.platforms
+  const maxPlatforms = planLimits.platforms
+
+  const [story, setStory] = useState('')
+  const [demographics, setDemographics] = useState<string[]>([])
+  const [interests, setInterests] = useState<string[]>([])
+  const [selectedFormats, setSelectedFormats] = useState<string[]>([])
+  const [selectedSocialPlatforms, setSelectedSocialPlatforms] = useState<string[]>([])
+
+  // Load data from previous pages
+  useEffect(() => {
+    const savedStory = localStorage.getItem('currentStory')
+    const savedDemographics = localStorage.getItem('selectedDemographics')
+    const savedInterests = localStorage.getItem('selectedInterests')
+    if (savedStory) setStory(savedStory)
+    if (savedDemographics) setDemographics(JSON.parse(savedDemographics))
+    if (savedInterests) setInterests(JSON.parse(savedInterests))
+  }, [])
+
+  const formatOptions = [
     { name: 'Social Media Posts', icon: '📱', desc: 'Instagram, Facebook, Twitter, LinkedIn' },
     { name: 'Blog Article', icon: '📝', desc: 'SEO-optimized long-form content' },
     { name: 'Video Script', icon: '🎥', desc: 'YouTube, TikTok, or promotional videos' },
@@ -13,48 +34,34 @@ export default function Formats() {
     { name: 'Email Newsletter', icon: '📧', desc: 'Engaging email campaigns' },
     { name: 'Press Release', icon: '📰', desc: 'Professional media announcements' },
     { name: 'Podcast Episode Outline', icon: '🎙️', desc: 'Structured podcast content' }
-  ];
+  ]
 
   const socialPlatforms = [
     { name: 'Instagram', icon: '📷', color: 'bg-pink-100 text-pink-800' },
     { name: 'Facebook', icon: '👥', color: 'bg-blue-100 text-blue-800' },
     { name: 'Twitter', icon: '🐦', color: 'bg-sky-100 text-sky-800' },
     { name: 'LinkedIn', icon: '💼', color: 'bg-indigo-100 text-indigo-800' }
-  ];
-
-  // Load data from previous pages
-  useEffect(() => {
-    const savedStory = localStorage.getItem('currentStory');
-    const savedDemographics = localStorage.getItem('selectedDemographics');
-    const savedInterests = localStorage.getItem('selectedInterests');
-    
-    if (savedStory) setStory(savedStory);
-    if (savedDemographics) setDemographics(JSON.parse(savedDemographics));
-    if (savedInterests) setInterests(JSON.parse(savedInterests));
-  }, []);
+  ]
 
   const handleGenerate = () => {
     if (selectedFormats.length === 0) {
-      alert('Please select at least one content format.');
-      return;
+      alert('Please select at least one content format.')
+      return
     }
-    
     if (selectedFormats.includes('Social Media Posts') && selectedSocialPlatforms.length === 0) {
-      alert('Please select at least one social media platform.');
-      return;
+      alert('Please select at least one social media platform.')
+      return
     }
-
     // Save all selections
-    localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats));
-    localStorage.setItem('selectedSocialPlatforms', JSON.stringify(selectedSocialPlatforms));
-    
+    localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats))
+    localStorage.setItem('selectedSocialPlatforms', JSON.stringify(selectedSocialPlatforms))
     // Navigate to results page
-    window.location.href = '/dashboard/create/results';
-  };
+    window.location.href = '/dashboard/create/results'
+  }
 
   const handleBack = () => {
-    window.location.href = '/dashboard/create/demographics';
-  };
+    window.location.href = '/dashboard/create/demographics'
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -93,7 +100,8 @@ export default function Formats() {
           <div className="flex items-center">
             <span className="text-green-600 font-medium text-sm">✓ Audience:</span>
             <span className="ml-2 text-green-700 text-sm">
-              {demographics.slice(0, 2).join(', ')}{demographics.length > 2 && ` +${demographics.length - 2} more`}
+              {demographics.slice(0, 2).join(', ')}
+              {demographics.length > 2 && ` +${demographics.length - 2} more`}
             </span>
           </div>
         </div>
@@ -104,14 +112,11 @@ export default function Formats() {
         <div className="bg-white shadow rounded-lg p-6">
           <div className="text-center mb-6">
             <div className="flex items-center justify-center mb-4">
-  <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
-</div>
-<div className="flex items-center justify-center mb-4">
-  <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
-</div>
-<h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
-  Choose Your Content Formats
-</h2>
+              <img src="/logos/3.png" alt="Click" className="h-16 w-auto" />
+            </div>
+            <h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
+              Choose Your Content Formats
+            </h2>
             <p className="text-sm text-gray-600">
               Select up to {maxFormats} formats to multiply your story across different platforms and audiences.
             </p>
@@ -129,32 +134,33 @@ export default function Formats() {
                 </span>
               )}
             </div>
-            
             <div className="grid grid-cols-1 gap-3">
               {formatOptions.map((format) => (
                 <label key={format.name} className="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={selectedFormats.includes(format.name)}
                     disabled={selectedFormats.length >= maxFormats && !selectedFormats.includes(format.name)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedFormats([...selectedFormats, format.name]);
+                        setSelectedFormats([...selectedFormats, format.name])
                       } else {
-                        setSelectedFormats(selectedFormats.filter(f => f !== format.name));
+                        setSelectedFormats(selectedFormats.filter(f => f !== format.name))
                         if (format.name === 'Social Media Posts') {
-                          setSelectedSocialPlatforms([]);
+                          setSelectedSocialPlatforms([])
                         }
                       }
                     }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1" 
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
                   />
                   <div className="ml-3 flex-1">
                     <div className="flex items-center">
                       <span className="text-lg mr-2">{format.icon}</span>
                       <span className="text-sm font-medium text-gray-900">{format.name}</span>
                       {format.name === 'Social Media Posts' && selectedFormats.includes(format.name) && (
-                        <span className="ml-2 text-blue-500 text-xs">→ Select platforms below</span>
+                        <span className="ml-2 text-blue-500 text-xs">
+                          → Select platforms below
+                        </span>
                       )}
                     </div>
                     <p className="text-xs text-gray-600 mt-1">{format.desc}</p>
@@ -177,22 +183,21 @@ export default function Formats() {
                   </span>
                 )}
               </div>
-              
               <div className="grid grid-cols-2 gap-3">
                 {socialPlatforms.map((platform) => (
                   <label key={platform.name} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedSocialPlatforms.includes(platform.name)}
                       disabled={selectedSocialPlatforms.length >= maxPlatforms && !selectedSocialPlatforms.includes(platform.name)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedSocialPlatforms([...selectedSocialPlatforms, platform.name]);
+                          setSelectedSocialPlatforms([...selectedSocialPlatforms, platform.name])
                         } else {
-                          setSelectedSocialPlatforms(selectedSocialPlatforms.filter(p => p !== platform.name));
+                          setSelectedSocialPlatforms(selectedSocialPlatforms.filter(p => p !== platform.name))
                         }
                       }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <div className="ml-3 flex items-center">
                       <span className="text-lg mr-2">{platform.icon}</span>
@@ -209,13 +214,21 @@ export default function Formats() {
           {/* Generation Preview */}
           {selectedFormats.length > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">🚀 Ready to Generate:</h3>
+              <h3 className="text-sm font-medium text-blue-800 mb-2">
+                🚀 Ready to Generate:
+              </h3>
               <div className="text-sm text-blue-700">
-                <p className="mb-1">✓ {selectedFormats.length} content format{selectedFormats.length > 1 ? 's' : ''}</p>
+                <p className="mb-1">
+                  ✓ {selectedFormats.length} content format{selectedFormats.length > 1 ? 's' : ''}
+                </p>
                 {selectedSocialPlatforms.length > 0 && (
-                  <p className="mb-1">✓ {selectedSocialPlatforms.length} social platform{selectedSocialPlatforms.length > 1 ? 's' : ''}</p>
+                  <p className="mb-1">
+                    ✓ {selectedSocialPlatforms.length} social platform{selectedSocialPlatforms.length > 1 ? 's' : ''}
+                  </p>
                 )}
-                <p>✓ Targeting {demographics.length} demographic{demographics.length > 1 ? 's' : ''} + {interests.length} interest{interests.length > 1 ? 's' : ''}</p>
+                <p>
+                  ✓ Targeting {demographics.length} demographic{demographics.length > 1 ? 's' : ''} + {interests.length} interest{interests.length > 1 ? 's' : ''}
+                </p>
               </div>
             </div>
           )}
@@ -244,7 +257,7 @@ export default function Formats() {
 
         {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-6 mb-4">
-          **Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**
+          <b>Speak Click Send</b> is another <b>CCC Marketing Pro™ Saas 2025</b>
         </p>
       </div>
     </main>
