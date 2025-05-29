@@ -1,46 +1,11 @@
 'use client'
 import Link from 'next/link'
-
-const PLAN_LIMITS = {
-  free: { 
-    storiesPerWeek: 1, 
-    platforms: 2, 
-    demographics: 3, 
-    lifestyles: 3, 
-    users: 2,
-    price: 'FREE'
-  },
-  basic: { 
-    storiesPerWeek: 5, 
-    platforms: 3, 
-    demographics: 3, 
-    lifestyles: 3, 
-    users: 2,
-    price: '$97/month'
-  },
-  professional: { 
-    storiesPerWeek: 5, 
-    platforms: 5, 
-    demographics: 3, 
-    lifestyles: 3, 
-    users: 2,
-    price: '$197/month'
-  },
-  enterprise: { 
-    storiesPerWeek: 999, 
-    platforms: 10, 
-    demographics: 6, 
-    lifestyles: 6, 
-    users: 5,
-    price: '$497/month',
-    whitePaper: true
-  }
-};
+import { PLANS } from '../../../config/plans';
 
 export default function Dashboard() {
   const currentPlan = 'free';
   const storiesThisWeek = 0;
-  const planLimits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS];
+  const planLimits = PLANS[currentPlan as keyof typeof PLANS].limits;
   const canCreateStory = storiesThisWeek < planLimits.storiesPerWeek;
   
   return (
