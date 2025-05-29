@@ -1,9 +1,9 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-
+import { getPlanLimits } from '../../../config/plans';
 export default function Formats() {
-  import { getPlanLimits } from '../../../config/plans';
+  
   const userPlan = 'free'; // TODO: Get from user data
   const planLimits = getPlanLimits(userPlan);
     { name: 'Social Media Posts', icon: '📱', desc: 'Instagram, Facebook, Twitter, LinkedIn' },
