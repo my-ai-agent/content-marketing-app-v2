@@ -34,7 +34,7 @@ export default function CreateStory() {
       localStorage.setItem('storyInputMethod', inputMethod);
       window.location.href = '/dashboard/create/demographics';
     } else {
-      alert('Please add your story content before continuing.');
+      alert('Add your story before continuing.');
     }
   };
 
@@ -113,7 +113,7 @@ export default function CreateStory() {
               Share Your Story
             </h2>
             <p className="text-sm text-gray-600">
-              Share your cultural story through writing, speaking, or with photos. Choose the method that feels most natural to you.
+              Choose sharing your story through writing, speaking, or with photos.
             </p>
           </div>
 
@@ -176,7 +176,7 @@ export default function CreateStory() {
                 onChange={(e) => setStory(e.target.value)}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 rows={8}
-                placeholder="Share your story, tradition, or narrative here. Be as detailed as you like - the more context you provide, the better we can adapt it for different audiences and platforms..."
+                placeholder="Share your story here. The more detail you provide, the better we can adapt it for different audiences and platforms..."
               />
               <div className="mt-2 text-sm text-gray-500">
                 {story.length} characters
@@ -196,7 +196,7 @@ export default function CreateStory() {
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Record Your Story</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Click the button below to start recording your story. Our AI will transcribe and help you craft it for different platforms.
+                    Click the button below to record your story. Our AI will transcribe and help you craft it for different platforms.
                   </p>
                 </div>
                 <button
@@ -325,7 +325,7 @@ export default function CreateStory() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
             <h3 className="text-sm font-medium text-yellow-800 mb-1">Cultural Respect</h3>
             <p className="text-sm text-yellow-700">
-              Please ensure your story and images respect cultural values and traditions. We're here to help you share authentic narratives responsibly.
+              Please ensure your story and images respect cultural values and traditions.
             </p>
           </div>
 
