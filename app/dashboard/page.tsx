@@ -33,7 +33,7 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back!</h2>
-          <p className="text-gray-600">Ready to create and multiply your cultural stories?</p>
+          <p className="text-gray-600">Ready to create and multiply your stories?</p>
         </div>
 
         {/* Quick Actions */}
@@ -65,7 +65,7 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 ml-3">My Stories</h3>
               </div>
-              <p className="text-gray-600">View, edit, and manage all your cultural stories in one place.</p>
+              <p className="text-gray-600">View, edit, and manage all your stories in one place.</p>
             </div>
           </Link>
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 ml-3">Analytics</h3>
               </div>
-              <p className="text-gray-600">Track performance, engagement, and cultural impact of your stories.</p>
+              <p className="text-gray-600">Track performance, engagement, and impact of your stories.</p>
             </div>
           </Link>
         </div>
