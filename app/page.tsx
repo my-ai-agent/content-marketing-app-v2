@@ -81,8 +81,7 @@ export default function Home() {
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
-                  style={{ focusRingColor: BRAND_PURPLE }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
@@ -91,8 +90,7 @@ export default function Home() {
                 </label>
                 <input
                   type="email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
-                  style={{ focusRingColor: BRAND_PURPLE }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div className="flex space-x-4 pt-4">
