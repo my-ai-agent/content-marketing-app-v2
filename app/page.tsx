@@ -15,7 +15,7 @@ export default function Home() {
       <div className="w-full max-w-xl flex flex-col items-center justify-center px-4">
         {/* Large Centered Logo */}
         <Image
-          src="/logo.png"
+          src="/logos/1.png" // FIXED: Correct logo path
           alt="Speak Click Send"
           width={220}
           height={220}
