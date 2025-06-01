@@ -14,35 +14,35 @@ export default function Home() {
 
   return (
     <>
-      {/* Sign Up Button - Top Right */}
+      {/* Sign Up Button - Top Right Corner */}
       <div className="fixed top-6 right-6 z-10">
         <button
           onClick={() => setShowSignUp(true)}
-          className="px-6 py-2 rounded-lg font-medium transition-colors"
-          style={{ backgroundColor: BRAND_PURPLE, color: 'white' }}
+          className="px-6 py-3 rounded-lg font-medium transition-colors text-white"
+          style={{ backgroundColor: BRAND_PURPLE }}
         >
           Sign Up
         </button>
       </div>
 
-      {/* Main Content - Centered */}
-      <main className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+      {/* Main Content - Perfectly Centered */}
+      <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-12">
         
-        {/* Logo */}
-        <div className="mb-8">
+        {/* Robot Logo - Centered and Smaller */}
+        <div className="mb-8 flex justify-center">
           <Image
             src="/logos/1.png"
-            alt="Speak Click Send"
-            width={300}
-            height={300}
+            alt="Speak Click Send Robot"
+            width={150}
+            height={150}
             priority
             className="max-w-full h-auto"
           />
         </div>
 
-        {/* Tagline */}
+        {/* Tagline - Centered under logo */}
         <h1 
-          className="text-4xl md:text-5xl font-bold text-center mb-12 max-w-4xl leading-tight"
+          className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 max-w-4xl leading-tight"
           style={{
             background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
             WebkitBackgroundClip: 'text',
@@ -53,17 +53,19 @@ export default function Home() {
           Transform your single story into 10 platform formats instantly!
         </h1>
 
-        {/* START Button */}
-        <Link href="/dashboard/create">
-          <button 
-            className="px-12 py-4 rounded-lg text-white font-bold text-xl transition-all hover:scale-105 shadow-lg"
-            style={{
-              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-            }}
-          >
-            START
-          </button>
-        </Link>
+        {/* START Button - Large, Centered, Mobile-Friendly */}
+        <div className="flex justify-center">
+          <Link href="/dashboard/create">
+            <button 
+              className="px-16 py-6 rounded-2xl text-white font-bold text-2xl md:text-3xl transition-all hover:scale-105 shadow-xl min-w-[280px] md:min-w-[320px]"
+              style={{
+                background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+              }}
+            >
+              START
+            </button>
+          </Link>
+        </div>
 
       </main>
 
