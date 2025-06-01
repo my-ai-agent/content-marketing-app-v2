@@ -3,11 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #__next {
+    height: 100%;
+    width: 100%;
+    min-height: 100vh;
+    min-width: 100vw;
+  }
   * {
     @apply border-gray-200;
+    box-sizing: border-box;
   }
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white text-gray-900 flex items-center justify-center;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
   }
 }
 
