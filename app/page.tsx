@@ -11,20 +11,32 @@ export default function Home() {
   const [showSignUp, setShowSignUp] = useState(false)
 
   return (
-    <main className="w-screen h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-xl flex flex-col items-center justify-center px-4">
-        {/* Large Centered Logo */}
+    <main className="w-screen h-screen flex flex-col items-center justify-center relative bg-white">
+      {/* Sign Up Button (top-right corner) */}
+      <button
+        className="absolute top-8 right-8 bg-brand-purple text-white text-lg font-medium px-6 py-2 rounded-xl shadow transition hover:bg-[#5730bf] z-10"
+        onClick={() => setShowSignUp(true)}
+      >
+        Sign Up
+      </button>
+
+      {/* Central Content */}
+      <div className="flex flex-col items-center w-full max-w-md px-4">
+        {/* Robot logo (using full logo for now) */}
         <Image
-          src="/logos/1.png" // FIXED: Correct logo path
-          alt="Speak Click Send"
+          src="/logos/1.png"
+          alt="Speak Click Send Logo"
           width={220}
           height={220}
+          className="mb-6"
           priority
-          className="mb-8"
         />
-        {/* Prominent Tagline */}
+        {/* TODO: Split logo into robot and text for perfect layout */}
+        {/* Brand text placeholder */}
+        {/* <Image src="/logos/text.png" alt="Speak Click Send Text" width={220} height={120} className="mb-7" priority /> */}
+        {/* Tagline */}
         <h2
-          className="font-bold text-center mb-12 text-2xl sm:text-3xl md:text-4xl leading-snug"
+          className="font-bold text-center mb-10 text-2xl sm:text-3xl md:text-4xl leading-snug"
           style={{
             background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
             WebkitBackgroundClip: 'text',
@@ -33,26 +45,19 @@ export default function Home() {
         >
           Transform your single story into 10 platform formats instantly!
         </h2>
-        {/* CTA Buttons */}
-        <div className="flex flex-col items-center gap-6 w-full">
-          <button
-            className="w-full text-2xl font-bold py-5 rounded-2xl shadow-none transition bg-gradient-to-r from-brand-purple to-brand-orange hover:opacity-90 text-white mb-2"
-            onClick={() => window.location.href = '/dashboard/create'}
-          >
-            START
-          </button>
-          <button
-            className="w-full border-none bg-brand-purple text-white text-lg font-medium py-3 rounded-xl transition hover:bg-[#5730bf]"
-            onClick={() => setShowSignUp(true)}
-          >
-            Sign Up
-          </button>
-        </div>
-        {/* Sign Up Modal */}
-        {showSignUp && (
-          <SignUpModal onClose={() => setShowSignUp(false)} />
-        )}
+        {/* START Button */}
+        <button
+          className="w-full text-2xl font-bold py-5 rounded-2xl shadow-none transition bg-gradient-to-r from-brand-purple to-brand-orange hover:opacity-90 text-white mb-2"
+          onClick={() => window.location.href = '/dashboard/create'}
+        >
+          START
+        </button>
       </div>
+
+      {/* Sign Up Modal */}
+      {showSignUp && (
+        <SignUpModal onClose={() => setShowSignUp(false)} />
+      )}
     </main>
   )
 }
