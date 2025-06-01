@@ -17,7 +17,7 @@ export default function Home() {
       {/* Logo Centered */}
       <div className="flex flex-col items-center mt-12 mb-8">
         <Image
-          src="/logo.png"
+          src="/logos/1.png"
           alt="Speak Click Send"
           width={160}
           height={160}
