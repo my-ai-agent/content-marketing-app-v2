@@ -9,19 +9,12 @@
     margin: 0;
     padding: 0;
   }
-  
+
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   }
-  
-  /* Ensure no default margins/padding interfere */
+
   * {
     box-sizing: border-box;
-  }
-  
-  /* Remove any default constraints */
-  main {
-    width: 100%;
-    min-height: 100vh;
   }
 }
