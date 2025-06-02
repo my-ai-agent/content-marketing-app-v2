@@ -13,7 +13,7 @@ export default function Home() {
   const [showSignUp, setShowSignUp] = useState(false)
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="w-screen min-h-screen bg-white relative overflow-hidden">
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 md:p-6">
@@ -29,7 +29,7 @@ export default function Home() {
       </div>
 
       {/* Main Content Container - Full Screen Centered */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-20">
+      <div className="w-screen min-h-screen flex flex-col items-center justify-center px-6 py-20">
         
         {/* Logo Section - Perfectly Centered */}
         <div className="flex flex-col items-center mb-8 md:mb-12">
@@ -47,7 +47,7 @@ export default function Home() {
         </div>
 
         {/* Tagline Section */}
-        <div className="text-center mb-12 md:mb-16 max-w-xs md:max-w-md lg:max-w-lg">
+        <div className="text-center mb-12 md:mb-16 w-full px-4">
           <h1 
             className="text-lg md:text-xl lg:text-2xl font-bold leading-tight"
             style={{
@@ -62,8 +62,8 @@ export default function Home() {
         </div>
 
         {/* START Button - Large and Prominent */}
-        <div className="w-full max-w-xs md:max-w-sm">
-          <Link href="/dashboard/create" className="block">
+        <div className="w-full px-4">
+          <Link href="/dashboard/create" className="block max-w-sm mx-auto">
             <button 
               className="w-full py-4 md:py-5 rounded-2xl text-white font-bold text-xl md:text-2xl transition-all hover:scale-105 active:scale-95 shadow-lg"
               style={{
