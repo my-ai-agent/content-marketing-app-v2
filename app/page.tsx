@@ -22,50 +22,57 @@ export default function Home() {
         Log-In
       </button>
 
-      {/* Main Content - Flex 1 for Perfect Centering */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
+      {/* Main Content - Better Space Proportions */}
+      <div className="flex-1 flex flex-col">
         
-        {/* Logo - Using standard img tag for debugging */}
-        <div className="mb-8 flex justify-center">
+        {/* Logo Section - Top 1/3 of Page */}
+        <div className="flex-1 flex items-center justify-center max-h-[33vh] pt-8">
           <img
             src="/logos/1.png"
             alt="Speak Click Send"
-            className="w-24 h-24 md:w-32 md:h-32 max-w-full h-auto"
+            className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 max-w-full h-auto"
             onError={(e) => {
               console.error('Logo failed to load:', e);
-              // Fallback to a different logo if needed
               e.currentTarget.src = '/logos/2.png';
             }}
           />
         </div>
 
-        {/* Tagline */}
-        <h1 
-          className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-12 leading-tight max-w-4xl"
-          style={{
-            background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}
-        >
-          Transform Your Single Story into 10 Different Platform Formats Instantly!
-        </h1>
-
-        {/* START Button */}
-        <div className="flex justify-center">
-          <Link href="/dashboard/create">
-            <button 
-              className="px-12 py-4 rounded-xl text-white font-bold text-xl transition-all hover:scale-105 shadow-lg"
+        {/* Content Section - Bottom 2/3 of Page */}
+        <div className="flex-[2] flex flex-col justify-center px-6 pb-8">
+          
+          {/* Tagline - Large, Accessible Font */}
+          <div className="w-full flex justify-center mb-12">
+            <h1 
+              className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center leading-tight max-w-5xl px-4"
               style={{
-                background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+                background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                lineHeight: '1.2'
               }}
             >
-              START
-            </button>
-          </Link>
-        </div>
+              Transform Your Single Story into 10 Different Platform Formats Instantly!
+            </h1>
+          </div>
 
+          {/* START Button - 5x Larger and Centered */}
+          <div className="w-full flex justify-center">
+            <Link href="/dashboard/create" className="w-full max-w-md px-6">
+              <button 
+                className="w-full py-8 rounded-2xl text-white font-bold text-3xl md:text-4xl lg:text-5xl transition-all hover:scale-105 shadow-xl"
+                style={{
+                  background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+                  minHeight: '120px'
+                }}
+              >
+                START
+              </button>
+            </Link>
+          </div>
+
+        </div>
       </div>
 
       {/* Sign Up Modal */}
