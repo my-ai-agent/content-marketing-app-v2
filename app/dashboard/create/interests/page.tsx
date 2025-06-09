@@ -9,14 +9,16 @@ const BRAND_BLUE = '#11B3FF'
 export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
 
-  // Enhanced lifestyle/interest options for tourism
+  // Enhanced lifestyle/interest options for tourism (8 categories)
   const allInterests = [
     'Cultural Experiences', 
     'Adventure & Outdoor Activities', 
     'Food & Wine', 
     'Relaxation & Wellness', 
     'History & Heritage', 
-    'Photography & Social Media'
+    'Photography & Social Media',
+    'Arts & Creative Experiences',
+    'Gardens & Nature'
   ]
 
   const handleNext = () => {
@@ -124,12 +126,12 @@ export default function Interests() {
           </p>
         </div>
 
-        {/* Interests Selection Grid */}
-        <div style={{ width: '100%', maxWidth: '700px', margin: '0 auto' }}>
+        {/* Interests Selection Grid - 8 Categories */}
+        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
           
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '1rem',
             marginBottom: '2rem'
           }}>
@@ -176,7 +178,7 @@ export default function Interests() {
             ))}
           </div>
 
-          {/* Selection Info */}
+          {/* Selection Info - Updated for 8 categories */}
           <div style={{
             padding: '1rem',
             backgroundColor: '#f0f9ff',
@@ -186,7 +188,7 @@ export default function Interests() {
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             color: '#1e40af'
           }}>
-            🎯 Select one primary interest to focus your story's appeal
+            🎯 Select one primary interest to focus your story's appeal (includes NZ Great Walks in Gardens & Nature)
           </div>
 
         </div>
@@ -200,7 +202,7 @@ export default function Interests() {
           justifyContent: 'space-between', 
           alignItems: 'center', 
           width: '100%', 
-          maxWidth: '700px',
+          maxWidth: '800px',
           gap: '1rem'
         }}>
           <Link 
