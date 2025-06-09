@@ -66,7 +66,7 @@ export default function Home() {
           maxWidth: '900px',
           margin: '0 auto'
         }}>
-          Transform Your Single Story into 10 Different Platform Formats Instantly!
+          Transform Your Single Story into 10 Different Platforms Instantly!
         </p>
       </div>,
 
