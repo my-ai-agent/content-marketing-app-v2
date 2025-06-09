@@ -22,29 +22,30 @@ export default function Home() {
         Log-In
       </button>
 
-      {/* Text-Only Logo Header - Enlarged & Centralized */}
-      <div className="text-center mt-16 mb-12">
-        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold leading-tight">
-          <span style={{ color: BRAND_PURPLE }}>speak</span>
-          <br />
-          <span style={{ color: BRAND_ORANGE }}>click</span>
-          <br />
-          <span style={{ color: BRAND_BLUE }}>send</span>
+      {/* Text-Only Logo Header - Takes up 1/3 of page, Bold & Central */}
+      <div className="flex flex-col justify-center items-center h-[33vh] text-center">
+        <h1 className="text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black leading-tight">
+          <div style={{ color: BRAND_PURPLE }}>speak</div>
+          <div style={{ color: BRAND_ORANGE }}>click</div>
+          <div style={{ color: BRAND_BLUE }}>send</div>
         </h1>
       </div>
 
-      {/* Tagline */}
-      <div className="text-center mb-12 px-4">
-        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
+      {/* Clear Space Gap */}
+      <div className="h-12"></div>
+
+      {/* Tagline - Centered */}
+      <div className="text-center mb-16 px-4">
+        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight mx-auto max-w-4xl">
           Transform Your Single Story into 10 Different Platform Formats Instantly!
         </p>
       </div>
 
-      {/* CTA Button - Copilot's Proven Centering */}
-      <div className="flex justify-center mb-16">
-        <Link href="/dashboard/create">
+      {/* CTA Button - Perfectly Centered */}
+      <div className="flex justify-center items-center mb-16">
+        <Link href="/dashboard/create" className="block">
           <button 
-            className="px-12 py-6 rounded-2xl text-white font-black text-4xl sm:text-5xl md:text-6xl transition-all hover:scale-105 shadow-2xl"
+            className="px-12 py-6 rounded-2xl text-white font-black text-4xl sm:text-5xl md:text-6xl transition-all hover:scale-105 shadow-2xl block mx-auto"
             style={{
               background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
             }}
