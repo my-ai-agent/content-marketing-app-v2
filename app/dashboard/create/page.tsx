@@ -1,362 +1,179 @@
 'use client'
 import Link from 'next/link'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
+
+const BRAND_PURPLE = '#6B2EFF'
+const BRAND_ORANGE = '#FF7B1C' 
+const BRAND_BLUE = '#11B3FF'
 
 export default function CreateStory() {
-  const [story, setStory] = useState('');
-  const [inputMethod, setInputMethod] = useState<'write' | 'speak' | 'photo'>('write');
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [imageCaption, setImageCaption] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [story, setStory] = useState('')
+  const [inputMethod, setInputMethod] = useState<'type' | 'record'>('type')
 
   const handleNext = () => {
-    let hasContent = false;
-    let contentToSave = '';
-
-    if (inputMethod === 'write' && story.trim()) {
-      hasContent = true;
-      contentToSave = story;
-    } else if (inputMethod === 'photo' && (uploadedImage || imageCaption.trim())) {
-      hasContent = true;
-      contentToSave = imageCaption || 'Photo story';
-      // Save image data
-      if (uploadedImage) {
-        localStorage.setItem('storyImage', uploadedImage);
-      }
-    } else if (inputMethod === 'speak' && story.trim()) {
-      hasContent = true;
-      contentToSave = story;
-    }
-
-    if (hasContent) {
-      localStorage.setItem('currentStory', contentToSave);
-      localStorage.setItem('storyInputMethod', inputMethod);
-      window.location.href = '/dashboard/create/demographics';
+    if (story.trim()) {
+      // Save story to localStorage for now
+      localStorage.setItem('currentStory', story.trim())
+      localStorage.setItem('storyInputMethod', inputMethod)
+      // Navigate to Step 2 (Select Platforms)
+      window.location.href = '/dashboard/create/platforms'
     } else {
-      alert('Add your story before continuing.');
+      alert('Please share your story before continuing.')
     }
-  };
+  }
 
-  const handleSpeak = () => {
-    alert('Voice recording feature coming soon!');
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        alert('File size must be less than 10MB');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeImage = () => {
-    setUploadedImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
-  };
-
-  const getContentForNext = () => {
-    switch (inputMethod) {
-      case 'write':
-        return story.trim().length > 0;
-      case 'speak':
-        return story.trim().length > 0;
-      case 'photo':
-        return !!uploadedImage || imageCaption.trim().length > 0;
-      default:
-        return false;
-    }
-  };
+  const handleRecord = () => {
+    alert('Voice recording feature coming soon!')
+  }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="max-w-2xl mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">Step 1: Your Story</h1>
-          <Link
-            href="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800"
+    <main className="min-h-screen bg-white flex flex-col">
+      
+      {/* Clean Header with Logo and Step Indicator */}
+      <div className="flex justify-between items-center p-6">
+        <Link href="/" className="flex items-center">
+          <div style={{ 
+            color: BRAND_PURPLE, 
+            fontSize: '1.5rem', 
+            fontWeight: '900' 
+          }}>speak</div>
+          <div style={{ 
+            color: BRAND_ORANGE, 
+            fontSize: '1.5rem', 
+            fontWeight: '900',
+            marginLeft: '0.25rem'
+          }}>click</div>
+          <div style={{ 
+            color: BRAND_BLUE, 
+            fontSize: '1.5rem', 
+            fontWeight: '900',
+            marginLeft: '0.25rem'
+          }}>send</div>
+        </Link>
+        
+        <div className="text-gray-500 font-medium">
+          Step 1 of 4
+        </div>
+      </div>
+
+      {/* Main Content - Centered and Clean */}
+      <div className="flex-1 flex flex-col justify-center items-center px-6 pb-20">
+        
+        {/* Page Title */}
+        <div className="text-center mb-12">
+          <h1 style={{ 
+            fontSize: 'clamp(2rem, 5vw, 3rem)', 
+            fontWeight: '700',
+            color: '#1f2937',
+            marginBottom: '1rem'
+          }}>
+            Create Your Story
+          </h1>
+        </div>
+
+        {/* Input Method Toggle - Simple */}
+        <div className="mb-8 flex bg-gray-100 rounded-xl p-2">
+          <button
+            type="button"
+            onClick={() => setInputMethod('type')}
+            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+              inputMethod === 'type'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
           >
-            ← Dashboard
-          </Link>
+            <span className="mr-2">📝</span>
+            Type
+          </button>
+          <button
+            type="button"
+            onClick={() => setInputMethod('record')}
+            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+              inputMethod === 'record'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <span className="mr-2">🎤</span>
+            Record
+          </button>
         </div>
-      </div>
 
-      {/* Progress Bar */}
-      <div className="max-w-2xl mx-auto px-4 mb-6">
-        <div className="flex items-center">
-          <div className="flex-1 bg-blue-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full w-1/3"></div>
-          </div>
-          <span className="ml-3 text-sm text-gray-600">Step 1 of 3</span>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-6">
-            <div className="flex items-center justify-center mb-4">
-              <img src="/logos/4.png" alt="Speak" className="h-16 w-auto" />
-            </div>
-            <h2 className="text-lg font-medium text-gray-900 mb-2 text-center">
-              Share Your Story
-            </h2>
-            <p className="text-sm text-gray-600">
-              Choose sharing your story through writing, speaking, or with photos.
-            </p>
-          </div>
-
-          {/* Input Method Toggle */}
-          <div className="mb-6">
-            <div className="grid grid-cols-3 bg-gray-100 rounded-lg p-1 gap-1">
-              <button
-                type="button"
-                onClick={() => setInputMethod('write')}
-                className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
-                  inputMethod === 'write'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <div className="flex flex-col items-center">
-                  <span className="text-lg mb-1">✍️</span>
-                  <span>Write</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputMethod('speak')}
-                className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
-                  inputMethod === 'speak'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <div className="flex flex-col items-center">
-                  <span className="text-lg mb-1">🎤</span>
-                  <span>Speak</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputMethod('photo')}
-                className={`py-3 px-3 rounded-md text-sm font-medium transition-colors ${
-                  inputMethod === 'photo'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <div className="flex flex-col items-center">
-                  <span className="text-lg mb-1">📷</span>
-                  <span>Photo</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Content Input Based on Method */}
-          {inputMethod === 'write' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Original Story
-              </label>
-              <textarea
-                value={story}
-                onChange={(e) => setStory(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
-                rows={8}
-                placeholder="Share your story here. The more detail you provide, the better we can adapt it for different audiences and platforms..."
-              />
-              <div className="mt-2 text-sm text-gray-500">
-                {story.length} characters
-              </div>
-            </div>
-          )}
-
-          {inputMethod === 'speak' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Voice Recording
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span role="img" aria-label="Microphone">🎤</span>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Record Your Story</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Click the button below to record your story. Our AI will transcribe and help you craft it for different platforms.
-                  </p>
-                </div>
+        {/* Story Input Area - Large and Clean */}
+        <div className="w-full max-w-2xl">
+          {inputMethod === 'type' ? (
+            <textarea
+              value={story}
+              onChange={(e) => setStory(e.target.value)}
+              placeholder="Share your unique story here..."
+              className="w-full h-64 p-6 border-2 border-gray-200 rounded-2xl text-lg resize-none focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all"
+              style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+            />
+          ) : (
+            <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center">
+              <div className="text-center">
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎤</div>
+                <h3 className="text-xl font-medium text-gray-700 mb-4">Record Your Story</h3>
                 <button
-                  type="button"
-                  onClick={handleSpeak}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                  onClick={handleRecord}
+                  className="px-8 py-4 rounded-xl text-white font-medium transition-all hover:scale-105"
+                  style={{ backgroundColor: BRAND_PURPLE }}
                 >
-                  🔴 Start Recording
+                  Start Recording
                 </button>
-                <p className="text-xs text-gray-500 mt-3">
-                  Voice feature powered by real-time AI language interpretation
+                <p className="text-sm text-gray-500 mt-4">
+                  Voice recording feature coming soon
                 </p>
               </div>
-
-              {/* Transcribed text area for voice input */}
-              {story && (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Transcribed Text (Edit if needed)
-                  </label>
-                  <textarea
-                    value={story}
-                    onChange={(e) => setStory(e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
-                    rows={6}
-                  />
-                </div>
-              )}
             </div>
           )}
-
-          {inputMethod === 'photo' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Photo Story
-              </label>
-
-              {/* Photo Upload Area */}
-              <div className="space-y-4">
-                {!uploadedImage ? (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span role="img" aria-label="Camera">📷</span>
-                      </div>
-                      <h3 className="text-sm font-medium text-gray-900 mb-2">Add a Photo to Your Story</h3>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Upload an image that represents your cultural story
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button
-                          type="button"
-                          onClick={() => cameraInputRef.current?.click()}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                        >
-                          📱 Take Photo
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                        >
-                          📁 Upload File
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-3">
-                        Supports JPG, PNG, HEIC (max 10MB)
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <img
-                      src={uploadedImage}
-                      alt="Uploaded story"
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-
-                {/* Hidden file inputs */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-
-                {/* Caption Input */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Story Caption {uploadedImage ? '(Required)' : '(Optional)'}
-                  </label>
-                  <textarea
-                    value={imageCaption}
-                    onChange={(e) => setImageCaption(e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
-                    rows={4}
-                    placeholder="Describe the cultural significance of this image, the story behind it, or the tradition it represents..."
-                  />
-                  <div className="mt-2 text-sm text-gray-500">
-                    {imageCaption.length} characters
-                  </div>
-                </div>
-              </div>
+          
+          {/* Character Count - Subtle */}
+          {inputMethod === 'type' && story && (
+            <div className="text-right text-sm text-gray-400 mt-3">
+              {story.length} characters
             </div>
           )}
-
-          {/* Cultural Integrity Notice */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <h3 className="text-sm font-medium text-yellow-800 mb-1">Cultural Respect</h3>
-            <p className="text-sm text-yellow-700">
-              Please ensure your story and images respect cultural values and traditions.
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <Link
-              href="/dashboard"
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
-            >
-              Save Draft
-            </Link>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={!getContentForNext()}
-              className={`font-medium py-3 px-8 rounded-lg transition-colors ${
-                getContentForNext()
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              Next: Audience →
-            </button>
-          </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-6 mb-4">
-          **Speak Click Send** is another **CCC Marketing Pro™ Saas 2025**
-        </p>
+        {/* Next Button - Prominent */}
+        <div className="mt-12">
+          <button
+            onClick={handleNext}
+            disabled={!story.trim()}
+            className={`px-12 py-4 rounded-2xl font-bold text-xl transition-all ${
+              story.trim()
+                ? 'text-white hover:scale-105 shadow-lg'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+            style={{
+              background: story.trim() 
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : undefined,
+              backgroundColor: !story.trim() ? '#e5e7eb' : undefined
+            }}
+          >
+            Next →
+          </button>
+        </div>
+
       </div>
+
+      {/* Bottom Navigation - Minimal */}
+      <div className="p-6 border-t border-gray-100">
+        <div className="flex justify-between items-center max-w-2xl mx-auto">
+          <Link 
+            href="/"
+            className="text-gray-500 hover:text-gray-700 font-medium"
+          >
+            ← Back to Home
+          </Link>
+          <div className="text-sm text-gray-400">
+            Save draft feature coming soon
+          </div>
+        </div>
+      </div>
+
     </main>
   )
 }
