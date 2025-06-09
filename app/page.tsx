@@ -38,13 +38,16 @@ export default function Home() {
           />
         </div>
 
+        {/* FIXED: Added space under robot logo */}
+        <div className="h-8 md:h-12"></div>
+
         {/* Content Section - Remaining 2/3 of Page */}
-        <div className="flex-1 flex flex-col justify-center px-4 pb-8 space-y-8">
+        <div className="flex-1 flex flex-col justify-center px-4 pb-8">
           
-          {/* Tagline - Very Large, Accessible Font */}
+          {/* Tagline - FIXED: Larger font size */}
           <div className="w-full">
             <h1 
-              className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-center leading-tight px-2"
+              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-center leading-tight px-2"
               style={{
                 background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
                 WebkitBackgroundClip: 'text',
@@ -57,11 +60,14 @@ export default function Home() {
             </h1>
           </div>
 
-          {/* START Button - Centered and Much Larger Text */}
-          <div className="w-full flex justify-center px-4">
-            <Link href="/dashboard/create" className="w-full max-w-lg">
+          {/* FIXED: Added space under tagline text */}
+          <div className="h-12 md:h-16"></div>
+
+          {/* START Button - FIXED: Properly centered */}
+          <div className="w-full flex justify-center">
+            <Link href="/dashboard/create" className="block">
               <button 
-                className="w-full py-10 rounded-3xl text-white font-black text-5xl md:text-6xl lg:text-7xl xl:text-8xl transition-all hover:scale-105 shadow-2xl flex items-center justify-center"
+                className="px-16 py-10 rounded-3xl text-white font-black text-5xl md:text-6xl lg:text-7xl xl:text-8xl transition-all hover:scale-105 shadow-2xl flex items-center justify-center"
                 style={{
                   background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
                   minHeight: '140px'
