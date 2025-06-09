@@ -16,10 +16,14 @@ export default function Home() {
       {/* Log-In Button - Absolute Top Right */}
       <button
         onClick={() => setShowSignUp(true)}
-        className="absolute top-6 right-6 z-10 px-6 py-2 rounded-lg font-medium text-white"
-        style={{ backgroundColor: BRAND_PURPLE }}
+        className="absolute top-6 right-6 z-10 px-6 py-2 rounded-lg font-medium transition-all hover:bg-blue-50"
+        style={{ 
+          backgroundColor: 'transparent',
+          border: `3px solid ${BRAND_BLUE}`,
+          color: BRAND_BLUE
+        }}
       >
-        Log-In
+        Sign-In
       </button>
 
       {/* Text-Only Logo Header - Takes up 1/3 of page, Bold & Central */}
@@ -48,8 +52,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Clear Space Gap */}
-      <div className="h-12"></div>
+      {/* Clear Space Gap - Double spacing */}
+      <div className="h-24"></div>
 
       {/* Tagline - Centered */}
       <div style={{ textAlign: 'center', width: '100%', marginBottom: '4rem', padding: '0 1rem' }}>
