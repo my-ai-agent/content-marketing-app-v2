@@ -67,7 +67,7 @@ export default function Home() {
         }}>
           Transform Your Single Story into 10 Different Platform Formats Instantly!
         </p>
-      </div>
+      </div>,
 
       {/* CTA Button - Perfectly Centered */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', marginBottom: '4rem' }}>
