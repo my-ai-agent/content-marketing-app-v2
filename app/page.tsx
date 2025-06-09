@@ -22,22 +22,9 @@ export default function Home() {
         Log-In
       </button>
 
-      {/* Logo Section */}
-      <div className="flex justify-center mt-16 mb-8">
-        <img
-          src="/logos/1.png"
-          alt="Speak Click Send Robot"
-          className="w-20 h-20 md:w-24 md:h-24"
-          onError={(e) => {
-            console.error('Logo failed to load:', e);
-            e.currentTarget.src = '/logos/2.png';
-          }}
-        />
-      </div>
-
-      {/* Brand Header - Simplified */}
-      <div className="text-center mb-8">
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight">
+      {/* Text-Only Logo Header - Enlarged & Centralized */}
+      <div className="text-center mt-16 mb-12">
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold leading-tight">
           <span style={{ color: BRAND_PURPLE }}>speak</span>
           <br />
           <span style={{ color: BRAND_ORANGE }}>click</span>
