@@ -11,7 +11,7 @@ export default function Home() {
   const [showSignUp, setShowSignUp] = useState(false)
 
   return (
-    <main className="h-screen w-screen bg-white flex flex-col relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-white relative">
       
       {/* Log-In Button - Absolute Top Right */}
       <button
@@ -22,64 +22,53 @@ export default function Home() {
         Log-In
       </button>
 
-      {/* Main Content - Better Space Proportions */}
-      <div className="flex-1 flex flex-col">
-        
-        {/* Logo Section - Strict Top 1/3, Smaller Logo */}
-        <div className="h-[30vh] flex items-center justify-center pt-4">
-          <img
-            src="/logos/1.png"
-            alt="Speak Click Send"
-            className="w-16 h-16 md:w-20 md:h-20 max-w-full h-auto"
-            onError={(e) => {
-              console.error('Logo failed to load:', e);
-              e.currentTarget.src = '/logos/2.png';
-            }}
-          />
-        </div>
-
-        {/* FIXED: Added space under robot logo */}
-        <div className="h-8 md:h-12"></div>
-
-        {/* Content Section - Remaining 2/3 of Page */}
-        <div className="flex-1 flex flex-col justify-center px-4 pb-8">
-          
-          {/* Tagline - FIXED: Larger font size */}
-          <div className="w-full">
-            <h1 
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-center leading-tight px-2"
-              style={{
-                background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                lineHeight: '1.1'
-              }}
-            >
-              Transform Your Single Story into 10 Different Platform Formats Instantly!
-            </h1>
-          </div>
-
-          {/* FIXED: Added space under tagline text */}
-          <div className="h-12 md:h-16"></div>
-
-          {/* START Button - FIXED: Properly centered */}
-          <div className="w-full flex justify-center">
-            <Link href="/dashboard/create" className="block">
-              <button 
-                className="px-16 py-10 rounded-3xl text-white font-black text-5xl md:text-6xl lg:text-7xl xl:text-8xl transition-all hover:scale-105 shadow-2xl flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-                  minHeight: '140px'
-                }}
-              >
-                START
-              </button>
-            </Link>
-          </div>
-
-        </div>
+      {/* Logo Section */}
+      <div className="flex justify-center mt-16 mb-8">
+        <img
+          src="/logos/1.png"
+          alt="Speak Click Send Robot"
+          className="w-20 h-20 md:w-24 md:h-24"
+          onError={(e) => {
+            console.error('Logo failed to load:', e);
+            e.currentTarget.src = '/logos/2.png';
+          }}
+        />
       </div>
+
+      {/* Brand Header - Simplified */}
+      <div className="text-center mb-8">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight">
+          <span style={{ color: BRAND_PURPLE }}>speak</span>
+          <br />
+          <span style={{ color: BRAND_ORANGE }}>click</span>
+          <br />
+          <span style={{ color: BRAND_BLUE }}>send</span>
+        </h1>
+      </div>
+
+      {/* Tagline */}
+      <div className="text-center mb-12 px-4">
+        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
+          Transform Your Single Story into 10 Different Platform Formats Instantly!
+        </p>
+      </div>
+
+      {/* CTA Button - Copilot's Proven Centering */}
+      <div className="flex justify-center mb-16">
+        <Link href="/dashboard/create">
+          <button 
+            className="px-12 py-6 rounded-2xl text-white font-black text-4xl sm:text-5xl md:text-6xl transition-all hover:scale-105 shadow-2xl"
+            style={{
+              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+            }}
+          >
+            START
+          </button>
+        </Link>
+      </div>
+
+      {/* Spacer for bottom */}
+      <div className="flex-1"></div>
 
       {/* Sign Up Modal */}
       {showSignUp && (
@@ -129,6 +118,6 @@ export default function Home() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   )
 }
