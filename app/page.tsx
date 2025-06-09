@@ -53,10 +53,10 @@ export default function Home() {
       </div>
 
       {/* Clear Space Gap - Double spacing */}
-      <div className="h-24"></div>
+      <div className="h-40"></div>
 
       {/* Tagline - Centered */}
-      <div style={{ textAlign: 'center', width: '100%', marginBottom: '4rem', padding: '0 1rem' }}>
+      
         <p style={{ 
           fontSize: 'clamp(1.5rem, 4vw, 3rem)', 
           fontWeight: '700',
