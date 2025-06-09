@@ -25,12 +25,12 @@ export default function Home() {
       {/* Main Content - Better Space Proportions */}
       <div className="flex-1 flex flex-col">
         
-        {/* Logo Section - Top 1/3 of Page */}
-        <div className="flex-1 flex items-center justify-center max-h-[33vh] pt-8">
+        {/* Logo Section - Strict Top 1/3, Smaller Logo */}
+        <div className="h-[30vh] flex items-center justify-center pt-4">
           <img
             src="/logos/1.png"
             alt="Speak Click Send"
-            className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 max-w-full h-auto"
+            className="w-16 h-16 md:w-20 md:h-20 max-w-full h-auto"
             onError={(e) => {
               console.error('Logo failed to load:', e);
               e.currentTarget.src = '/logos/2.png';
@@ -38,33 +38,33 @@ export default function Home() {
           />
         </div>
 
-        {/* Content Section - Bottom 2/3 of Page */}
-        <div className="flex-[2] flex flex-col justify-center px-6 pb-8">
+        {/* Content Section - Remaining 2/3 of Page */}
+        <div className="flex-1 flex flex-col justify-center px-4 pb-8 space-y-8">
           
-          {/* Tagline - Large, Accessible Font */}
-          <div className="w-full flex justify-center mb-12">
+          {/* Tagline - Very Large, Accessible Font */}
+          <div className="w-full">
             <h1 
-              className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center leading-tight max-w-5xl px-4"
+              className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-center leading-tight px-2"
               style={{
                 background: `linear-gradient(90deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                lineHeight: '1.2'
+                lineHeight: '1.1'
               }}
             >
               Transform Your Single Story into 10 Different Platform Formats Instantly!
             </h1>
           </div>
 
-          {/* START Button - 5x Larger and Centered */}
-          <div className="w-full flex justify-center">
-            <Link href="/dashboard/create" className="w-full max-w-md px-6">
+          {/* START Button - Centered and Much Larger Text */}
+          <div className="w-full flex justify-center px-4">
+            <Link href="/dashboard/create" className="w-full max-w-lg">
               <button 
-                className="w-full py-8 rounded-2xl text-white font-bold text-3xl md:text-4xl lg:text-5xl transition-all hover:scale-105 shadow-xl"
+                className="w-full py-10 rounded-3xl text-white font-black text-5xl md:text-6xl lg:text-7xl xl:text-8xl transition-all hover:scale-105 shadow-2xl flex items-center justify-center"
                 style={{
                   background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-                  minHeight: '120px'
+                  minHeight: '140px'
                 }}
               >
                 START
