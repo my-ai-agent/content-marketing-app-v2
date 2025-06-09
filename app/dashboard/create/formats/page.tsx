@@ -130,7 +130,6 @@ export default function ReviewDistribute() {
   }
 
   const handleSendToPlatform = (platform: string) => {
-    // Mark as completed
     setCompletedPlatforms(prev => [...prev, platform])
     setPlatformContent(prev => ({
       ...prev,
@@ -139,8 +138,6 @@ export default function ReviewDistribute() {
         isCompleted: true
       }
     }))
-    
-    // Simulate API call
     alert(`Content sent to ${platform}! 🚀`)
   }
 
@@ -150,27 +147,52 @@ export default function ReviewDistribute() {
 
   if (isGenerating) {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">🚀 Generating Your Content...</h2>
-            <p className="text-gray-600 mb-4">Creating platform-optimized versions of your story</p>
-            <div className="text-sm text-gray-500 space-y-1">
-              <p>✓ Analyzing your story</p>
-              <p>✓ Optimizing for your target audience</p>
-              <p>✓ Formatting for each platform</p>
-            </div>
-          </div>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh', 
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '1rem' }}>🚀</div>
+        <h2 style={{ 
+          fontSize: 'clamp(1.5rem, 4vw, 2rem)', 
+          fontWeight: '700', 
+          color: '#1f2937', 
+          marginBottom: '1rem' 
+        }}>
+          Generating Your Content...
+        </h2>
+        <p style={{ color: '#6b7280', marginBottom: '1rem' }}>Creating platform-optimized versions of your story</p>
+        <div style={{ fontSize: 'clamp(0.875rem, 2vw, 1rem)', color: '#9ca3af' }}>
+          <p>✓ Analyzing your story</p>
+          <p>✓ Optimizing for your target audience</p>
+          <p>✓ Formatting for each platform</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: 'white' 
+    }}>
+      
       {/* Header with Logo and Step Tracker */}
-      <div className="flex flex-col justify-center items-center py-8 border-b border-gray-100">
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
+      }}>
+        
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
@@ -198,103 +220,328 @@ export default function ReviewDistribute() {
         </div>
 
         {/* Step Tracker */}
-        <div className="flex justify-center items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">1</div>
-          <div className="w-10 h-0.5 bg-green-500"></div>
-          <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">2</div>
-          <div className="w-10 h-0.5 bg-green-500"></div>
-          <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">3</div>
-          <div className="w-10 h-0.5 bg-green-500"></div>
-          <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-semibold">4</div>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '0.5rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>1</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>2</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>3</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#1f2937', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>4</div>
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Review & Distribute</h1>
-        <p className="text-gray-600 text-center max-w-2xl">Your AI-generated content is ready. Review each platform and send when perfect.</p>
+        <h1 style={{ 
+          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+          fontWeight: '700',
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Review & Distribute
+        </h1>
+        <p style={{ 
+          color: '#6b7280', 
+          textAlign: 'center', 
+          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+          maxWidth: '600px' 
+        }}>
+          Your AI-generated content is ready. Review each platform and send when perfect.
+        </p>
       </div>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
+      }}>
+        
         {/* Generated Story Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Your Generated Story</h2>
-            <button className="text-gray-600 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '1rem' 
+          }}>
+            <h2 style={{ 
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
+              fontWeight: '600', 
+              color: '#1f2937' 
+            }}>
+              Your Generated Story
+            </h2>
+            <button 
+              style={{
+                color: '#6b7280',
+                border: '1px solid #d1d5db',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                backgroundColor: 'white',
+                cursor: 'pointer'
+              }}
+            >
               ✏️ Edit Story
             </button>
           </div>
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 text-gray-700 leading-relaxed">
+          <div style={{
+            backgroundColor: '#f9fafb',
+            border: '2px solid #e5e7eb',
+            borderRadius: '0.75rem',
+            padding: '1.5rem',
+            color: '#374151',
+            lineHeight: '1.6',
+            fontSize: 'clamp(1rem, 2.5vw, 1.125rem)'
+          }}>
             {story || "Your story will appear here..."}
           </div>
         </div>
 
         {/* Platform Distribution Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Your Chosen Platform Distribution</h2>
-            <div className="text-sm text-gray-500">
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '1rem' 
+          }}>
+            <h2 style={{ 
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
+              fontWeight: '600', 
+              color: '#1f2937' 
+            }}>
+              Your Chosen Platform Distribution
+            </h2>
+            <div style={{ 
+              fontSize: '0.875rem', 
+              color: '#6b7280' 
+            }}>
               {completedPlatforms.length} of {Object.keys(platforms).length} platforms completed
             </div>
           </div>
 
           {/* Platform Tabs */}
-          <div className="flex gap-2 mb-6 border-b-2 border-gray-100 overflow-x-auto">
+          <div style={{ 
+            display: 'flex', 
+            gap: '0.5rem', 
+            marginBottom: '1.5rem',
+            borderBottom: '2px solid #f1f5f9',
+            overflowX: 'auto'
+          }}>
             {Object.keys(platforms).map((platform) => (
               <button
                 key={platform}
                 onClick={() => setActivePlatform(platform)}
-                className={`flex flex-col items-center gap-2 px-5 py-4 rounded-t-lg transition-all min-w-[120px] relative ${
-                  activePlatform === platform
-                    ? 'bg-white border-b-3 border-blue-500 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                } ${completedPlatforms.includes(platform) ? 'bg-green-50' : ''}`}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '1rem 1.25rem',
+                  borderRadius: '0.5rem 0.5rem 0 0',
+                  minWidth: '120px',
+                  position: 'relative',
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: activePlatform === platform ? 'white' : 'transparent',
+                  borderBottom: activePlatform === platform ? '3px solid #3b82f6' : 'none',
+                  color: activePlatform === platform ? '#3b82f6' : '#6b7280'
+                }}
               >
                 {completedPlatforms.includes(platform) && (
-                  <div className="absolute top-2 right-2 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  <div style={{
+                    position: 'absolute',
+                    top: '0.5rem',
+                    right: '0.5rem',
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: '700'
+                  }}>
                     ✓
                   </div>
                 )}
-                <div className="text-2xl">{platforms[platform as keyof typeof platforms].icon}</div>
-                <div className="text-sm font-medium">{platform}</div>
+                <div style={{ fontSize: '1.5rem' }}>
+                  {platforms[platform as keyof typeof platforms].icon}
+                </div>
+                <div style={{ fontSize: '0.875rem', fontWeight: '500' }}>
+                  {platform}
+                </div>
               </button>
             ))}
             
             {/* More Platforms Button */}
             <button
               onClick={handleMorePlatforms}
-              className="flex flex-col items-center gap-1.5 px-5 py-4 rounded-lg border-2 border-dashed border-yellow-300 bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 transition-all min-w-[120px] relative ml-2"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.375rem',
+                padding: '1rem 1.25rem',
+                borderRadius: '0.5rem',
+                border: '2px dashed #fbbf24',
+                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                minWidth: '120px',
+                position: 'relative',
+                marginLeft: '0.5rem',
+                cursor: 'pointer'
+              }}
             >
-              <div className="absolute top-2 right-2 w-5 h-5 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+              <div style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                width: '1.25rem',
+                height: '1.25rem',
+                backgroundColor: '#f59e0b',
+                color: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: '700'
+              }}>
                 +3
               </div>
-              <div className="text-2xl">✨</div>
-              <div className="text-xs font-semibold text-yellow-800 text-center leading-tight">More Platforms</div>
+              <div style={{ fontSize: '1.5rem' }}>✨</div>
+              <div style={{ 
+                fontSize: '0.75rem', 
+                fontWeight: '600', 
+                color: '#92400e', 
+                textAlign: 'center', 
+                lineHeight: '1.2' 
+              }}>
+                More Platforms
+              </div>
             </button>
           </div>
 
           {/* Active Platform Content */}
           {activePlatform && platformContent[activePlatform] && (
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-6 mb-6">
-              <div className="flex justify-between items-start mb-4 pb-3 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl">
+            <div style={{
+              backgroundColor: 'white',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              padding: '1.5rem',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '1rem',
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid #f1f5f9'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    backgroundColor: '#eff6ff',
+                    borderRadius: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.25rem'
+                  }}>
                     {platforms[activePlatform as keyof typeof platforms].icon}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{activePlatform} Post</h3>
-                    <p className="text-sm text-gray-500">{platforms[activePlatform as keyof typeof platforms].description}</p>
+                    <h3 style={{ 
+                      fontSize: '1.125rem', 
+                      fontWeight: '600', 
+                      color: '#1f2937', 
+                      marginBottom: '0.25rem' 
+                    }}>
+                      {activePlatform} Post
+                    </h3>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      {platforms[activePlatform as keyof typeof platforms].description}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className={`text-sm font-semibold ${
-                    getCharacterStatus(activePlatform) === 'optimal' ? 'text-green-600' :
-                    getCharacterStatus(activePlatform) === 'acceptable' ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: getCharacterStatus(activePlatform) === 'optimal' ? '#059669' :
+                           getCharacterStatus(activePlatform) === 'acceptable' ? '#d97706' : '#dc2626'
+                  }}>
                     {platformContent[activePlatform].charCount}/{platforms[activePlatform as keyof typeof platforms].optimal.max} chars
                   </div>
-                  <div className={`text-xs px-2 py-1 rounded-full mt-1 ${
-                    getCharacterStatus(activePlatform) === 'optimal' ? 'bg-green-100 text-green-700' :
-                    getCharacterStatus(activePlatform) === 'acceptable' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                  }`}>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '9999px',
+                    marginTop: '0.25rem',
+                    backgroundColor: getCharacterStatus(activePlatform) === 'optimal' ? '#dcfce7' :
+                                    getCharacterStatus(activePlatform) === 'acceptable' ? '#fef3c7' : '#fee2e2',
+                    color: getCharacterStatus(activePlatform) === 'optimal' ? '#166534' :
+                           getCharacterStatus(activePlatform) === 'acceptable' ? '#92400e' : '#dc2626'
+                  }}>
                     Optimal: {platforms[activePlatform as keyof typeof platforms].optimal.min}-{platforms[activePlatform as keyof typeof platforms].optimal.max}
                   </div>
                 </div>
@@ -303,31 +550,52 @@ export default function ReviewDistribute() {
               <textarea
                 value={platformContent[activePlatform].content}
                 onChange={(e) => handleEditContent(activePlatform, e.target.value)}
-                className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm leading-relaxed resize-none"
+                style={{
+                  width: '100%',
+                  height: '12rem',
+                  padding: '1rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.5',
+                  resize: 'none',
+                  outline: 'none',
+                  fontFamily: 'inherit'
+                }}
                 placeholder="Generated content will appear here..."
               />
 
-              <div className="flex justify-between items-center mt-4">
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '1rem'
+              }}>
                 <button
-                  onClick={() => {
-                    const textarea = document.querySelector('textarea') as HTMLTextAreaElement
-                    if (textarea) {
-                      // Simple edit mode - could expand this
-                      textarea.focus()
-                    }
+                  style={{
+                    backgroundColor: '#f3f4f6',
+                    color: '#374151',
+                    fontWeight: '500',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    cursor: 'pointer'
                   }}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
                 >
                   ✏️ Edit This Version
                 </button>
                 <button
                   onClick={() => handleSendToPlatform(activePlatform)}
                   disabled={completedPlatforms.includes(activePlatform)}
-                  className={`font-medium py-3 px-6 rounded-lg transition-colors ${
-                    completedPlatforms.includes(activePlatform)
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}
+                  style={{
+                    fontWeight: '500',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    cursor: completedPlatforms.includes(activePlatform) ? 'not-allowed' : 'pointer',
+                    backgroundColor: completedPlatforms.includes(activePlatform) ? '#d1d5db' : '#059669',
+                    color: completedPlatforms.includes(activePlatform) ? '#6b7280' : 'white'
+                  }}
                 >
                   {completedPlatforms.includes(activePlatform) ? '✅ Sent' : '📤 Send to ' + activePlatform}
                 </button>
@@ -337,26 +605,56 @@ export default function ReviewDistribute() {
         </div>
 
         {/* Bottom Navigation */}
-        <div className="flex justify-between items-center pt-6 border-t border-gray-100">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: '1.5rem',
+          borderTop: '1px solid #f1f5f9'
+        }}>
           <Link
             href="/dashboard/create/interests"
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
+            style={{
+              backgroundColor: '#e5e7eb',
+              color: '#374151',
+              fontWeight: '500',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.5rem',
+              textDecoration: 'none',
+              display: 'inline-block'
+            }}
           >
             ← Back to Interests
           </Link>
-          <div className="flex gap-3">
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
               onClick={() => {
                 localStorage.setItem('platformContent', JSON.stringify(platformContent))
                 alert('All content saved as drafts! 💾')
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+              style={{
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                fontWeight: '500',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                cursor: 'pointer'
+              }}
             >
               💾 Save All Drafts
             </button>
             <Link
               href="/dashboard"
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+              style={{
+                backgroundColor: '#059669',
+                color: 'white',
+                fontWeight: '500',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                textDecoration: 'none',
+                display: 'inline-block'
+              }}
             >
               ✅ Complete
             </Link>
@@ -365,7 +663,13 @@ export default function ReviewDistribute() {
       </div>
 
       {/* Footer */}
-      <div className="text-center py-4 text-gray-500 text-sm border-t border-gray-100">
+      <div style={{
+        textAlign: 'center',
+        padding: '1rem',
+        color: '#6b7280',
+        fontSize: '0.875rem',
+        borderTop: '1px solid #f1f5f9'
+      }}>
         <strong>Speak Click Send</strong> is another <strong>CCC Marketing Pro™ SaaS 2025</strong>
       </div>
     </div>
