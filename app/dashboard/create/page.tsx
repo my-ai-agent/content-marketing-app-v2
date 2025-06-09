@@ -12,10 +12,8 @@ export default function CreateStory() {
 
   const handleNext = () => {
     if (story.trim()) {
-      // Save story to localStorage for now
       localStorage.setItem('currentStory', story.trim())
       localStorage.setItem('storyInputMethod', inputMethod)
-      // Navigate to Step 2 (Select Platforms)
       window.location.href = '/dashboard/create/platforms'
     } else {
       alert('Please share your story before continuing.')
@@ -27,130 +25,249 @@ export default function CreateStory() {
   }
 
   return (
-    <main className="min-h-screen bg-white flex flex-col">
+    <div style={{ minHeight: '100vh', backgroundColor: 'white', display: 'flex', flexDirection: 'column' }}>
       
-      {/* Clean Header with Logo and Step Indicator */}
-      <div className="flex justify-between items-center p-6">
-        <Link href="/" className="flex items-center">
+      {/* Header - Clean and Consistent */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '1.5rem',
+        width: '100%'
+      }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
           <div style={{ 
             color: BRAND_PURPLE, 
-            fontSize: '1.5rem', 
+            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
             fontWeight: '900' 
           }}>speak</div>
           <div style={{ 
             color: BRAND_ORANGE, 
-            fontSize: '1.5rem', 
+            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
             fontWeight: '900',
             marginLeft: '0.25rem'
           }}>click</div>
           <div style={{ 
             color: BRAND_BLUE, 
-            fontSize: '1.5rem', 
+            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
             fontWeight: '900',
             marginLeft: '0.25rem'
           }}>send</div>
         </Link>
         
-        <div className="text-gray-500 font-medium">
+        <div style={{ 
+          color: '#6b7280', 
+          fontWeight: '600',
+          fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+        }}>
           Step 1 of 4
         </div>
       </div>
 
-      {/* Main Content - Centered and Clean */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 pb-20">
+      {/* Main Content - Using Landing Page Success Pattern */}
+      <div style={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        padding: '0 1rem',
+        textAlign: 'center',
+        width: '100%'
+      }}>
         
-        {/* Page Title */}
-        <div className="text-center mb-12">
+        {/* Page Title - Same Approach as Landing Page */}
+        <div style={{ marginBottom: '3rem', width: '100%' }}>
           <h1 style={{ 
-            fontSize: 'clamp(2rem, 5vw, 3rem)', 
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
             fontWeight: '700',
             color: '#1f2937',
-            marginBottom: '1rem'
+            margin: '0 auto',
+            textAlign: 'center',
+            lineHeight: '1.1'
           }}>
             Create Your Story
           </h1>
         </div>
 
-        {/* Input Method Toggle - Simple */}
-        <div className="mb-8 flex bg-gray-100 rounded-xl p-2">
+        {/* Input Method Toggle - Bulletproof Centering */}
+        <div style={{ 
+          marginBottom: '2rem',
+          display: 'flex',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '1rem',
+          padding: '0.5rem',
+          justifyContent: 'center'
+        }}>
           <button
             type="button"
             onClick={() => setInputMethod('type')}
-            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
-              inputMethod === 'type'
-                ? 'bg-white shadow-sm text-gray-900'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: inputMethod === 'type' ? 'white' : 'transparent',
+              color: inputMethod === 'type' ? '#1f2937' : '#6b7280',
+              boxShadow: inputMethod === 'type' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
           >
-            <span className="mr-2">📝</span>
+            <span style={{ marginRight: '0.5rem' }}>📝</span>
             Type
           </button>
           <button
             type="button"
             onClick={() => setInputMethod('record')}
-            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
-              inputMethod === 'record'
-                ? 'bg-white shadow-sm text-gray-900'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: inputMethod === 'record' ? 'white' : 'transparent',
+              color: inputMethod === 'record' ? '#1f2937' : '#6b7280',
+              boxShadow: inputMethod === 'record' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
           >
-            <span className="mr-2">🎤</span>
+            <span style={{ marginRight: '0.5rem' }}>🎤</span>
             Record
           </button>
         </div>
 
-        {/* Story Input Area - Large and Clean */}
-        <div className="w-full max-w-2xl">
+        {/* Story Input Area - Landing Page Style */}
+        <div style={{ width: '100%', maxWidth: '700px', margin: '0 auto' }}>
           {inputMethod === 'type' ? (
             <textarea
               value={story}
               onChange={(e) => setStory(e.target.value)}
               placeholder="Share your unique story here..."
-              className="w-full h-64 p-6 border-2 border-gray-200 rounded-2xl text-lg resize-none focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all"
-              style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              style={{
+                width: '100%',
+                height: '280px',
+                padding: '2rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '1.5rem',
+                fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                resize: 'none',
+                outline: 'none',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                lineHeight: '1.5',
+                backgroundColor: 'white',
+                transition: 'all 0.2s',
+                boxSizing: 'border-box'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#3b82f6'
+                e.target.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)'
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#e5e7eb'
+                e.target.style.boxShadow = 'none'
+              }}
             />
           ) : (
-            <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center">
-              <div className="text-center">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎤</div>
-                <h3 className="text-xl font-medium text-gray-700 mb-4">Record Your Story</h3>
-                <button
-                  onClick={handleRecord}
-                  className="px-8 py-4 rounded-xl text-white font-medium transition-all hover:scale-105"
-                  style={{ backgroundColor: BRAND_PURPLE }}
-                >
-                  Start Recording
-                </button>
-                <p className="text-sm text-gray-500 mt-4">
-                  Voice recording feature coming soon
-                </p>
-              </div>
+            <div style={{
+              width: '100%',
+              height: '280px',
+              border: '2px dashed #d1d5db',
+              borderRadius: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#fafafa'
+            }}>
+              <div style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '1rem' }}>🎤</div>
+              <h3 style={{ 
+                fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '1.5rem',
+                margin: '0 0 1.5rem 0'
+              }}>
+                Record Your Story
+              </h3>
+              <button
+                onClick={handleRecord}
+                style={{
+                  padding: '1rem 2rem',
+                  borderRadius: '1rem',
+                  color: 'white',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                  backgroundColor: BRAND_PURPLE
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+              >
+                Start Recording
+              </button>
+              <p style={{ 
+                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
+                color: '#6b7280', 
+                marginTop: '1rem',
+                margin: '1rem 0 0 0'
+              }}>
+                Voice recording feature coming soon
+              </p>
             </div>
           )}
           
-          {/* Character Count - Subtle */}
+          {/* Character Count - Same Style as Landing Page */}
           {inputMethod === 'type' && story && (
-            <div className="text-right text-sm text-gray-400 mt-3">
+            <div style={{ 
+              textAlign: 'right', 
+              fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
+              color: '#9ca3af', 
+              marginTop: '0.75rem' 
+            }}>
               {story.length} characters
             </div>
           )}
         </div>
 
-        {/* Next Button - Prominent */}
-        <div className="mt-12">
+        {/* Spacing - Landing Page Style */}
+        <div style={{ height: '3rem' }}></div>
+
+        {/* Next Button - Exact Landing Page Approach */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <button
             onClick={handleNext}
             disabled={!story.trim()}
-            className={`px-12 py-4 rounded-2xl font-bold text-xl transition-all ${
-              story.trim()
-                ? 'text-white hover:scale-105 shadow-lg'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
             style={{
+              padding: '1.5rem 3rem',
+              borderRadius: '1.5rem',
+              fontWeight: '900',
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
+              border: 'none',
+              cursor: story.trim() ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s',
               background: story.trim() 
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : undefined,
-              backgroundColor: !story.trim() ? '#e5e7eb' : undefined
+                : '#e5e7eb',
+              color: story.trim() ? 'white' : '#9ca3af',
+              boxShadow: story.trim() ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              display: 'block',
+              margin: '0 auto'
+            }}
+            onMouseOver={(e) => {
+              if (story.trim()) e.target.style.transform = 'scale(1.05)'
+            }}
+            onMouseOut={(e) => {
+              if (story.trim()) e.target.style.transform = 'scale(1)'
             }}
           >
             Next →
@@ -159,21 +276,40 @@ export default function CreateStory() {
 
       </div>
 
-      {/* Bottom Navigation - Minimal */}
-      <div className="p-6 border-t border-gray-100">
-        <div className="flex justify-between items-center max-w-2xl mx-auto">
+      {/* Bottom Navigation - Clean */}
+      <div style={{ 
+        padding: '1.5rem', 
+        borderTop: '1px solid #f3f4f6',
+        backgroundColor: 'white'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          maxWidth: '700px',
+          margin: '0 auto',
+          width: '100%'
+        }}>
           <Link 
             href="/"
-            className="text-gray-500 hover:text-gray-700 font-medium"
+            style={{ 
+              color: '#6b7280', 
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
           >
             ← Back to Home
           </Link>
-          <div className="text-sm text-gray-400">
+          <div style={{ 
+            fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
+            color: '#9ca3af' 
+          }}>
             Save draft feature coming soon
           </div>
         </div>
       </div>
 
-    </main>
+    </div>
   )
 }
