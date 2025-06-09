@@ -115,7 +115,7 @@ export default function CreateStory() {
             }}
           >
             <span style={{ marginRight: '0.5rem' }}>📝</span>
-            Type
+            Write
           </button>
           <button
             type="button"
@@ -150,7 +150,7 @@ export default function CreateStory() {
           <textarea
             value={story}
             onChange={(e) => setStory(e.target.value)}
-            placeholder="Share your unique story here..."
+            placeholder="Write your unique story here, or copy and paste from your existing notes..."
             style={{
               width: '100%',
               maxWidth: '700px',
