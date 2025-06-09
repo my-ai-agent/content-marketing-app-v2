@@ -14,7 +14,7 @@ export default function CreateStory() {
     if (story.trim()) {
       localStorage.setItem('currentStory', story.trim())
       localStorage.setItem('storyInputMethod', inputMethod)
-      window.location.href = '/dashboard/create/platforms'
+      window.location.href = '/dashboard/create/demographics'
     } else {
       alert('Please share your story before continuing.')
     }
