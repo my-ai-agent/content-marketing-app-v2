@@ -144,14 +144,16 @@ export default function Demographics() {
                 }}
                 onMouseOver={(e) => {
                   if (selectedDemographic !== demo) {
-                    e.target.style.borderColor = '#d1d5db'
-                    e.target.style.backgroundColor = '#f9fafb'
+                    const target = e.target as HTMLButtonElement
+                    target.style.borderColor = '#d1d5db'
+                    target.style.backgroundColor = '#f9fafb'
                   }
                 }}
                 onMouseOut={(e) => {
                   if (selectedDemographic !== demo) {
-                    e.target.style.borderColor = '#e5e7eb'
-                    e.target.style.backgroundColor = 'white'
+                    const target = e.target as HTMLButtonElement
+                    target.style.borderColor = '#e5e7eb'
+                    target.style.backgroundColor = 'white'
                   }
                 }}
               >
@@ -221,10 +223,16 @@ export default function Demographics() {
               boxShadow: selectedDemographic ? '0 10px 25px -5px rgba(0, 0, 0, 0.2)' : 'none'
             }}
             onMouseOver={(e) => {
-              if (selectedDemographic) e.target.style.transform = 'scale(1.02)'
+              if (selectedDemographic) {
+                const target = e.target as HTMLButtonElement
+                target.style.transform = 'scale(1.02)'
+              }
             }}
             onMouseOut={(e) => {
-              if (selectedDemographic) e.target.style.transform = 'scale(1)'
+              if (selectedDemographic) {
+                const target = e.target as HTMLButtonElement
+                target.style.transform = 'scale(1)'
+              }
             }}
           >
             Next →
