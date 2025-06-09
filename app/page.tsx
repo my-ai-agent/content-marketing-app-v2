@@ -23,32 +23,66 @@ export default function Home() {
       </button>
 
       {/* Text-Only Logo Header - Takes up 1/3 of page, Bold & Central */}
-      <div className="flex flex-col justify-center items-center h-[33vh] text-center">
-        <h1 className="text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black leading-tight">
-          <div style={{ color: BRAND_PURPLE }}>speak</div>
-          <div style={{ color: BRAND_ORANGE }}>click</div>
-          <div style={{ color: BRAND_BLUE }}>send</div>
-        </h1>
+      <div className="flex flex-col justify-center items-center h-[33vh] text-center w-full">
+        <div style={{ textAlign: 'center', width: '100%' }}>
+          <div style={{ 
+            color: BRAND_PURPLE, 
+            fontSize: 'clamp(4rem, 12vw, 10rem)', 
+            fontWeight: '900',
+            lineHeight: '0.9',
+            marginBottom: '0.2rem'
+          }}>speak</div>
+          <div style={{ 
+            color: BRAND_ORANGE, 
+            fontSize: 'clamp(4rem, 12vw, 10rem)', 
+            fontWeight: '900',
+            lineHeight: '0.9',
+            marginBottom: '0.2rem'
+          }}>click</div>
+          <div style={{ 
+            color: BRAND_BLUE, 
+            fontSize: 'clamp(4rem, 12vw, 10rem)', 
+            fontWeight: '900',
+            lineHeight: '0.9'
+          }}>send</div>
+        </div>
       </div>
 
       {/* Clear Space Gap */}
       <div className="h-12"></div>
 
       {/* Tagline - Centered */}
-      <div className="text-center mb-16 px-4">
-        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight mx-auto max-w-4xl">
+      <div style={{ textAlign: 'center', width: '100%', marginBottom: '4rem', padding: '0 1rem' }}>
+        <p style={{ 
+          fontSize: 'clamp(1.5rem, 4vw, 3rem)', 
+          fontWeight: '700',
+          color: '#374151',
+          lineHeight: '1.2',
+          maxWidth: '900px',
+          margin: '0 auto'
+        }}>
           Transform Your Single Story into 10 Different Platform Formats Instantly!
         </p>
       </div>
 
       {/* CTA Button - Perfectly Centered */}
-      <div className="flex justify-center items-center mb-16">
-        <Link href="/dashboard/create" className="block">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', marginBottom: '4rem' }}>
+        <Link href="/dashboard/create">
           <button 
-            className="px-12 py-6 rounded-2xl text-white font-black text-4xl sm:text-5xl md:text-6xl transition-all hover:scale-105 shadow-2xl block mx-auto"
             style={{
-              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+              color: 'white',
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+              fontWeight: '900',
+              padding: '1.5rem 3rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              display: 'block',
+              margin: '0 auto'
             }}
+            className="transition-all hover:scale-105"
           >
             START
           </button>
