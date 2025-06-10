@@ -1,271 +1,300 @@
 'use client'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { getPlanLimits } from '../../../config/plans'
+import { useState } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
 const BRAND_BLUE = '#11B3FF'
 
 export default function Demographics() {
-  const userPlan = 'free'
-  const planLimits = getPlanLimits(userPlan)
   const [selectedDemographic, setSelectedDemographic] = useState('')
-  const [story, setStory] = useState('')
 
-  useEffect(() => {
-    const savedStory = localStorage.getItem('currentStory')
-    if (savedStory) setStory(savedStory)
-  }, [])
-
-  // Updated demographics list with respectful terminology
-  const allDemographics = [
-    'Female Travellers', 
-    'Families', 
-    'Young Adults (18-35)', 
-    'Business Travellers', 
-    'Solo Travellers', 
+  const demographics = [
+    'Female Travellers',
+    'Families',
+    'Young Adults (18-35)',
+    'Business Travellers',
+    'Solo Travellers',
     'Mature Travellers'
   ]
 
   const handleNext = () => {
-    if (!selectedDemographic) {
-      alert('Please select your target audience before continuing.')
-      return
+    if (selectedDemographic) {
+      localStorage.setItem('selectedDemographics', JSON.stringify([selectedDemographic]))
+      window.location.href = '/dashboard/create/interests'
+    } else {
+      alert('Please select a target audience before continuing.')
     }
-    // Save single selection (not array since we only allow one)
-    localStorage.setItem('selectedDemographics', JSON.stringify([selectedDemographic]))
-    window.location.href = '/dashboard/create/interests'
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: 'white'
+    }}>
       
-      {/* Header - Same as Step 1 Success Pattern */}
+      {/* Header with Step Tracker Only */}
       <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: '1.5rem',
-        width: '100%'
-      }}>
-        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          <div style={{ 
-            color: BRAND_PURPLE, 
-            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-            fontWeight: '900' 
-          }}>speak</div>
-          <div style={{ 
-            color: BRAND_ORANGE, 
-            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-            fontWeight: '900',
-            marginLeft: '0.25rem'
-          }}>click</div>
-          <div style={{ 
-            color: BRAND_BLUE, 
-            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-            fontWeight: '900',
-            marginLeft: '0.25rem'
-          }}>send</div>
-        </Link>
-        
-        <div style={{ 
-          color: '#6b7280', 
-          fontWeight: '600',
-          fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-        }}>
-          Step 2 of 4
-        </div>
-      </div>
-
-      {/* Main Content - Using Step 1 Success Pattern */}
-      <div style={{ 
-        flex: 1, 
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', 
-        alignItems: 'center',
-        padding: '0 1rem',
-        textAlign: 'center',
-        width: '100%'
+        alignItems: 'center', 
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
       }}>
-        
-        {/* Page Title */}
-        <div style={{ marginBottom: '3rem', width: '100%' }}>
-          <h1 style={{ 
-            fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
-            fontWeight: '700',
-            color: '#1f2937',
-            margin: '0 auto',
-            textAlign: 'center',
-            lineHeight: '1.1',
-            marginBottom: '1rem'
-          }}>
-            Target Audience
-          </h1>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            color: '#6b7280',
-            margin: '0 auto',
-            maxWidth: '600px'
-          }}>
-            Who is your story for?
-          </p>
-        </div>
 
-        {/* Demographics Selection Grid - Single Selection */}
-        <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '1rem',
-            marginBottom: '2rem'
-          }}>
-            {allDemographics.map(demo => (
-              <button
-                key={demo}
-                onClick={() => setSelectedDemographic(demo)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '1.5rem 1rem',
-                  backgroundColor: selectedDemographic === demo ? '#ecfdf5' : 'white',
-                  border: `2px solid ${selectedDemographic === demo ? '#10b981' : '#e5e7eb'}`,
-                  borderRadius: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                  fontWeight: selectedDemographic === demo ? '600' : '500',
-                  color: selectedDemographic === demo ? '#065f46' : '#374151',
-                  textAlign: 'center',
-                  minHeight: '80px'
-                }}
-                onMouseOver={(e) => {
-                  if (selectedDemographic !== demo) {
-                    const target = e.target as HTMLButtonElement
-                    target.style.borderColor = '#d1d5db'
-                    target.style.backgroundColor = '#f9fafb'
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (selectedDemographic !== demo) {
-                    const target = e.target as HTMLButtonElement
-                    target.style.borderColor = '#e5e7eb'
-                    target.style.backgroundColor = 'white'
-                  }
-                }}
-              >
-                {selectedDemographic === demo && (
-                  <span style={{ marginRight: '0.5rem', fontSize: '1.25rem' }}>✅</span>
-                )}
-                {demo}
-              </button>
-            ))}
-          </div>
-
-          {/* Single Selection Info */}
-          <div style={{
-            padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #3b82f6',
-            borderRadius: '0.75rem',
-            marginBottom: '2rem',
-            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-            color: '#1e40af'
-          }}>
-            🎯 Select one target audience for the most effective messaging
-          </div>
-
-        </div>
-
-        {/* Spacing */}
-        <div style={{ height: '2rem' }}></div>
-
-        {/* Navigation Buttons */}
+        {/* Step Tracker */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'space-between', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '0.5rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>1</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>2</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#1f2937', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>3</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>4</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>5</div>
+        </div>
+
+        {/* Title */}
+        <h1 style={{ 
+          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+          fontWeight: '700',
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Target Audience
+        </h1>
+        <p style={{ 
+          color: '#6b7280', 
+          textAlign: 'center', 
+          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}>
+          Who is your story for?
+        </p>
+      </div>
+
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
+      }}>
+
+        {/* Demographics Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1rem',
+          marginBottom: '3rem'
+        }}>
+          {demographics.map((demographic) => (
+            <button
+              key={demographic}
+              onClick={() => setSelectedDemographic(demographic)}
+              style={{
+                padding: '1.5rem',
+                border: selectedDemographic === demographic ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                borderRadius: '1rem',
+                backgroundColor: selectedDemographic === demographic ? '#eff6ff' : 'white',
+                color: '#374151',
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                textAlign: 'center',
+                minHeight: '4rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                if (selectedDemographic !== demographic) {
+                  e.currentTarget.style.borderColor = '#9ca3af'
+                  e.currentTarget.style.backgroundColor = '#f9fafb'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedDemographic !== demographic) {
+                  e.currentTarget.style.borderColor = '#e5e7eb'
+                  e.currentTarget.style.backgroundColor = 'white'
+                }
+              }}
+            >
+              {demographic}
+            </button>
+          ))}
+        </div>
+
+        {/* Selection Guidance */}
+        <div style={{
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          textAlign: 'center',
+          marginBottom: '3rem'
+        }}>
+          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🎯</span>
+          <span style={{ 
+            color: '#1e40af', 
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            fontWeight: '500'
+          }}>
+            Select one target audience for the most effective messaging
+          </span>
+        </div>
+
+        {/* Next Button */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
           alignItems: 'center', 
           width: '100%', 
-          maxWidth: '600px',
-          gap: '1rem'
+          marginBottom: '2rem' 
         }}>
-          <Link 
-            href="/dashboard/create"
-            style={{ 
-              color: '#6b7280', 
-              textDecoration: 'none',
-              fontWeight: '600',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-              padding: '0.75rem 1.5rem'
-            }}
-          >
-            ← Back
-          </Link>
-
           <button
             onClick={handleNext}
             disabled={!selectedDemographic}
             style={{
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              fontWeight: '900',
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-              border: 'none',
-              cursor: selectedDemographic ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s',
-              background: selectedDemographic
+              background: selectedDemographic 
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
               color: selectedDemographic ? 'white' : '#9ca3af',
-              boxShadow: selectedDemographic ? '0 10px 25px -5px rgba(0, 0, 0, 0.2)' : 'none'
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+              fontWeight: '900',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedDemographic ? 'pointer' : 'not-allowed',
+              boxShadow: selectedDemographic ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              display: 'block',
+              margin: '0 auto',
+              transition: 'all 0.2s'
             }}
-            onMouseOver={(e) => {
-              if (selectedDemographic) {
-                const target = e.target as HTMLButtonElement
-                target.style.transform = 'scale(1.02)'
-              }
-            }}
-            onMouseOut={(e) => {
-              if (selectedDemographic) {
-                const target = e.target as HTMLButtonElement
-                target.style.transform = 'scale(1)'
-              }
-            }}
+            className={selectedDemographic ? "transition-all hover:scale-105" : ""}
           >
             Next →
           </button>
         </div>
 
-        {/* Story Preview - Enhanced */}
-        {story && (
-          <div style={{
-            marginTop: '2rem',
-            padding: '1rem',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '0.75rem',
-            maxWidth: '600px',
-            width: '100%'
-          }}>
-            <p style={{ 
-              fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
-              color: '#64748b',
-              margin: 0,
-              fontStyle: 'italic'
-            }}>
-              Your story: "{story.substring(0, 80)}..."
-            </p>
-          </div>
-        )}
-
+        {/* Logo - Brand Reinforcement */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{ 
+              color: BRAND_PURPLE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline'
+            }}>speak</div>
+            <div style={{ 
+              color: BRAND_ORANGE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>click</div>
+            <div style={{ 
+              color: BRAND_BLUE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </Link>
+        </div>
       </div>
 
-      {/* Spacer for bottom */}
-      <div style={{ height: '2rem' }}></div>
-
+      {/* Bottom Navigation */}
+      <div style={{ 
+        padding: '1.5rem', 
+        textAlign: 'center',
+        borderTop: '1px solid #f3f4f6'
+      }}>
+        <Link 
+          href="/dashboard/create/photo"
+          style={{ 
+            color: '#6b7280', 
+            textDecoration: 'none',
+            fontWeight: '600',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+          }}
+        >
+          ← Back to Photo
+        </Link>
+      </div>
     </div>
   )
 }
