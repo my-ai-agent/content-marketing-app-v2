@@ -64,7 +64,7 @@ export default function PhotoUpload() {
       backgroundColor: 'white'
     }}>
       
-      {/* Header with Logo and Step Tracker */}
+      {/* Header with Step Tracker Only */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -73,32 +73,6 @@ export default function PhotoUpload() {
         padding: '2rem 1rem',
         borderBottom: '1px solid #f3f4f6'
       }}>
-        
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{ 
-              color: BRAND_PURPLE, 
-              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-              fontWeight: '900',
-              display: 'inline'
-            }}>speak</div>
-            <div style={{ 
-              color: BRAND_ORANGE, 
-              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>click</div>
-            <div style={{ 
-              color: BRAND_BLUE, 
-              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>send</div>
-          </Link>
-        </div>
 
         {/* Step Tracker */}
         <div style={{ 
@@ -443,6 +417,36 @@ export default function PhotoUpload() {
           >
             Next →
           </button>
+        </div>
+
+        {/* Logo - Brand Reinforcement */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{ 
+              color: BRAND_PURPLE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline'
+            }}>speak</div>
+            <div style={{ 
+              color: BRAND_ORANGE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>click</div>
+            <div style={{ 
+              color: BRAND_BLUE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </Link>
         </div>
       </div>
 
