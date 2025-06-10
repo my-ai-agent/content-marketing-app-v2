@@ -14,7 +14,7 @@ export default function CreateStory() {
     if (story.trim()) {
       localStorage.setItem('currentStory', story.trim())
       localStorage.setItem('storyInputMethod', inputMethod)
-      window.location.href = '/dashboard/create/demographics'
+      window.location.href = '/dashboard/create/photo'
     } else {
       alert('Please share your story before continuing.')
     }
@@ -34,7 +34,7 @@ export default function CreateStory() {
           fontWeight: '600',
           fontSize: 'clamp(0.875rem, 2vw, 1rem)'
         }}>
-          Step 1 of 4
+          Step 1 of 5
         </div>
       </div>
 
