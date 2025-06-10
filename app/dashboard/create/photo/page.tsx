@@ -27,7 +27,6 @@ export default function PhotoUpload() {
 
   const handleNext = () => {
     if (selectedPhoto) {
-      // Save photo data to localStorage
       localStorage.setItem('selectedPhoto', selectedPhoto)
       if (photoFile) {
         localStorage.setItem('photoFileName', photoFile.name)
@@ -40,7 +39,6 @@ export default function PhotoUpload() {
   }
 
   const handleSkip = () => {
-    // Clear any existing photo data and continue
     localStorage.removeItem('selectedPhoto')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
@@ -63,8 +61,7 @@ export default function PhotoUpload() {
       display: 'flex', 
       flexDirection: 'column', 
       minHeight: '100vh', 
-      backgroundColor: 'white', 
-      position: 'relative' 
+      backgroundColor: 'white'
     }}>
       
       {/* Header with Logo and Step Tracker */}
@@ -176,7 +173,6 @@ export default function PhotoUpload() {
             fontWeight: '600' 
           }}>5</div>
         </div>
-      </div>
 
         {/* Title */}
         <h1 style={{ 
@@ -208,245 +204,246 @@ export default function PhotoUpload() {
         padding: '2rem 1rem' 
       }}>
 
-      {/* Upload Method Toggle */}
-      <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
-        <div style={{ 
-          display: 'inline-flex',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '1rem',
-          padding: '0.5rem'
-        }}>
-          <button
-            type="button"
-            onClick={() => setUploadMethod('upload')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: uploadMethod === 'upload' ? 'white' : 'transparent',
-              color: uploadMethod === 'upload' ? '#1f2937' : '#6b7280',
-              boxShadow: uploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-            }}
-          >
-            <span style={{ marginRight: '0.5rem' }}>📂</span>
-            Upload
-          </button>
-          <button
-            type="button"
-            onClick={() => setUploadMethod('camera')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: uploadMethod === 'camera' ? 'white' : 'transparent',
-              color: uploadMethod === 'camera' ? '#1f2937' : '#6b7280',
-              boxShadow: uploadMethod === 'camera' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-            }}
-          >
-            <span style={{ marginRight: '0.5rem' }}>📷</span>
-            Camera
-          </button>
-        </div>
-      </div>
-
-      {/* Photo Upload Area */}
-      <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
-        {!selectedPhoto ? (
-          <div style={{
-            width: '100%',
-            maxWidth: '500px',
-            height: '300px',
-            border: '2px dashed #d1d5db',
-            borderRadius: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            backgroundColor: '#fafafa',
-            margin: '0 auto',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onClick={() => {
-            if (uploadMethod === 'upload') {
-              fileInputRef.current?.click()
-            } else {
-              cameraInputRef.current?.click()
-            }
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#9ca3af'
-            e.currentTarget.style.backgroundColor = '#f5f5f5'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#d1d5db'
-            e.currentTarget.style.backgroundColor = '#fafafa'
-          }}
-          >
-            <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
-              {uploadMethod === 'upload' ? '📂' : '📷'}
-            </div>
-            <h3 style={{ 
-              fontSize: 'clamp(1.125rem, 3vw, 1.5rem)', 
-              fontWeight: '600', 
-              color: '#374151', 
-              marginBottom: '0.5rem',
-              margin: '0 0 0.5rem 0'
-            }}>
-              {uploadMethod === 'upload' ? 'Upload a Photo' : 'Take a Photo'}
-            </h3>
-            <p style={{ 
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)', 
-              color: '#6b7280',
-              marginBottom: '1rem',
-              padding: '0 1rem'
-            }}>
-              {uploadMethod === 'upload' 
-                ? 'Click to browse your files or drag and drop'
-                : 'Click to open camera and capture a moment'
-              }
-            </p>
-            <div style={{ 
-              fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
-              color: '#9ca3af' 
-            }}>
-              Supports: JPG, PNG, HEIC, WebP
-            </div>
-
-            {/* Hidden file inputs */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-          </div>
-        ) : (
-          <div style={{
-            width: '100%',
-            maxWidth: '500px',
-            margin: '0 auto',
-            position: 'relative'
+        {/* Upload Method Toggle */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
+          <div style={{ 
+            display: 'inline-flex',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '1rem',
+            padding: '0.5rem'
           }}>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('upload')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'upload' ? 'white' : 'transparent',
+                color: uploadMethod === 'upload' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📂</span>
+              Upload
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('camera')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'camera' ? 'white' : 'transparent',
+                color: uploadMethod === 'camera' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'camera' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📷</span>
+              Camera
+            </button>
+          </div>
+        </div>
+
+        {/* Photo Upload Area */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
+          {!selectedPhoto ? (
             <div style={{
               width: '100%',
+              maxWidth: '500px',
               height: '300px',
+              border: '2px dashed #d1d5db',
               borderRadius: '1.5rem',
-              overflow: 'hidden',
-              position: 'relative',
-              backgroundColor: '#f3f4f6'
-            }}>
-              <img
-                src={selectedPhoto}
-                alt="Selected photo"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-              <button
-                onClick={handleRemovePhoto}
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  right: '1rem',
-                  width: '2rem',
-                  height: '2rem',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(0,0,0,0.7)',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div style={{ 
-              marginTop: '1rem',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-              color: '#6b7280'
-            }}>
-              {photoFile?.name && `📁 ${photoFile.name}`}
-            </div>
-          </div>
-        )}
-      </div>
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#fafafa',
+              margin: '0 auto',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onClick={() => {
+              if (uploadMethod === 'upload') {
+                fileInputRef.current?.click()
+              } else {
+                cameraInputRef.current?.click()
+              }
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#9ca3af'
+              e.currentTarget.style.backgroundColor = '#f5f5f5'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#d1d5db'
+              e.currentTarget.style.backgroundColor = '#fafafa'
+            }}
+            >
+              <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
+                {uploadMethod === 'upload' ? '📂' : '📷'}
+              </div>
+              <h3 style={{ 
+                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '0.5rem',
+                margin: '0 0 0.5rem 0'
+              }}>
+                {uploadMethod === 'upload' ? 'Upload a Photo' : 'Take a Photo'}
+              </h3>
+              <p style={{ 
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)', 
+                color: '#6b7280',
+                marginBottom: '1rem',
+                padding: '0 1rem'
+              }}>
+                {uploadMethod === 'upload' 
+                  ? 'Click to browse your files or drag and drop'
+                  : 'Click to open camera and capture a moment'
+                }
+              </p>
+              <div style={{ 
+                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
+                color: '#9ca3af' 
+              }}>
+                Supports: JPG, PNG, HEIC, WebP
+              </div>
 
-      {/* Action Buttons */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        gap: '1rem',
-        width: '100%', 
-        marginBottom: '2rem'
-      }}>
-        <button
-          onClick={handleSkip}
-          style={{
-            background: '#f3f4f6',
-            color: '#6b7280',
-            fontSize: 'clamp(1rem, 3vw, 1.25rem)',
-            fontWeight: '600',
-            padding: '1rem 2rem',
-            borderRadius: '1rem',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-        >
-          Skip for now
-        </button>
-        
-        <button
-          onClick={handleNext}
-          disabled={!selectedPhoto}
-          style={{
-            background: selectedPhoto 
-              ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-              : '#e5e7eb',
-            color: selectedPhoto ? 'white' : '#9ca3af',
-            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-            fontWeight: '900',
-            padding: '1rem 2rem',
-            borderRadius: '1rem',
-            border: 'none',
-            cursor: selectedPhoto ? 'pointer' : 'not-allowed',
-            boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-            transition: 'all 0.2s'
-          }}
-          className={selectedPhoto ? "transition-all hover:scale-105" : ""}
-        >
-          Next →
-        </button>
+              {/* Hidden file inputs */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+            </div>
+          ) : (
+            <div style={{
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto',
+              position: 'relative'
+            }}>
+              <div style={{
+                width: '100%',
+                height: '300px',
+                borderRadius: '1.5rem',
+                overflow: 'hidden',
+                position: 'relative',
+                backgroundColor: '#f3f4f6'
+              }}>
+                <img
+                  src={selectedPhoto}
+                  alt="Selected photo"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                <button
+                  onClick={handleRemovePhoto}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ 
+                marginTop: '1rem',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                color: '#6b7280'
+              }}>
+                {photoFile?.name && `📁 ${photoFile.name}`}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '1rem',
+          width: '100%', 
+          marginBottom: '2rem'
+        }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              background: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+              fontWeight: '600',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Skip for now
+          </button>
+          
+          <button
+            onClick={handleNext}
+            disabled={!selectedPhoto}
+            style={{
+              background: selectedPhoto 
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : '#e5e7eb',
+              color: selectedPhoto ? 'white' : '#9ca3af',
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+              fontWeight: '900',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedPhoto ? 'pointer' : 'not-allowed',
+              boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              transition: 'all 0.2s'
+            }}
+            className={selectedPhoto ? "transition-all hover:scale-105" : ""}
+          >
+            Next →
+          </button>
+        </div>
       </div>
 
       {/* Bottom Navigation */}
@@ -467,9 +464,6 @@ export default function PhotoUpload() {
           ← Back to Create Story
         </Link>
       </div>
-
-      {/* Spacer for bottom */}
-      <div style={{ flex: '1' }}></div>
     </div>
   )
 }
