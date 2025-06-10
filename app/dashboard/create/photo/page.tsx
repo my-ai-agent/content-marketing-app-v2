@@ -67,91 +67,149 @@ export default function PhotoUpload() {
       position: 'relative' 
     }}>
       
-      {/* Step Indicator - Top Right */}
-      <div style={{ 
-        position: 'absolute', 
-        top: '1.5rem', 
-        right: '1.5rem', 
-        zIndex: '10' 
-      }}>
-        <div style={{ 
-          color: '#6b7280', 
-          fontWeight: '600',
-          fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-        }}>
-          Step 2 of 5
-        </div>
-      </div>
-
-      {/* Header Section */}
+      {/* Header with Logo and Step Tracker */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '25vh', 
-        textAlign: 'center', 
-        width: '100%' 
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
       }}>
-        <div style={{ textAlign: 'center', width: '100%' }}>
+        
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
             <div style={{ 
               color: BRAND_PURPLE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
-              marginBottom: '0.2rem',
               display: 'inline'
             }}>speak</div>
             <div style={{ 
               color: BRAND_ORANGE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
-              marginBottom: '0.2rem',
               display: 'inline',
               marginLeft: '0.25rem'
             }}>click</div>
             <div style={{ 
               color: BRAND_BLUE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
               display: 'inline',
               marginLeft: '0.25rem'
             }}>send</div>
           </Link>
         </div>
+
+        {/* Step Tracker */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '0.5rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>1</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#1f2937', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>2</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>3</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>4</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>5</div>
+        </div>
       </div>
 
-      {/* Title Section */}
-      <div style={{ textAlign: 'center', width: '100%', padding: '0 1rem' }}>
+        {/* Title */}
         <h1 style={{ 
           fontSize: 'clamp(2rem, 6vw, 4rem)', 
           fontWeight: '700',
           color: '#1f2937',
           lineHeight: '1.2',
-          maxWidth: '900px',
-          margin: '0 auto'
+          marginBottom: '0.5rem',
+          textAlign: 'center'
         }}>
           Add Your Photo
         </h1>
         <p style={{ 
           color: '#6b7280', 
+          textAlign: 'center', 
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          marginTop: '1rem',
           maxWidth: '600px',
-          margin: '1rem auto 0 auto'
+          margin: '0 auto'
         }}>
           Capture the moment or upload an inspiring photo to enhance your story
         </p>
       </div>
 
-      {/* Spacing */}
-      <div style={{ height: '2rem' }}></div>
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
+      }}>
 
       {/* Upload Method Toggle */}
-      <div style={{ textAlign: 'center', width: '100%', padding: '0 1rem' }}>
+      <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
         <div style={{ 
           display: 'inline-flex',
           backgroundColor: '#f3f4f6',
@@ -203,11 +261,8 @@ export default function PhotoUpload() {
         </div>
       </div>
 
-      {/* Spacing */}
-      <div style={{ height: '2rem' }}></div>
-
       {/* Photo Upload Area */}
-      <div style={{ textAlign: 'center', width: '100%', padding: '0 1rem' }}>
+      <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
         {!selectedPhoto ? (
           <div style={{
             width: '100%',
@@ -345,9 +400,6 @@ export default function PhotoUpload() {
         )}
       </div>
 
-      {/* Spacing */}
-      <div style={{ height: '3rem' }}></div>
-
       {/* Action Buttons */}
       <div style={{ 
         display: 'flex', 
@@ -355,8 +407,7 @@ export default function PhotoUpload() {
         alignItems: 'center', 
         gap: '1rem',
         width: '100%', 
-        marginBottom: '2rem',
-        padding: '0 1rem'
+        marginBottom: '2rem'
       }}>
         <button
           onClick={handleSkip}
