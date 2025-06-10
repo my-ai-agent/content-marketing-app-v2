@@ -23,7 +23,7 @@ export default function Interests() {
   const handleNext = () => {
     if (selectedInterest) {
       localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
-      window.location.href = '/dashboard/create/formats'
+      window.location.href = '/dashboard/create/results'
     } else {
       alert('Please select an interest before continuing.')
     }
