@@ -232,7 +232,6 @@ export default function Demographics() {
                     padding: '0.75rem 1rem',
                     borderRadius: '0.5rem',
                     fontSize: '0.875rem',
-                    whiteSpace: 'nowrap',
                     opacity: '0',
                     visibility: 'hidden',
                     transition: 'all 0.3s ease',
