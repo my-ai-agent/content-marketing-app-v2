@@ -9,81 +9,347 @@ const BRAND_BLUE = '#11B3FF'
 export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
 
-  // Enhanced lifestyle/interest options for tourism (8 categories)
-  const allInterests = [
-    'Cultural Experiences', 
-    'Adventure & Outdoor Activities', 
-    'Food & Wine', 
-    'Relaxation & Wellness', 
-    'History & Heritage', 
+  const interests = [
+    'Cultural Experiences',
+    'Adventure & Outdoor Activities',
+    'Food & Wine',
+    'Relaxation & Wellness',
+    'History & Heritage',
     'Photography & Social Media',
-    'Arts & Creative Experiences',
-    'Gardens & Nature'
+    'Gardens & Nature',
+    'Arts & Creative Experiences'
   ]
 
   const handleNext = () => {
-    if (!selectedInterest) {
+    if (selectedInterest) {
+      localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
+      window.location.href = '/dashboard/create/formats'
+    } else {
       alert('Please select an interest before continuing.')
-      return
     }
-    localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
-    window.location.href = '/dashboard/create/formats'
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: 'white'
+    }}>
       
-      {/* Header with Step Indicator Only */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'flex-end', 
-        alignItems: 'center', 
-        padding: '1.5rem',
-        width: '100%'
-      }}>
-        <div style={{ 
-          color: '#6b7280', 
-          fontWeight: '600',
-          fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-        }}>
-          Step 3 of 4
-        </div>
-      </div>
-
-      {/* Logo Section - Centered like Steps 1 & 2 */}
+      {/* Header with Step Tracker Only */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '15vh', 
-        textAlign: 'center', 
-        width: '100%' 
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
       }}>
-        <div style={{ textAlign: 'center', width: '100%' }}>
+
+        {/* Step Tracker */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '0.5rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>1</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>2</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#10b981', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>3</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#1f2937', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>4</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>5</div>
+        </div>
+
+        {/* Title */}
+        <h1 style={{ 
+          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+          fontWeight: '700',
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Audience Interests
+        </h1>
+        <p style={{ 
+          color: '#6b7280', 
+          textAlign: 'center', 
+          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}>
+          What interests your audience most?
+        </p>
+        <p style={{ 
+          color: '#9ca3af', 
+          textAlign: 'center', 
+          fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+          maxWidth: '700px',
+          margin: '0.5rem auto 0 auto',
+          fontStyle: 'italic'
+        }}>
+          Select your primary interest now - you can create an additional content publication for other interests later!
+        </p>
+      </div>
+
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '900px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
+      }}>
+
+        {/* Interests Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1rem',
+          marginBottom: '3rem'
+        }}>
+          {interests.map((interest) => {
+            const tooltips = {
+              'Cultural Experiences': 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals',
+              'Adventure & Outdoor Activities': 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities',
+              'Food & Wine': 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals',
+              'Relaxation & Wellness': 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts',
+              'History & Heritage': 'Historical sites, battlefields, colonial history, archaeological sites, guided tours',
+              'Photography & Social Media': 'Instagram spots, scenic viewpoints, photography tours, influencer experiences',
+              'Gardens & Nature': 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours',
+              'Arts & Creative Experiences': 'Art galleries, workshops, creative retreats, local artisans, craft experiences'
+            }
+
+            return (
+              <div key={interest} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setSelectedInterest(interest)}
+                  style={{
+                    width: '100%',
+                    padding: '1.5rem',
+                    border: selectedInterest === interest ? '2px solid #10b981' : '2px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    backgroundColor: selectedInterest === interest ? '#dcfce7' : 'white',
+                    color: '#374151',
+                    fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'center',
+                    minHeight: '4rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedInterest !== interest) {
+                      e.currentTarget.style.borderColor = '#9ca3af'
+                      e.currentTarget.style.backgroundColor = '#f9fafb'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.1)'
+                    }
+                    // Show tooltip
+                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
+                    if (tooltip) {
+                      tooltip.style.opacity = '1'
+                      tooltip.style.visibility = 'visible'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedInterest !== interest) {
+                      e.currentTarget.style.borderColor = '#e5e7eb'
+                      e.currentTarget.style.backgroundColor = 'white'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }
+                    // Hide tooltip
+                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
+                    if (tooltip) {
+                      tooltip.style.opacity = '0'
+                      tooltip.style.visibility = 'hidden'
+                    }
+                  }}
+                >
+                  {interest}
+                </button>
+                
+                {/* Tooltip */}
+                <div 
+                  className="tooltip"
+                  style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#1f2937',
+                    color: 'white',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    opacity: '0',
+                    visibility: 'hidden',
+                    transition: 'all 0.3s ease',
+                    zIndex: '10',
+                    marginBottom: '0.5rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    maxWidth: '280px',
+                    whiteSpace: 'normal',
+                    textAlign: 'center',
+                    lineHeight: '1.3'
+                  }}
+                >
+                  {tooltips[interest as keyof typeof tooltips]}
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    borderLeft: '6px solid transparent',
+                    borderRight: '6px solid transparent',
+                    borderTop: '6px solid #1f2937'
+                  }}></div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Selection Guidance */}
+        <div style={{
+          backgroundColor: '#dcfce7',
+          border: '1px solid #bbf7d0',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          textAlign: 'center',
+          marginBottom: '3rem'
+        }}>
+          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🎯</span>
+          <span style={{ 
+            color: '#15803d', 
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            fontWeight: '500'
+          }}>
+            Select one primary interest for the most effective content targeting
+          </span>
+        </div>
+
+        {/* Next Button */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          width: '100%', 
+          marginBottom: '2rem' 
+        }}>
+          <button
+            onClick={handleNext}
+            disabled={!selectedInterest}
+            style={{
+              background: selectedInterest 
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : '#e5e7eb',
+              color: selectedInterest ? 'white' : '#9ca3af',
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+              fontWeight: '900',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedInterest ? 'pointer' : 'not-allowed',
+              boxShadow: selectedInterest ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              display: 'block',
+              margin: '0 auto',
+              transition: 'all 0.2s'
+            }}
+            className={selectedInterest ? "transition-all hover:scale-105" : ""}
+          >
+            Next →
+          </button>
+        </div>
+
+        {/* Logo - Brand Reinforcement */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
             <div style={{ 
               color: BRAND_PURPLE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
-              marginBottom: '0.2rem',
               display: 'inline'
             }}>speak</div>
             <div style={{ 
               color: BRAND_ORANGE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
-              marginBottom: '0.2rem',
               display: 'inline',
               marginLeft: '0.25rem'
             }}>click</div>
             <div style={{ 
               color: BRAND_BLUE, 
-              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
-              lineHeight: '0.9',
               display: 'inline',
               marginLeft: '0.25rem'
             }}>send</div>
@@ -91,172 +357,24 @@ export default function Interests() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Bottom Navigation */}
       <div style={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: '0 1rem',
+        padding: '1.5rem', 
         textAlign: 'center',
-        width: '100%'
+        borderTop: '1px solid #f3f4f6'
       }}>
-        
-        {/* Page Title */}
-        <div style={{ marginBottom: '3rem', width: '100%' }}>
-          <h1 style={{ 
-            fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
-            fontWeight: '700',
-            color: '#1f2937',
-            margin: '0 auto',
-            textAlign: 'center',
-            lineHeight: '1.1',
-            marginBottom: '1rem'
-          }}>
-            Audience Interests
-          </h1>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            color: '#6b7280',
-            margin: '0 auto',
-            maxWidth: '600px'
-          }}>
-            What interests your audience most?
-          </p>
-        </div>
-
-        {/* Interests Selection Grid - 8 Categories */}
-        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1rem',
-            marginBottom: '2rem'
-          }}>
-            {allInterests.map(interest => (
-              <button
-                key={interest}
-                onClick={() => setSelectedInterest(interest)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '1.5rem 1rem',
-                  backgroundColor: selectedInterest === interest ? '#ecfdf5' : 'white',
-                  border: `2px solid ${selectedInterest === interest ? '#10b981' : '#e5e7eb'}`,
-                  borderRadius: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                  fontWeight: selectedInterest === interest ? '600' : '500',
-                  color: selectedInterest === interest ? '#065f46' : '#374151',
-                  textAlign: 'center',
-                  minHeight: '80px'
-                }}
-                onMouseOver={(e) => {
-                  if (selectedInterest !== interest) {
-                    const target = e.target as HTMLButtonElement
-                    target.style.borderColor = '#d1d5db'
-                    target.style.backgroundColor = '#f9fafb'
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (selectedInterest !== interest) {
-                    const target = e.target as HTMLButtonElement
-                    target.style.borderColor = '#e5e7eb'
-                    target.style.backgroundColor = 'white'
-                  }
-                }}
-              >
-                {selectedInterest === interest && (
-                  <span style={{ marginRight: '0.5rem', fontSize: '1.25rem' }}>✅</span>
-                )}
-                {interest}
-              </button>
-            ))}
-          </div>
-
-          {/* Selection Info - Updated for 8 categories */}
-          <div style={{
-            padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #3b82f6',
-            borderRadius: '0.75rem',
-            marginBottom: '2rem',
-            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-            color: '#1e40af'
-          }}>
-            🎯 Select one primary interest to focus your story's appeal (includes NZ Great Walks in Gardens & Nature)
-          </div>
-
-        </div>
-
-        {/* Spacing */}
-        <div style={{ height: '2rem' }}></div>
-
-        {/* Navigation Buttons */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          width: '100%', 
-          maxWidth: '800px',
-          gap: '1rem'
-        }}>
-          <Link 
-            href="/dashboard/create/demographics"
-            style={{ 
-              color: '#6b7280', 
-              textDecoration: 'none',
-              fontWeight: '600',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-              padding: '0.75rem 1.5rem'
-            }}
-          >
-            ← Back
-          </Link>
-
-          <button
-            onClick={handleNext}
-            disabled={!selectedInterest}
-            style={{
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              fontWeight: '900',
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-              border: 'none',
-              cursor: selectedInterest ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s',
-              background: selectedInterest
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : '#e5e7eb',
-              color: selectedInterest ? 'white' : '#9ca3af',
-              boxShadow: selectedInterest ? '0 10px 25px -5px rgba(0, 0, 0, 0.2)' : 'none'
-            }}
-            onMouseOver={(e) => {
-              if (selectedInterest) {
-                const target = e.target as HTMLButtonElement
-                target.style.transform = 'scale(1.02)'
-              }
-            }}
-            onMouseOut={(e) => {
-              if (selectedInterest) {
-                const target = e.target as HTMLButtonElement
-                target.style.transform = 'scale(1)'
-              }
-            }}
-          >
-            Next →
-          </button>
-        </div>
-
+        <Link 
+          href="/dashboard/create/demographics"
+          style={{ 
+            color: '#6b7280', 
+            textDecoration: 'none',
+            fontWeight: '600',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+          }}
+        >
+          ← Back to Target Audience
+        </Link>
       </div>
-
-      {/* Spacer for bottom */}
-      <div style={{ height: '2rem' }}></div>
-
     </div>
   )
 }
