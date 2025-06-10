@@ -154,7 +154,19 @@ export default function Results() {
   const wordCount = story.trim().split(/\s+/).length;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .content-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .action-buttons {
+            flex-direction: column !important;
+          }
+        }
+      `}</style>
+      
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {/* Step Tracker */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '3rem', gap: '1rem' }}>
@@ -177,7 +189,7 @@ export default function Results() {
         </div>
 
         {/* Content Area */}
-        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: '3rem', marginBottom: '3rem' }}>
+        <div className="content-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
           {/* Story Preview */}
           <div style={{ background: 'white', borderRadius: '20px', padding: '2rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1f2937' }}>Your Story</h2>
@@ -246,7 +258,7 @@ export default function Results() {
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="action-buttons" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', gap: '1rem' }}>
           <Link href="/dashboard/create/interests" style={{ background: '#f97316', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: '500', textDecoration: 'none' }}>
             ← Back to Audience Interests
           </Link>
