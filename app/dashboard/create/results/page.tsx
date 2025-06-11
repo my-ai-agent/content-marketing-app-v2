@@ -196,7 +196,7 @@ export default function Results() {
       
       {index < 4 && (
         <div style={{
-          width: '1rem',
+          width: '4rem',
           height: '2px',
           backgroundColor: step < 5 ? '#10b981' : '#d1d5db',
           margin: '0 0.25rem'
