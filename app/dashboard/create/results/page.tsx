@@ -166,16 +166,45 @@ export default function Results() {
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {/* Step Tracker */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '3rem', gap: '1rem' }}>
-          {[1,2,3,4].map(step => (
-            <div key={step}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '600', fontSize: '1.1rem' }}>{step}</div>
-              {step < 4 && <div style={{ width: '60px', height: '3px', background: '#10b981', display: 'inline-block', margin: '0 0.5rem' }}></div>}
-            </div>
-          ))}
-          <div style={{ width: '60px', height: '3px', background: '#10b981', display: 'inline-block', margin: '0 0.5rem' }}></div>
-          <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#1f2937', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '600', fontSize: '1.1rem' }}>5</div>
-        </div>
+<div style={{ 
+  display: 'flex', 
+  alignItems: 'center', 
+  justifyContent: 'center',
+  gap: '1rem',
+  marginBottom: '3rem',
+  width: '100%',
+  maxWidth: '500px',
+  margin: '0 auto 3rem auto'
+}}>
+  {[1, 2, 3, 4, 5].map((step, index) => (
+    <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{
+        width: '3rem',
+        height: '3rem',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: step <= 4 ? '#10b981' : '#374151',
+        color: 'white',
+        fontSize: '1rem',
+        fontWeight: '600',
+        flexShrink: 0
+      }}>
+        {step}
+      </div>
+      
+      {index < 4 && (
+        <div style={{
+          width: '1rem',
+          height: '2px',
+          backgroundColor: step < 5 ? '#10b981' : '#d1d5db',
+          margin: '0 0.25rem'
+        }} />
+      )}
+    </div>
+  ))}
+</div>
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
