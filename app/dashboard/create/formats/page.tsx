@@ -223,7 +223,7 @@ export default function ReviewDistribute() {
   display: 'flex', 
   alignItems: 'center', 
   justifyContent: 'center',
-  gap: '1rem',                    // Increased from 0.75rem
+  gap: '2rem',                    // Increased from 1rem
   marginBottom: '2rem',
   width: '100%',
   maxWidth: '500px',              // Increased from 400px
@@ -233,15 +233,15 @@ export default function ReviewDistribute() {
     <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
       {/* Step Circle */}
       <div style={{
-        width: '2.5rem',
-        height: '2.5rem',
+        width: '3rem',
+        height: '3rem',
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: step <= 5 ? '#10b981' : '#d1d5db',
-        color: step <= 5 ? 'white' : '#6b7280',
-        fontSize: '0.875rem',
+        backgroundColor: step <= 4 ? '#10b981' : '#374151', // Step 5 black
+        color: 'white',               // All white text
+        fontSize: '1rem',             // Slightly larger
         fontWeight: '600',
         flexShrink: 0
       }}>
