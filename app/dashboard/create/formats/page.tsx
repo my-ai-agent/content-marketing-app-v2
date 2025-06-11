@@ -270,7 +270,7 @@ export default function ReviewDistribute() {
             alignItems: 'center', 
             justifyContent: 'center', 
             fontSize: '0.875rem', 
-            fontWeight: '600' 
+            fontWeight: '600', 
           }}>1</div>
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
           <div style={{ 
