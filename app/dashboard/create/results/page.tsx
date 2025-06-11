@@ -14,6 +14,8 @@ export default function Results() {
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [versionOptions, setVersionOptions] = useState<Array<{text: string, tone: string, words: number}>>([]);
   const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
+  const [showMorePlatforms, setShowMorePlatforms] = useState(false);
+  const [showMoreDownloads, setShowMoreDownloads] = useState(false);
 
   // Sample content
   const sampleStory = "Discover the hidden gems of Canterbury's wellness scene! From the therapeutic hot springs of Hanmer Springs to the tranquil meditation retreats nestled in the Southern Alps, our region offers the perfect escape for those seeking relaxation and renewal.\n\nWhether you're looking to unwind in luxury spa treatments, practice yoga with mountain views, or simply disconnect from the digital world, Canterbury has something special waiting for you. Come experience the peace and serenity that makes our corner of New Zealand truly magical.";
@@ -249,7 +251,7 @@ export default function Results() {
                 Platform Integrations
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
-                {Object.entries(platformData).slice(0, 4).map(([key, platform]) => (
+                {Object.entries(platformData).slice(0, showMorePlatforms ? 8 : 4).map(([key, platform]) => (
                   <div key={key} onClick={() => handlePublishTo(key)} style={{ background: '#eff6ff', border: '2px solid #3b82f6', borderRadius: '12px', padding: '0.75rem', textAlign: 'center', cursor: 'pointer', minHeight: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center', transition: 'all 0.3s ease' }}>
                     <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{platform.icon}</div>
                     <div style={{ fontWeight: '600', marginBottom: '0.1rem', fontSize: '0.85rem' }}>{platform.name}</div>
@@ -257,6 +259,26 @@ export default function Results() {
                   </div>
                 ))}
               </div>
+
+              {Object.keys(platformData).length > 4 && (
+                <button
+                  onClick={() => setShowMorePlatforms(!showMorePlatforms)}
+                  style={{
+                    marginTop: '1rem',
+                    padding: '0.5rem 1rem',
+                    border: '2px dashed #3b82f6',
+                    borderRadius: '8px',
+                    background: 'white',
+                    color: '#3b82f6',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {showMorePlatforms ? '← Show Less Platforms' : 'More Platforms →'}
+                </button>
+              )}
             </div>
 
             {/* Instant Downloads */}
@@ -271,7 +293,7 @@ export default function Results() {
                   {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
                   {key: 'image', icon: '🖼️', name: 'Image', desc: 'Social ready'},
                   {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'}
-                ].map((item) => (
+                ].slice(0, showMoreDownloads ? 8 : 4).map((item) => (
                   <div key={item.key} onClick={() => handleDownload(item.key)} style={{ background: '#ecfdf5', border: '2px solid #10b981', borderRadius: '12px', padding: '0.75rem', textAlign: 'center', cursor: 'pointer', minHeight: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center', transition: 'all 0.3s ease' }}>
                     <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{item.icon}</div>
                     <div style={{ fontWeight: '600', marginBottom: '0.1rem', fontSize: '0.85rem' }}>{item.name}</div>
@@ -279,6 +301,30 @@ export default function Results() {
                   </div>
                 ))}
               </div>
+              {[
+                {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
+                {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
+                {key: 'image', icon: '🖼️', name: 'Image', desc: 'Social ready'},
+                {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'}
+              ].length > 4 && (
+                <button
+                  onClick={() => setShowMoreDownloads(!showMoreDownloads)}
+                  style={{
+                    marginTop: '1rem',
+                    padding: '0.5rem 1rem',
+                    border: '2px dashed #0ea5e9',
+                    borderRadius: '8px',
+                    background: 'white',
+                    color: '#0ea5e9',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {showMoreDownloads ? '← Show Less Downloads' : 'More Downloads →'}
+                </button>
+              )}
             </div>
           </div>
         </div>
