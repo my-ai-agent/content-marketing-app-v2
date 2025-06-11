@@ -31,6 +31,17 @@ export default function Results() {
     'youtube': { name: 'YouTube', icon: '📺', description: 'Video/Shorts', accounts: ['Your Channel', 'Business Channel'], charLimit: 5000 },
     'pinterest': { name: 'Pinterest', icon: '📌', description: 'Pins & boards', accounts: ['Business Account', 'Personal Account'], charLimit: 500 }
   };
+  // Download options data
+  const downloadOptions = [
+    {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
+    {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
+    {key: 'blog', icon: '✍️', name: 'Blog Post', desc: 'SEO optimized'},
+    {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'},
+    {key: 'press', icon: '📰', name: 'Press Release', desc: 'Media format'},
+    {key: 'staff', icon: '👥', name: 'Staff News', desc: 'Internal comms'},
+    {key: 'board', icon: '📋', name: 'Board Report', desc: 'Executive summary'},
+    {key: 'stakeholder', icon: '🤝', name: 'Stakeholder Letter', desc: 'Partner comms'}
+  ];
 
   // Add responsive state
   const [isMobile, setIsMobile] = useState(false);
@@ -288,15 +299,7 @@ export default function Results() {
                 Instant Downloads
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
-                [
-  {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
-  {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
-  {key: 'blog', icon: '✍️', name: 'Blog Post', desc: 'SEO optimized'},
-  {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'},
-  {key: 'press', icon: '📰', name: 'Press Release', desc: 'Media format'},
-  {key: 'staff', icon: '👥', name: 'Staff News', desc: 'Internal comms'},
-  {key: 'board', icon: '📋', name: 'Board Report', desc: 'Executive summary'},
-  {key: 'stakeholder', icon: '🤝', name: 'Stakeholder Letter', desc: 'Partner comms'}
+                {downloadOptions
 
                 ].slice(0, showMoreDownloads ? 8 : 4).map((item) => (
                   <div key={item.key} onClick={() => handleDownload(item.key)} style={{ background: '#ecfdf5', border: '2px solid #10b981', borderRadius: '12px', padding: '0.75rem', textAlign: 'center', cursor: 'pointer', minHeight: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center', transition: 'all 0.3s ease' }}>
@@ -307,7 +310,7 @@ export default function Results() {
                 ))}
               </div>
               
-                {8 > 4 && (
+                {downloadOptions.length > 4 && (
   <button
                   onClick={() => setShowMoreDownloads(!showMoreDownloads)}
                   style={{
