@@ -288,11 +288,16 @@ export default function Results() {
                 Instant Downloads
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
-                {[
-                  {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
-                  {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
-                  {key: 'image', icon: '🖼️', name: 'Image', desc: 'Social ready'},
-                  {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'}
+                [
+  {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
+  {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
+  {key: 'blog', icon: '✍️', name: 'Blog Post', desc: 'SEO optimized'},
+  {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'},
+  {key: 'press', icon: '📰', name: 'Press Release', desc: 'Media format'},
+  {key: 'staff', icon: '👥', name: 'Staff News', desc: 'Internal comms'},
+  {key: 'board', icon: '📋', name: 'Board Report', desc: 'Executive summary'},
+  {key: 'stakeholder', icon: '🤝', name: 'Stakeholder Letter', desc: 'Partner comms'}
+]
                 ].slice(0, showMoreDownloads ? 8 : 4).map((item) => (
                   <div key={item.key} onClick={() => handleDownload(item.key)} style={{ background: '#ecfdf5', border: '2px solid #10b981', borderRadius: '12px', padding: '0.75rem', textAlign: 'center', cursor: 'pointer', minHeight: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center', transition: 'all 0.3s ease' }}>
                     <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{item.icon}</div>
@@ -301,13 +306,9 @@ export default function Results() {
                   </div>
                 ))}
               </div>
-              {[
-                {key: 'pdf', icon: '📄', name: 'PDF', desc: 'Print ready'},
-                {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
-                {key: 'image', icon: '🖼️', name: 'Image', desc: 'Social ready'},
-                {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'}
-              ].length > 4 && (
-                <button
+              
+                {8 > 4 && (
+  <button
                   onClick={() => setShowMoreDownloads(!showMoreDownloads)}
                   style={{
                     marginTop: '1rem',
@@ -324,6 +325,7 @@ export default function Results() {
                 >
                   {showMoreDownloads ? '← Show Less Downloads' : 'More Downloads →'}
                 </button>
+  )}
               )}
             </div>
           </div>
