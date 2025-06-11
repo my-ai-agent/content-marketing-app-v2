@@ -219,15 +219,15 @@ export default function ReviewDistribute() {
           </Link>
         </div>
 
-        {/* Step Tracker */}
         <div style={{ 
   display: 'flex', 
   alignItems: 'center', 
   justifyContent: 'center',
-  gap: '0.75rem',
+  gap: '1rem',                    // Increased from 0.75rem
   marginBottom: '2rem',
   width: '100%',
-  maxWidth: '400px'
+  maxWidth: '500px',              // Increased from 400px
+  margin: '0 auto'                // Added for better centering
 }}>
   {[1, 2, 3, 4, 5].map((step, index) => (
     <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
