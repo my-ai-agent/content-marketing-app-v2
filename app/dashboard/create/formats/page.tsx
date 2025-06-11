@@ -221,12 +221,45 @@ export default function ReviewDistribute() {
 
         {/* Step Tracker */}
         <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
-        }}>
+  display: 'flex', 
+  alignItems: 'center', 
+  justifyContent: 'center',
+  gap: '0.75rem',
+  marginBottom: '2rem',
+  width: '100%',
+  maxWidth: '400px'
+}}>
+  {[1, 2, 3, 4, 5].map((step, index) => (
+    <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
+      {/* Step Circle */}
+      <div style={{
+        width: '2.5rem',
+        height: '2.5rem',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: step <= 5 ? '#10b981' : '#d1d5db',
+        color: step <= 5 ? 'white' : '#6b7280',
+        fontSize: '0.875rem',
+        fontWeight: '600',
+        flexShrink: 0
+      }}>
+        {step}
+      </div>
+      
+      {/* Connecting Line */}
+      {index < 4 && (
+        <div style={{
+          width: '2rem',
+          height: '2px',
+          backgroundColor: step < 5 ? '#10b981' : '#d1d5db',
+          margin: '0 0.25rem'
+        }} />
+      )}
+    </div>
+  ))}
+</div>
           <div style={{ 
             width: '2rem', 
             height: '2rem', 
