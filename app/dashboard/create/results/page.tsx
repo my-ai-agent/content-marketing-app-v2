@@ -297,7 +297,7 @@ export default function Results() {
   {key: 'staff', icon: '👥', name: 'Staff News', desc: 'Internal comms'},
   {key: 'board', icon: '📋', name: 'Board Report', desc: 'Executive summary'},
   {key: 'stakeholder', icon: '🤝', name: 'Stakeholder Letter', desc: 'Partner comms'}
-]
+
                 ].slice(0, showMoreDownloads ? 8 : 4).map((item) => (
                   <div key={item.key} onClick={() => handleDownload(item.key)} style={{ background: '#ecfdf5', border: '2px solid #10b981', borderRadius: '12px', padding: '0.75rem', textAlign: 'center', cursor: 'pointer', minHeight: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center', transition: 'all 0.3s ease' }}>
                     <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{item.icon}</div>
