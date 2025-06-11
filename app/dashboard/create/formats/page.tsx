@@ -223,7 +223,7 @@ export default function ReviewDistribute() {
   display: 'flex', 
   alignItems: 'center', 
   justifyContent: 'center',
-  gap: '2rem',                    // Increased from 1rem
+  gap: '1rem',                    // reduced from 2rem
   marginBottom: '2rem',
   width: '100%',
   maxWidth: '500px',              // Increased from 400px
@@ -251,7 +251,7 @@ export default function ReviewDistribute() {
       {/* Connecting Line */}
       {index < 4 && (
         <div style={{
-          width: '2rem',
+          width: '1rem',
           height: '2px',
           backgroundColor: step < 5 ? '#10b981' : '#d1d5db',
           margin: '0 0.25rem'
