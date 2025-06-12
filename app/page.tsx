@@ -92,7 +92,38 @@ export default function Home() {
           </button>
         </Link>
       </div>
+{/* Animated Platform Logos */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        width: '100%', 
+        marginBottom: '2rem',
+        height: '60px' 
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '2rem', 
+          alignItems: 'center',
+          opacity: 0.7,
+          animation: 'logoFade 16s infinite'
+        }}>
+          <div style={{ fontSize: '32px' }}>📘</div>
+          <div style={{ fontSize: '32px' }}>📷</div>
+          <div style={{ fontSize: '32px' }}>💼</div>
+          <div style={{ fontSize: '32px' }}>🐦</div>
+        </div>
+      </div>
 
+      <style jsx>{`
+        @keyframes logoFade {
+          0%, 20% { opacity: 0.7; }
+          25%, 45% { opacity: 0; }
+          50%, 70% { opacity: 0.7; }
+          75%, 95% { opacity: 0; }
+          100% { opacity: 0.7; }
+        }
+      `}</style>
       {/* Spacer for bottom */}
       <div className="flex-1"></div>
 
