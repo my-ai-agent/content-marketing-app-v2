@@ -306,7 +306,7 @@ export default function Results() {
                 {key: 'word', icon: '📝', name: 'Word', desc: 'Editable'},
                 {key: 'image', icon: '🖼️', name: 'Image', desc: 'Social ready'},
                 {key: 'email', icon: '📧', name: 'Email', desc: 'Newsletter'}
-              ].length > 4 && (
+              ].length > 3 && (
                 <button
                   onClick={() => setShowMoreDownloads(!showMoreDownloads)}
                   style={{
