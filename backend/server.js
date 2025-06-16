@@ -26,15 +26,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Import route modules (we'll create these next)
-// const contentRoutes = require('./routes/content');
-// const sessionRoutes = require('./routes/session');
-// const userRoutes = require('./routes/users');
+// Import route modules
+const contentRoutes = require('./routes/content');
 
-// Routes (uncomment when we add route files)
-// app.use('/api/content', contentRoutes);
-// app.use('/api/session', sessionRoutes);
-// app.use('/api/users', userRoutes);
+// Routes - ENABLED!
+app.use('/api/content', contentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -42,7 +38,13 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'AI Business Suite Backend',
-    version: '1.0.0'
+    version: '1.0.0',
+    features: {
+      claudeAPI: !!process.env.CLAUDE_API_KEY,
+      contentGeneration: true,
+      planLimits: true,
+      downloadFormats: 8
+    }
   });
 });
 
@@ -51,7 +53,13 @@ app.get('/api/test', (req, res) => {
   res.json({
     message: 'AI Business Suite Backend is running!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    availableEndpoints: [
+      'GET /health',
+      'GET /api/test',
+      'POST /api/content/generate',
+      'GET /api/content/plans'
+    ]
   });
 });
 
@@ -70,7 +78,9 @@ app.use('*', (req, res) => {
     error: 'Endpoint not found',
     availableEndpoints: [
       'GET /health',
-      'GET /api/test'
+      'GET /api/test',
+      'POST /api/content/generate',
+      'GET /api/content/plans'
     ]
   });
 });
@@ -80,6 +90,8 @@ app.listen(PORT, () => {
   console.log(`🚀 AI Business Suite Backend running on port ${PORT}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`🔗 Content API: http://localhost:${PORT}/api/content/generate`);
+  console.log(`💡 Claude API: ${process.env.CLAUDE_API_KEY ? 'Connected' : 'Not configured'}`);
 });
 
 // Export cache for use in routes
