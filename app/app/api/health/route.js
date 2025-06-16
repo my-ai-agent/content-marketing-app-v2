@@ -2,29 +2,7 @@
 // Health check endpoint for Next.js App Router
 
 import { NextResponse } from 'next/server';
-
-// Import your middleware (adjust paths as needed)
-const LOCATION_CONTEXTS = {
-  'Christchurch': { culturalContext: [], uniqueElements: [], audienceAngles: [] },
-  'Auckland': { culturalContext: [], uniqueElements: [], audienceAngles: [] },
-  'Wellington': { culturalContext: [], uniqueElements: [], audienceAngles: [] },
-  'Queenstown': { culturalContext: [], uniqueElements: [], audienceAngles: [] },
-  'Rotorua': { culturalContext: [], uniqueElements: [], audienceAngles: [] }
-};
-
-const MAORI_GLOSSARY = {
-  'Aotearoa': { translation: 'Land of the long white cloud' },
-  'manaakitanga': { translation: 'Hospitality, care, respect, generosity' },
-  'Ngāi Tahu': { translation: 'People of Tahu' }
-  // Add more terms as needed
-};
-
-const GENERATIONAL_PROFILES = {
-  'Gen Z (1997-2012)': { displayName: 'Gen Z' },
-  'Millennials (1981-1996)': { displayName: 'Millennials' },
-  'Gen X (1965-1980)': { displayName: 'Gen X' },
-  'Baby Boomers (1946-1964)': { displayName: 'Baby Boomers' }
-};
+import { LOCATION_CONTEXTS, MAORI_GLOSSARY, GENERATIONAL_PROFILES, EMOTIONAL_APPROACHES } from '../../utils/data.js';
 
 export async function GET() {
   try {
@@ -34,29 +12,45 @@ export async function GET() {
       version: '2.1.0 - Next.js App Router Enhancement Suite',
       
       systems: {
-        enhancedResponses: `✅ ${Object.keys(LOCATION_CONTEXTS).length} locations, 15+ variations`,
-        culturalRespect: `✅ ${Object.keys(MAORI_GLOSSARY).length} Te Reo terms, IP protection`,
-        generationalTargeting: `✅ ${Object.keys(GENERATIONAL_PROFILES).length} profiles with travel trends`,
+        enhancedResponses: `✅ ${Object.keys(LOCATION_CONTEXTS).length} locations, ${EMOTIONAL_APPROACHES.length} emotional approaches`,
+        culturalRespect: `✅ ${Object.keys(MAORI_GLOSSARY).length} Te Reo terms with pronunciations`,
+        generationalTargeting: `✅ ${Object.keys(GENERATIONAL_PROFILES).length} psychological profiles`,
         seasonalTrends: '✅ Southern Hemisphere seasonal optimization',
         competitorAnalysis: '✅ Differentiation framework active',
         claudeAPI: process.env.ANTHROPIC_API_KEY ? '✅ Connected' : '❌ Missing API key'
       },
       
       capabilities: {
-        culturalAccuracy: 'Iwi-specific references (Ngāi Tahu, Te Arawa)',
+        culturalAccuracy: 'Iwi-specific references (Ngāi Tahu for Christchurch, Te Arawa for Rotorua)',
         psychographics: 'Generational psychology replaces age demographics',
-        contentVariety: '15+ unique approaches per request',
+        contentVariety: `${EMOTIONAL_APPROACHES.length}+ unique approaches per request`,
         seasonalRelevance: 'Real-time seasonal trend integration',
-        ethicalAI: 'Cultural respect and IP protection built-in'
+        ethicalAI: 'Cultural respect and IP protection built-in',
+        locations: Object.keys(LOCATION_CONTEXTS).join(', ')
       },
       
       architecture: 'Next.js App Router API Routes',
-      middleware: {
-        enhancedResponseSystem: 'Converting to Next.js',
-        maoriGlossary: 'Converting to Next.js', 
-        contentEthics: 'Converting to Next.js',
-        crossGenerationalStrategy: 'Converting to Next.js',
-        additionalFeatures: 'Converting to Next.js'
+      
+      dataStatus: {
+        locations: {
+          available: Object.keys(LOCATION_CONTEXTS),
+          total: Object.keys(LOCATION_CONTEXTS).length,
+          sample: LOCATION_CONTEXTS['Christchurch'] ? 'Christchurch data loaded' : 'No sample data'
+        },
+        maoriTerms: {
+          total: Object.keys(MAORI_GLOSSARY).length,
+          sample: Object.keys(MAORI_GLOSSARY).slice(0, 3)
+        },
+        generations: {
+          profiles: Object.keys(GENERATIONAL_PROFILES).map(key => GENERATIONAL_PROFILES[key].displayName),
+          total: Object.keys(GENERATIONAL_PROFILES).length
+        }
+      },
+      
+      enhancement_preview: {
+        christchurch_cultural: LOCATION_CONTEXTS['Christchurch']?.culturalContext?.[0] || 'Data loading...',
+        maori_example: MAORI_GLOSSARY['manaakitanga']?.translation || 'Loading...',
+        generation_example: GENERATIONAL_PROFILES['Millennials (1981-1996)']?.description || 'Loading...'
       }
     };
 
@@ -68,7 +62,12 @@ export async function GET() {
       status: 'error',
       message: 'Health check failed',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      debug: {
+        locationContextsLoaded: typeof LOCATION_CONTEXTS !== 'undefined',
+        maoriGlossaryLoaded: typeof MAORI_GLOSSARY !== 'undefined',
+        generationalProfilesLoaded: typeof GENERATIONAL_PROFILES !== 'undefined'
+      }
     }, { status: 500 });
   }
 }
