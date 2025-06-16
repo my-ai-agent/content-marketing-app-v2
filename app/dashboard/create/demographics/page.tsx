@@ -10,13 +10,55 @@ export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
 
   const demographics = [
-    'Female Travellers',
-    'Families',
-    'Young Adults (18-35)',
-    'Business Travellers',
-    'Solo Travellers',
-    'Mature Travellers'
-  ]
+  {
+    id: 'gen-z',
+    label: 'Gen Z (1997-2012)',
+    description: 'Digital natives prioritizing authenticity & sustainability',
+    travelStyle: 'Solo adventures, eco-tourism, Instagram-worthy experiences',
+    platforms: ['TikTok', 'Instagram', 'Snapchat'],
+    motivation: 'Self-discovery and social impact'
+  },
+  {
+    id: 'millennials',
+    label: 'Millennials (1981-1996)', 
+    description: 'Experience-focused, digitally savvy, authenticity-seeking',
+    travelStyle: 'Cultural immersion, food tourism, unique experiences',
+    platforms: ['Instagram', 'Facebook', 'YouTube'],
+    motivation: 'Authentic experiences and personal growth'
+  },
+  {
+    id: 'gen-x',
+    label: 'Gen X (1965-1980)',
+    description: 'Family-focused, practical, value-conscious decision makers',
+    travelStyle: 'Family adventures, educational travel, multi-generational trips',
+    platforms: ['Facebook', 'Email', 'Google Search'],
+    motivation: 'Family bonding and practical benefits'
+  },
+  {
+    id: 'boomers',
+    label: 'Baby Boomers (1946-1964)',
+    description: 'Comfort-seeking, knowledge-focused, service-oriented',
+    travelStyle: 'Luxury experiences, guided tours, cultural enrichment',
+    platforms: ['Email', 'Facebook', 'Traditional websites'],
+    motivation: 'Cultural enrichment and comfort'
+  },
+  {
+    id: 'families',
+    label: 'Multi-Generational Families',
+    description: 'Mixed-age groups with diverse needs and preferences',
+    travelStyle: 'Inclusive activities, varied accommodation, flexible itineraries',
+    platforms: ['Facebook', 'WhatsApp', 'Email'],
+    motivation: 'Creating shared memories across generations'
+  },
+  {
+    id: 'business',
+    label: 'Business & Corporate Travellers',
+    description: 'Professional travelers seeking efficiency and networking',
+    travelStyle: 'Premium accommodations, efficient transport, networking events',
+    platforms: ['LinkedIn', 'Email', 'Professional networks'],
+    motivation: 'Professional development and business success'
+  }
+]
 
   const handleNext = () => {
     if (selectedDemographic) {
