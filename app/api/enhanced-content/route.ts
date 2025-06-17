@@ -91,27 +91,50 @@ function generateGenZContent(story: string, interests: string[], culturalContext
   const interestTags = interests?.map(i => `#${i.replace(/\s+/g, '')}`).join(' ') || '#Travel'
   
   return {
-    social: `🌱 Real talk: ${story} hits different ✨ This is the kind of authentic experience that actually matters. No greenwashing, just genuine sustainable travel that makes an impact 🌍
+    social: `bestie listen up 👀
 
-${interestTags} #AuthenticTravel #SustainableVibes #GenZTravel #RealExperiences
+${story.toLowerCase().includes('tourism') ? 'this tourism thing' : 'this'} is actually giving main character energy
 
-Who's ready to travel with purpose? 👇`,
+no cap - this isn't another corporate money grab
+it's the sustainable travel moment we've been waiting for ✨
 
-    detailed: `Why ${story} is exactly what Gen Z has been searching for:
+your future self will thank you
+(and so will the planet) 🌍
 
-✨ AUTHENTIC AF - No manufactured experiences here
-🌍 SUSTAINABLE IMPACT - Travel that actually helps, not hurts  
-📱 SHARE-WORTHY - But like, genuinely beautiful moments
-🤝 COMMUNITY VIBES - Connect with real people, not tourists
-💚 VALUES-ALIGNED - Your money goes toward good stuff
+${interestTags} #MainCharacterMoments #ActuallyMatters #NotSponsored`,
 
-This isn't just travel - it's purposeful exploration that doesn't compromise your values. Finally.`,
+    detailed: `okay but why ${story.split(' ').slice(0, 3).join(' ').toLowerCase()} is the move:
 
-    cta: `Ready to experience something REAL? 
-Book ${story} now and be part of the sustainable travel movement! 
-Link in bio 🌱✈️ #NoMoreFakeTravel`
-  }
-}
+🚫 zero greenwashing BS
+✅ actually helps communities 
+💯 your values + wanderlust aligned
+📱 content that doesn't feel performative
+🌱 climate anxiety? not here
+💸 worth every penny (we know money's tight)
+
+this is what conscious travel looks like when it's not cringe
+
+finally - experiences that match our energy
+no fake sustainability theater
+just real impact + genuine connections
+
+the kind of travel that heals instead of harming 🤍`,
+
+    cta: `not to be dramatic but...
+this could literally change everything
+
+ready to be part of something that actually matters?
+
+swipe up / link in bio
+your feed (and soul) needs this 
+
+💌 save this post for when you're ready to book
+#NotAnAd #JustRealTalk #SustainableVibes`,
+
+    dm: `hey!! 
+saw you're into ${interests?.[0] || 'travel'} 👀
+
+have you heard about ${story.split(' ')
 
 function generateMillennialContent(story: string, interests: string[], culturalContext: any) {
   return {
