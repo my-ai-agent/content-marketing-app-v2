@@ -77,7 +77,14 @@ export default function Demographics() {
     }
   }
 ]
-
+const tooltips = {
+  'Gen Z (1997-2012) - Digital natives prioritizing authenticity': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
+  'Millennials (1981-1996) - Experience-focused, cultural seekers': 'Parents with children, multi-generational trips, visiting friends & relatives',
+  'Gen X (1965-1980) - Family-focused, value-conscious': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
+  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused': 'Corporate travellers, conference attendees, business meeting planners',
+  'Multi-Generational Families - Mixed-age groups': 'Independent explorers, digital nomads, solo adventure enthusiasts',
+  'Business & Corporate Travellers - Professional efficiency-focused': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
+}
   const handleNext = () => {
     if (selectedDemographic) {
       localStorage.setItem('selectedDemographics', JSON.stringify([selectedDemographic]))
@@ -86,7 +93,39 @@ export default function Demographics() {
       alert('Please select a target audience before continuing.')
     }
   }
-
+return (
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    backgroundColor: '#f9fafb'
+  }}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+      gap: '1rem',
+      marginBottom: '3rem'
+    }}>
+      {demographics.map((demographic, index) => (
+        <div key={demographic.label} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setSelectedDemographic(demographic.label)}
+            style={{
+              width: '100%',
+              padding: '1.5rem',
+              border: selectedDemographic === demographic.label ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+              borderRadius: '1rem',
+              backgroundColor: selectedDemographic === demographic.label ? '#eff6ff' : 'white',
+              cursor: 'pointer'
+            }}
+          >
+            {demographic.label}
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)
   return (
     <div style={{ 
       display: 'flex', 
@@ -219,15 +258,7 @@ export default function Demographics() {
           {demographics.map((demographic, index) => (
   // ... existing code that uses 'demographic.label' instead
 ))}
-            const tooltips = {
-  'Gen Z (1997-2012) - Digital natives prioritizing authenticity': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
-  'Millennials (1981-1996) - Experience-focused, cultural seekers': 'Parents with children, multi-generational trips, visiting friends & relatives',
-  'Gen X (1965-1980) - Family-focused, value-conscious': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
-  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused': 'Corporate travellers, conference attendees, business meeting planners',
-  'Multi-Generational Families - Mixed-age groups': 'Independent explorers, digital nomads, solo adventure enthusiasts',
-  'Business & Corporate Travellers - Professional efficiency-focused': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
-}
-
+            
             return (
               <div key={demographic.label} style={{ position: 'relative' }}>
                 <button
