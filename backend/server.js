@@ -303,65 +303,215 @@ app.post('/api/test/quick', async (req, res) => {
   }
 });
 
+// Updated backend/server.js - Lines 306-350+ (replace existing plans endpoint)
+
 // Get available plans endpoint
 app.get('/api/content/plans', (req, res) => {
   res.json({
     plans: [
       {
-        name: 'Free',
-        price: 0,
+        id: 'starter',
+        name: 'Starter',
+        description: 'Get consistent with professional tourism content',
+        price: 47,
         features: [
-          '1 content generation per week',
-          'Basic cultural respect guidelines', 
-          'Single generational targeting',
-          'Standard download formats'
+          '2 professional stories per week',
+          'Unlimited images per story',
+          '500MB storage with auto-compression',
+          'Photo attribution & location tags',
+          'Universal QR distribution to all platforms',
+          'Basic QR scan analytics',
+          '7-day free trial'
         ],
-        limits: { weekly: 1, monthly: 4 }
+        limits: { 
+          storiesPerWeek: 2, 
+          qrCodesActive: 5,
+          imageStorage: 500,
+          demographics: 4,
+          lifestyles: 4,
+          users: 1,
+          schedulingFeatures: false,
+          analyticsLevel: 'basic',
+          photoAttribution: true,
+          trialDays: 7
+        }
       },
       {
-        name: 'Basic', 
-        price: 29,
+        id: 'professional',
+        name: 'Professional',
+        description: 'Set your week\'s content on Monday, then focus on your guests',
+        price: 147,
         features: [
-          '5 content generations per week',
-          'Full cultural respect & IP protection',
-          'All generational profiles with travel trends',
-          'Enhanced response variety (15+ options)',
-          'Te Reo Māori glossary integration',
-          'Seasonal trend optimization',
-          'All download formats'
+          '7 stories per week (daily professional content)',
+          'Unlimited images per story',
+          '2GB storage with smart compression',
+          'Week scheduler - "Set and Smile"',
+          'Advanced QR analytics & engagement tracking',
+          'All generational psychology profiles',
+          'Small team collaboration (3 users)',
+          '7-day free trial'
         ],
-        limits: { weekly: 5, monthly: 20 }
+        limits: { 
+          storiesPerWeek: 7, 
+          qrCodesActive: 25,
+          imageStorage: 2000,
+          demographics: 6,
+          lifestyles: 6,
+          users: 3,
+          schedulingFeatures: true,
+          analyticsLevel: 'advanced',
+          photoAttribution: true,
+          trialDays: 7
+        },
+        popular: true
       },
       {
-        name: 'Pro',
-        price: 79,
-        features: [
-          '25 content generations per week',
-          'All Basic features',
-          'Competitive advantage messaging',
-          'Advanced seasonal analytics',
-          'Custom cultural guidelines',
-          'Priority support'
-        ],
-        limits: { weekly: 25, monthly: 100 }
-      },
-      {
+        id: 'enterprise',
         name: 'Enterprise',
-        price: 199,
+        description: 'Complete tourism marketing ecosystem for large operations',
+        price: 547,
         features: [
-          'Unlimited content generations',
-          'All Pro features',
-          'Custom generational profiling',
-          'White-label options',
-          'API access',
-          'Cultural consultation'
+          'Unlimited stories and content generation',
+          'Unlimited images and storage',
+          'Month scheduler with bulk operations',
+          'Premium analytics dashboard with exports',
+          'White-label QR landing pages',
+          'Unlimited team collaboration',
+          'Priority support with dedicated account manager',
+          'API access for custom integrations',
+          '7-day free trial'
         ],
-        limits: { weekly: 'unlimited', monthly: 'unlimited' }
+        limits: { 
+          storiesPerWeek: -1, 
+          qrCodesActive: -1,
+          imageStorage: -1,
+          demographics: 6,
+          lifestyles: 6,
+          users: -1,
+          schedulingFeatures: true,
+          analyticsLevel: 'premium',
+          photoAttribution: true,
+          trialDays: 7
+        }
       }
-    ]
+    ],
+    
+    // Additional helper data for frontend
+    metadata: {
+      currency: 'USD',
+      billingPeriod: 'monthly',
+      trialPeriod: 7,
+      lastUpdated: new Date().toISOString(),
+      apiVersion: '2.0'
+    }
   });
 });
 
+// Helper endpoint to get specific plan details
+app.get('/api/content/plans/:planId', (req, res) => {
+  const { planId } = req.params;
+  
+  const allPlans = [
+    {
+      id: 'starter',
+      name: 'Starter',
+      description: 'Get consistent with professional tourism content',
+      price: 47,
+      limits: { 
+        storiesPerWeek: 2, 
+        qrCodesActive: 5,
+        imageStorage: 500,
+        demographics: 4,
+        lifestyles: 4,
+        users: 1,
+        schedulingFeatures: false,
+        analyticsLevel: 'basic',
+        photoAttribution: true,
+        trialDays: 7
+      }
+    },
+    {
+      id: 'professional',
+      name: 'Professional', 
+      description: 'Set your week\'s content on Monday, then focus on your guests',
+      price: 147,
+      limits: { 
+        storiesPerWeek: 7, 
+        qrCodesActive: 25,
+        imageStorage: 2000,
+        demographics: 6,
+        lifestyles: 6,
+        users: 3,
+        schedulingFeatures: true,
+        analyticsLevel: 'advanced',
+        photoAttribution: true,
+        trialDays: 7
+      },
+      popular: true
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      description: 'Complete tourism marketing ecosystem for large operations', 
+      price: 547,
+      limits: { 
+        storiesPerWeek: -1, 
+        qrCodesActive: -1,
+        imageStorage: -1,
+        demographics: 6,
+        lifestyles: 6,
+        users: -1,
+        schedulingFeatures: true,
+        analyticsLevel: 'premium',
+        photoAttribution: true,
+        trialDays: 7
+      }
+    }
+  ];
+
+  const plan = allPlans.find(p => p.id === planId);
+  
+  if (!plan) {
+    return res.status(404).json({ 
+      error: 'Plan not found',
+      availablePlans: allPlans.map(p => p.id)
+    });
+  }
+
+  res.json({ plan });
+});
+
+// Endpoint to validate plan limits (useful for frontend validation)
+app.post('/api/content/validate-usage', (req, res) => {
+  const { planId, usageType, currentUsage, requestedUsage = 1 } = req.body;
+  
+  const planLimits = {
+    starter: { storiesPerWeek: 2, qrCodesActive: 5, imageStorage: 500, users: 1 },
+    professional: { storiesPerWeek: 7, qrCodesActive: 25, imageStorage: 2000, users: 3 },
+    enterprise: { storiesPerWeek: -1, qrCodesActive: -1, imageStorage: -1, users: -1 }
+  };
+
+  const limits = planLimits[planId];
+  if (!limits) {
+    return res.status(400).json({ error: 'Invalid plan ID' });
+  }
+
+  const limit = limits[usageType];
+  if (limit === undefined) {
+    return res.status(400).json({ error: 'Invalid usage type' });
+  }
+
+  // -1 means unlimited
+  const canExceed = limit === -1 || (currentUsage + requestedUsage) <= limit;
+  
+  res.json({
+    allowed: canExceed,
+    currentUsage,
+    requestedUsage,
+    limit: limit === -1 ? 'unlimited' : limit,
+    remainingUsage: limit === -1 ? 'unlimited' : Math.max(0, limit - currentUsage)
+  });
+});
 // Get available locations endpoint
 app.get('/api/content/locations', (req, res) => {
   const locations = Object.keys(LOCATION_CONTEXTS).map(location => ({
