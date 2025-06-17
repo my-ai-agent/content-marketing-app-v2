@@ -134,8 +134,18 @@ your feed (and soul) needs this
     dm: `hey!! 
 saw you're into ${interests?.[0] || 'travel'} 👀
 
-have you heard about ${story.split(' ')
+have you heard about ${story.split(' ').slice(0, 4).join(' ').toLowerCase()}??
 
+it's giving everything we actually care about:
+- zero corporate BS ✅
+- actually sustainable ✅  
+- supports real communities ✅
+- won't break the bank ✅
+
+dm me if you want the details
+this is the travel moment we've been waiting for fr 💕`
+  }
+}
 function generateMillennialContent(story: string, interests: string[], culturalContext: any) {
   return {
     social: `Just discovered ${story} and honestly, this is the kind of experience that creates those memories you'll be talking about for years 📸
