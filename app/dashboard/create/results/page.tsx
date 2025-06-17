@@ -100,24 +100,83 @@ export default function Results() {
     }
   };
 
-  // Handle refresh version
-  const handleRefreshVersion = () => {
+  // Handle refresh version with enhanced generational psychology
+const handleRefreshVersion = async () => {
+  try {
+    // Get stored user selections
+    const targetAudience = localStorage.getItem('selectedDemographic') || 'Gen Z (1997-2012) - Digital natives prioritizing authenticity';
+    const interests = JSON.parse(localStorage.getItem('selectedInterests') || '["wellness", "relaxation"]');
+    const originalStory = localStorage.getItem('currentStory') || story;
+
+    // Call enhanced content API
+    const response = await fetch('/api/enhanced-content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        story: originalStory,
+        targetAudience,
+        interests,
+        location: 'Christchurch'
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.contentVariations) {
+      // Transform API response into version options format
+      const enhancedVersions = data.contentVariations.map((variation, index) => ({
+        text: variation.content,
+        tone: `${variation.style.replace(/_/g, ' ')} (${variation.platform})`,
+        words: variation.content.trim().split(/\s+/).length
+      }));
+
+      // Add enhanced metadata
+      setVersionOptions(enhancedVersions);
+      
+      // Store enhancement info for display
+      const enhancementInfo = {
+        targetAudience: data.targetAudience,
+        profile: data.profile,
+        culturalContext: data.culturalContext
+      };
+      localStorage.setItem('lastEnhancementInfo', JSON.stringify(enhancementInfo));
+      
+    } else {
+      // Fallback to original versions if API fails
+      setVersionOptions([
+        {
+          text: "Escape to Canterbury's wellness paradise! Experience rejuvenating hot springs, mountain yoga sessions, and luxury spa treatments. From Hanmer Springs' healing waters to alpine meditation retreats, discover your perfect wellness getaway in New Zealand's most beautiful region.",
+          tone: "Energetic & Inviting",
+          words: 42
+        },
+        {
+          text: "Transform your wellbeing in Canterbury! Our region's natural hot springs, world-class spas, and serene mountain retreats offer the ultimate relaxation experience. Reconnect with nature, restore your energy, and rediscover inner peace in Canterbury's wellness wonderland.",
+          tone: "Inspirational & Calming", 
+          words: 40
+        },
+        {
+          text: "Canterbury's wellness scene awaits! Indulge in therapeutic hot springs, mindful mountain yoga, and luxurious spa experiences. Whether seeking adventure or tranquility, our wellness destinations provide the perfect backdrop for renewal and rejuvenation.",
+          tone: "Professional & Sophisticated",
+          words: 36
+        }
+      ]);
+    }
+    
+    setShowRefreshModal(true);
+    
+  } catch (error) {
+    console.error('Enhanced content generation failed:', error);
+    // Fallback to original functionality
     setVersionOptions([
       {
-        text: "Escape to Canterbury's wellness paradise! Experience rejuvenating hot springs, mountain yoga sessions, and luxury spa treatments. From Hanmer Springs' healing waters to alpine meditation retreats, discover your perfect wellness getaway in New Zealand's most beautiful region.",
+        text: "Discover Canterbury's hidden wellness gems! From therapeutic hot springs to mountain meditation retreats, experience the perfect escape for relaxation and renewal in New Zealand's most beautiful region.",
         tone: "Energetic & Inviting",
-        words: 42
-      },
-      {
-        text: "Transform your wellbeing in Canterbury! Our region's natural hot springs, world-class spas, and serene mountain retreats offer the ultimate relaxation experience. Reconnect with nature, restore your energy, and rediscover inner peace in Canterbury's wellness wonderland.",
-        tone: "Inspirational & Calming",
-        words: 40
-      },
-      {
-        text: "Canterbury's wellness scene awaits! Indulge in therapeutic hot springs, mindful mountain yoga, and luxurious spa experiences. Whether seeking adventure or tranquility, our wellness destinations provide the perfect backdrop for renewal and rejuvenation.",
-        tone: "Professional & Sophisticated",
-        words: 36
+        words: 30
       }
+    ]);
+    setShowRefreshModal(true);
+  }
+};
     ]);
     setShowRefreshModal(true);
   };
