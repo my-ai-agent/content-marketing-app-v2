@@ -456,4 +456,13 @@ export default function Results() {
               )}
               
               {publishStep === 'preview' &&*
-
+                , color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
+                Use This Version
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
