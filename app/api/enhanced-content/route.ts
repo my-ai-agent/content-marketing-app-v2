@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { OpenAI } from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
 // Generational Psychology Profiles for Content Generation
@@ -91,55 +91,6 @@ const nzCulturalContext = {
   culturalValues: ['manaakitanga (hospitality)', 'whakapapa (connections)', 'taiao (environment)']
 }
 
-export async function POST(request: Request) {
-  try {
-    const { 
-      story, 
-      targetAudience, 
-      interests, 
-      platforms,
-      location = 'New Zealand',
-      contentType = 'social_media_post'
-    } = await request.json()
-
-    // Get generational profile
-    const profile = generationalProfiles[targetAudience as keyof typeof generationalProfiles]
-    
-    if (!profile) {
-      return NextResponse.json({ error: 'Invalid target audience' }, { status: 400 })
-    }
-
-    // Get cultural context
-    const culturalContext = nzCulturalContext.locations[location as keyof typeof nzCulturalContext.locations] || null
-
-    // Generate multiple content variations
-    const contentVariations = await generateContentVariations({
-      story,
-      profile,
-      interests,
-      platforms,
-      culturalContext,
-      contentType
-    })
-
-    return NextResponse.json({
-      success: true,
-      targetAudience,
-      profile: {
-        platforms: profile.platforms,
-        contentStyle: profile.contentStyle,
-        valuePropositions: profile.valuePropositions
-      },
-      culturalContext,
-      contentVariations
-    })
-
-  } catch (error) {
-    console.error('Enhanced content generation error:', error)
-    return NextResponse.json({ error: 'Failed to generate enhanced content' }, { status: 500 })
-  }
-}
-
 async function generateContentVariations({
   story,
   profile,
@@ -150,10 +101,9 @@ async function generateContentVariations({
 }: any) {
   const variations = []
 
-  // Platform-specific variations
+  // Platform-specific variations using Claude
   for (const platform of profile.platforms.slice(0, 3)) {
-    const prompt = `
-Create ${contentType} content for ${platform} targeting ${profile.contentStyle} audience.
+    const prompt = `Create ${contentType} content for ${platform} targeting ${profile.contentStyle} audience.
 
 Story: ${story}
 Interests: ${interests?.join(', ') || 'general travel'}
@@ -175,20 +125,23 @@ Requirements:
 - Keep culturally appropriate for New Zealand
 - Include relevant hashtags and calls-to-action
 
-Generate compelling, authentic content that resonates with this specific audience psychology.
-`
+Generate compelling, authentic content that resonates with this specific audience psychology.`
 
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "user", content: prompt }],
+      const response = await anthropic.messages.create({
+        model: "claude-3-sonnet-20240229",
         max_tokens: 500,
-        temperature: 0.8
+        messages: [{ 
+          role: "user", 
+          content: prompt 
+        }]
       })
+
+      const content = response.content[0]?.type === 'text' ? response.content[0].text : ''
 
       variations.push({
         platform,
-        content: response.choices[0]?.message?.content || '',
+        content,
         style: profile.contentStyle,
         targetFactors: profile.decisionFactors
       })
@@ -199,8 +152,7 @@ Generate compelling, authentic content that resonates with this specific audienc
 
   // Add a cultural-specific variation if context available
   if (culturalContext) {
-    const culturalPrompt = `
-Create culturally-informed content that respectfully incorporates ${culturalContext.iwi} perspectives and local knowledge.
+    const culturalPrompt = `Create culturally-informed content that respectfully incorporates ${culturalContext.iwi} perspectives and local knowledge.
 
 Story: ${story}
 Cultural Elements: ${culturalContext.culturalElements.join(', ')}
@@ -212,20 +164,23 @@ Include:
 - Respect for indigenous culture
 - Authentic New Zealand voice
 
-Generate content that shows cultural awareness and local expertise.
-`
+Generate content that shows cultural awareness and local expertise.`
 
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "user", content: culturalPrompt }],
+      const response = await anthropic.messages.create({
+        model: "claude-3-sonnet-20240229",
         max_tokens: 500,
-        temperature: 0.7
+        messages: [{ 
+          role: "user", 
+          content: culturalPrompt 
+        }]
       })
+
+      const content = response.content[0]?.type === 'text' ? response.content[0].text : ''
 
       variations.push({
         platform: 'Cultural',
-        content: response.choices[0]?.message?.content || '',
+        content,
         style: 'culturally-informed',
         targetFactors: ['cultural respect', 'local knowledge']
       })
@@ -235,4 +190,57 @@ Generate content that shows cultural awareness and local expertise.
   }
 
   return variations
+}
+
+export async function POST(request: Request) {
+  try {
+    const { 
+      story, 
+      targetAudience, 
+      interests, 
+      platforms,
+      location = 'New Zealand',
+      contentType = 'social_media_post'
+    } = await request.json()
+
+    // Get generational profile
+    const profile = generationalProfiles[targetAudience as keyof typeof generationalProfiles]
+    
+    if (!profile) {
+      return NextResponse.json({ error: 'Invalid target audience' }, { status: 400 })
+    }
+
+    // Get cultural context
+    const culturalContext = nzCulturalContext.locations[location as keyof typeof nzCulturalContext.locations] || null
+
+    // Get content templates for this audience
+    const templates = contentTemplates[targetAudience as keyof typeof contentTemplates]
+
+    // Generate multiple content variations using Claude
+    const contentVariations = await generateContentVariations({
+      story,
+      profile,
+      interests,
+      platforms,
+      culturalContext,
+      contentType
+    })
+
+    return NextResponse.json({
+      success: true,
+      targetAudience,
+      profile: {
+        platforms: profile.platforms,
+        contentStyle: profile.contentStyle,
+        valuePropositions: profile.valuePropositions,
+        communicationStyle: profile.communicationStyle
+      },
+      culturalContext,
+      contentVariations
+    })
+
+  } catch (error) {
+    console.error('Enhanced content generation error:', error)
+    return NextResponse.json({ error: 'Failed to generate enhanced content' }, { status: 500 })
+  }
 }
