@@ -346,9 +346,9 @@ function generateDownloadVersions(story: string, targetAudience: string, interes
   switch(format) {
     case 'blog':
       return [
-        { tone: 'Professional & SEO-Optimized', content: generateBlogPost(story, storyTitle, profile, interests) },
-        { tone: 'Casual & Engaging', content: generateBlogPost(story, storyTitle, profile, interests) },
-        { tone: 'Expert Authority', content: generateBlogPost(story, storyTitle, profile, interests) }
+        { tone: 'Professional & SEO-Optimized', content: generateBlogPost(story, storyTitle, profile, interests, 'professional') },
+{ tone: 'Casual & Engaging', content: generateBlogPost(story, storyTitle, profile, interests, 'casual') },
+{ tone: 'Expert Authority', content: generateBlogPost(story, storyTitle, profile, interests, 'authority') }
       ]
     
     case 'press':
