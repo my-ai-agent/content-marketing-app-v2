@@ -832,17 +832,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to generate enhanced content' }, { status: 500 })
   }
 }
-
-// Optionally export generators for use elsewhere
-export {
-  generateBlogPost,
-  generatePressRelease,
-  generateEmailNewsletter,
-  generateStaffNews,
-  generateBoardReport,
-  generateStakeholderLetter,
-  generatePDFContent,
-  generateWordContent,
-  generateCulturalContent,
-  generateDownloadVersions
-}
