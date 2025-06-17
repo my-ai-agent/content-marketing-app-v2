@@ -346,58 +346,58 @@ function generateDownloadVersions(story: string, targetAudience: string, interes
   switch(format) {
     case 'blog':
       return [
-        { tone: 'Professional & SEO-Optimized', content: generateBlogPost(story, storyTitle, profile, interests, 'professional') },
-        { tone: 'Casual & Engaging', content: generateBlogPost(story, storyTitle, profile, interests, 'casual') },
-        { tone: 'Expert Authority', content: generateBlogPost(story, storyTitle, profile, interests, 'authority') }
+        { tone: 'Professional & SEO-Optimized', content: generateBlogPost(story, storyTitle, profile, interests) },
+        { tone: 'Casual & Engaging', content: generateBlogPost(story, storyTitle, profile, interests) },
+        { tone: 'Expert Authority', content: generateBlogPost(story, storyTitle, profile, interests) }
       ]
     
     case 'press':
       return [
-        { tone: 'Standard Press Release', content: generatePressRelease(story, storyTitle, companyName, today, 'standard') },
-        { tone: 'Executive Announcement', content: generatePressRelease(story, storyTitle, companyName, today, 'executive') },
-        { tone: 'Media-Friendly', content: generatePressRelease(story, storyTitle, companyName, today, 'media') }
+        { tone: 'Standard Press Release', content: generatePressRelease(story, storyTitle, companyName, today) },
+        { tone: 'Executive Announcement', content: generatePressRelease(story, storyTitle, companyName, today) },
+        { tone: 'Media-Friendly', content: generatePressRelease(story, storyTitle, companyName, today) }
       ]
     
     case 'email':
       return [
-        { tone: 'Professional Newsletter', content: generateEmailNewsletter(story, storyTitle, profile, 'professional') },
-        { tone: 'Personal & Direct', content: generateEmailNewsletter(story, storyTitle, profile, 'personal') },
-        { tone: 'Action-Oriented', content: generateEmailNewsletter(story, storyTitle, profile, 'action') }
+        { tone: 'Professional Newsletter', content: generateEmailNewsletter(story, storyTitle, profile) },
+        { tone: 'Personal & Direct', content: generateEmailNewsletter(story, storyTitle, profile) },
+        { tone: 'Action-Oriented', content: generateEmailNewsletter(story, storyTitle, profile) }
       ]
     
     case 'staff':
       return [
-        { tone: 'Formal Announcement', content: generateStaffNews(story, storyTitle, today, 'formal') },
-        { tone: 'Team-Friendly', content: generateStaffNews(story, storyTitle, today, 'friendly') },
-        { tone: 'Motivational', content: generateStaffNews(story, storyTitle, today, 'motivational') }
+        { tone: 'Formal Announcement', content: generateStaffNews(story, storyTitle, today) },
+        { tone: 'Team-Friendly', content: generateStaffNews(story, storyTitle, today) },
+        { tone: 'Motivational', content: generateStaffNews(story, storyTitle, today) }
       ]
     
     case 'board':
       return [
-        { tone: 'Executive Summary', content: generateBoardReport(story, storyTitle, today, 'executive') },
-        { tone: 'Strategic Analysis', content: generateBoardReport(story, storyTitle, today, 'strategic') },
-        { tone: 'Performance Focus', content: generateBoardReport(story, storyTitle, today, 'performance') }
+        { tone: 'Executive Summary', content: generateBoardReport(story, storyTitle, today) },
+        { tone: 'Strategic Analysis', content: generateBoardReport(story, storyTitle, today) },
+        { tone: 'Performance Focus', content: generateBoardReport(story, storyTitle, today) }
       ]
     
     case 'stakeholder':
       return [
-        { tone: 'Partnership Focus', content: generateStakeholderLetter(story, storyTitle, companyName, today, 'partnership') },
-        { tone: 'Business Update', content: generateStakeholderLetter(story, storyTitle, companyName, today, 'business') },
-        { tone: 'Relationship Building', content: generateStakeholderLetter(story, storyTitle, companyName, today, 'relationship') }
+        { tone: 'Partnership Focus', content: generateStakeholderLetter(story, storyTitle, companyName, today) },
+        { tone: 'Business Update', content: generateStakeholderLetter(story, storyTitle, companyName, today) },
+        { tone: 'Relationship Building', content: generateStakeholderLetter(story, storyTitle, companyName, today) }
       ]
     
     case 'pdf':
       return [
-        { tone: 'Document Format', content: generatePDFContent(story, storyTitle, profile, 'document') },
-        { tone: 'Presentation Style', content: generatePDFContent(story, storyTitle, profile, 'presentation') },
-        { tone: 'Report Format', content: generatePDFContent(story, storyTitle, profile, 'report') }
+        { tone: 'Document Format', content: generatePDFContent(story, storyTitle, profile) },
+        { tone: 'Presentation Style', content: generatePDFContent(story, storyTitle, profile) },
+        { tone: 'Report Format', content: generatePDFContent(story, storyTitle, profile) }
       ]
     
     case 'word':
       return [
-        { tone: 'Professional Document', content: generateWordContent(story, storyTitle, profile, 'professional') },
-        { tone: 'Collaborative Draft', content: generateWordContent(story, storyTitle, profile, 'collaborative') },
-        { tone: 'Template Ready', content: generateWordContent(story, storyTitle, profile, 'template') }
+        { tone: 'Professional Document', content: generateWordContent(story, storyTitle, profile) },
+        { tone: 'Collaborative Draft', content: generateWordContent(story, storyTitle, profile) },
+        { tone: 'Template Ready', content: generateWordContent(story, storyTitle, profile) }
       ]
     
     default:
