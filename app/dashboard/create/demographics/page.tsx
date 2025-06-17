@@ -10,81 +10,14 @@ export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
 
   const demographics = [
-  {
-    label: 'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
-    hoverData: {
-      motivation: 'Self-discovery and social impact',
-      platforms: ['TikTok', 'Instagram', 'Snapchat'],
-      decisionFactors: ['Social proof', 'Sustainability', 'Authenticity', 'Visual appeal'],
-      budgetStyle: 'Budget-conscious, value-seeking',
-      travelStyle: 'Solo adventures, eco-tourism, Instagram-worthy experiences',
-      keyTraits: ['Mobile-first', 'Authentic', 'Sustainable', 'Visual']
-    }
-  },
-  {
-    label: 'Millennials (1981-1996) - Experience-focused, cultural seekers',
-    hoverData: {
-      motivation: 'Authentic experiences and personal growth',
-      platforms: ['Instagram', 'Facebook', 'YouTube'],
-      decisionFactors: ['Reviews', 'Authenticity', 'Value', 'Social sharing potential'],
-      budgetStyle: 'Mid-range, experience over luxury',
-      travelStyle: 'Cultural immersion, food tourism, unique experiences',
-      keyTraits: ['Experience-driven', 'Research-heavy', 'Social', 'Quality-focused']
-    }
-  },
-  {
-    label: 'Gen X (1965-1980) - Family-focused, value-conscious',
-    hoverData: {
-      motivation: 'Family bonding and practical benefits',
-      platforms: ['Facebook', 'Email', 'Google Search'],
-      decisionFactors: ['Safety', 'Value', 'Family-friendly', 'Convenience'],
-      budgetStyle: 'Value-focused, quality for family',
-      travelStyle: 'Family adventures, educational travel, multi-generational trips',
-      keyTraits: ['Family-oriented', 'Practical', 'Value-conscious', 'Thorough']
-    }
-  },
-  {
-    label: 'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
-    hoverData: {
-      motivation: 'Cultural enrichment and comfort',
-      platforms: ['Email', 'Facebook', 'Traditional websites'],
-      decisionFactors: ['Comfort', 'Service quality', 'Reputation', 'Expert guidance'],
-      budgetStyle: 'Premium, comfort and service focused',
-      travelStyle: 'Luxury experiences, guided tours, cultural enrichment',
-      keyTraits: ['Comfort-focused', 'Service-oriented', 'Traditional', 'Knowledge-seeking']
-    }
-  },
-  {
-    label: 'Multi-Generational Families - Mixed-age groups',
-    hoverData: {
-      motivation: 'Creating shared memories across generations',
-      platforms: ['Facebook', 'WhatsApp', 'Email'],
-      decisionFactors: ['Inclusivity', 'Flexibility', 'Group appeal', 'Accessibility'],
-      budgetStyle: 'Varied, depending on group composition',
-      travelStyle: 'Inclusive activities, varied accommodation, flexible itineraries',
-      keyTraits: ['Inclusive', 'Flexible', 'Diverse needs', 'Memory-focused']
-    }
-  },
-  {
-    label: 'Business & Corporate Travellers - Professional efficiency-focused',
-    hoverData: {
-      motivation: 'Professional development and business success',
-      platforms: ['LinkedIn', 'Email', 'Professional networks'],
-      decisionFactors: ['Efficiency', 'Professional value', 'Networking opportunities', 'ROI'],
-      budgetStyle: 'Premium, ROI-justified expenses',
-      travelStyle: 'Premium accommodations, efficient transport, networking events',
-      keyTraits: ['Efficiency-focused', 'Professional', 'Time-conscious', 'ROI-driven']
-    }
-  }
+  'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
+  'Millennials (1981-1996) - Experience-focused, cultural seekers', 
+  'Gen X (1965-1980) - Family-focused, value-conscious',
+  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
+  'Multi-Generational Families - Mixed-age groups',
+  'Business & Corporate Travellers - Professional efficiency-focused'
 ]
-const tooltips = {
-  'Gen Z (1997-2012) - Digital natives prioritizing authenticity': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
-  'Millennials (1981-1996) - Experience-focused, cultural seekers': 'Parents with children, multi-generational trips, visiting friends & relatives',
-  'Gen X (1965-1980) - Family-focused, value-conscious': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
-  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused': 'Corporate travellers, conference attendees, business meeting planners',
-  'Multi-Generational Families - Mixed-age groups': 'Independent explorers, digital nomads, solo adventure enthusiasts',
-  'Business & Corporate Travellers - Professional efficiency-focused': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
-}
+
   const handleNext = () => {
     if (selectedDemographic) {
       localStorage.setItem('selectedDemographics', JSON.stringify([selectedDemographic]))
@@ -93,38 +26,8 @@ const tooltips = {
       alert('Please select a target audience before continuing.')
     }
   }
-return (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    backgroundColor: '#f9fafb'
-  }}>
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-      gap: '1rem',
-      marginBottom: '3rem'
-    }}>
-      {demographics.map((demographic, index) => (
-        <div key={demographic.label} style={{ position: 'relative' }}>
-          <button
-            onClick={() => setSelectedDemographic(demographic.label)}
-            style={{
-              width: '100%',
-              padding: '1.5rem',
-              border: selectedDemographic === demographic.label ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-              borderRadius: '1rem',
-              backgroundColor: selectedDemographic === demographic.label ? '#eff6ff' : 'white',
-              cursor: 'pointer'
-            }}
-          >
-            {demographic.label}
-          </button>
-        </div>
-      ))}
-    </div>
-  
+
+  return (
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
@@ -253,20 +156,26 @@ return (
           gap: '1rem',
           marginBottom: '3rem'
         }}>
-          {demographics.map((demographic, index) => (
-  // ... existing code that uses 'demographic.label' instead
-))}
-            
+          {demographics.map((demographic) => {
+            const tooltips = {
+              'Female Travellers': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
+              'Families': 'Parents with children, multi-generational trips, visiting friends & relatives',
+              'Young Adults (18-35)': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
+              'Business Travellers': 'Corporate travellers, conference attendees, business meeting planners',
+              'Solo Travellers': 'Independent explorers, digital nomads, solo adventure enthusiasts',
+              'Mature Travellers': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
+            }
+
             return (
-              <div key={demographic.label} style={{ position: 'relative' }}>
+              <div key={demographic} style={{ position: 'relative' }}>
                 <button
-                  onClick={() => setSelectedDemographic(demographic.label)}
+                  onClick={() => setSelectedDemographic(demographic)}
                   style={{
                     width: '100%',
                     padding: '1.5rem',
-                    border: selectedDemographic === demographic.label ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                    border: selectedDemographic === demographic ? '2px solid #3b82f6' : '2px solid #e5e7eb',
                     borderRadius: '1rem',
-                    backgroundColor: selectedDemographic === demographic.label ? '#eff6ff' : 'white',
+                    backgroundColor: selectedDemographic === demographic ? '#eff6ff' : 'white',
                     color: '#374151',
                     fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
                     fontWeight: '500',
@@ -279,7 +188,7 @@ return (
                     justifyContent: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedDemographic !== demographic.label) {
+                    if (selectedDemographic !== demographic) {
                       e.currentTarget.style.borderColor = '#9ca3af'
                       e.currentTarget.style.backgroundColor = '#f9fafb'
                       e.currentTarget.style.transform = 'translateY(-2px)'
@@ -293,7 +202,7 @@ return (
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedDemographic !== demographic.label) {
+                    if (selectedDemographic !== demographic) {
                       e.currentTarget.style.borderColor = '#e5e7eb'
                       e.currentTarget.style.backgroundColor = 'white'
                       e.currentTarget.style.transform = 'translateY(0)'
@@ -307,7 +216,7 @@ return (
                     }
                   }}
                 >
-                  {demographic.label}
+                  {demographic}
                 </button>
                 
                 {/* Tooltip */}
@@ -335,7 +244,7 @@ return (
                     lineHeight: '1.3'
                   }}
                 >
-                  {tooltips[demographic.label as keyof typeof tooltips]}
+                  {tooltips[demographic as keyof typeof tooltips]}
                   <div style={{
                     position: 'absolute',
                     top: '100%',
