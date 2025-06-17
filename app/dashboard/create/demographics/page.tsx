@@ -227,18 +227,17 @@ export default function Demographics() {
   'Multi-Generational Families - Mixed-age groups': 'Independent explorers, digital nomads, solo adventure enthusiasts',
   'Business & Corporate Travellers - Professional efficiency-focused': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
 }
-            }
 
             return (
-              <div key={demographic} style={{ position: 'relative' }}>
+              <div key={demographic.label} style={{ position: 'relative' }}>
                 <button
-                  onClick={() => setSelectedDemographic(demographic)}
+                  onClick={() => setSelectedDemographic(demographic.label)}
                   style={{
                     width: '100%',
                     padding: '1.5rem',
-                    border: selectedDemographic === demographic ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                    border: selectedDemographic === demographic.label ? '2px solid #3b82f6' : '2px solid #e5e7eb',
                     borderRadius: '1rem',
-                    backgroundColor: selectedDemographic === demographic ? '#eff6ff' : 'white',
+                    backgroundColor: selectedDemographic === demographic.label ? '#eff6ff' : 'white',
                     color: '#374151',
                     fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
                     fontWeight: '500',
@@ -251,7 +250,7 @@ export default function Demographics() {
                     justifyContent: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedDemographic !== demographic) {
+                    if (selectedDemographic !== demographic.label) {
                       e.currentTarget.style.borderColor = '#9ca3af'
                       e.currentTarget.style.backgroundColor = '#f9fafb'
                       e.currentTarget.style.transform = 'translateY(-2px)'
@@ -265,7 +264,7 @@ export default function Demographics() {
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedDemographic !== demographic) {
+                    if (selectedDemographic !== demographic.label) {
                       e.currentTarget.style.borderColor = '#e5e7eb'
                       e.currentTarget.style.backgroundColor = 'white'
                       e.currentTarget.style.transform = 'translateY(0)'
@@ -279,7 +278,7 @@ export default function Demographics() {
                     }
                   }}
                 >
-                  {demographic}
+                  {demographic.label}
                 </button>
                 
                 {/* Tooltip */}
@@ -307,7 +306,7 @@ export default function Demographics() {
                     lineHeight: '1.3'
                   }}
                 >
-                  {tooltips[demographic as keyof typeof tooltips]}
+                  {tooltips[demographic.label as keyof typeof tooltips]}
                   <div style={{
                     position: 'absolute',
                     top: '100%',
