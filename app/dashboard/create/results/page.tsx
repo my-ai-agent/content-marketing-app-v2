@@ -177,10 +177,7 @@ const handleRefreshVersion = async () => {
     setShowRefreshModal(true);
   }
 };
-    ]);
-    setShowRefreshModal(true);
-  };
-
+    
   // Handle version selection
   const handleSelectVersion = () => {
     if (versionOptions[selectedVersionIndex]) {
