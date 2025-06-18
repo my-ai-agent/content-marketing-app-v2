@@ -42,65 +42,122 @@ export default function CreateStory() {
         borderBottom: '1px solid #f3f4f6'
       }}>
 
-        {/* Step Tracker */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#1f2937', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>1</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>2</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>3</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>4</div>
+        // MOBILE PROGRESS TRACKER FIX
+// Replace the Step Tracker section (lines 45-98) with this responsive version:
+
+{/* Step Tracker - Mobile Responsive */}
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: window.innerWidth < 640 ? '0.25rem' : '0.5rem', // Smaller gap on mobile
+  marginBottom: '1.5rem',
+  padding: '0 1rem', // Add padding to prevent edge overflow
+  overflow: 'hidden' // Prevent horizontal scroll
+}}>
+  {/* Step 1 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2rem', // Smaller circles on mobile
+    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    borderRadius: '50%',
+    backgroundColor: currentStep >= 1 ? '#1f2937' : '#e5e7eb',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem', // Smaller text on mobile
+    fontWeight: '600'
+  }}>1</div>
+  
+  {/* Line 1-2 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem', // Shorter lines on mobile
+    height: '2px',
+    backgroundColor: currentStep >= 2 ? '#1f2937' : '#e5e7eb'
+  }}></div>
+  
+  {/* Step 2 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    borderRadius: '50%',
+    backgroundColor: currentStep >= 2 ? '#1f2937' : '#e5e7eb',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
+    fontWeight: '600'
+  }}>2</div>
+  
+  {/* Line 2-3 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
+    height: '2px',
+    backgroundColor: currentStep >= 3 ? '#1f2937' : '#e5e7eb'
+  }}></div>
+  
+  {/* Step 3 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    borderRadius: '50%',
+    backgroundColor: currentStep >= 3 ? '#1f2937' : '#e5e7eb',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
+    fontWeight: '600'
+  }}>3</div>
+  
+  {/* Line 3-4 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
+    height: '2px',
+    backgroundColor: currentStep >= 4 ? '#1f2937' : '#e5e7eb'
+  }}></div>
+  
+  {/* Step 4 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    borderRadius: '50%',
+    backgroundColor: currentStep >= 4 ? '#1f2937' : '#e5e7eb',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
+    fontWeight: '600'
+  }}>4</div>
+  
+  {/* Line 4-5 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
+    height: '2px',
+    backgroundColor: currentStep >= 5 ? '#1f2937' : '#e5e7eb'
+  }}></div>
+  
+  {/* Step 5 */}
+  <div style={{
+    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
+    borderRadius: '50%',
+    backgroundColor: currentStep >= 5 ? '#1f2937' : '#e5e7eb',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
+    fontWeight: '600'
+  }}>5</div>
+</div>
+
+// MOBILE CALCULATIONS:
+// Mobile: 5 circles (1.5rem each) + 4 lines (1.5rem each) + gaps (0.25rem each) = ~280px
+// Desktop: 5 circles (2rem each) + 4 lines (2.5rem each) + gaps (0.5rem each) = ~320px
+// This will fit comfortably on mobile screens!
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
           <div style={{ 
             width: '2rem', 
