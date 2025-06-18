@@ -282,13 +282,7 @@ export default function Home() {
     Sign Up
   </button>
 </Link>
-    className="flex-1 px-4 py-3 rounded-xl text-white font-medium w-full"
-    style={{ backgroundColor: BRAND_PURPLE }}
-    onClick={() => setShowSignUp(false)}
-  >
-    Sign Up
-  </button>
-</Link>
+    
               </div>
             </form>
           </div>
