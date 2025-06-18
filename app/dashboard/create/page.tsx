@@ -30,46 +30,79 @@ export default function CreateStory() {
       {/* Header with Step Tracker */}
       <div className="flex flex-col justify-center items-center p-8 border-b border-gray-200">
 
-        {/* Step Tracker - Mobile Responsive */}
-        <div className="flex justify-center items-center gap-1 sm:gap-2 mb-6 px-4 overflow-hidden">
-          {/* Step 1 */}
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs sm:text-sm font-semibold">
-            1
-          </div>
-          
-          {/* Line 1-2 */}
-          <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
-          
-          {/* Step 2 */}
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
-            2
-          </div>
-          
-          {/* Line 2-3 */}
-          <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
-          
-          {/* Step 3 */}
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
-            3
-          </div>
-          
-          {/* Line 3-4 */}
-          <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
-          
-          {/* Step 4 */}
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
-            4
-          </div>
-          
-          {/* Line 4-5 */}
-          <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
-          
-          {/* Step 5 */}
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
-            5
-          </div>
+        {/* Step Tracker - Copy from WORKING photo page */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>1</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>2</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>3</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>4</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>5</div>
         </div>
-
         {/* Title */}
         <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 text-center">
           Create Your Story
