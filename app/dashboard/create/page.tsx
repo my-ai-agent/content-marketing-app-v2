@@ -183,7 +183,7 @@ export default function CreateStory() {
           textAlign: 'center'
         }}>
           Create Your Story
-        </h1>
+        </h1>,
       </div>
 
       <div style={{ 
