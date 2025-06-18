@@ -35,15 +35,10 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <img src="/logos/1.png" alt="Speak Click Send" className="h-8 w-auto mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
                 Home
-              </Link>
-              <Link href="/dashboard/settings" className="text-gray-600 hover:text-gray-900">
-                Settings
               </Link>
               <div className="flex items-center space-x-2">
                 <span 
