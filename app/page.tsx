@@ -272,15 +272,15 @@ export default function Home() {
                 >
                   Cancel
                   </button>
-                <Link href="/plans" >className="flex-1">
+                <Link href="/plans" className="flex-1">
   <button
-  type="button"
-  className="w-full px-4 py-3 rounded-xl text-white font-medium"
-  style={{ backgroundColor: BRAND_PURPLE }}
-  onClick={() => setShowSignUp(false)}
->
-  Sign Up
-</button>
+    type="button"
+    className="w-full px-4 py-3 rounded-xl text-white font-medium"
+    style={{ backgroundColor: BRAND_PURPLE }}
+    onClick={() => setShowSignUp(false)}
+  >
+    Sign Up
+  </button>
 </Link>
     className="flex-1 px-4 py-3 rounded-xl text-white font-medium w-full"
     style={{ backgroundColor: BRAND_PURPLE }}
