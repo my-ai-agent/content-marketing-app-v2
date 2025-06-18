@@ -42,117 +42,55 @@ export default function CreateStory() {
         borderBottom: '1px solid #f3f4f6'
       }}>
 
-        // MOBILE PROGRESS TRACKER FIX
-// Replace the Step Tracker section (lines 45-98) with this responsive version:
+// FIXED PROGRESS TRACKER - Replace the Step Tracker section with this:
 
 {/* Step Tracker - Mobile Responsive */}
-<div style={{
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: window.innerWidth < 640 ? '0.25rem' : '0.5rem', // Smaller gap on mobile
-  marginBottom: '1.5rem',
-  padding: '0 1rem', // Add padding to prevent edge overflow
-  overflow: 'hidden' // Prevent horizontal scroll
-}}>
+<div className="flex justify-center items-center gap-1 sm:gap-2 mb-6 px-4 overflow-hidden">
   {/* Step 1 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2rem', // Smaller circles on mobile
-    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    borderRadius: '50%',
-    backgroundColor: currentStep >= 1 ? '#1f2937' : '#e5e7eb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem', // Smaller text on mobile
-    fontWeight: '600'
-  }}>1</div>
+  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs sm:text-sm font-semibold">
+    1
+  </div>
   
   {/* Line 1-2 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem', // Shorter lines on mobile
-    height: '2px',
-    backgroundColor: currentStep >= 2 ? '#1f2937' : '#e5e7eb'
-  }}></div>
+  <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
   
   {/* Step 2 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    borderRadius: '50%',
-    backgroundColor: currentStep >= 2 ? '#1f2937' : '#e5e7eb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
-    fontWeight: '600'
-  }}>2</div>
+  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
+    2
+  </div>
   
   {/* Line 2-3 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
-    height: '2px',
-    backgroundColor: currentStep >= 3 ? '#1f2937' : '#e5e7eb'
-  }}></div>
+  <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
   
   {/* Step 3 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    borderRadius: '50%',
-    backgroundColor: currentStep >= 3 ? '#1f2937' : '#e5e7eb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
-    fontWeight: '600'
-  }}>3</div>
+  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
+    3
+  </div>
   
   {/* Line 3-4 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
-    height: '2px',
-    backgroundColor: currentStep >= 4 ? '#1f2937' : '#e5e7eb'
-  }}></div>
+  <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
   
   {/* Step 4 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    borderRadius: '50%',
-    backgroundColor: currentStep >= 4 ? '#1f2937' : '#e5e7eb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
-    fontWeight: '600'
-  }}>4</div>
+  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
+    4
+  </div>
   
   {/* Line 4-5 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2.5rem',
-    height: '2px',
-    backgroundColor: currentStep >= 5 ? '#1f2937' : '#e5e7eb'
-  }}></div>
+  <div className="w-6 sm:w-10 h-0.5 bg-gray-300"></div>
   
   {/* Step 5 */}
-  <div style={{
-    width: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    height: window.innerWidth < 640 ? '1.5rem' : '2rem',
-    borderRadius: '50%',
-    backgroundColor: currentStep >= 5 ? '#1f2937' : '#e5e7eb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: window.innerWidth < 640 ? '0.75rem' : '0.875rem',
-    fontWeight: '600'
-  }}>5</div>
+  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-xs sm:text-sm font-semibold">
+    5
+  </div>
 </div>
+
+// EXPLANATION:
+// - Uses Tailwind CSS classes instead of window.innerWidth
+// - w-6 h-6 on mobile (24px) vs w-8 h-8 on desktop (32px)
+// - gap-1 on mobile vs gap-2 on desktop
+// - w-6 lines on mobile vs w-10 lines on desktop  
+// - Works perfectly with server-side rendering
+// - No JavaScript runtime dependencies
 
 // MOBILE CALCULATIONS:
 // Mobile: 5 circles (1.5rem each) + 4 lines (1.5rem each) + gaps (0.25rem each) = ~280px
