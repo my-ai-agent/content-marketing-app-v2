@@ -14,12 +14,13 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-white relative">
       
       {/* Log-In Button - Absolute Top Right */}
+      {/* Fixed Log-In Button - Responsive positioning */}
       <button
         onClick={() => setShowSignUp(true)}
-        className="absolute top-6 right-6 z-10 px-6 py-2 rounded-lg font-medium transition-all hover:bg-blue-50"
+        className="absolute top-4 right-4 md:top-6 md:right-6 z-10 px-3 py-2 md:px-6 md:py-2 rounded-lg font-medium transition-all hover:bg-blue-50 text-sm md:text-base"
         style={{ 
           backgroundColor: 'transparent',
-          border: `3px solid ${BRAND_BLUE}`,
+          border: `2px solid ${BRAND_BLUE}`,
           color: BRAND_BLUE
         }}
       >
