@@ -84,36 +84,9 @@ export default function CreateStory() {
   </div>
 </div>
 
-// EXPLANATION:
-// - Uses Tailwind CSS classes instead of window.innerWidth
-// - w-6 h-6 on mobile (24px) vs w-8 h-8 on desktop (32px)
-// - gap-1 on mobile vs gap-2 on desktop
-// - w-6 lines on mobile vs w-10 lines on desktop  
-// - Works perfectly with server-side rendering
-// - No JavaScript runtime dependencies
-
-// MOBILE CALCULATIONS:
-// Mobile: 5 circles (1.5rem each) + 4 lines (1.5rem each) + gaps (0.25rem each) = ~280px
-// Desktop: 5 circles (2rem each) + 4 lines (2.5rem each) + gaps (0.5rem each) = ~320px
-// This will fit comfortably on mobile screens!
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>5</div>
-        </div>
-
         {/* Title */}
-        <h1 style={{ 
-          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+        <h1 style={{
+          fontSize: 'clamp(2rem, 6vw, 4rem)',
           fontWeight: '700',
           color: '#1f2937',
           lineHeight: '1.2',
@@ -121,16 +94,8 @@ export default function CreateStory() {
           textAlign: 'center'
         }}>
           Create Your Story
-        </h1>,
+        </h1>
       </div>
-
-      <div style={{ 
-        flex: '1', 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        width: '100%', 
-        padding: '2rem 1rem' 
-      }}>
 
         {/* Input Method Toggle */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
