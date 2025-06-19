@@ -600,7 +600,6 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
       )}
     </div>
   );
-}
 {/* QR Code Modal */}
 {showQRModal && (
   <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.6)', zIndex: 1002, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
