@@ -601,3 +601,71 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
     </div>
   );
 }
+{/* QR Code Modal */}
+{showQRModal && (
+  <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.6)', zIndex: 1002, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ background: 'white', borderRadius: '20px', maxWidth: '400px', width: '90%', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)' }}>
+      <div style={{ background: '#fef3c7', padding: '1.5rem', borderBottom: '1px solid #f59e0b', textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📱</div>
+        <h3 style={{ margin: 0, color: '#374151', fontSize: '1.2rem' }}>Your Universal QR Code</h3>
+        <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.9rem' }}>Scan to access all 16 platform options</p>
+      </div>
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        {qrCodeURL && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <img 
+              src={qrCodeURL} 
+              alt="QR Code" 
+              style={{ 
+                width: '200px', 
+                height: '200px', 
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px'
+              }} 
+            />
+          </div>
+        )}
+        <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+          Print this QR code on brochures, business cards, or signs. Tourists can scan to instantly access and share your story across all platforms!
+        </p>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button
+            onClick={() => {
+              // Download QR code
+              const link = document.createElement('a');
+              link.href = qrCodeURL;
+              link.download = 'story-qr-code.png';
+              link.click();
+            }}
+            style={{
+              flex: 1,
+              padding: '0.75rem 1rem',
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            📥 Download QR
+          </button>
+          <button
+            onClick={() => setShowQRModal(false)}
+            style={{
+              flex: 1,
+              padding: '0.75rem 1rem',
+              background: '#e5e7eb',
+              color: '#374151',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
