@@ -208,8 +208,25 @@ const handleGenerateQR = async () => {
     const landingPageURL = `${baseURL}/story/${storyId}`;
     
     // Generate QR code URL (we'll use QR Server API)
-    const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(landingPageURL)}`;
-    setQRCodeURL(qrURL);
+    // Generate QR code URL (using Google Charts API with fallback)
+try {
+  // Primary: Google Charts QR API (more reliable)
+  const qrURL = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(landingPageURL)}&choe=UTF-8`;
+  
+  // Test if the QR service is accessible
+  const testResponse = await fetch(qrURL, { method: 'HEAD' });
+  if (!testResponse.ok) {
+    throw new Error('Primary QR service unavailable');
+  }
+  
+  setQRCodeURL(qrURL);
+} catch (qrError) {
+  console.error('Primary QR generation failed, trying fallback:', qrError);
+  
+  // Fallback: Use QR Code Generator API
+  const fallbackURL = `https://qr-code-styling.com/api/qr-code?data=${encodeURIComponent(landingPageURL)}&size=300&format=png`;
+  setQRCodeURL(fallbackURL);
+}
     setShowQRModal(true);
     
   } catch (error) {
