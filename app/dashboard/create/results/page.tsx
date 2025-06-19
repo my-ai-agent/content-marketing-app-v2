@@ -1,6 +1,8 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+// Add this import at the top of results/page.tsx
+// We'll use a CDN-based QR library since we can't install packages
 
 export default function Results() {
   // State management
@@ -17,6 +19,9 @@ export default function Results() {
   const [showMorePlatforms, setShowMorePlatforms] = useState(false);
   const [showMoreDownloads, setShowMoreDownloads] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
+const [qrCodeURL, setQRCodeURL] = useState<string>('');
+const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
   // Sample content
   const sampleStory = "Discover the hidden gems of Canterbury's wellness scene! From the therapeutic hot springs of Hanmer Springs to the tranquil meditation retreats nestled in the Southern Alps, our region offers the ultimate relaxation and rejuvenation experience. Whether you seek adventure or serenity, Canterbury’s wellness destinations are sure to inspire your next escape.";
@@ -178,7 +183,42 @@ const targetAudience = storedDemo ? JSON.parse(storedDemo)[0] : 'Gen Z (1997-201
       setShowRefreshModal(false);
     }
   };
-
+// QR Code Generation
+const handleGenerateQR = async () => {
+  setIsGeneratingQR(true);
+  
+  try {
+    // Create a unique story ID based on current timestamp
+    const storyId = Date.now().toString();
+    
+    // Store story data for the landing page
+    const storyData = {
+      story: story,
+      photo: selectedPhoto,
+      demographic: localStorage.getItem('selectedDemographics'),
+      interests: localStorage.getItem('selectedInterests'),
+      created: new Date().toISOString()
+    };
+    
+    // Store in localStorage with the story ID
+    localStorage.setItem(`story_${storyId}`, JSON.stringify(storyData));
+    
+    // Create the landing page URL
+    const baseURL = window.location.origin;
+    const landingPageURL = `${baseURL}/story/${storyId}`;
+    
+    // Generate QR code URL (we'll use QR Server API)
+    const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(landingPageURL)}`;
+    setQRCodeURL(qrURL);
+    setShowQRModal(true);
+    
+  } catch (error) {
+    console.error('QR generation failed:', error);
+    alert('Failed to generate QR code. Please try again.');
+  } finally {
+    setIsGeneratingQR(false);
+  }
+};
   // Download content
   const handleDownload = (type: string) => {
     const filename = `story-${type}-${Date.now()}`;
@@ -319,6 +359,35 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
           <div style={{ background: 'white', borderRadius: '20px', padding: '2rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#1f2937' }}>Distribution Options</h2>
             {/* Platform Integrations */}
+            {/* Universal QR Code - PRIMARY DISTRIBUTION METHOD */}
+<div style={{ marginBottom: '2rem' }}>
+  <h3 style={{ fontSize: '1.2rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <span style={{ background: '#f59e0b', color: 'white', padding: '0.25rem', borderRadius: '4px', fontSize: '0.8rem' }}>📱</span>
+    Universal QR Code
+  </h3>
+  <div style={{ background: '#fef3c7', border: '2px solid #f59e0b', borderRadius: '12px', padding: '1.5rem', textAlign: 'center' }}>
+    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📱</div>
+    <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem' }}>Tell Your Story, Instantly!</h4>
+    <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem' }}>Generate a QR code that gives tourists access to all 16 platform and format options</p>
+    <button
+      onClick={handleGenerateQR}
+      disabled={isGeneratingQR}
+      style={{
+        background: isGeneratingQR ? '#d1d5db' : 'linear-gradient(45deg, #f59e0b 0%, #ef4444 100%)',
+        color: 'white',
+        border: 'none',
+        padding: '1rem 2rem',
+        borderRadius: '8px',
+        cursor: isGeneratingQR ? 'not-allowed' : 'pointer',
+        fontWeight: '600',
+        fontSize: '1rem',
+        transition: 'all 0.2s'
+      }}
+    >
+      {isGeneratingQR ? '🔄 Generating...' : '📱 Generate QR Code'}
+    </button>
+  </div>
+</div>
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.2rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ background: '#3b82f6', color: 'white', padding: '0.25rem', borderRadius: '4px', fontSize: '0.8rem' }}>🔗</span>
