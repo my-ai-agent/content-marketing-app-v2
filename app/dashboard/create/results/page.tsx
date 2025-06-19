@@ -227,8 +227,8 @@ export default function Results() {
           {[1, 2, 3, 4, 5].map((step, index) => (
             <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '2rem',
+                height: '2rem',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -243,7 +243,7 @@ export default function Results() {
               </div>
               {index < 4 && (
                 <div style={{
-                  width: '4rem',
+                  width: '2.5rem',
                   height: '2px',
                   backgroundColor: step < 5 ? '#10b981' : '#d1d5db',
                   margin: '0 0.25rem'
