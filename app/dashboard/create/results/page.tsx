@@ -198,7 +198,8 @@ const targetAudience = storedDemo ? JSON.parse(storedDemo)[0] : 'Gen Z (1997-201
         // keep plain text
         break;
     }
-
+// Add this after line 200:
+alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's download notification.`);
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     element.href = url;
