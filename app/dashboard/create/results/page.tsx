@@ -668,3 +668,4 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
     </div>
   </div>
 )}
+}
