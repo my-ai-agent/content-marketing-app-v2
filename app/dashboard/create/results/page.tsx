@@ -16,6 +16,7 @@ export default function Results() {
   const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
   const [showMorePlatforms, setShowMorePlatforms] = useState(false);
   const [showMoreDownloads, setShowMoreDownloads] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   // Sample content
   const sampleStory = "Discover the hidden gems of Canterbury's wellness scene! From the therapeutic hot springs of Hanmer Springs to the tranquil meditation retreats nestled in the Southern Alps, our region offers the ultimate relaxation and rejuvenation experience. Whether you seek adventure or serenity, Canterbury’s wellness destinations are sure to inspire your next escape.";
@@ -36,16 +37,22 @@ export default function Results() {
 
   // Load data on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedStory = localStorage.getItem('currentStory') || sampleStory;
-      setStory(savedStory);
-
-      const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-      checkMobile();
-      window.addEventListener('resize', checkMobile);
-      return () => window.removeEventListener('resize', checkMobile);
+  if (typeof window !== 'undefined') {
+    const savedStory = localStorage.getItem('currentStory') || sampleStory;
+    setStory(savedStory);
+    
+    // ADD THIS: Retrieve uploaded photo
+    const savedPhoto = localStorage.getItem('selectedPhoto');
+    if (savedPhoto) {
+      setSelectedPhoto(savedPhoto);
     }
-  }, []);
+
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }
+}, []);
 
   // Format content for platform
   const formatContentForPlatform = (content: string, platform: string) => {
