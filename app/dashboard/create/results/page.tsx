@@ -275,6 +275,27 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
           {/* Story Preview */}
           <div style={{ background: 'white', borderRadius: '20px', padding: '2rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1f2937' }}>Your Story</h2>
+            {/* Photo Display */}
+{selectedPhoto && (
+  <div style={{ marginBottom: '1.5rem' }}>
+    <img 
+      src={selectedPhoto} 
+      alt="Story photo" 
+      style={{ 
+        width: '100%', 
+        maxHeight: '300px', 
+        objectFit: 'cover', 
+        borderRadius: '12px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+      }} 
+    />
+  </div>
+)}
+
+{/* Existing story text div - line 278 */}
+<div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', lineHeight: '1.6', color: '#374151', minHeight: '200px', whiteSpace: 'pre-wrap' }}>
+  {story}
+</div>
             <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', lineHeight: '1.6', color: '#374151', minHeight: '200px', whiteSpace: 'pre-wrap' }}>
               {story}
             </div>
