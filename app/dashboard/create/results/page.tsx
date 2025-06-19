@@ -98,7 +98,8 @@ export default function Results() {
   // Handle refresh version with enhanced generational psychology
   const handleRefreshVersion = async () => {
     try {
-      const targetAudience = localStorage.getItem('selectedDemographic') || 'Gen Z (1997-2012) - Digital natives prioritizing authenticity';
+      const storedDemo = localStorage.getItem('selectedDemographics');
+const targetAudience = storedDemo ? JSON.parse(storedDemo)[0] : 'Gen Z (1997-2012) - Digital natives prioritizing authenticity';
       const interests = JSON.parse(localStorage.getItem('selectedInterests') || '["wellness", "relaxation"]');
       const originalStory = localStorage.getItem('currentStory') || story;
 
