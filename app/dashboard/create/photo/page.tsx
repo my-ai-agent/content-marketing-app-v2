@@ -16,32 +16,16 @@ export default function PhotoUpload() {
 const [originalPhoto, setOriginalPhoto] = useState(null);
 const [uploading, setUploading] = useState(false);
   
- const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+ const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];
   if (!file) return;
   
-  try {
-    setUploading(true);
-    
-    // Process image into multiple qualities
-    const processed = await processImage(file);
-    
-    // Store only lightweight versions in localStorage (no quota issues!)
-    localStorage.setItem('photoThumbnail', processed.thumbnail);
-    localStorage.setItem('photoMedium', processed.medium);
-    localStorage.setItem('photoSocial', processed.social);
-    localStorage.setItem('photoMetadata', JSON.stringify(processed.metadata));
-    
-    // Display medium quality preview
-    setSelectedPhoto(processed.medium);
-    setOriginalPhoto(processed.original);
-    
-  } catch (error) {
-    console.error('Photo processing failed:', error);
-    alert(error instanceof Error ? error.message : 'Failed to process image. Please try a smaller file.');
-  } finally {
-    setUploading(false);
-  }
+  setPhotoFile(file);
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    setSelectedPhoto(e.target?.result as string);
+  };
+  reader.readAsDataURL(file);
 };
 
   const handleNext = () => {
