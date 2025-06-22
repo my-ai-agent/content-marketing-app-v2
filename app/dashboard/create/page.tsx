@@ -57,7 +57,7 @@ export default function EnhancedStory() {
       
       let finalTranscript = story; // Keep existing story content
       
-      newRecognition.onresult = (event) => {
+      newRecognition.onresult = (event: any) => {
         let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -72,7 +72,7 @@ export default function EnhancedStory() {
         setStory(finalTranscript + interimTranscript);
       };
       
-      newRecognition.onerror = (event) => {
+      newRecognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsRecording(false);
         
