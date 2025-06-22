@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
-import { processImage } from '../../../utils/imageProcessor';
+import { processImageWithPica, simpleFallbackProcessing } from '../../../utils/picaProcessor';
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -23,24 +23,45 @@ const [uploading, setUploading] = useState(false);
   try {
     setUploading(true);
     
-    // Process with smart compression
-    const processed = await processImage(file);
+    // Add small delay for iOS file readiness (Copilot's recommendation)
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Store flow-optimized image in localStorage (no quota issues!)
-    localStorage.setItem('selectedPhoto', processed.flowImage);
-    localStorage.setItem('photoMetadata', JSON.stringify(processed.metadata));
-    
-    // Display the optimized image
-    setSelectedPhoto(processed.displayImage);
-    
-    // Keep original in component state for high-res needs
-    setOriginalPhoto(processed.original);
-    
-    console.log('Image processed:', {
-      original: `${(file.size / 1024 / 1024).toFixed(1)}MB`,
-      flow: `${(processed.metadata.flowImageSize / 1024).toFixed(0)}KB`,
-      isHighRes: processed.metadata.isHighRes
+    // Log file details for debugging
+    console.log('File selected:', {
+      name: file.name,
+      type: file.type,
+      size: `${(file.size / 1024 / 1024).toFixed(1)}MB`
     });
+    
+    try {
+      // Try Pica processing first (mobile-optimized)
+      const processed = await processImageWithPica(file);
+      
+      // Store processed image (no localStorage quota issues!)
+      localStorage.setItem('selectedPhoto', processed.processedImage);
+      setSelectedPhoto(processed.processedImage);
+      
+    } catch (picaError) {
+      console.warn('Pica processing failed, trying fallback:', picaError);
+      
+      // Fallback to simple processing
+      const fallback = await simpleFallbackProcessing(file);
+      localStorage.setItem('selectedPhoto', fallback.processedImage);
+      setSelectedPhoto(fallback.processedImage);
+      
+      if (fallback.fallback) {
+        console.log('Using fallback processing');
+      }
+    }
+    
+  } catch (error) {
+    console.error('All image processing failed:', error);
+    
+    // User-friendly error messages
+    if (error.message.includes('HEIC')) {
+      alert('iPhone HEIC photos are not supported. Please:\n1. Change your camera settings to JPEG, or\n2. Select a different photo');
+    } else if (error.message.includes('too large')) {
+      alert('Image is too large. Plea
     
   } catch (error) {
     console.error('Photo processing failed:', error);
