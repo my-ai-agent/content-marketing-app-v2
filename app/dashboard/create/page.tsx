@@ -48,7 +48,7 @@ export default function EnhancedStory() {
       setIsRecording(false);
     } else {
       // Start recording
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const newRecognition = new SpeechRecognition();
       
       newRecognition.continuous = true;
