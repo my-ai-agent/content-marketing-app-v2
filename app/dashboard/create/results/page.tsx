@@ -349,10 +349,6 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
   </div>
 )}
 
-{/* Existing story text div - line 278 */}
-<div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', lineHeight: '1.6', color: '#374151', minHeight: '200px', whiteSpace: 'pre-wrap' }}>
-  {story}
-</div>
             <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', lineHeight: '1.6', color: '#374151', minHeight: '200px', whiteSpace: 'pre-wrap' }}>
               {story}
             </div>
