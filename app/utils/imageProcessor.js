@@ -45,31 +45,41 @@ export const processImage = async (file) => {
       throw new Error('Invalid file type. Please select an image.');
     }
     
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error('File too large. Please select an image under 10MB.');
+    // Check file size (max 15MB)
+    if (file.size > 15 * 1024 * 1024) {
+      throw new Error('File too large. Please select an image under 15MB.');
     }
     
-    // Generate multiple quality versions
+    // Smart compression based on file size
+    let flowImage, displayImage;
+    
+    if (file.size > 2 * 1024 * 1024) { // Over 2MB
+      // High-res image: Create compressed version for app flow
+      flowImage = await compressImage(file, 800, 600, 0.75);    // ~400KB for flow
+      displayImage = await compressImage(file, 1200, 900, 0.8); // ~600KB for display
+    } else {
+      // Already small: Use as-is for flow
+      flowImage = file;
+      displayImage = await compressImage(file, 1200, 900, 0.8);
+    }
+    
+    // Always create thumbnail for preview
     const thumbnail = await compressImage(file, 300, 200, 0.6); // ~50KB
-    const medium = await compressImage(file, 800, 600, 0.8);    // ~200KB
-    const social = await compressImage(file, 1200, 800, 0.85);  // ~400KB
     
     // Extract metadata
     const metadata = {
       originalSize: file.size,
       originalName: file.name,
-      thumbnailSize: thumbnail.size,
-      mediumSize: medium.size,
-      socialSize: social.size,
+      isHighRes: file.size > 2 * 1024 * 1024,
+      flowImageSize: flowImage.size,
       timestamp: new Date().toISOString()
     };
     
     return {
       thumbnail: await blobToDataURL(thumbnail),
-      medium: await blobToDataURL(medium),
-      social: await blobToDataURL(social),
-      original: file,
+      flowImage: await blobToDataURL(flowImage),     // For app navigation
+      displayImage: await blobToDataURL(displayImage), // For preview
+      original: file,                                // Keep for high-res needs
       metadata
     };
     
