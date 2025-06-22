@@ -16,16 +16,38 @@ export default function PhotoUpload() {
 const [originalPhoto, setOriginalPhoto] = useState(null);
 const [uploading, setUploading] = useState(false);
   
- const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+ const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];
   if (!file) return;
   
-  setPhotoFile(file);
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    setSelectedPhoto(e.target?.result as string);
-  };
-  reader.readAsDataURL(file);
+  try {
+    setUploading(true);
+    
+    // Process with smart compression
+    const processed = await processImage(file);
+    
+    // Store flow-optimized image in localStorage (no quota issues!)
+    localStorage.setItem('selectedPhoto', processed.flowImage);
+    localStorage.setItem('photoMetadata', JSON.stringify(processed.metadata));
+    
+    // Display the optimized image
+    setSelectedPhoto(processed.displayImage);
+    
+    // Keep original in component state for high-res needs
+    setOriginalPhoto(processed.original);
+    
+    console.log('Image processed:', {
+      original: `${(file.size / 1024 / 1024).toFixed(1)}MB`,
+      flow: `${(processed.metadata.flowImageSize / 1024).toFixed(0)}KB`,
+      isHighRes: processed.metadata.isHighRes
+    });
+    
+  } catch (error) {
+    console.error('Photo processing failed:', error);
+    alert(error instanceof Error ? error.message : 'Failed to process image. Please try a smaller file.');
+  } finally {
+    setUploading(false);
+  }
 };
 
   const handleNext = () => {
