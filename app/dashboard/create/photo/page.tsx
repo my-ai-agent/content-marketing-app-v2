@@ -61,11 +61,11 @@ const [uploading, setUploading] = useState(false);
     if (error.message.includes('HEIC')) {
       alert('iPhone HEIC photos are not supported. Please:\n1. Change your camera settings to JPEG, or\n2. Select a different photo');
     } else if (error.message.includes('too large')) {
-      alert('Image is too large. Plea
+      alert('Image is too large. Please choose a smaller photo (under 20MB).');
+    } else {
+  alert('Failed to process image. Please try:\n• A different photo\n• A smaller file size\n• JPEG or PNG format');
+}
     
-  } catch (error) {
-    console.error('Photo processing failed:', error);
-    alert(error instanceof Error ? error.message : 'Failed to process image. Please try a smaller file.');
   } finally {
     setUploading(false);
   }
