@@ -38,7 +38,7 @@ const [uploading, setUploading] = useState(false);
     
   } catch (error) {
     console.error('Photo processing failed:', error);
-    alert(error.message || 'Failed to process image. Please try a smaller file.');
+    alert(error instanceof Error ? error.message : 'Failed to process image. Please try a smaller file.');
   } finally {
     setUploading(false);
   }
