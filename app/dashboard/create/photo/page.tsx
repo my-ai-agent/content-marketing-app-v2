@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
+import { processImage } from '../../../utils/imageProcessor';
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -12,18 +13,36 @@ export default function PhotoUpload() {
   const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setPhotoFile(file)
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setSelectedPhoto(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
+const [originalPhoto, setOriginalPhoto] = useState(null);
+const [uploading, setUploading] = useState(false);
+  
+ const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  
+  try {
+    setUploading(true);
+    
+    // Process image into multiple qualities
+    const processed = await processImage(file);
+    
+    // Store only lightweight versions in localStorage (no quota issues!)
+    localStorage.setItem('photoThumbnail', processed.thumbnail);
+    localStorage.setItem('photoMedium', processed.medium);
+    localStorage.setItem('photoSocial', processed.social);
+    localStorage.setItem('photoMetadata', JSON.stringify(processed.metadata));
+    
+    // Display medium quality preview
+    setSelectedPhoto(processed.medium);
+    setOriginalPhoto(processed.original);
+    
+  } catch (error) {
+    console.error('Photo processing failed:', error);
+    alert(error.message || 'Failed to process image. Please try a smaller file.');
+  } finally {
+    setUploading(false);
   }
+};
 
   const handleNext = () => {
     if (selectedPhoto) {
