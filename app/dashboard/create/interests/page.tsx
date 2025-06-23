@@ -338,14 +338,14 @@ export default function Interests() {
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
               display: 'inline'
-            }}>speak</div>
+            }}>click</div>
             <div style={{ 
               color: BRAND_ORANGE, 
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
               display: 'inline',
               marginLeft: '0.25rem'
-            }}>click</div>
+            }}>speak</div>
             <div style={{ 
               color: BRAND_BLUE, 
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
