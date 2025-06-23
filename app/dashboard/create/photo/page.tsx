@@ -402,7 +402,7 @@ export default function PhotoCapture() {
           borderRadius: '15px'
         }}>
           <h4 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
-            Why Click Speak Send?
+            Why is Click Speak Send the World's #1 Travel Storytelling App?
           </h4>
           <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
             <div style={{ textAlign: 'center', maxWidth: '200px' }}>
