@@ -1,39 +1,31 @@
 'use client'
+
 import Link from 'next/link'
 import { useState, useRef } from 'react'
 import { processImageWithPica, simpleFallbackProcessing } from '../../../utils/picaProcessor'
 
 const BRAND_PURPLE = '#6B2EFF'
-const BRAND_ORANGE = '#FF7B1C' 
+const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-export default function PhotoFirst() {
+export default function PhotoCapture() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const [uploading, setUploading] = useState(false)
-  const [originalPhoto, setOriginalPhoto] = useState<File | null>(null)
-  
+  const [caption, setCaption] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    
+
     try {
       setUploading(true)
       
-      // Add small delay for iOS file readiness (Copilot's recommendation)
+      // Add small delay for iOS file readiness
       await new Promise(resolve => setTimeout(resolve, 100))
-      
-      // Log file details for debugging
-      console.log('File selected:', {
-        name: file.name,
-        type: file.type,
-        size: `${(file.size / 1024 / 1024).toFixed(1)}MB`
-      })
-      
+
       try {
         // Try Pica processing first (mobile-optimized)
         const processed = await processImageWithPica(file)
@@ -41,25 +33,17 @@ export default function PhotoFirst() {
         // Store processed image (no localStorage quota issues!)
         localStorage.setItem('selectedPhoto', processed.processedImage)
         setSelectedPhoto(processed.processedImage)
-        setOriginalPhoto(file)
-        
+        setPhotoFile(file)
       } catch (picaError) {
         console.warn('Pica processing failed, trying fallback:', picaError)
-        
         // Fallback to simple processing
         const fallback = await simpleFallbackProcessing(file)
         localStorage.setItem('selectedPhoto', fallback.processedImage)
         setSelectedPhoto(fallback.processedImage)
-        
-        if (fallback.fallback) {
-          console.log('Using fallback processing')
-        }
+        setPhotoFile(file)
       }
-      
     } catch (error) {
       console.error('All image processing failed:', error)
-      
-      // User-friendly error messages
       if (error instanceof Error && error.message.includes('HEIC')) {
         alert('iPhone HEIC photos are not supported. Please:\n1. Change your camera settings to JPEG, or\n2. Select a different photo')
       } else if (error instanceof Error && error.message.includes('too large')) {
@@ -73,306 +57,388 @@ export default function PhotoFirst() {
   }
 
   const handleNext = () => {
-    if (selectedPhoto) {
-      // Store the photo and move to choice point
-      window.location.href = '/dashboard/create/choice'
-    } else {
-      alert('Please add a photo before continuing.')
+    if (selectedPhoto && caption.trim()) {
+      // Store caption for later use
+      localStorage.setItem('photoCaption', caption.trim())
+      localStorage.setItem('userStory', caption.trim()) // Basic story starts with caption
     }
   }
 
-  const handleCameraCapture = () => {
-    setUploadMethod('camera')
-    cameraInputRef.current?.click()
-  }
-
-  const handleUpload = () => {
-    setUploadMethod('upload')
-    fileInputRef.current?.click()
-  }
+  const isReadyToNext = selectedPhoto && caption.trim().length > 0
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      
-      {/* Header with Step Tracker */}
-      <div className="flex flex-col justify-center items-center p-8 border-b border-gray-200">
-
-        {/* Step Tracker */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      padding: '2rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
+      {/* Progress Indicator */}
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: BRAND_PURPLE, 
             color: 'white',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
+            fontWeight: 'bold'
           }}>1</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
+          <div style={{ width: '3rem', height: '2px', backgroundColor: '#ddd' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#ddd', 
+            color: '#999',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
+            fontWeight: 'bold'
           }}>2</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
+          <div style={{ width: '3rem', height: '2px', backgroundColor: '#ddd' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#ddd', 
+            color: '#999',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
+            fontWeight: 'bold'
           }}>3</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>4</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>5</div>
-        </div>
-
-        {/* Hero Section */}
-        <div className="text-center">
-          <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-4">
-            Capture Your Amazing Moment
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            The only tourism app that works exactly how tourists actually behave: 
-            <br />
-            <span className="font-semibold text-gray-800">📸 See something amazing → Capture it → Share it professionally</span>
-          </p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 max-w-4xl mx-auto w-full p-8">
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h1 style={{
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            fontWeight: '800',
+            color: '#2D3748',
+            margin: '0 0 1rem 0'
+          }}>
+            Capture Your Amazing Moment
+          </h1>
+          <p style={{
+            fontSize: '1.2rem',
+            color: '#4A5568',
+            margin: '0',
+            lineHeight: '1.6'
+          }}>
+            The only tourism app that works exactly how tourists actually behave:<br/>
+            📸 <strong>See something amazing</strong> → <strong>Capture it</strong> → <strong>Share it professionally</strong>
+          </p>
+        </div>
 
-        {/* Photo Upload Area */}
-        <div className="text-center w-full mb-12">
+        {/* Photo Upload Section */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '20px',
+          padding: '2rem',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          marginBottom: '2rem'
+        }}>
           {!selectedPhoto ? (
-            <div className="max-w-2xl mx-auto">
+            <>
               {/* Upload Options */}
-              <div className="mb-8">
-                <div className="inline-flex bg-gray-100 rounded-2xl p-2">
-                  <button
-                    type="button"
-                    onClick={() => setUploadMethod('upload')}
-                    className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all ${
-                      uploadMethod === 'upload' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    <span className="mr-2">📁</span>
-                    Upload
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setUploadMethod('camera')}
-                    className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all ${
-                      uploadMethod === 'camera' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    <span className="mr-2">📸</span>
-                    Camera
-                  </button>
-                </div>
-              </div>
-
-              {/* Upload Zone */}
-              <div 
-                onClick={uploadMethod === 'camera' ? handleCameraCapture : handleUpload}
-                className="border-3 border-dashed border-gray-300 rounded-3xl p-12 hover:border-gray-400 transition-all cursor-pointer bg-gray-50 hover:bg-gray-100"
-              >
-                <div className="text-6xl mb-6">📸</div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-4">
-                  {uploadMethod === 'camera' ? 'Take Photo' : 'Upload Your Photo'}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {uploadMethod === 'camera' 
-                    ? 'Capture the moment with your camera'
-                    : 'Drop your amazing travel photo here or click to browse'
-                  }
-                </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
                 <button
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className={`px-8 py-4 rounded-2xl text-white font-semibold transition-all hover:scale-105 ${
-                    uploading 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'shadow-lg'
-                  }`}
-                  style={{ 
-                    backgroundColor: uploading ? undefined : BRAND_PURPLE 
+                  style={{
+                    backgroundColor: BRAND_ORANGE,
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '25px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    opacity: uploading ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
-                  {uploading ? (
-                    <span className="flex items-center gap-2">
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      Processing...
-                    </span>
-                  ) : (
-                    uploadMethod === 'camera' ? '📸 Open Camera' : '📁 Choose Photo'
-                  )}
+                  📁 Upload
+                </button>
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={uploading}
+                  style={{
+                    backgroundColor: BRAND_BLUE,
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '25px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    opacity: uploading ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  📷 Camera
                 </button>
               </div>
 
-              {/* Hidden file inputs */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-
-              {/* Tips */}
-              <div className="mt-8 text-sm text-gray-500">
-                <p>💡 Tips: For best results, use JPEG or PNG format under 10MB</p>
+              {/* Upload Area */}
+              <div style={{
+                border: '3px dashed #CBD5E0',
+                borderRadius: '12px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                backgroundColor: '#F7FAFC'
+              }}>
+                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📸</div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 0.5rem 0' }}>
+                  Upload Your Photo
+                </h3>
+                <p style={{ color: '#718096', margin: '0 0 1.5rem 0' }}>
+                  Drop your amazing travel photo here or click to browse
+                </p>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  style={{
+                    backgroundColor: BRAND_PURPLE,
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.75rem 2rem',
+                    borderRadius: '25px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    opacity: uploading ? 0.7 : 1
+                  }}
+                >
+                  {uploading ? 'Processing...' : '📁 Choose Photo'}
+                </button>
               </div>
-            </div>
+
+              <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#718096', marginTop: '1rem' }}>
+                💡 Tips: For best results, use JPEG or PNG format under 10MB
+              </p>
+            </>
           ) : (
             /* Photo Preview */
-            <div className="max-w-2xl mx-auto">
-              <div className="mb-6">
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
+                Your Amazing Photo
+              </h3>
+              <div style={{
+                display: 'inline-block',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                marginBottom: '1.5rem'
+              }}>
                 <img 
                   src={selectedPhoto} 
-                  alt="Your amazing photo" 
-                  className="w-full max-h-96 object-cover rounded-3xl shadow-xl"
+                  alt="Selected tourism photo" 
+                  style={{ 
+                    maxWidth: '100%', 
+                    maxHeight: '400px', 
+                    width: 'auto', 
+                    height: 'auto',
+                    display: 'block'
+                  }} 
                 />
               </div>
-              
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
-                <div className="flex items-center justify-center gap-2 text-green-700">
-                  <span className="text-2xl">✅</span>
-                  <span className="font-semibold">Perfect! Your photo is ready</span>
-                </div>
-                <p className="text-green-600 mt-2">
-                  Now let's choose how you want to share this amazing moment
-                </p>
-              </div>
-
               <button
                 onClick={() => {
                   setSelectedPhoto(null)
                   setPhotoFile(null)
+                  setCaption('')
                 }}
-                className="text-gray-600 hover:text-gray-800 font-medium"
+                style={{
+                  backgroundColor: '#E2E8F0',
+                  color: '#4A5568',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer'
+                }}
               >
-                📸 Choose Different Photo
+                🔄 Change Photo
               </button>
             </div>
           )}
+
+          {/* Hidden File Inputs */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            style={{ display: 'none' }}
+          />
+          <input
+            type="file"
+            ref={cameraInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+          />
         </div>
 
-        {/* Next Button */}
-        <div className="flex justify-center mb-8">
-          <button
-            onClick={handleNext}
-            disabled={!selectedPhoto || uploading}
-            className={`text-2xl font-black px-12 py-4 rounded-2xl transition-all ${
-              selectedPhoto && !uploading
-                ? 'text-white shadow-2xl hover:scale-105 cursor-pointer' 
-                : 'text-gray-400 bg-gray-200 cursor-not-allowed'
-            }`}
+        {/* Caption Section - Only show when photo is selected */}
+        {selectedPhoto && (
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+            marginBottom: '2rem'
+          }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
+              📝 Tell us about this photo
+            </h3>
+            <p style={{ color: '#718096', margin: '0 0 1rem 0', fontSize: '1rem' }}>
+              Write a simple caption describing your amazing moment (e.g., "Incredible sunrise at Milford Sound")
+            </p>
+            <textarea
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              placeholder="Amazing day at Milford Sound..."
+              style={{
+                width: '100%',
+                minHeight: '100px',
+                padding: '1rem',
+                border: '2px solid #E2E8F0',
+                borderRadius: '12px',
+                fontSize: '1rem',
+                fontFamily: 'inherit',
+                resize: 'vertical',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+            />
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginTop: '0.5rem',
+              fontSize: '0.9rem',
+              color: '#718096'
+            }}>
+              <span>{caption.length} characters</span>
+              <span>Keep it simple and authentic!</span>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link 
+            href="/"
             style={{
-              background: selectedPhoto && !uploading
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : undefined
+              color: '#718096',
+              textDecoration: 'none',
+              fontSize: '1rem',
+              padding: '0.75rem 1.5rem'
             }}
           >
-            Next: Choose Sharing Style →
-          </button>
+            ← Back to Home
+          </Link>
+
+          {isReadyToNext ? (
+            <Link
+              href="/dashboard/create/demographics"
+              onClick={handleNext}
+              style={{
+                background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+                color: 'white',
+                padding: '1rem 2rem',
+                borderRadius: '25px',
+                textDecoration: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Next: Choose Demographics →
+            </Link>
+          ) : (
+            <button
+              disabled
+              style={{
+                backgroundColor: '#E2E8F0',
+                color: '#A0AEC0',
+                padding: '1rem 2rem',
+                borderRadius: '25px',
+                border: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                cursor: 'not-allowed'
+              }}
+            >
+              Next: Choose Demographics →
+            </button>
+          )}
         </div>
 
-        {/* Value Proposition */}
-        <div className="text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 mb-8">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
-            Why Speak Click Send?
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div>
-              <div className="text-2xl mb-2">📸</div>
-              <p className="font-semibold text-gray-700">Photo First</p>
-              <p className="text-gray-600">Works exactly how tourists think</p>
+        {/* Why Speak Click Send? */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '4rem',
+          padding: '2rem',
+          backgroundColor: 'rgba(255,255,255,0.8)',
+          borderRadius: '15px'
+        }}>
+          <h4 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
+            Why Click Speak Send?
+          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📸</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>Photo-First</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Natural tourist behavior</p>
             </div>
-            <div>
-              <div className="text-2xl mb-2">🤖</div>
-              <p className="font-semibold text-gray-700">AI Enhanced</p>
-              <p className="text-gray-600">Professional content creation</p>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🤖</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>AI-Enhanced</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Professional content creation</p>
             </div>
-            <div>
-              <div className="text-2xl mb-2">🌍</div>
-              <p className="font-semibold text-gray-700">Multi-Platform</p>
-              <p className="text-gray-600">Share across 16+ platforms instantly</p>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌍</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>Multi-Platform</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>16+ platforms instantly</p>
             </div>
           </div>
         </div>
 
-        {/* Logo */}
-        <div className="text-center pt-8">
-          <Link href="/" className="inline-block text-xl font-black">
-            <span style={{ color: BRAND_PURPLE }}>speak</span>
-            <span style={{ color: BRAND_ORANGE }}> click</span>
-            <span style={{ color: BRAND_BLUE }}> send</span>
-          </Link>
+        {/* Brand Logo Footer */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '3rem',
+          padding: '1rem'
+        }}>
+          <div style={{
+            fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+            fontWeight: '900',
+            lineHeight: '0.9'
+          }}>
+            <span style={{ color: BRAND_PURPLE }}>click</span>{' '}
+            <span style={{ color: BRAND_ORANGE }}>speak</span>{' '}
+            <span style={{ color: BRAND_BLUE }}>send</span>
+          </div>
         </div>
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="p-6 text-center border-t border-gray-200">
-        <Link href="/" className="text-gray-600 font-semibold hover:text-gray-900">
-          ← Back to Home
-        </Link>
       </div>
     </div>
   )
