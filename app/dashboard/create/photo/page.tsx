@@ -280,52 +280,7 @@ export default function PhotoCapture() {
           />
         </div>
 
-        {/* LinkedIn-Style Caption Section - Only show when photo is selected */}
-        {selectedPhoto && (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            padding: '1.5rem',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-            marginBottom: '2rem'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
-              📝 Add a caption
-            </h3>
-            
-            <input
-              type="text"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Write a caption... (e.g., Amazing day at Milford Sound)"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '2px solid #E2E8F0',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontFamily: 'inherit',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
-            />
-            
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginTop: '0.5rem',
-              fontSize: '0.9rem',
-              color: '#718096'
-            }}>
-              <span>{caption.length} characters</span>
-              <span>Keep it simple and authentic!</span>
-            </div>
-          </div>
-        )}
+        
         {/* Navigation */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link 
