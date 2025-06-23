@@ -116,7 +116,7 @@ export default function PhotoCapture() {
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <h1 style={{
             fontSize: 'clamp(2rem, 5vw, 3rem)',
             fontWeight: '800',
@@ -140,9 +140,9 @@ export default function PhotoCapture() {
         <div style={{
           backgroundColor: 'white',
           borderRadius: '20px',
-          padding: '2rem',
+          padding: '1rem',
           boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-          marginBottom: '2rem'
+          marginBottom: '1rem'
         }}>
           {!selectedPhoto ? (
             <>
@@ -234,11 +234,11 @@ export default function PhotoCapture() {
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
                 Your Amazing Photo
               </h3>
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ textAlign: 'center', marginBottom: '0.5rem', padding: '0' }}>
                 <img 
   src={selectedPhoto} 
   alt="Your amazing photo" 
-  className="w-full max-h-96 object-cover rounded-3xl shadow-xl"
+  className="w-full max-h-[600px] object-cover rounded-3xl shadow-xl"
 />
               </div>
               <button
