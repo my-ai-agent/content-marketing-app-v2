@@ -64,7 +64,7 @@ export default function PhotoCapture() {
     }
   }
 
-  const isReadyToNext = selectedPhoto && caption.trim().length > 0;
+  const isReadyToNext = selectedPhoto && caption.trim().length > 0
 
   return (
     <div style={{
@@ -336,7 +336,78 @@ export default function PhotoCapture() {
               fontSize: '1rem',
               padding: '0.75rem 1.5rem'
             }}
+          >
+            ← Back to Home
+          </Link>
+
+          {isReadyToNext ? (
+            <Link
+              href="/dashboard/create/demographics"
+              onClick={handleNext}
+              style={{
+                background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+                color: 'white',
+                padding: '1rem 2rem',
+                borderRadius: '25px',
+                textDecoration: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Next: Choose Demographics →
+            </Link>
+          ) : (
+            <button
+              disabled
+              style={{
+                backgroundColor: '#E2E8F0',
+                color: '#A0AEC0',
+                padding: '1rem 2rem',
+                borderRadius: '25px',
+                border: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                cursor: 'not-allowed'
+              }}
+            >
+              Next: Choose Demographics →
+            </button>
+          )}
+        </div>
+
+        {/* Why Speak Click Send? */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '4rem',
+          padding: '2rem',
+          backgroundColor: 'rgba(255,255,255,0.8)',
+          borderRadius: '15px'
+        }}>
+          <h4 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
+            🏆 World's #1 Photo-First Travel Storytelling App
+          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📸</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>Photo-First</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Natural tourist behavior</p>
+            </div>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🤖</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>AI-Enhanced</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Professional content creation</p>
+            </div>
+            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌍</div>
+              <p style={{ margin: '0', fontWeight: '600' }}>Multi-Platform</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>16+ global platforms instantly</p>
+            </div>
           </div>
+        </div>
 
         {/* Brand Logo Footer */}
         <div style={{ 
