@@ -234,13 +234,7 @@ export default function PhotoCapture() {
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
                 Your Amazing Photo
               </h3>
-              <div style={{
-                display: 'inline-block',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                marginBottom: '1.5rem'
-              }}>
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                 <img 
   src={selectedPhoto} 
   alt="Your amazing photo" 
