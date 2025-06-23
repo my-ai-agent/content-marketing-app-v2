@@ -339,23 +339,25 @@ export default function PhotoCapture() {
           </div>
 
         {/* Brand Logo Footer */}
-<Link
-  href="/dashboard/create/demographics"
-  onClick={handleNext}
-  style={{
-    background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-    color: 'white',
-    padding: '1rem 2rem',
-    borderRadius: '25px',
-    textDecoration: 'none',
-    fontSize: '1.1rem',
-    fontWeight: '600',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-    transition: 'transform 0.2s'
-  }}
-  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
->
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '3rem',
+          padding: '1rem'
+        }}>
+          <div style={{
+            fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+            fontWeight: '900',
+            lineHeight: '0.9'
+          }}>
+            <span style={{ color: BRAND_PURPLE }}>click</span>{' '}
+            <span style={{ color: BRAND_ORANGE }}>speak</span>{' '}
+            <span style={{ color: BRAND_BLUE }}>send</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
   Next: Choose Demographics →
 </Link>
           ) : (
