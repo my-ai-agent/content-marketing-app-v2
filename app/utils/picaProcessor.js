@@ -6,15 +6,28 @@ const picaInstance = pica();
 export const calculateDimensions = (originalWidth, originalHeight, maxWidth, maxHeight) => {
   const aspectRatio = originalWidth / originalHeight;
   
+  // 🐞 DEBUG: Log calculation details
+  console.log('🔍 calculateDimensions DEBUG:');
+  console.log('Original:', originalWidth, 'x', originalHeight);
+  console.log('Aspect ratio:', aspectRatio);
+  console.log('Max constraints:', maxWidth, 'x', maxHeight);
+  console.log('Is portrait?', originalHeight > originalWidth);
+  
   let width = maxWidth;
   let height = maxWidth / aspectRatio;
+  
+  console.log('Initial calculation:', width, 'x', height);
   
   if (height > maxHeight) {
     height = maxHeight;
     width = maxHeight * aspectRatio;
+    console.log('Adjusted for maxHeight:', width, 'x', height);
   }
   
-  return { width: Math.round(width), height: Math.round(height) };
+  const result = { width: Math.round(width), height: Math.round(height) };
+  console.log('Final dimensions:', result);
+  
+  return result;
 };
 
 export const processImageWithPica = async (file) => {
