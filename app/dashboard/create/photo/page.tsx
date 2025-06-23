@@ -242,18 +242,10 @@ export default function PhotoCapture() {
                 marginBottom: '1.5rem'
               }}>
                 <img 
-                  src={selectedPhoto} 
-                  alt="Selected tourism photo" 
-                  style={{ 
-                    maxWidth: '100%',
-  maxHeight: '400px',
-  width: 'auto',
-  height: 'auto',
-  display: 'block',
-  objectFit: 'contain',
-  objectPosition: 'center'
-                  }} 
-                />
+  src={selectedPhoto} 
+  alt="Your amazing photo" 
+  className="w-full max-h-96 object-cover rounded-3xl shadow-xl"
+/>
               </div>
               <button
                 onClick={() => {
