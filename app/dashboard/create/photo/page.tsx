@@ -418,7 +418,7 @@ export default function PhotoCapture() {
             <div style={{ textAlign: 'center', maxWidth: '200px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌍</div>
               <p style={{ margin: '0', fontWeight: '600' }}>Multi-Platform</p>
-              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>16+ platforms instantly</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>16+ global platforms instantly</p>
             </div>
           </div>
         </div>
