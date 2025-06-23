@@ -1,10 +1,102 @@
 'use client'
 
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
+
+// Platform showcase with real platform names and colors
+const platformSets = [
+  [
+    { name: 'Instagram', color: '#E4405F', icon: '📷' },
+    { name: 'Facebook', color: '#1877F2', icon: '📘' },
+    { name: 'LinkedIn', color: '#0A66C2', icon: '💼' },
+    { name: 'Email', color: '#718096', icon: '📧' }
+  ],
+  [
+    { name: 'TikTok', color: '#000000', icon: '🎵' },
+    { name: 'YouTube', color: '#FF0000', icon: '📺' },
+    { name: 'Twitter/X', color: '#1DA1F2', icon: '🐦' },
+    { name: 'Pinterest', color: '#BD081C', icon: '📌' }
+  ],
+  [
+    { name: 'Website', color: '#718096', icon: '🌐' },
+    { name: 'PDF', color: '#DC2626', icon: '📄' },
+    { name: 'Blog Post', color: '#059669', icon: '📝' },
+    { name: 'Word Doc', color: '#2563EB', icon: '💻' }
+  ]
+]
+
+// Clean Platform Carousel Component
+function PlatformCarousel() {
+  const [currentSetIndex, setCurrentSetIndex] = useState(0)
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSetIndex((prevIndex) => (prevIndex + 1) % platformSets.length)
+    }, 3000) // Change every 3 seconds for better readability
+    
+    return () => clearInterval(interval)
+  }, [])
+  
+  const currentPlatforms = platformSets[currentSetIndex]
+  
+  return (
+    <div style={{
+      display: 'flex',
+      gap: '2rem',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '80px'
+    }}>
+      {currentPlatforms.map((platform, index) => (
+        <div
+          key={`${currentSetIndex}-${index}`}
+          style={{
+            textAlign: 'center',
+            transition: 'all 0.6s ease',
+            opacity: 1,
+            transform: 'translateY(0)',
+            animation: `slideInFade 0.6s ease-in-out`
+          }}
+        >
+          <div style={{ 
+            fontSize: '2.5rem',
+            marginBottom: '0.25rem',
+            color: platform.color
+          }}>
+            {platform.icon}
+          </div>
+          <div style={{ 
+            fontSize: '0.8rem', 
+            color: '#4A5568', 
+            fontWeight: '600',
+            whiteSpace: 'nowrap'
+          }}>
+            {platform.name}
+          </div>
+        </div>
+      ))}
+      
+      {/* CSS animation */}
+      <style jsx>{`
+        @keyframes slideInFade {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
 
 export default function Home() {
   return (
@@ -107,62 +199,8 @@ export default function Home() {
         START
       </Link>
 
-      {/* Platform Logos */}
-      <div style={{
-        display: 'flex',
-        gap: '2rem',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        {/* Instagram */}
-        <div style={{ 
-          fontSize: '2.5rem',
-          color: '#E4405F',
-          textAlign: 'center'
-        }}>
-          📷
-        </div>
-        
-        {/* Facebook */}
-        <div style={{ 
-          fontSize: '2.5rem',
-          color: '#1877F2',
-          textAlign: 'center'
-        }}>
-          📘
-        </div>
-        
-        {/* LinkedIn */}
-        <div style={{ 
-          fontSize: '2.5rem',
-          color: '#0A66C2',
-          textAlign: 'center'
-        }}>
-          💼
-        </div>
-        
-        {/* Email/More */}
-        <div style={{ 
-          fontSize: '2.5rem',
-          color: '#718096',
-          textAlign: 'center'
-        }}>
-          📧
-        </div>
-        
-        {/* Plus More Indicator */}
-        <div style={{
-          fontSize: '1.2rem',
-          color: '#718096',
-          fontWeight: '600',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          + 12 more platforms
-        </div>
-      </div>
+      {/* Clean Platform Carousel */}
+      <PlatformCarousel />
 
       {/* Subtitle */}
       <p style={{
