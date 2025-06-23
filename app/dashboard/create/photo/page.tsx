@@ -336,12 +336,9 @@ export default function PhotoCapture() {
               fontSize: '1rem',
               padding: '0.75rem 1.5rem'
             }}
-          >
-            ← Back to Home
-          </Link>
+          </div>
 
-          {isReadyToNext ? (
-            <Link
+        {/* Brand Logo Footer */}
               href="/dashboard/create/demographics"
               onClick={handleNext}
               style={{
