@@ -238,7 +238,7 @@ export default function PhotoCapture() {
                 <img 
   src={selectedPhoto} 
   alt="Your amazing photo" 
-  className="w-full max-h-[600px] object-cover rounded-3xl shadow-xl"
+  className="w-full object-cover rounded-3xl shadow-xl"
 />
               </div>
               <button
