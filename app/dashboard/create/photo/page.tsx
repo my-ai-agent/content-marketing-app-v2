@@ -64,7 +64,7 @@ export default function PhotoCapture() {
     }
   }
 
-  const isReadyToNext = selectedPhoto && caption.trim().length > 0
+  const isReadyToNext = selectedPhoto && caption.trim().length > 0;
 
   return (
     <div style={{
