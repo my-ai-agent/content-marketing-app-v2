@@ -280,40 +280,39 @@ export default function PhotoCapture() {
           />
         </div>
 
-        {/* Caption Section - Only show when photo is selected */}
+        {/* LinkedIn-Style Caption Section - Only show when photo is selected */}
         {selectedPhoto && (
           <div style={{
             backgroundColor: 'white',
             borderRadius: '20px',
-            padding: '2rem',
+            padding: '1.5rem',
             boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
             marginBottom: '2rem'
           }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
-              📝 Tell us about this photo
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
+              📝 Add a caption
             </h3>
-            <p style={{ color: '#718096', margin: '0 0 1rem 0', fontSize: '1rem' }}>
-              Write a simple caption describing your amazing moment (e.g., "Incredible sunrise at Milford Sound")
-            </p>
-            <textarea
+            
+            <input
+              type="text"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Amazing day at Milford Sound..."
+              placeholder="Write a caption... (e.g., Amazing day at Milford Sound)"
               style={{
                 width: '100%',
-                minHeight: '100px',
-                padding: '1rem',
+                padding: '0.75rem 1rem',
                 border: '2px solid #E2E8F0',
                 borderRadius: '12px',
                 fontSize: '1rem',
                 fontFamily: 'inherit',
-                resize: 'vertical',
                 outline: 'none',
-                transition: 'border-color 0.2s'
+                transition: 'border-color 0.2s',
+                boxSizing: 'border-box'
               }}
               onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
               onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
             />
+            
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -327,7 +326,6 @@ export default function PhotoCapture() {
             </div>
           </div>
         )}
-
         {/* Navigation */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link 
