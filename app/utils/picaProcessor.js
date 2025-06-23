@@ -6,7 +6,6 @@ const picaInstance = pica();
 export const calculateDimensions = (originalWidth, originalHeight, maxWidth, maxHeight) => {
   const aspectRatio = originalWidth / originalHeight;
   
-  // 🐞 DEBUG: Log calculation details
   console.log('🔍 calculateDimensions DEBUG:');
   console.log('Original:', originalWidth, 'x', originalHeight);
   console.log('Aspect ratio:', aspectRatio);
@@ -54,8 +53,7 @@ export const processImageWithPica = async (file) => {
     return new Promise((resolve, reject) => {
       img.onload = async () => {
         try {
-          // 🐞 DEBUG: Log original image size
-console.log('Original image size:', img.width, img.height);
+          
           // Smart sizing based on file size and device capabilities
           let maxWidth, maxHeight, quality;
           
@@ -83,9 +81,7 @@ console.log('Original image size:', img.width, img.height);
           
           canvas.width = width;
           canvas.height = height;
-          // 🐞 DEBUG: Log target canvas size
-console.log('Target canvas size:', canvas.width, canvas.height);
-
+          
 // 🔧 FIX: Explicitly clear canvas (Copilot's key suggestion)
 const ctx = canvas.getContext('2d');
 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -98,10 +94,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
             unsharpRadius: 0.6,
             unsharpThreshold: 2
           });
-          // 🐞 DEBUG: Visualize canvas (REMOVE after testing)
-canvas.style.border = "2px solid red";
-document.body.appendChild(canvas);
-          
+                    
           // Convert to blob with appropriate quality
           canvas.toBlob((blob) => {
             if (!blob) {
@@ -111,9 +104,7 @@ document.body.appendChild(canvas);
             
             const reader = new FileReader();
             reader.onload = () => {
-              // 🐞 DEBUG: Log base64 output
-console.log('Base64 (first 100 chars):', reader.result.slice(0, 100));
-console.log('Base64 length:', reader.result.length);
+              
               const result = {
                 processedImage: reader.result,
                 originalSize: file.size,
