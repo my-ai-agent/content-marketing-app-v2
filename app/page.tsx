@@ -107,7 +107,7 @@ export default function Home() {
         START
       </Link>
 
-      {/* Platform Icons */}
+      {/* Platform Logos */}
       <div style={{
         display: 'flex',
         gap: '2rem',
@@ -115,10 +115,53 @@ export default function Home() {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-        <div style={{ fontSize: '2.5rem' }}>📱</div>
-        <div style={{ fontSize: '2.5rem' }}>💻</div>
-        <div style={{ fontSize: '2.5rem' }}>📧</div>
-        <div style={{ fontSize: '2.5rem' }}>📄</div>
+        {/* Instagram */}
+        <div style={{ 
+          fontSize: '2.5rem',
+          color: '#E4405F',
+          textAlign: 'center'
+        }}>
+          📷
+        </div>
+        
+        {/* Facebook */}
+        <div style={{ 
+          fontSize: '2.5rem',
+          color: '#1877F2',
+          textAlign: 'center'
+        }}>
+          📘
+        </div>
+        
+        {/* LinkedIn */}
+        <div style={{ 
+          fontSize: '2.5rem',
+          color: '#0A66C2',
+          textAlign: 'center'
+        }}>
+          💼
+        </div>
+        
+        {/* Email/More */}
+        <div style={{ 
+          fontSize: '2.5rem',
+          color: '#718096',
+          textAlign: 'center'
+        }}>
+          📧
+        </div>
+        
+        {/* Plus More Indicator */}
+        <div style={{
+          fontSize: '1.2rem',
+          color: '#718096',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          + 12 more platforms
+        </div>
       </div>
 
       {/* Subtitle */}
