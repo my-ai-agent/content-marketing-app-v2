@@ -245,11 +245,13 @@ export default function PhotoCapture() {
                   src={selectedPhoto} 
                   alt="Selected tourism photo" 
                   style={{ 
-                    maxWidth: '100%', 
-                    maxHeight: '400px', 
-                    width: 'auto', 
-                    height: 'auto',
-                    display: 'block'
+                    maxWidth: '100%',
+  maxHeight: '400px',
+  width: 'auto',
+  height: 'auto',
+  display: 'block',
+  objectFit: 'contain',
+  objectPosition: 'center'
                   }} 
                 />
               </div>
