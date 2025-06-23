@@ -339,24 +339,25 @@ export default function PhotoCapture() {
           </div>
 
         {/* Brand Logo Footer */}
-              href="/dashboard/create/demographics"
-              onClick={handleNext}
-              style={{
-                background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-                color: 'white',
-                padding: '1rem 2rem',
-                borderRadius: '25px',
-                textDecoration: 'none',
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-                transition: 'transform 0.2s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              Next: Choose Demographics →
-            </Link>
+<Link
+  href="/dashboard/create/demographics"
+  onClick={handleNext}
+  style={{
+    background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+    color: 'white',
+    padding: '1rem 2rem',
+    borderRadius: '25px',
+    textDecoration: 'none',
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+    transition: 'transform 0.2s'
+  }}
+  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+>
+  Next: Choose Demographics →
+</Link>
           ) : (
             <button
               disabled
