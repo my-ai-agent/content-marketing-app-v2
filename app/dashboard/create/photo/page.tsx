@@ -386,29 +386,7 @@ export default function PhotoCapture() {
           padding: '2rem',
           backgroundColor: 'rgba(255,255,255,0.8)',
           borderRadius: '15px'
-        }}>
-          <h4 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2D3748', margin: '0 0 1rem 0' }}>
-            🏆 World's #1 Photo-First Travel Storytelling App
-          </h4>
-          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
-            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📸</div>
-              <p style={{ margin: '0', fontWeight: '600' }}>Photo-First</p>
-              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Natural tourist behavior</p>
-            </div>
-            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🤖</div>
-              <p style={{ margin: '0', fontWeight: '600' }}>AI-Enhanced</p>
-              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>Professional content creation</p>
-            </div>
-            <div style={{ textAlign: 'center', maxWidth: '200px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌍</div>
-              <p style={{ margin: '0', fontWeight: '600' }}>Multi-Platform</p>
-              <p style={{ margin: '0', fontSize: '0.9rem', color: '#718096' }}>16+ global platforms instantly</p>
-            </div>
-          </div>
-        </div>
-
+        
         {/* Brand Logo Footer */}
         <div style={{ 
           textAlign: 'center', 
