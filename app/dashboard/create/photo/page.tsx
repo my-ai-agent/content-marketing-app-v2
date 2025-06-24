@@ -95,6 +95,13 @@ export default function PhotoUpload() {
     setIsProcessing(true)
     setError(null)
     try {
+      try {
+  // Add these two lines here:
+  const picaModule = await import('pica');
+  const picaInstance = picaModule.default();
+  
+  const img = document.createElement('img')
+  // ... rest of code
       const img = document.createElement('img')
       img.src = URL.createObjectURL(file)
       await new Promise((res, rej) => {
@@ -116,9 +123,9 @@ export default function PhotoUpload() {
       outputCanvas.width = newW
       outputCanvas.height = newH
       // Use Pica for high-quality resize
-      await pica().resize(inputCanvas, outputCanvas)
+      await picaInstance.resize(inputCanvas, outputCanvas)
       // Export as JPEG (for max compression & compatibility)
-      const blob = await pica().toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
+      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
       URL.revokeObjectURL(img.src)
       return blob
     } finally {
