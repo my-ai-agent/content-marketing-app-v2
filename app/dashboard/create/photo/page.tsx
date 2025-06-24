@@ -4,7 +4,6 @@ import { useState, useRef } from 'react'
 
 // Import Pica for client-side image compression
 // Instead of using pica directly, use dynamic import:
-const picaInstance = await import('pica').then(module => module.default());
 
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
