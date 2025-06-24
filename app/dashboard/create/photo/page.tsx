@@ -86,10 +86,126 @@ export default function PhotoUpload() {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  // Add crop functionality state  
+const [showCropModal, setShowCropModal] = useState(false);
+const [cropData, setCropData] = useState({
+  x: 0, y: 0, width: 100, height: 100, scale: 1
+});
+const [originalImage, setOriginalImage] = useState<string | null>(null);
+const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
   // Try to load photo from IndexedDB on mount if exists
   // (optional: can be enhanced with useEffect)
 
+  // Simple Crop Tool Component
+const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
+  image: string,
+  onCropComplete: (croppedUrl: string) => void,
+  onCancel: () => void,
+  onApply: (croppedUrl: string) => void
+}) => {
+  const [cropBox, setCropBox] = useState({ x: 50, y: 50, width: 200, height: 200 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  const applyCrop = () => {
+    if (!canvasRef.current || !imgRef.current) return;
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const img = imgRef.current
+
+    // Set canvas size to crop dimensions
+    canvas.width = cropBox.width
+    canvas.height = cropBox.height
+
+    // Draw cropped portion
+    ctx?.drawImage(
+      img,
+      cropBox.x, cropBox.y, cropBox.width, cropBox.height, // Source
+      0, 0, cropBox.width, cropBox.height // Destination
+    )
+
+    const croppedUrl = canvas.toDataURL('image/jpeg', 0.9)
+    onApply(croppedUrl)
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <img
+        ref={imgRef}
+        src={image}
+        alt="Crop preview"
+        style={{ maxWidth: '100%', maxHeight: '400px', display: 'block' }}
+        onLoad={() => {
+          // Initialize crop box in center
+          if (imgRef.current) {
+            const img = imgRef.current
+            setCropBox({
+              x: img.width * 0.1,
+              y: img.height * 0.1,
+              width: img.width * 0.8,
+              height: img.height * 0.8
+            })
+          }
+        }}
+      />
+      
+      {/* Crop Overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          left: `${cropBox.x}px`,
+          top: `${cropBox.y}px`,
+          width: `${cropBox.width}px`,
+          height: `${cropBox.height}px`,
+          border: '2px solid #3b82f6',
+          background: 'rgba(59, 130, 246, 0.1)',
+          cursor: 'move',
+          boxSizing: 'border-box'
+        }}
+        onMouseDown={(e) => {
+          setIsDragging(true)
+          setDragStart({ x: e.clientX - cropBox.x, y: e.clientY - cropBox.y })
+        }}
+      />
+
+      {/* Control Buttons */}
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+        <button
+          onClick={onCancel}
+          style={{ 
+            padding: '0.75rem 1.5rem', 
+            background: '#e5e7eb', 
+            color: '#374151', 
+            border: 'none', 
+            borderRadius: '8px', 
+            cursor: 'pointer' 
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={applyCrop}
+          style={{ 
+            padding: '0.75rem 1.5rem', 
+            background: '#10b981', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '8px', 
+            cursor: 'pointer', 
+            fontWeight: '600' 
+          }}
+        >
+          ✂️ Apply Crop
+        </button>
+      </div>
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+    </div>
+  )
+}
   // Clean Pica processing: compress, no debug code
   const compressWithPica = async (file: File): Promise<Blob> => {
     setIsProcessing(true)
