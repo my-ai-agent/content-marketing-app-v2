@@ -95,19 +95,16 @@ export default function PhotoUpload() {
     setIsProcessing(true)
     setError(null)
     try {
-      try {
-  // Add these two lines here:
-  const picaModule = await import('pica');
-  const picaInstance = picaModule.default();
-  
-  const img = document.createElement('img')
-  // ... rest of code
-      const img = document.createElement('img')
-      img.src = URL.createObjectURL(file)
-      await new Promise((res, rej) => {
-        img.onload = () => res(undefined)
-        img.onerror = () => rej(new Error('Image load failed'))
-      })
+      // Dynamic import inside function
+    const picaModule = await import('pica');
+    const picaInstance = picaModule.default();
+    
+    const img = document.createElement('img')
+    img.src = URL.createObjectURL(file)
+    await new Promise((res, rej) => {
+      img.onload = () => res(undefined)
+      img.onerror = () => rej(new Error('Image load failed'))
+    })
       // Calculate new size
       let { width, height } = img
       let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
@@ -142,6 +139,7 @@ export default function PhotoUpload() {
         // Aggressive compression for local storage
         const compressedBlob = await compressWithPica(file)
         // Try to use IndexedDB (preferred, more space)
+        
         await saveImageToIndexedDB('selectedPhoto', compressedBlob)
         // Display preview
         const reader = new FileReader()
