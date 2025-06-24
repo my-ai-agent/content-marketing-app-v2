@@ -438,7 +438,7 @@ export default function PhotoUpload() {
               fontWeight: '900',
               display: 'inline',
               marginLeft: '0.25rem'
-            }}>speakk</div>
+            }}>speak</div>
             <div style={{ 
               color: BRAND_BLUE, 
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
