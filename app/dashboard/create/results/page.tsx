@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 // Add this import at the top of results/page.tsx
 // We'll use a CDN-based QR library since we can't install packages
 
@@ -20,19 +20,19 @@ export default function Results() {
   const [showMoreDownloads, setShowMoreDownloads] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
-const [qrCodeURL, setQRCodeURL] = useState<string>('');
-const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [qrCodeURL, setQRCodeURL] = useState<string>('');
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
   // Add crop functionality state
-const [showCropModal, setShowCropModal] = useState(false);
-const [cropData, setCropData] = useState({
-  x: 0, y: 0, width: 100, height: 100, scale: 1
-});
-const [originalImage, setOriginalImage] = useState<string | null>(null);
-const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [cropData, setCropData] = useState({
+    x: 0, y: 0, width: 100, height: 100, scale: 1
+  });
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
   // Claude API integration for story generation
-// REPLACE LINE 27 WITH:
-const generateStoryWithClaude = async (
+ // REPLACE LINE 27 WITH:
+ const generateStoryWithClaude = async (
   photoData: string, 
   userStory: string, 
   demographics: string, 
@@ -70,7 +70,7 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const applyCrop = () => {
-    if (!canvasRef.current || !imgRef.current) return
+    if (!canvasRef.current || !imgRef.current) return;
     
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
