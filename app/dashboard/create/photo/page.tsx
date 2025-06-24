@@ -431,14 +431,14 @@ export default function PhotoUpload() {
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
               display: 'inline'
-            }}>speak</div>
+            }}>click</div>
             <div style={{ 
               color: BRAND_ORANGE, 
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
               fontWeight: '900',
               display: 'inline',
               marginLeft: '0.25rem'
-            }}>click</div>
+            }}>speakk</div>
             <div style={{ 
               color: BRAND_BLUE, 
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
@@ -457,7 +457,7 @@ export default function PhotoUpload() {
         borderTop: '1px solid #f3f4f6'
       }}>
         <Link 
-          href="/dashboard/create"
+          href="/"
           style={{ 
             color: '#6b7280', 
             textDecoration: 'none',
@@ -465,7 +465,7 @@ export default function PhotoUpload() {
             fontSize: 'clamp(0.875rem, 2vw, 1rem)'
           }}
         >
-          ← Back to Create Story
+          ← Back to Home
         </Link>
       </div>
     </div>
