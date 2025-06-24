@@ -24,7 +24,13 @@ const [qrCodeURL, setQRCodeURL] = useState<string>('');
 const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
   // Claude API integration for story generation
-const generateStoryWithClaude = async (photoData, userStory, demographics, interests) => {
+// REPLACE LINE 27 WITH:
+const generateStoryWithClaude = async (
+  photoData: string, 
+  userStory: string, 
+  demographics: string, 
+  interests: string[]
+) => {
   try {
     const response = await fetch('/api/claude-story', {
       method: 'POST',
