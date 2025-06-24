@@ -22,6 +22,13 @@ export default function Results() {
   const [showQRModal, setShowQRModal] = useState(false);
 const [qrCodeURL, setQRCodeURL] = useState<string>('');
 const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  // Add crop functionality state
+const [showCropModal, setShowCropModal] = useState(false);
+const [cropData, setCropData] = useState({
+  x: 0, y: 0, width: 100, height: 100, scale: 1
+});
+const [originalImage, setOriginalImage] = useState<string | null>(null);
+const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
   // Claude API integration for story generation
 // REPLACE LINE 27 WITH:
@@ -49,6 +56,63 @@ const generateStoryWithClaude = async (
     return { error: 'Story generation unavailable' };
   }
 };
+  // Simple Crop Tool Component
+const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
+  image: string,
+  onCropComplete: (croppedUrl: string) => void,
+  onCancel: () => void,
+  onApply: (croppedUrl: string) => void
+}) => {
+  const [cropBox, setCropBox] = useState({ x: 50, y: 50, width: 200, height: 200 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  const applyCrop = () => {
+    if (!canvasRef.current || !imgRef.current) return
+    
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const img = imgRef.current
+    
+    // Set canvas size to crop dimensions
+    canvas.width = cropBox.width
+    canvas.height = cropBox.height
+    
+    // Draw cropped portion
+    ctx?.drawImage(
+      img,
+      cropBox.x, cropBox.y, cropBox.width, cropBox.height, // Source
+      0, 0, cropBox.width, cropBox.height // Destination
+    )
+    
+    const croppedUrl = canvas.toDataURL('image/jpeg', 0.9)
+    onApply(croppedUrl)
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <img
+        ref={imgRef}
+        src={image}
+        alt="Crop preview"
+        style={{ maxWidth: '100%', maxHeight: '400px', display: 'block' }}
+        onLoad={() => {
+          // Initialize crop box in center
+          if (imgRef.current) {
+            const img = imgRef.current
+            setCropBox({
+              x: img.width * 0.1,
+              y: img.height * 0.1,
+              width: img.width * 0.8,
+              height: img.height * 0.8
+            })
+          }
+        }}
+      />
+      
+      {/* C
   // Platform data
   const platformData = {
     'facebook': { name: 'Facebook', icon: '📘', description: 'Direct post', accounts: ['Your Business Page', 'Personal Profile', 'Community Group'], charLimit: 63206 },
