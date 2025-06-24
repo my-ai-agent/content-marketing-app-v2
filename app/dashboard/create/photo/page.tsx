@@ -2,9 +2,6 @@
 import Link from 'next/link'
 import { useState, useRef } from 'react'
 
-// Import Pica for client-side image compression
-// Instead of using pica directly, use dynamic import:
-
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
@@ -28,30 +25,6 @@ function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
   })
 }
 
-// Read image from IndexedDB as Data URL for display
-function getImageFromIndexedDB(key: string): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readonly')
-      const getReq = tx.objectStore(STORE_NAME).get(key)
-      getReq.onsuccess = () => {
-        const blob = getReq.result as Blob
-        if (!blob) return resolve(null)
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = () => reject(reader.error)
-        reader.readAsDataURL(blob)
-      }
-      getReq.onerror = () => reject(getReq.error)
-      tx.oncomplete = () => db.close()
-    }
-  })
-}
-
-// Remove image from IndexedDB
 function removeImageFromIndexedDB(key: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1)
@@ -70,13 +43,227 @@ function removeImageFromIndexedDB(key: string): Promise<void> {
 }
 
 const BRAND_PURPLE = '#6B2EFF'
-const BRAND_ORANGE = '#FF7B1C' 
+const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
 // Compression config for mobile-optimized, localStorage/IndexedDB safe
-const MAX_WIDTH = 1280   // px, mobile-friendly
-const MAX_HEIGHT = 1280  // px, mobile-friendly
-const OUTPUT_QUALITY = 0.80 // 0.7-0.85 is a good balance
+const MAX_WIDTH = 1280
+const MAX_HEIGHT = 1280
+const OUTPUT_QUALITY = 0.80
+
+type CropBox = { x: number; y: number; width: number; height: number }
+
+function CropTool({
+  image,
+  onApply,
+  onCancel
+}: {
+  image: string,
+  onApply: (croppedUrl: string) => void,
+  onCancel: () => void
+}) {
+  const [cropBox, setCropBox] = useState<CropBox>({ x: 50, y: 50, width: 200, height: 200 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [resizeDir, setResizeDir] = useState<null | 'se' | 'nw'>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  // Mouse drag for moving crop box
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging && !resizeDir) return
+    if (isDragging) {
+      setCropBox(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(prev.x + e.movementX, (imgRef.current?.width ?? 0) - prev.width)),
+        y: Math.max(0, Math.min(prev.y + e.movementY, (imgRef.current?.height ?? 0) - prev.height))
+      }))
+    } else if (resizeDir) {
+      setCropBox(prev => {
+        if (resizeDir === 'se') {
+          // southeast corner: resize width/height
+          const newW = Math.max(40, Math.min(prev.width + e.movementX, (imgRef.current?.width ?? 0) - prev.x))
+          const newH = Math.max(40, Math.min(prev.height + e.movementY, (imgRef.current?.height ?? 0) - prev.y))
+          return { ...prev, width: newW, height: newH }
+        }
+        if (resizeDir === 'nw') {
+          // northwest corner: move x/y and resize width/height
+          let newX = Math.max(0, prev.x + e.movementX)
+          let newY = Math.max(0, prev.y + e.movementY)
+          let newW = Math.max(40, prev.width - e.movementX)
+          let newH = Math.max(40, prev.height - e.movementY)
+          // Clamp to image bounds
+          if (newX + newW > (imgRef.current?.width ?? 0)) newW = (imgRef.current?.width ?? 0) - newX
+          if (newY + newH > (imgRef.current?.height ?? 0)) newH = (imgRef.current?.height ?? 0) - newY
+          return { x: newX, y: newY, width: newW, height: newH }
+        }
+        return prev
+      })
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+    setResizeDir(null)
+    window.removeEventListener('mousemove', handleMouseMove)
+    window.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  // Start drag or resize
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }
+  const startResize = (dir: 'se' | 'nw') => (e: React.MouseEvent) => {
+    e.preventDefault()
+    setResizeDir(dir)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const applyCrop = () => {
+    if (!canvasRef.current || !imgRef.current) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const img = imgRef.current
+    canvas.width = cropBox.width
+    canvas.height = cropBox.height
+    ctx?.drawImage(
+      img,
+      cropBox.x, cropBox.y, cropBox.width, cropBox.height,
+      0, 0, cropBox.width, cropBox.height
+    )
+    const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
+    onApply(croppedUrl)
+  }
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 50,
+      background: 'rgba(0,0,0,0.65)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '1rem',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+        padding: '2rem 2rem 1.5rem 2rem',
+        maxWidth: 600,
+        width: '90vw',
+        position: 'relative',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          fontWeight: 700,
+          fontSize: '1.25rem',
+          marginBottom: '1rem',
+          color: '#1f2937'
+        }}>Crop Your Photo</div>
+        <div style={{ position: 'relative', display: 'inline-block', width: '100%', maxWidth: 400, maxHeight: 400 }}>
+          <img
+            ref={imgRef}
+            src={image}
+            alt="Crop preview"
+            style={{ maxWidth: 400, maxHeight: 400, display: 'block', borderRadius: '0.75rem' }}
+            onLoad={() => {
+              if (imgRef.current) {
+                const img = imgRef.current
+                setCropBox({
+                  x: img.width * 0.1,
+                  y: img.height * 0.1,
+                  width: img.width * 0.8,
+                  height: img.height * 0.8
+                })
+              }
+            }}
+          />
+          {/* Crop Overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              left: cropBox.x,
+              top: cropBox.y,
+              width: cropBox.width,
+              height: cropBox.height,
+              border: '2px solid #3b82f6',
+              background: 'rgba(59, 130, 246, 0.10)',
+              cursor: isDragging ? 'grabbing' : 'move',
+              boxSizing: 'border-box',
+              borderRadius: '0.4rem'
+            }}
+            onMouseDown={startDrag}
+          >
+            {/* Resize Handles */}
+            <div
+              style={{
+                position: 'absolute',
+                right: -10,
+                bottom: -10,
+                width: 18,
+                height: 18,
+                background: '#3b82f6',
+                borderRadius: '50%',
+                border: '2px solid white',
+                cursor: 'nwse-resize'
+              }}
+              onMouseDown={startResize('se')}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                left: -10,
+                top: -10,
+                width: 18,
+                height: 18,
+                background: '#3b82f6',
+                borderRadius: '50%',
+                border: '2px solid white',
+                cursor: 'nwse-resize'
+              }}
+              onMouseDown={startResize('nw')}
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#e5e7eb',
+              color: '#374151',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={applyCrop}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            ✂️ Apply Crop
+          </button>
+        </div>
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+      </div>
+    </div>
+  )
+}
 
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
@@ -84,149 +271,29 @@ export default function PhotoUpload() {
   const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showCropModal, setShowCropModal] = useState(false)
+  const [originalImage, setOriginalImage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  // Add crop functionality state  
-const [showCropModal, setShowCropModal] = useState(false);
-const [cropData, setCropData] = useState({
-  x: 0, y: 0, width: 100, height: 100, scale: 1
-});
-const [originalImage, setOriginalImage] = useState<string | null>(null);
-const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
-  // Try to load photo from IndexedDB on mount if exists
-  // (optional: can be enhanced with useEffect)
-
-  // Simple Crop Tool Component
-const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
-  image: string,
-  onCropComplete: (croppedUrl: string) => void,
-  onCancel: () => void,
-  onApply: (croppedUrl: string) => void
-}) => {
-  const [cropBox, setCropBox] = useState({ x: 50, y: 50, width: 200, height: 200 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imgRef = useRef<HTMLImageElement>(null)
-
-  const applyCrop = () => {
-    if (!canvasRef.current || !imgRef.current) return;
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const img = imgRef.current
-
-    // Set canvas size to crop dimensions
-    canvas.width = cropBox.width
-    canvas.height = cropBox.height
-
-    // Draw cropped portion
-    ctx?.drawImage(
-      img,
-      cropBox.x, cropBox.y, cropBox.width, cropBox.height, // Source
-      0, 0, cropBox.width, cropBox.height // Destination
-    )
-
-    const croppedUrl = canvas.toDataURL('image/jpeg', 0.9)
-    onApply(croppedUrl)
-  }
-
-  return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <img
-        ref={imgRef}
-        src={image}
-        alt="Crop preview"
-        style={{ maxWidth: '100%', maxHeight: '400px', display: 'block' }}
-        onLoad={() => {
-          // Initialize crop box in center
-          if (imgRef.current) {
-            const img = imgRef.current
-            setCropBox({
-              x: img.width * 0.1,
-              y: img.height * 0.1,
-              width: img.width * 0.8,
-              height: img.height * 0.8
-            })
-          }
-        }}
-      />
-      
-      {/* Crop Overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          left: `${cropBox.x}px`,
-          top: `${cropBox.y}px`,
-          width: `${cropBox.width}px`,
-          height: `${cropBox.height}px`,
-          border: '2px solid #3b82f6',
-          background: 'rgba(59, 130, 246, 0.1)',
-          cursor: 'move',
-          boxSizing: 'border-box'
-        }}
-        onMouseDown={(e) => {
-          setIsDragging(true)
-          setDragStart({ x: e.clientX - cropBox.x, y: e.clientY - cropBox.y })
-        }}
-      />
-
-      {/* Control Buttons */}
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-        <button
-          onClick={onCancel}
-          style={{ 
-            padding: '0.75rem 1.5rem', 
-            background: '#e5e7eb', 
-            color: '#374151', 
-            border: 'none', 
-            borderRadius: '8px', 
-            cursor: 'pointer' 
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={applyCrop}
-          style={{ 
-            padding: '0.75rem 1.5rem', 
-            background: '#10b981', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '8px', 
-            cursor: 'pointer', 
-            fontWeight: '600' 
-          }}
-        >
-          ✂️ Apply Crop
-        </button>
-      </div>
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-    </div>
-  )
-}
   // Clean Pica processing: compress, no debug code
-  const compressWithPica = async (file: File): Promise<Blob> => {
+  const compressWithPica = async (imgSrc: string): Promise<Blob> => {
     setIsProcessing(true)
     setError(null)
     try {
-      // Dynamic import inside function
-    const picaModule = await import('pica');
-    const picaInstance = picaModule.default();
-    
-    const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
-    await new Promise((res, rej) => {
-      img.onload = () => res(undefined)
-      img.onerror = () => rej(new Error('Image load failed'))
-    })
-      // Calculate new size
+      const picaModule = await import('pica')
+      const picaInstance = picaModule.default()
+      const img = document.createElement('img')
+      img.src = imgSrc
+      await new Promise((res, rej) => {
+        img.onload = () => res(undefined)
+        img.onerror = () => rej(new Error('Image load failed'))
+      })
       let { width, height } = img
       let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
       let newW = Math.round(width * scale)
       let newH = Math.round(height * scale)
-      // Set up canvases
       const inputCanvas = document.createElement('canvas')
       inputCanvas.width = width
       inputCanvas.height = height
@@ -235,9 +302,7 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
       const outputCanvas = document.createElement('canvas')
       outputCanvas.width = newW
       outputCanvas.height = newH
-      // Use Pica for high-quality resize
       await picaInstance.resize(inputCanvas, outputCanvas)
-      // Export as JPEG (for max compression & compatibility)
       const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
       URL.revokeObjectURL(img.src)
       return blob
@@ -246,40 +311,62 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
     }
   }
 
+  // On file selection, show crop modal with loaded image (as data URL)
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setError(null)
     const file = event.target.files?.[0]
     if (file) {
       setPhotoFile(file)
-      try {
-        // Aggressive compression for local storage
-        const compressedBlob = await compressWithPica(file)
-        // Try to use IndexedDB (preferred, more space)
-        
-        await saveImageToIndexedDB('selectedPhoto', compressedBlob)
-        // Display preview
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          setSelectedPhoto(e.target?.result as string)
-        }
-        reader.readAsDataURL(compressedBlob)
-        // Save metadata in localStorage (not the image itself!)
-        localStorage.setItem('photoFileName', file.name)
-        localStorage.setItem('photoFileSize', file.size.toString())
-      } catch (e) {
-        setError('Failed to process image. Please try a different photo.')
+      setPendingFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setOriginalImage(e.target?.result as string)
+        setShowCropModal(true)
       }
+      reader.onerror = () => {
+        setError('Failed to read image. Try a different file.')
+      }
+      reader.readAsDataURL(file)
     }
+  }
+
+  // When crop is applied: compress, store, and show preview
+  const handleCropApply = async (croppedUrl: string) => {
+    setShowCropModal(false)
+    setIsProcessing(true)
+    try {
+      const compressedBlob = await compressWithPica(croppedUrl)
+      await saveImageToIndexedDB('selectedPhoto', compressedBlob)
+      setSelectedPhoto(croppedUrl)
+      // Save photo meta for future steps
+      if (pendingFile) {
+        localStorage.setItem('photoFileName', pendingFile.name)
+        localStorage.setItem('photoFileSize', pendingFile.size.toString())
+      }
+    } catch {
+      setError('Failed to process cropped image. Please try again.')
+      setSelectedPhoto(null)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleCropCancel = () => {
+    setShowCropModal(false)
+    setOriginalImage(null)
+    setPhotoFile(null)
+    setPendingFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
 
   const handleNext = async () => {
     setError(null)
     if (selectedPhoto) {
       try {
-        // Just store a flag that a photo was saved; actual image is in IndexedDB
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
         window.location.href = '/dashboard/create/demographics'
-      } catch (err) {
+      } catch {
         setError('Failed to save photo. Storage quota may be exceeded.')
       }
     } else {
@@ -291,6 +378,8 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
     setError(null)
     setSelectedPhoto(null)
     setPhotoFile(null)
+    setOriginalImage(null)
+    setPendingFile(null)
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
@@ -301,12 +390,10 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
   const handleRemovePhoto = async () => {
     setSelectedPhoto(null)
     setPhotoFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-    if (cameraInputRef.current) {
-      cameraInputRef.current.value = ''
-    }
+    setOriginalImage(null)
+    setPendingFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (cameraInputRef.current) cameraInputRef.current.value = ''
     await removeImageFromIndexedDB('selectedPhoto')
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
@@ -314,99 +401,106 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh', 
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
       backgroundColor: 'white'
     }}>
-      
+      {/* Crop Modal */}
+      {showCropModal && originalImage && (
+        <CropTool
+          image={originalImage}
+          onApply={handleCropApply}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       {/* Header with Step Tracker Only */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: '2rem 1rem',
         borderBottom: '1px solid #f3f4f6'
       }}>
         {/* Step Tracker */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
         }}>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
           }}>1</div>
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#1f2937', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#1f2937',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
           }}>2</div>
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
           }}>3</div>
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
           }}>4</div>
           <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
           }}>5</div>
         </div>
-
         {/* Title */}
-        <h1 style={{ 
-          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+        <h1 style={{
+          fontSize: 'clamp(2rem, 6vw, 4rem)',
           fontWeight: '700',
           color: '#1f2937',
           lineHeight: '1.2',
@@ -415,9 +509,9 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
         }}>
           Add Your Photo
         </h1>
-        <p style={{ 
-          color: '#6b7280', 
-          textAlign: 'center', 
+        <p style={{
+          color: '#6b7280',
+          textAlign: 'center',
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
           maxWidth: '600px',
           margin: '0 auto'
@@ -425,18 +519,16 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
           Capture the moment or upload an inspiring photo to enhance your story
         </p>
       </div>
-
-      <div style={{ 
-        flex: '1', 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        width: '100%', 
-        padding: '2rem 1rem' 
+      <div style={{
+        flex: '1',
+        maxWidth: '800px',
+        margin: '0 auto',
+        width: '100%',
+        padding: '2rem 1rem'
       }}>
-
         {/* Upload Method Toggle */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
-          <div style={{ 
+          <div style={{
             display: 'inline-flex',
             backgroundColor: '#f3f4f6',
             borderRadius: '1rem',
@@ -486,7 +578,6 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
             </button>
           </div>
         </div>
-
         {/* Photo Upload Area */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
           {!selectedPhoto ? (
@@ -506,52 +597,51 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
-            onClick={() => {
-              if (uploadMethod === 'upload') {
-                fileInputRef.current?.click()
-              } else {
-                cameraInputRef.current?.click()
-              }
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#9ca3af'
-              e.currentTarget.style.backgroundColor = '#f5f5f5'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#d1d5db'
-              e.currentTarget.style.backgroundColor = '#fafafa'
-            }}
+              onClick={() => {
+                if (uploadMethod === 'upload') {
+                  fileInputRef.current?.click()
+                } else {
+                  cameraInputRef.current?.click()
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#9ca3af'
+                e.currentTarget.style.backgroundColor = '#f5f5f5'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db'
+                e.currentTarget.style.backgroundColor = '#fafafa'
+              }}
             >
               <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
                 {uploadMethod === 'upload' ? '📂' : '📷'}
               </div>
-              <h3 style={{ 
-                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)', 
-                fontWeight: '600', 
-                color: '#374151', 
+              <h3 style={{
+                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
+                fontWeight: '600',
+                color: '#374151',
                 marginBottom: '0.5rem',
                 margin: '0 0 0.5rem 0'
               }}>
                 {uploadMethod === 'upload' ? 'Upload a Photo' : 'Take a Photo'}
               </h3>
-              <p style={{ 
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)', 
+              <p style={{
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                 color: '#6b7280',
                 marginBottom: '1rem',
                 padding: '0 1rem'
               }}>
-                {uploadMethod === 'upload' 
+                {uploadMethod === 'upload'
                   ? 'Click to browse your files or drag and drop'
                   : 'Click to open camera and capture a moment'
                 }
               </p>
-              <div style={{ 
-                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)', 
-                color: '#9ca3af' 
+              <div style={{
+                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
+                color: '#9ca3af'
               }}>
                 Supports: JPG, PNG, HEIC, WebP
               </div>
-
               {/* Hidden file inputs */}
               <input
                 ref={fileInputRef}
@@ -615,7 +705,7 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
                   ✕
                 </button>
               </div>
-              <div style={{ 
+              <div style={{
                 marginTop: '1rem',
                 fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                 color: '#6b7280'
@@ -635,14 +725,13 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
             </div>
           )}
         </div>
-
         {/* Action Buttons */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           gap: '1rem',
-          width: '100%', 
+          width: '100%',
           marginBottom: '2rem'
         }}>
           <button
@@ -661,12 +750,11 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
           >
             Skip for now
           </button>
-          
           <button
             onClick={handleNext}
             disabled={!selectedPhoto || isProcessing}
             style={{
-              background: selectedPhoto 
+              background: selectedPhoto
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
               color: selectedPhoto ? 'white' : '#9ca3af',
@@ -684,30 +772,29 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
             Next →
           </button>
         </div>
-
         {/* Logo - Brand Reinforcement */}
-        <div style={{ 
-          textAlign: 'center', 
+        <div style={{
+          textAlign: 'center',
           marginBottom: '2rem',
           paddingTop: '2rem'
         }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{ 
-              color: BRAND_PURPLE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            <div style={{
+              color: BRAND_PURPLE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               fontWeight: '900',
               display: 'inline'
             }}>click</div>
-            <div style={{ 
-              color: BRAND_ORANGE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            <div style={{
+              color: BRAND_ORANGE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               fontWeight: '900',
               display: 'inline',
               marginLeft: '0.25rem'
             }}>speak</div>
-            <div style={{ 
-              color: BRAND_BLUE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            <div style={{
+              color: BRAND_BLUE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               fontWeight: '900',
               display: 'inline',
               marginLeft: '0.25rem'
@@ -715,17 +802,16 @@ const CropTool = ({ image, onCropComplete, onCancel, onApply }: {
           </Link>
         </div>
       </div>
-
       {/* Bottom Navigation */}
-      <div style={{ 
-        padding: '1.5rem', 
+      <div style={{
+        padding: '1.5rem',
         textAlign: 'center',
         borderTop: '1px solid #f3f4f6'
       }}>
-        <Link 
+        <Link
           href="/"
-          style={{ 
-            color: '#6b7280', 
+          style={{
+            color: '#6b7280',
             textDecoration: 'none',
             fontWeight: '600',
             fontSize: 'clamp(0.875rem, 2vw, 1rem)'
