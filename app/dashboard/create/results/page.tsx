@@ -23,9 +23,26 @@ export default function Results() {
 const [qrCodeURL, setQRCodeURL] = useState<string>('');
 const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
-  // Sample content
-  const sampleStory = "Discover the hidden gems of Canterbury's wellness scene! From the therapeutic hot springs of Hanmer Springs to the tranquil meditation retreats nestled in the Southern Alps, our region offers the ultimate relaxation and rejuvenation experience. Whether you seek adventure or serenity, Canterbury’s wellness destinations are sure to inspire your next escape.";
-
+  // Claude API integration for story generation
+const generateStoryWithClaude = async (photoData, userStory, demographics, interests) => {
+  try {
+    const response = await fetch('/api/claude-story', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        photo: photoData,
+        initialStory: userStory,
+        targetAudience: demographics,
+        primaryInterest: interests,
+        culturalGuidelines: true
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Claude story generation failed:', error);
+    return { error: 'Story generation unavailable' };
+  }
+};
   // Platform data
   const platformData = {
     'facebook': { name: 'Facebook', icon: '📘', description: 'Direct post', accounts: ['Your Business Page', 'Personal Profile', 'Community Group'], charLimit: 63206 },
@@ -43,7 +60,7 @@ const [isGeneratingQR, setIsGeneratingQR] = useState(false);
   // Load data on component mount
   useEffect(() => {
   if (typeof window !== 'undefined') {
-    const savedStory = localStorage.getItem('currentStory') || sampleStory;
+    const savedStory = localStorage.getItem('currentStory') || '';
     setStory(savedStory);
     
     // ADD THIS: Retrieve uploaded photo
@@ -144,34 +161,12 @@ const targetAudience = storedDemo ? JSON.parse(storedDemo)[0] : 'Gen Z (1997-201
         };
         localStorage.setItem('lastEnhancementInfo', JSON.stringify(enhancementInfo));
       } else {
-        setVersionOptions([
-          {
-            text: "Escape to Canterbury's wellness paradise! Experience rejuvenating hot springs, mountain yoga sessions, and luxury spa treatments. From Hanmer Springs' healing waters to alpine meditation, recharge your body and mind in New Zealand's breathtaking landscapes.",
-            tone: "Energetic & Inviting",
-            words: 42
-          },
-          {
-            text: "Transform your wellbeing in Canterbury! Our region's natural hot springs, world-class spas, and serene mountain retreats offer the ultimate relaxation experience. Reconnect with nature and restore your energy in style.",
-            tone: "Inspirational & Calming",
-            words: 40
-          },
-          {
-            text: "Canterbury's wellness scene awaits! Indulge in therapeutic hot springs, mindful mountain yoga, and luxurious spa experiences. Whether seeking adventure or tranquility, our wellness destinations deliver rejuvenation.",
-            tone: "Professional & Sophisticated",
-            words: 36
-          }
-        ]);
+        
       }
       setShowRefreshModal(true);
     } catch (error) {
       console.error('Enhanced content generation failed:', error);
-      setVersionOptions([
-        {
-          text: "Discover Canterbury's hidden wellness gems! From therapeutic hot springs to mountain meditation retreats, experience the perfect escape for relaxation and renewal in New Zealand's most beautiful region.",
-          tone: "Energetic & Inviting",
-          words: 30
-        }
-      ]);
+      
       setShowRefreshModal(true);
     }
   };
