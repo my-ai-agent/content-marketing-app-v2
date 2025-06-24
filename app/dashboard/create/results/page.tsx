@@ -566,10 +566,14 @@ alert(`✅ Downloaded: ${filename}\n\nCheck your Downloads folder or browser's d
       {/* Logo */}
       <div style={{ textAlign: 'center', marginTop: '3rem', padding: '2rem 0' }}>
         <h1 style={{ fontSize: '2rem', background: 'linear-gradient(45deg, #f97316, #10b981, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: '700' }}>
-          speak click send
+          click speak send
         </h1>
       </div>
 
+  </div>
+    </div>
+  );
+}
       {/* Publishing Modal */}
       {showPublishModal && currentPlatform && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.6)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
