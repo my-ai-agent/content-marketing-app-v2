@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react'
 
 // Types
@@ -35,6 +34,16 @@ const handles = [
   { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
 ] as const
 
+const aspectRatios = [
+  { name: "Free", value: null },
+  { name: "1:1", value: 1 },
+  { name: "4:3", value: 4 / 3 },
+  { name: "3:4", value: 3 / 4 },
+  { name: "16:9", value: 16 / 9 },
+]
+
+const MIN_SIZE = 40
+
 const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const imgRef = useRef<HTMLImageElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -42,6 +51,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const [cropBox, setCropBox] = useState<CropBox>({ x: 40, y: 40, width: 200, height: 200 })
   const [dragging, setDragging] = useState(false)
   const [resizing, setResizing] = useState<ResizeDir>(null)
+  const [aspect, setAspect] = useState<number | null>(null)
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
   // Set image dimensions on load
@@ -55,12 +65,24 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     }
   }, [image])
 
-  // Clamp crop box within image
+  // Clamp crop box within image and aspect ratio
   function clamp(box: CropBox): CropBox {
-    const min = 40
     let { x, y, width, height } = box
-    if (width < min) width = min
-    if (height < min) height = min
+
+    // Enforce min size
+    width = Math.max(width, MIN_SIZE)
+    height = Math.max(height, MIN_SIZE)
+
+    // Enforce aspect ratio if set
+    if (aspect) {
+      if (width / height > aspect) {
+        width = Math.round(height * aspect)
+      } else {
+        height = Math.round(width / aspect)
+      }
+    }
+
+    // Clamp to bounds
     if (x < 0) x = 0
     if (y < 0) y = 0
     if (x + width > imgDims.width) x = imgDims.width - width
@@ -89,21 +111,39 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           let { x, y, width, height } = prev
           switch (resizing) {
             case 'n':
-              y += dy; height -= dy; break
+              y += dy
+              height -= dy
+              break
             case 's':
-              height += dy; break
+              height += dy
+              break
             case 'e':
-              width += dx; break
+              width += dx
+              break
             case 'w':
-              x += dx; width -= dx; break
+              x += dx
+              width -= dx
+              break
             case 'ne':
-              y += dy; height -= dy; width += dx; break
+              y += dy
+              height -= dy
+              width += dx
+              break
             case 'nw':
-              y += dy; height -= dy; x += dx; width -= dx; break
+              y += dy
+              height -= dy
+              x += dx
+              width -= dx
+              break
             case 'se':
-              width += dx; height += dy; break
+              width += dx
+              height += dy
+              break
             case 'sw':
-              x += dx; width -= dx; height += dy; break
+              x += dx
+              width -= dx
+              height += dy
+              break
           }
           return clamp({ x, y, width, height })
         }
@@ -213,12 +253,19 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     onApply(croppedUrl)
   }
 
-  // Set crop box to centered default on first image load
+  // Set crop box to centered default on first image load or aspect ratio change
   useEffect(() => {
     const img = imgRef.current
     if (img && img.naturalWidth && img.naturalHeight) {
-      const w = Math.round(img.naturalWidth * 0.7)
-      const h = Math.round(img.naturalHeight * 0.7)
+      let w = Math.round(img.naturalWidth * 0.7)
+      let h = Math.round(img.naturalHeight * 0.7)
+      if (aspect) {
+        if (w / h > aspect) {
+          w = Math.round(h * aspect)
+        } else {
+          h = Math.round(w / aspect)
+        }
+      }
       setCropBox({
         x: Math.round((img.naturalWidth - w) / 2),
         y: Math.round((img.naturalHeight - h) / 2),
@@ -227,7 +274,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imgDims.width, imgDims.height, image])
+  }, [imgDims.width, imgDims.height, image, aspect])
 
   // Responsive: constrain displayed width/height for mobile
   const displayMax = 400
@@ -267,6 +314,28 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           marginBottom: '1rem',
           color: '#1f2937'
         }}>Crop Your Photo</div>
+        {/* Aspect Ratio Presets */}
+        <div style={{ marginBottom: "1rem" }}>
+          {aspectRatios.map(opt => (
+            <button
+              key={opt.name}
+              onClick={() => setAspect(opt.value)}
+              style={{
+                fontWeight: aspect === opt.value ? 700 : 400,
+                background: aspect === opt.value ? "#10b981" : "#e5e7eb",
+                color: aspect === opt.value ? "white" : "#374151",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.5rem 1rem",
+                marginRight: "0.5rem",
+                marginBottom: "0.25rem",
+                cursor: "pointer"
+              }}
+            >
+              {opt.name}
+            </button>
+          ))}
+        </div>
         <div
           ref={overlayRef}
           style={{
@@ -319,8 +388,8 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
                   position: 'absolute',
                   top: handle.top,
                   left: handle.left,
-                  width: 18,
-                  height: 18,
+                  width: 24, // Larger for touch
+                  height: 24,
                   background: '#3b82f6',
                   borderRadius: '50%',
                   border: '2px solid white',
