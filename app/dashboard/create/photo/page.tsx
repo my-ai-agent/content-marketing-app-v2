@@ -1,8 +1,11 @@
 'use client'
 import Link from 'next/link'
-import { useState, useRef, useEffect } from 'react'
-import CropTool from './CropTool'
-import heic2any from "heic2any";
+import { useState, useRef } from 'react'
+import dynamic from 'next/dynamic'
+
+// Dynamically import CropTool in case it uses browser APIs at the module level
+const CropTool = dynamic(() => import('./CropTool'), { ssr: false })
+
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
@@ -52,29 +55,6 @@ const MAX_WIDTH = 1280
 const MAX_HEIGHT = 1280
 const OUTPUT_QUALITY = 0.80
 
-type CropBox = { x: number; y: number; width: number; height: number }
-type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
-
-interface CropToolProps {
-  image: string
-  onApply: (croppedUrl: string) => void
-  onCancel: () => void
-}
-
-// Utility for touch/mouse coordinate extraction
-function getClientPos(e: MouseEvent | TouchEvent) {
-  let clientX = 0, clientY = 0
-  if ('touches' in e && e.touches.length > 0) {
-    clientX = e.touches[0].clientX
-    clientY = e.touches[0].clientY
-  } else if ('clientX' in e) {
-    clientX = (e as MouseEvent).clientX
-    clientY = (e as MouseEvent).clientY
-  }
-  return { clientX, clientY }
-}
-
-
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -87,7 +67,7 @@ export default function PhotoUpload() {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
 
-  // Clean Pica processing: compress, no debug code
+  // Compress image using pica, loaded dynamically
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
     setIsProcessing(true)
     setError(null)
@@ -200,104 +180,105 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoFileSize')
   }
 
-  // This function was referenced in your JSX but not present in your code!
-  // Here is a basic implementation:
-  // Enhanced handleFileSelect function - replace lines 204-222
-const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  setError(null);
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
+  // File select handler with dynamic heic2any import
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
 
-  // File size limit (10MB)
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
-  if (file.size > MAX_FILE_SIZE) {
-    setError('File too large. Please use images under 10MB.');
-    return;
-  }
-
-  let processedFile = file;
-
-  // Handle HEIC/HEIF conversion
-  if (file.type === "image/heic" || file.type === "image/heif" || 
-      file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
-    try {
-      setError("Converting iPhone photo, please wait...");
-      const convertedBlob = await heic2any({ 
-        blob: file, 
-        toType: "image/jpeg", 
-        quality: 0.8 
-      }) as Blob;
-      
-      processedFile = new File([convertedBlob], 
-        file.name.replace(/\.heic$/i, ".jpg"), 
-        { type: "image/jpeg" }
-      );
-      setError(null);
-    } catch (err) {
-      setError("Failed to convert iPhone photo. Please try a different file.");
+    // File size limit (10MB)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File too large. Please use images under 10MB.');
       return;
     }
-  }
 
-  // Check supported formats
-  if (!/image\/(jpeg|png|webp|heic|heif)/.test(file.type)) {
-    setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.');
-    return;
-  }
+    let processedFile = file;
 
-  setPendingFile(processedFile);
-  setPhotoFile(processedFile);
-
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
-    const result = ev.target?.result;
-    if (typeof result === 'string') {
+    // Handle HEIC/HEIF conversion with dynamic import
+    if (
+      file.type === "image/heic" || file.type === "image/heif" ||
+      file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")
+    ) {
       try {
-        // Pre-compress large images for better crop performance
-        const img = new Image();
-        img.src = result;
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-        });
+        setError("Converting iPhone photo, please wait...");
+        const heic2any = (await import("heic2any")).default;
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality: 0.8
+        }) as Blob;
 
-        let finalImageUrl = result;
-        const MAX_DISPLAY_SIZE = 2048;
-
-        // Pre-compress if image is very large
-        if (img.naturalWidth > MAX_DISPLAY_SIZE || img.naturalHeight > MAX_DISPLAY_SIZE) {
-          setError("Optimizing large photo for editing...");
-          
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
-          const scale = Math.min(
-            MAX_DISPLAY_SIZE / img.naturalWidth,
-            MAX_DISPLAY_SIZE / img.naturalHeight
-          );
-          
-          canvas.width = Math.round(img.naturalWidth * scale);
-          canvas.height = Math.round(img.naturalHeight * scale);
-          
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-          finalImageUrl = canvas.toDataURL('image/jpeg', 0.85);
-          setError(null);
-        }
-
-        setOriginalImage(finalImageUrl);
-        setShowCropModal(true);
+        processedFile = new File([convertedBlob],
+          file.name.replace(/\.heic$/i, ".jpg"),
+          { type: "image/jpeg" }
+        );
+        setError(null);
       } catch (err) {
-        setError('Failed to process image. Please try a smaller file or different format.');
+        setError("Failed to convert iPhone photo. Please try a different file.");
+        return;
       }
-    } else {
-      setError('Failed to read file');
     }
-  };
 
-  reader.onerror = () => setError('Failed to read file');
-  reader.readAsDataURL(processedFile);
-};
+    // Check supported formats (after conversion, processedFile.type may have changed)
+    if (!/image\/(jpeg|png|webp)/.test(processedFile.type)) {
+      setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.');
+      return;
+    }
+
+    setPendingFile(processedFile);
+    setPhotoFile(processedFile);
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === 'string') {
+        try {
+          // Pre-compress large images for better crop performance
+          const img = new Image();
+          img.src = result;
+
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+
+          let finalImageUrl = result;
+          const MAX_DISPLAY_SIZE = 2048;
+
+          // Pre-compress if image is very large
+          if (img.naturalWidth > MAX_DISPLAY_SIZE || img.naturalHeight > MAX_DISPLAY_SIZE) {
+            setError("Optimizing large photo for editing...");
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const scale = Math.min(
+              MAX_DISPLAY_SIZE / img.naturalWidth,
+              MAX_DISPLAY_SIZE / img.naturalHeight
+            );
+
+            canvas.width = Math.round(img.naturalWidth * scale);
+            canvas.height = Math.round(img.naturalHeight * scale);
+
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+            finalImageUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setError(null);
+          }
+
+          setOriginalImage(finalImageUrl);
+          setShowCropModal(true);
+        } catch (err) {
+          setError('Failed to process image. Please try a smaller file or different format.');
+        }
+      } else {
+        setError('Failed to read file');
+      }
+    };
+
+    reader.onerror = () => setError('Failed to read file');
+    reader.readAsDataURL(processedFile);
+  };
 
   return (
     <div style={{
