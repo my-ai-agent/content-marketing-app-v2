@@ -128,23 +128,27 @@ export default function PhotoUpload() {
 }
 
   // On file selection, show crop modal with loaded image (as data URL)
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    const file = event.target.files?.[0]
-    if (file) {
-      setPhotoFile(file)
-      setPendingFile(file)
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setOriginalImage(e.target?.result as string)
-        setShowCropModal(true)
-      }
-      reader.onerror = () => {
-        setError('Failed to read image. Try a different file.')
-      }
-      reader.readAsDataURL(file)
+  const handleCropApply = async (croppedUrl: string) => {
+  setShowCropModal(false)
+  setIsProcessing(true)
+  try {
+    if (!croppedUrl.startsWith('data:image/')) {
+      throw new Error('Invalid cropped image data')
     }
+    const compressedBlob = await compressWithPica(croppedUrl)
+    await saveImageToIndexedDB('selectedPhoto', compressedBlob)
+    setSelectedPhoto(croppedUrl)
+    if (pendingFile) {
+      localStorage.setItem('photoFileName', pendingFile.name)
+      localStorage.setItem('photoFileSize', pendingFile.size.toString())
+    }
+  } catch (err: any) {
+    setError(`Failed to process cropped image. ${err?.message ?? ''} Please try again.`)
+    setSelectedPhoto(null)
+  } finally {
+    setIsProcessing(false)
   }
+}
 
   // When crop is applied: compress, store, and show preview
   const handleCropApply = async (croppedUrl: string) => {
