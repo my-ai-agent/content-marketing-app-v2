@@ -88,37 +88,44 @@ export default function PhotoUpload() {
 
   // Clean Pica processing: compress, no debug code
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
-    setIsProcessing(true)
-    setError(null)
-    try {
-      const picaModule = await import('pica')
-      const picaInstance = picaModule.default()
-      const img = document.createElement('img')
-      img.src = imgSrc
-      await new Promise((res, rej) => {
-        img.onload = () => res(undefined)
-        img.onerror = () => rej(new Error('Image load failed'))
-      })
-      let { width, height } = img
-      let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
-      let newW = Math.round(width * scale)
-      let newH = Math.round(height * scale)
-      const inputCanvas = document.createElement('canvas')
-      inputCanvas.width = width
-      inputCanvas.height = height
-      const inputCtx = inputCanvas.getContext('2d')
-      inputCtx!.drawImage(img, 0, 0)
-      const outputCanvas = document.createElement('canvas')
-      outputCanvas.width = newW
-      outputCanvas.height = newH
-      await picaInstance.resize(inputCanvas, outputCanvas)
-      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
-      URL.revokeObjectURL(img.src)
-      return blob
-    } finally {
-      setIsProcessing(false)
+  setIsProcessing(true)
+  setError(null)
+  try {
+    const picaModule = await import('pica')
+    const picaInstance = picaModule.default()
+    const img = document.createElement('img')
+    img.src = imgSrc
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = (err) => reject(new Error('Image load failed'))
+    })
+
+    if (!img.naturalWidth || !img.naturalHeight) {
+      throw new Error('Image has invalid dimensions')
     }
+
+    let { width, height } = img
+    let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
+    let newW = Math.round(width * scale)
+    let newH = Math.round(height * scale)
+    const inputCanvas = document.createElement('canvas')
+    inputCanvas.width = width
+    inputCanvas.height = height
+    const inputCtx = inputCanvas.getContext('2d')
+    if (!inputCtx) throw new Error('Could not get canvas context')
+    inputCtx.drawImage(img, 0, 0)
+    const outputCanvas = document.createElement('canvas')
+    outputCanvas.width = newW
+    outputCanvas.height = newH
+    await picaInstance.resize(inputCanvas, outputCanvas)
+    const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
+    URL.revokeObjectURL(img.src)
+    return blob
+  } finally {
+    setIsProcessing(false)
   }
+}
 
   // On file selection, show crop modal with loaded image (as data URL)
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
