@@ -73,25 +73,59 @@ function getClientPos(e: MouseEvent | TouchEvent) {
   return { clientX, clientY }
 }
 
-function CropTool({ image, onApply, onCancel }: CropToolProps) {
+import React, { useRef, useState, useEffect } from 'react'
+
+// Types
+type CropBox = { x: number; y: number; width: number; height: number }
+type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
+
+interface CropToolProps {
+  image: string
+  onApply: (croppedUrl: string) => void
+  onCancel: () => void
+}
+
+// Utility for touch/mouse coordinate extraction
+function getClientPos(e: MouseEvent | TouchEvent) {
+  let clientX = 0, clientY = 0
+  if ('touches' in e && e.touches.length > 0) {
+    clientX = e.touches[0].clientX
+    clientY = e.touches[0].clientY
+  } else if ('clientX' in e) {
+    clientX = (e as MouseEvent).clientX
+    clientY = (e as MouseEvent).clientY
+  }
+  return { clientX, clientY }
+}
+
+const handles = [
+  { dir: 'n', top: -8, left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 's', top: '100%', left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, 50%)' } },
+  { dir: 'e', top: '50%', left: '100%', cursor: 'ew-resize', style: { transform: 'translate(50%, -50%)' } },
+  { dir: 'w', top: '50%', left: -8, cursor: 'ew-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 'ne', top: -8, left: '100%', cursor: 'nesw-resize', style: { transform: 'translate(50%, -50%)' } },
+  { dir: 'nw', top: -8, left: -8, cursor: 'nwse-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 'se', top: '100%', left: '100%', cursor: 'nwse-resize', style: { transform: 'translate(50%, 50%)' } },
+  { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
+] as const
+
+const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const imgRef = useRef<HTMLImageElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [imgDims, setImgDims] = useState({ width: 1, height: 1 })
   const [cropBox, setCropBox] = useState<CropBox>({ x: 40, y: 40, width: 200, height: 200 })
   const [dragging, setDragging] = useState(false)
   const [resizing, setResizing] = useState<ResizeDir>(null)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-
-  // For touch events: track last position
-  const lastPos = useRef({ x: 0, y: 0 })
+  const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
   // Set image dimensions on load
   useEffect(() => {
     const img = imgRef.current
     if (img) {
-      img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      const setDims = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      img.onload = setDims
       // If already loaded (cache), trigger manually
-      if (img.complete) setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      if (img.complete) setDims()
     }
   }, [image])
 
@@ -108,78 +142,95 @@ function CropTool({ image, onApply, onCancel }: CropToolProps) {
     return { x, y, width, height }
   }
 
-  // Mouse/touch move handlers for drag/resize
-  function onMove(e: MouseEvent | TouchEvent) {
-    e.preventDefault()
-    const { clientX, clientY } = getClientPos(e)
-    let dx = clientX - lastPos.current.x
-    let dy = clientY - lastPos.current.y
-    lastPos.current = { x: clientX, y: clientY }
+  // Event handler for drag/resize
+  useEffect(() => {
+    function onMove(e: MouseEvent | TouchEvent) {
+      e.preventDefault()
+      const { clientX, clientY } = getClientPos(e)
+      let dx = clientX - lastPos.current.x
+      let dy = clientY - lastPos.current.y
+      lastPos.current = { x: clientX, y: clientY }
 
-    setCropBox(prev => {
-      if (dragging) {
-        return clamp({
-          ...prev,
-          x: prev.x + dx,
-          y: prev.y + dy
-        })
-      }
-      if (resizing) {
-        let { x, y, width, height } = prev
-        switch (resizing) {
-          case 'n':
-            y += dy; height -= dy; break
-          case 's':
-            height += dy; break
-          case 'e':
-            width += dx; break
-          case 'w':
-            x += dx; width -= dx; break
-          case 'ne':
-            y += dy; height -= dy; width += dx; break
-          case 'nw':
-            y += dy; height -= dy; x += dx; width -= dx; break
-          case 'se':
-            width += dx; height += dy; break
-          case 'sw':
-            x += dx; width -= dx; height += dy; break
+      setCropBox(prev => {
+        if (dragging) {
+          return clamp({
+            ...prev,
+            x: prev.x + dx,
+            y: prev.y + dy
+          })
         }
-        return clamp({ x, y, width, height })
+        if (resizing) {
+          let { x, y, width, height } = prev
+          switch (resizing) {
+            case 'n':
+              y += dy; height -= dy; break
+            case 's':
+              height += dy; break
+            case 'e':
+              width += dx; break
+            case 'w':
+              x += dx; width -= dx; break
+            case 'ne':
+              y += dy; height -= dy; width += dx; break
+            case 'nw':
+              y += dy; height -= dy; x += dx; width -= dx; break
+            case 'se':
+              width += dx; height += dy; break
+            case 'sw':
+              x += dx; width -= dx; height += dy; break
+          }
+          return clamp({ x, y, width, height })
+        }
+        return prev
+      })
+    }
+
+    function onUp() {
+      setDragging(false)
+      setResizing(null)
+      window.removeEventListener('mousemove', onMove as any)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onMove as any)
+      window.removeEventListener('touchend', onUp)
+    }
+
+    // Only attach listeners if dragging/resizing
+    if (dragging || resizing) {
+      window.addEventListener('mousemove', onMove as any, { passive: false })
+      window.addEventListener('mouseup', onUp)
+      window.addEventListener('touchmove', onMove as any, { passive: false })
+      window.addEventListener('touchend', onUp)
+      return () => {
+        window.removeEventListener('mousemove', onMove as any)
+        window.removeEventListener('mouseup', onUp)
+        window.removeEventListener('touchmove', onMove as any)
+        window.removeEventListener('touchend', onUp)
       }
-      return prev
-    })
-  }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging, resizing])
 
-  function onUp() {
-    setDragging(false)
-    setResizing(null)
-    window.removeEventListener('mousemove', onMove as any)
-    window.removeEventListener('mouseup', onUp)
-    window.removeEventListener('touchmove', onMove as any)
-    window.removeEventListener('touchend', onUp)
-  }
-
-  // Begin drag or resize
+  // Begin drag
   function startDrag(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault()
     e.stopPropagation()
     setDragging(true)
-    const { clientX, clientY } = getClientPos(e.nativeEvent as any)
+    const { clientX, clientY } = getClientPos(
+      'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
+    )
     lastPos.current = { x: clientX, y: clientY }
-    window.addEventListener('mousemove', onMove as any)
-    window.addEventListener('mouseup', onUp)
-    window.addEventListener('touchmove', onMove as any)
-    window.addEventListener('touchend', onUp)
   }
+
+  // Begin resize
   function startResize(dir: ResizeDir) {
     return (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault()
       e.stopPropagation()
       setResizing(dir)
-      const { clientX, clientY } = getClientPos(e.nativeEvent as any)
+      const { clientX, clientY } = getClientPos(
+        'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
+      )
       lastPos.current = { x: clientX, y: clientY }
-      window.addEventListener('mousemove', onMove as any)
-      window.addEventListener('mouseup', onUp)
-      window.addEventListener('touchmove', onMove as any)
-      window.addEventListener('touchend', onUp)
     }
   }
 
@@ -201,7 +252,6 @@ function CropTool({ image, onApply, onCancel }: CropToolProps) {
   // Apply cropping to original image
   async function handleApplyCrop() {
     const { x, y, width, height } = getCropPixels()
-    // Load original image at full size
     const img = new window.Image()
     img.src = image
     await new Promise((resolve, reject) => {
@@ -216,18 +266,6 @@ function CropTool({ image, onApply, onCancel }: CropToolProps) {
     const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
     onApply(croppedUrl)
   }
-
-  // Resize handle positions
-  const handles = [
-    { dir: 'n', top: -8, left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, -50%)' } },
-    { dir: 's', top: '100%', left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, 50%)' } },
-    { dir: 'e', top: '50%', left: '100%', cursor: 'ew-resize', style: { transform: 'translate(50%, -50%)' } },
-    { dir: 'w', top: '50%', left: -8, cursor: 'ew-resize', style: { transform: 'translate(-50%, -50%)' } },
-    { dir: 'ne', top: -8, left: '100%', cursor: 'nesw-resize', style: { transform: 'translate(50%, -50%)' } },
-    { dir: 'nw', top: -8, left: -8, cursor: 'nwse-resize', style: { transform: 'translate(-50%, -50%)' } },
-    { dir: 'se', top: '100%', left: '100%', cursor: 'nwse-resize', style: { transform: 'translate(50%, 50%)' } },
-    { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
-  ] as const
 
   // Set crop box to centered default on first image load
   useEffect(() => {
@@ -380,6 +418,7 @@ function CropTool({ image, onApply, onCancel }: CropToolProps) {
   )
 }
 
+export default CropTool
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
