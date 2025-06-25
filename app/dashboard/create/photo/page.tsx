@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import CropTool from './CropTool'
+import heic2any from "heic2any";
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
@@ -201,25 +202,102 @@ export default function PhotoUpload() {
 
   // This function was referenced in your JSX but not present in your code!
   // Here is a basic implementation:
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    const file = e.target.files && e.target.files[0]
-    if (!file) return
-    setPendingFile(file)
-    setPhotoFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const result = ev.target?.result
-      if (typeof result === 'string') {
-        setOriginalImage(result)
-        setShowCropModal(true)
-      } else {
-        setError('Failed to read file')
-      }
-    }
-    reader.onerror = () => setError('Failed to read file')
-    reader.readAsDataURL(file)
+  // Enhanced handleFileSelect function - replace lines 204-222
+const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  setError(null);
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  // File size limit (10MB)
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_FILE_SIZE) {
+    setError('File too large. Please use images under 10MB.');
+    return;
   }
+
+  let processedFile = file;
+
+  // Handle HEIC/HEIF conversion
+  if (file.type === "image/heic" || file.type === "image/heif" || 
+      file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
+    try {
+      setError("Converting iPhone photo, please wait...");
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.8 
+      }) as Blob;
+      
+      processedFile = new File([convertedBlob], 
+        file.name.replace(/\.heic$/i, ".jpg"), 
+        { type: "image/jpeg" }
+      );
+      setError(null);
+    } catch (err) {
+      setError("Failed to convert iPhone photo. Please try a different file.");
+      return;
+    }
+  }
+
+  // Check supported formats
+  if (!/image\/(jpeg|png|webp|heic|heif)/.test(file.type)) {
+    setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.');
+    return;
+  }
+
+  setPendingFile(processedFile);
+  setPhotoFile(processedFile);
+
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const result = ev.target?.result;
+    if (typeof result === 'string') {
+      try {
+        // Pre-compress large images for better crop performance
+        const img = new Image();
+        img.src = result;
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        let finalImageUrl = result;
+        const MAX_DISPLAY_SIZE = 2048;
+
+        // Pre-compress if image is very large
+        if (img.naturalWidth > MAX_DISPLAY_SIZE || img.naturalHeight > MAX_DISPLAY_SIZE) {
+          setError("Optimizing large photo for editing...");
+          
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          const scale = Math.min(
+            MAX_DISPLAY_SIZE / img.naturalWidth,
+            MAX_DISPLAY_SIZE / img.naturalHeight
+          );
+          
+          canvas.width = Math.round(img.naturalWidth * scale);
+          canvas.height = Math.round(img.naturalHeight * scale);
+          
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          finalImageUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setError(null);
+        }
+
+        setOriginalImage(finalImageUrl);
+        setShowCropModal(true);
+      } catch (err) {
+        setError('Failed to process image. Please try a smaller file or different format.');
+      }
+    } else {
+      setError('Failed to read file');
+    }
+  };
+
+  reader.onerror = () => setError('Failed to read file');
+  reader.readAsDataURL(processedFile);
+};
 
   return (
     <div style={{
