@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
-
+import CropTool from './CropTool'
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
