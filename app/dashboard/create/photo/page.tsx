@@ -98,9 +98,7 @@ function CropTool({
           return { x: newX, y: newY, width: newW, height: newH }
         }
 
-        import { useState, useRef, useEffect } from 'react'
-
-type CropBox = { x: number; y: number; width: number; height: number }
+        type CropBox = { x: number; y: number; width: number; height: number }
 type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
 interface CropToolProps {
