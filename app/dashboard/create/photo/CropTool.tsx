@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react'
 
 // Types
@@ -174,21 +175,41 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     }
   }
 
-  // Apply cropping to original image
+  // Defensive cropping and validation
   async function handleApplyCrop() {
     const { x, y, width, height } = getCropPixels()
+    // Defensive: don't allow zero or negative crop
+    if (width <= 0 || height <= 0) {
+      onApply('')
+      return
+    }
     const img = new window.Image()
     img.src = image
-    await new Promise((resolve, reject) => {
-      img.onload = resolve
-      img.onerror = reject
-    })
+
+    try {
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+    } catch {
+      onApply('')
+      return
+    }
+
     const canvas = document.createElement('canvas')
     canvas.width = width
     canvas.height = height
     const ctx = canvas.getContext('2d')
-    ctx!.drawImage(img, x, y, width, height, 0, 0, width, height)
+    if (!ctx) {
+      onApply('')
+      return
+    }
+    ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
     const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
+    if (!croppedUrl.startsWith('data:image/')) {
+      onApply('')
+      return
+    }
     onApply(croppedUrl)
   }
 
@@ -216,6 +237,9 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   } else {
     displayW = Math.round(imgDims.width * (displayMax / imgDims.height))
   }
+
+  // Only enable Apply if the crop is valid and image is loaded
+  const cropValid = imgDims.width > 0 && imgDims.height > 0 && cropBox.width > 0 && cropBox.height > 0
 
   return (
     <div style={{
@@ -327,13 +351,14 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
             onClick={handleApplyCrop}
             style={{
               padding: '0.75rem 1.5rem',
-              background: '#10b981',
-              color: 'white',
+              background: cropValid ? '#10b981' : '#a7f3d0',
+              color: cropValid ? 'white' : '#6b7280',
               border: 'none',
               borderRadius: '8px',
-              cursor: 'pointer',
+              cursor: cropValid ? 'pointer' : 'not-allowed',
               fontWeight: '600'
             }}
+            disabled={!cropValid}
           >
             ✂️ Apply Crop
           </button>
