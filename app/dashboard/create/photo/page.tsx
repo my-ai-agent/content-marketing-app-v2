@@ -52,53 +52,6 @@ const MAX_HEIGHT = 1280
 const OUTPUT_QUALITY = 0.80
 
 type CropBox = { x: number; y: number; width: number; height: number }
-
-function CropTool({
-  image,
-  onApply,
-  onCancel
-}: {
-  image: string,
-  onApply: (croppedUrl: string) => void,
-  onCancel: () => void
-}) {
-  const [cropBox, setCropBox] = useState<CropBox>({ x: 50, y: 50, width: 200, height: 200 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [resizeDir, setResizeDir] = useState<null | 'se' | 'nw'>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imgRef = useRef<HTMLImageElement>(null)
-
-  // Mouse drag for moving crop box
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging && !resizeDir) return
-    if (isDragging) {
-      setCropBox(prev => ({
-        ...prev,
-        x: Math.max(0, Math.min(prev.x + e.movementX, (imgRef.current?.width ?? 0) - prev.width)),
-        y: Math.max(0, Math.min(prev.y + e.movementY, (imgRef.current?.height ?? 0) - prev.height))
-      }))
-    } else if (resizeDir) {
-      setCropBox(prev => {
-        if (resizeDir === 'se') {
-          // southeast corner: resize width/height
-          const newW = Math.max(40, Math.min(prev.width + e.movementX, (imgRef.current?.width ?? 0) - prev.x))
-          const newH = Math.max(40, Math.min(prev.height + e.movementY, (imgRef.current?.height ?? 0) - prev.y))
-          return { ...prev, width: newW, height: newH }
-        }
-        if (resizeDir === 'nw') {
-          // northwest corner: move x/y and resize width/height
-          let newX = Math.max(0, prev.x + e.movementX)
-          let newY = Math.max(0, prev.y + e.movementY)
-          let newW = Math.max(40, prev.width - e.movementX)
-          let newH = Math.max(40, prev.height - e.movementY)
-          // Clamp to image bounds
-          if (newX + newW > (imgRef.current?.width ?? 0)) newW = (imgRef.current?.width ?? 0) - newX
-          if (newY + newH > (imgRef.current?.height ?? 0)) newH = (imgRef.current?.height ?? 0) - newY
-          return { x: newX, y: newY, width: newW, height: newH }
-        }
-
-        type CropBox = { x: number; y: number; width: number; height: number }
 type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
 interface CropToolProps {
@@ -114,13 +67,13 @@ function getClientPos(e: MouseEvent | TouchEvent) {
     clientX = e.touches[0].clientX
     clientY = e.touches[0].clientY
   } else if ('clientX' in e) {
-    clientX = e.clientX
-    clientY = e.clientY
+    clientX = (e as MouseEvent).clientX
+    clientY = (e as MouseEvent).clientY
   }
   return { clientX, clientY }
 }
 
-export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
+function CropTool({ image, onApply, onCancel }: CropToolProps) {
   const imgRef = useRef<HTMLImageElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [imgDims, setImgDims] = useState({ width: 1, height: 1 })
@@ -289,6 +242,7 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
         height: h
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgDims.width, imgDims.height, image])
 
   // Responsive: constrain displayed width/height for mobile
@@ -386,8 +340,8 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
                   cursor: handle.cursor,
                   ...handle.style
                 }}
-                onMouseDown={startResize(handle.dir)}
-                onTouchStart={startResize(handle.dir)}
+                onMouseDown={startResize(handle.dir as ResizeDir)}
+                onTouchStart={startResize(handle.dir as ResizeDir)}
               />
             ))}
           </div>
@@ -421,87 +375,6 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
             ✂️ Apply Crop
           </button>
         </div>
-      </div>
-    </div>
-  )
-}
-          {/* Crop Overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              left: cropBox.x,
-              top: cropBox.y,
-              width: cropBox.width,
-              height: cropBox.height,
-              border: '2px solid #3b82f6',
-              background: 'rgba(59, 130, 246, 0.10)',
-              cursor: isDragging ? 'grabbing' : 'move',
-              boxSizing: 'border-box',
-              borderRadius: '0.4rem'
-            }}
-            onMouseDown={startDrag}
-          >
-            {/* Resize Handles */}
-            <div
-              style={{
-                position: 'absolute',
-                right: -10,
-                bottom: -10,
-                width: 18,
-                height: 18,
-                background: '#3b82f6',
-                borderRadius: '50%',
-                border: '2px solid white',
-                cursor: 'nwse-resize'
-              }}
-              onMouseDown={startResize('se')}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                left: -10,
-                top: -10,
-                width: 18,
-                height: 18,
-                background: '#3b82f6',
-                borderRadius: '50%',
-                border: '2px solid white',
-                cursor: 'nwse-resize'
-              }}
-              onMouseDown={startResize('nw')}
-            />
-          </div>
-        </div>
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#e5e7eb',
-              color: '#374151',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={applyCrop}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            ✂️ Apply Crop
-          </button>
-        </div>
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
     </div>
   )
