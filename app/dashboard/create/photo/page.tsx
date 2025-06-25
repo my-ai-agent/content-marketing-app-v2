@@ -88,83 +88,62 @@ export default function PhotoUpload() {
 
   // Clean Pica processing: compress, no debug code
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
-  setIsProcessing(true)
-  setError(null)
-  try {
-    const picaModule = await import('pica')
-    const picaInstance = picaModule.default()
-    const img = document.createElement('img')
-    img.src = imgSrc
+    setIsProcessing(true)
+    setError(null)
+    try {
+      const picaModule = await import('pica')
+      const picaInstance = picaModule.default()
+      const img = document.createElement('img')
+      img.src = imgSrc
 
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = (err) => reject(new Error('Image load failed'))
-    })
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = (err) => reject(new Error('Image load failed'))
+      })
 
-    if (!img.naturalWidth || !img.naturalHeight) {
-      throw new Error('Image has invalid dimensions')
+      if (!img.naturalWidth || !img.naturalHeight) {
+        throw new Error('Image has invalid dimensions')
+      }
+
+      let { width, height } = img
+      let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
+      let newW = Math.round(width * scale)
+      let newH = Math.round(height * scale)
+      const inputCanvas = document.createElement('canvas')
+      inputCanvas.width = width
+      inputCanvas.height = height
+      const inputCtx = inputCanvas.getContext('2d')
+      if (!inputCtx) throw new Error('Could not get canvas context')
+      inputCtx.drawImage(img, 0, 0)
+      const outputCanvas = document.createElement('canvas')
+      outputCanvas.width = newW
+      outputCanvas.height = newH
+      await picaInstance.resize(inputCanvas, outputCanvas)
+      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
+      URL.revokeObjectURL(img.src)
+      return blob
+    } finally {
+      setIsProcessing(false)
     }
-
-    let { width, height } = img
-    let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
-    let newW = Math.round(width * scale)
-    let newH = Math.round(height * scale)
-    const inputCanvas = document.createElement('canvas')
-    inputCanvas.width = width
-    inputCanvas.height = height
-    const inputCtx = inputCanvas.getContext('2d')
-    if (!inputCtx) throw new Error('Could not get canvas context')
-    inputCtx.drawImage(img, 0, 0)
-    const outputCanvas = document.createElement('canvas')
-    outputCanvas.width = newW
-    outputCanvas.height = newH
-    await picaInstance.resize(inputCanvas, outputCanvas)
-    const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
-    URL.revokeObjectURL(img.src)
-    return blob
-  } finally {
-    setIsProcessing(false)
   }
-}
 
   // On file selection, show crop modal with loaded image (as data URL)
-  const handleCropApply = async (croppedUrl: string) => {
-  setShowCropModal(false)
-  setIsProcessing(true)
-  try {
-    if (!croppedUrl.startsWith('data:image/')) {
-      throw new Error('Invalid cropped image data')
-    }
-    const compressedBlob = await compressWithPica(croppedUrl)
-    await saveImageToIndexedDB('selectedPhoto', compressedBlob)
-    setSelectedPhoto(croppedUrl)
-    if (pendingFile) {
-      localStorage.setItem('photoFileName', pendingFile.name)
-      localStorage.setItem('photoFileSize', pendingFile.size.toString())
-    }
-  } catch (err: any) {
-    setError(`Failed to process cropped image. ${err?.message ?? ''} Please try again.`)
-    setSelectedPhoto(null)
-  } finally {
-    setIsProcessing(false)
-  }
-}
-
-  // When crop is applied: compress, store, and show preview
   const handleCropApply = async (croppedUrl: string) => {
     setShowCropModal(false)
     setIsProcessing(true)
     try {
+      if (!croppedUrl.startsWith('data:image/')) {
+        throw new Error('Invalid cropped image data')
+      }
       const compressedBlob = await compressWithPica(croppedUrl)
       await saveImageToIndexedDB('selectedPhoto', compressedBlob)
       setSelectedPhoto(croppedUrl)
-      // Save photo meta for future steps
       if (pendingFile) {
         localStorage.setItem('photoFileName', pendingFile.name)
         localStorage.setItem('photoFileSize', pendingFile.size.toString())
       }
-    } catch {
-      setError('Failed to process cropped image. Please try again.')
+    } catch (err: any) {
+      setError(`Failed to process cropped image. ${err?.message ?? ''} Please try again.`)
       setSelectedPhoto(null)
     } finally {
       setIsProcessing(false)
@@ -218,6 +197,28 @@ export default function PhotoUpload() {
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
+  }
+
+  // This function was referenced in your JSX but not present in your code!
+  // Here is a basic implementation:
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    setPendingFile(file)
+    setPhotoFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const result = ev.target?.result
+      if (typeof result === 'string') {
+        setOriginalImage(result)
+        setShowCropModal(true)
+      } else {
+        setError('Failed to read file')
+      }
+    }
+    reader.onerror = () => setError('Failed to read file')
+    reader.readAsDataURL(file)
   }
 
   return (
