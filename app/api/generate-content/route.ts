@@ -1,97 +1,88 @@
-// CORRECT API Route: /app/api/generate-content/route.ts
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
+const CLAUDE_MODEL = "claude-3-opus-20240229"; // Change if you use a different model
+const ANTHROPIC_VERSION = "2023-06-01"; // Update if Claude requires a newer version
+
+const isDev = process.env.NODE_ENV !== "production";
+
+export async function POST(req: Request) {
   try {
-    console.log('🚀 API route called')
-    
-    const data = await request.json()
-    console.log('📝 Request data:', data)
-    
-    // Check if Claude API key exists
-    if (!process.env.CLAUDE_API_KEY) {
-      console.error('❌ No Claude API key found')
+    // Enhanced environment check & logging
+    const apiKey = process.env.CLAUDE_API_KEY;
+    if (!apiKey) {
+      console.error("[Claude API route] CLAUDE_API_KEY is not set in environment variables.");
       return NextResponse.json(
-        { error: 'Claude API key not configured' },
+        { error: "Claude API key not configured" },
         { status: 500 }
-      )
+      );
     }
 
-    console.log('🔑 Claude API key found:', process.env.CLAUDE_API_KEY ? 'Yes' : 'No')
+    let body: any;
+    try {
+      body = await req.json();
+    } catch (err) {
+      console.error("[Claude API route] Invalid JSON body:", err);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
 
-    // Build a simple prompt
-    const prompt = `Create tourism content for:
-    - Audience: ${data.audience || 'travelers'}
-    - Interests: ${data.interests || 'cultural experiences'}
-    - Persona: ${data.persona || 'casual'}
-    
-    Please respond with a JSON object containing:
-    {
-      "mainStory": "A compelling 200-word story about this New Zealand cultural experience",
-      "qrSummary": "A 40-word summary",
-      "hashtags": ["#NewZealand", "#Tourism", "#Culture"]
-    }`
+    // Validate the prompt or required fields
+    if (!body || !body.messages || !Array.isArray(body.messages)) {
+      console.error("[Claude API route] Missing required Claude 'messages' param:", body);
+      return NextResponse.json(
+        { error: "Missing or invalid Claude messages parameter" },
+        { status: 400 }
+      );
+    }
 
-    console.log('🧠 Calling Claude API...')
-
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    // Prepare Claude API request
+    const anthropicRes = await fetch(CLAUDE_API_URL, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01'
+        "x-api-key": apiKey,
+        "content-type": "application/json",
+        "anthropic-version": ANTHROPIC_VERSION
       },
       body: JSON.stringify({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1000,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
+        model: CLAUDE_MODEL,
+        ...body
       })
-    })
+    });
 
-    console.log('📡 Claude response status:', claudeResponse.status)
-
-    if (!claudeResponse.ok) {
-      const errorText = await claudeResponse.text()
-      console.error('❌ Claude API error:', errorText)
+    // Handle non-200 responses from Claude API
+    if (!anthropicRes.ok) {
+      const errMsg = await anthropicRes.text();
+      console.error(
+        `[Claude API route] Claude API error:`,
+        anthropicRes.status,
+        errMsg
+      );
+      // Only show Claude error details in dev, not prod
       return NextResponse.json(
-        { error: 'Failed to generate content' },
-        { status: 500 }
-      )
+        {
+          error: isDev
+            ? `Claude API ${anthropicRes.status}: ${errMsg}`
+            : "Content generation failed. Please try again."
+        },
+        { status: anthropicRes.status }
+      );
     }
 
-    const claudeData = await claudeResponse.json()
-    console.log('✅ Claude response received')
-
-    const generatedContent = claudeData.content[0].text
-
-    // Try to parse JSON, fallback if needed
-    let structuredContent
-    try {
-      structuredContent = JSON.parse(generatedContent)
-    } catch {
-      structuredContent = {
-        mainStory: generatedContent,
-        qrSummary: "Amazing New Zealand cultural experience!",
-        hashtags: ["#NewZealand", "#Tourism", "#Culture"]
-      }
-    }
-
-    console.log('🎉 Success! Returning content')
-    return NextResponse.json({
-      content: structuredContent,
-      success: true
-    })
-
-  } catch (error) {
-    console.error('💥 API route error:', error)
+    const result = await anthropicRes.json();
+    return NextResponse.json(result);
+  } catch (err: any) {
+    // Log the full error on the server, sanitize for client in prod
+    console.error("[Claude API route] Unexpected error:", err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: isDev
+          ? `Server error: ${err.message || err.toString()}`
+          : "Content generation failed. Please try again."
+      },
       { status: 500 }
-    )
+    );
   }
 }
