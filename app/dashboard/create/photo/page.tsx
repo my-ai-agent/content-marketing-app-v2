@@ -145,7 +145,7 @@ export default function PhotoUpload() {
     if (selectedPhoto) {
       try {
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
-        window.location.href = '/dashboard/create/demographics'
+        window.location.href = '/dashboard/create/story'
       } catch {
         setError('Failed to save photo. Storage quota may be exceeded.')
       }
@@ -164,7 +164,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
     await removeImageFromIndexedDB('selectedPhoto')
-    window.location.href = '/dashboard/create/demographics'
+    window.location.href = '/dashboard/create/story'
   }
 
   const handleRemovePhoto = async () => {
