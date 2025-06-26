@@ -21,13 +21,13 @@ export default function Interests() {
   ]
 
   const handleNext = () => {
-    if (selectedInterest) {
-      localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
-      window.location.href = '/dashboard/create/results'
-    } else {
-      alert('Please select an interest before continuing.')
-    }
+  if (selectedInterest) {
+    localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
+    window.location.href = '/dashboard/create/generate'
+  } else {
+    alert('Please select an interest before continuing.')
   }
+}
 
   return (
     <div style={{ 
