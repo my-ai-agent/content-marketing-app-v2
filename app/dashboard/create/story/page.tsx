@@ -239,14 +239,30 @@ export default function TellYourStory() {
                 What's the story behind this photo? ✨
               </h3>
               
+              {/* Rotating prompt suggestion */}
+              <div style={{
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '0.5rem',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+                fontSize: '0.875rem',
+                color: '#64748b',
+                fontStyle: 'italic',
+                transition: 'all 0.3s ease',
+                opacity: story.length > 50 ? 0.3 : 1
+              }}>
+                💡 {storyPrompts[currentPromptIndex]}
+              </div>
+
               <textarea
                 value={story}
                 onChange={(e) => setStory(e.target.value)}
-                placeholder={storyPrompts[currentPromptIndex]}
+                placeholder="Share your experience... What made this moment special?"
                 style={{
                   width: '100%',
                   flex: '1',
-                  minHeight: '200px',
+                  minHeight: '180px',
                   padding: '1rem',
                   border: 'none',
                   borderRadius: '1rem',
@@ -266,17 +282,16 @@ export default function TellYourStory() {
                 }}
               />
               
-              {/* Rotating prompt indicator */}
+              {/* Progress indicator */}
               <div style={{
                 position: 'absolute',
                 bottom: '1rem',
                 right: '1rem',
                 fontSize: '0.75rem',
                 color: '#9ca3af',
-                opacity: story ? 0 : 0.7,
                 transition: 'opacity 0.3s ease'
               }}>
-                💡 {currentPromptIndex + 1}/6
+                {currentPromptIndex + 1}/6
               </div>
             </div>
           </div>
