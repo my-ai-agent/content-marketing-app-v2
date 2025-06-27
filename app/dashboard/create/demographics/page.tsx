@@ -9,6 +9,7 @@ const BRAND_BLUE = '#11B3FF'
 export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const demographics = [
     'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
@@ -20,6 +21,17 @@ export default function Demographics() {
     'Visiting Friends & Relatives - Personal connection travelers',
     'Students & Education - Learning-focused, budget-conscious'
   ]
+
+  const tooltips = {
+    'Gen Z (1997-2012) - Digital natives prioritizing authenticity': 'Social media savvy, sustainability-focused, authentic experiences, technology-integrated travel, influencer-driven decisions',
+    'Millennials (1981-1996) - Experience-focused, cultural seekers': 'Instagram-worthy moments, cultural immersion, unique experiences, work-life balance, adventure travel',
+    'Gen X (1965-1980) - Family-focused, value-conscious': 'Family-friendly activities, practical accommodations, value for money, multi-generational trips, educational experiences',
+    'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused': 'Comfortable accommodations, guided tours, cultural learning, heritage sites, relaxed pace travel',
+    'Multi-Generational Families - Mixed-age groups': 'Activities for all ages, accessible venues, flexible itineraries, group accommodations, shared experiences',
+    'Business & Corporate Travellers - Professional efficiency-focused': 'Efficient transport, business facilities, networking opportunities, time-conscious, professional services',
+    'Visiting Friends & Relatives - Personal connection travelers': 'Local insider experiences, extended stays, budget-conscious, authentic local culture, personal recommendations',
+    'Students & Education - Learning-focused, budget-conscious': 'Educational tours, budget accommodations, group discounts, learning experiences, cultural exchange programs'
+  }
 
   const handleNext = () => {
     if (selectedDemographic) {
@@ -255,11 +267,13 @@ export default function Demographics() {
                       <button
                         key={index}
                         onClick={() => handleDropdownSelect(demographic)}
+                        onMouseEnter={() => setHoveredTooltip(demographic)}
+                        onMouseLeave={() => setHoveredTooltip(null)}
                         style={{
                           width: '100%',
                           padding: '1rem',
                           border: 'none',
-                          backgroundColor: 'transparent',
+                          backgroundColor: hoveredTooltip === demographic ? '#f8fafc' : 'transparent',
                           textAlign: 'left',
                           cursor: 'pointer',
                           fontSize: 'clamp(0.875rem, 2vw, 1rem)',
@@ -268,16 +282,49 @@ export default function Demographics() {
                           transition: 'background-color 0.2s ease',
                           borderRadius: index === 0 ? '1rem 1rem 0 0' : index === demographics.length - 1 ? '0 0 1rem 1rem' : '0'
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#f8fafc'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent'
-                        }}
                       >
                         {demographic}
                       </button>
                     ))}
+                  </div>
+                )}
+
+                {/* Floating Tooltip */}
+                {hoveredTooltip && isDropdownOpen && (
+                  <div style={{
+                    position: 'fixed',
+                    left: '50%',
+                    top: '20%',
+                    transform: 'translateX(-50%)',
+                    background: '#1f2937',
+                    color: 'white',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.875rem',
+                    zIndex: '1000',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                    maxWidth: '320px',
+                    textAlign: 'center',
+                    lineHeight: '1.4',
+                    animation: 'fadeIn 0.2s ease-in'
+                  }}>
+                    <div style={{ 
+                      fontWeight: '600', 
+                      marginBottom: '0.5rem',
+                      color: '#10b981'
+                    }}>
+                      {hoveredTooltip.split(' - ')[0]}
+                    </div>
+                    {tooltips[hoveredTooltip as keyof typeof tooltips]}
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      borderLeft: '8px solid transparent',
+                      borderRight: '8px solid transparent',
+                      borderTop: '8px solid #1f2937'
+                    }}></div>
                   </div>
                 )}
               </div>
@@ -346,7 +393,7 @@ export default function Demographics() {
             }}
             className={selectedDemographic ? "transition-all hover:scale-105" : ""}
           >
-            Next →
+            Continue →
           </button>
         </div>
 
