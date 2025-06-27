@@ -241,16 +241,16 @@ export default function TellYourStory() {
               
               {/* Rotating prompt suggestion */}
               <div style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #0ea5e9',
                 borderRadius: '0.5rem',
                 padding: '0.75rem',
                 marginBottom: '1rem',
                 fontSize: '0.875rem',
-                color: '#64748b',
-                fontStyle: 'italic',
+                color: '#0369a1',
+                fontWeight: '500',
                 transition: 'all 0.3s ease',
-                opacity: story.length > 50 ? 0.3 : 1
+                opacity: story.length > 50 ? 0.6 : 1
               }}>
                 💡 {storyPrompts[currentPromptIndex]}
               </div>
