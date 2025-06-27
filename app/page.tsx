@@ -111,40 +111,17 @@ export default function Home() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
       {/* Brand Logo */}
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <h1 style={{
           fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
           fontWeight: '900',
-          margin: '0',
+          margin: '0 0 1rem 0',
           lineHeight: '0.9'
         }}>
           <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
           <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
           <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
         </h1>
-        
-        {/* NEW: Brand Differentiator */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem 1.5rem',
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          borderRadius: '25px',
-          display: 'inline-block',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.1)'
-        }}>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-            fontWeight: '700',
-            margin: '0',
-            background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 50%, ${BRAND_BLUE} 100%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            letterSpacing: '0.5px'
-          }}>
-            🏆 World's #1 Photo-First Travel Storytelling App
-          </p>
-        </div>
       </div>
 
       {/* Updated Value Proposition */}
@@ -158,14 +135,6 @@ export default function Home() {
         }}>
           Transform Your Single Story + Photo into 16 Different Platforms Instantly!
         </h2>
-        <p style={{
-          fontSize: '1.2rem',
-          color: '#4A5568',
-          margin: '0',
-          lineHeight: '1.5'
-        }}>
-          The only tourism app that works exactly how tourists actually behave: 📸 See something amazing → Capture it → Share it professionally
-        </p>
       </div>
 
       {/* Fixed START Button - Routes to Photo Capture */}
@@ -201,17 +170,6 @@ export default function Home() {
 
       {/* Clean Platform Carousel */}
       <PlatformCarousel />
-
-      {/* Subtitle */}
-      <p style={{
-        marginTop: '2rem',
-        fontSize: '1rem',
-        color: '#666',
-        textAlign: 'center',
-        maxWidth: '600px'
-      }}>
-        Photo-first tourism storytelling • AI-enhanced content • Multi-platform distribution • QR sharing ecosystem
-      </p>
     </div>
   )
 }
