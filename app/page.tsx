@@ -133,7 +133,7 @@ export default function Home() {
           margin: '0 0 1rem 0',
           lineHeight: '1.2'
         }}>
-          Transform Your Single Story + Photo into 20 Different Platforms Instantly!
+          Transform Your Single Story + Photo into 20 Different Global Platforms Instantly!
         </h2>
       </div>
 
