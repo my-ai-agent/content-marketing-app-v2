@@ -249,7 +249,8 @@ export default function Interests() {
                     zIndex: '10',
                     marginTop: '0.5rem',
                     maxHeight: '300px',
-                    overflowY: 'auto'
+                    overflowY: 'auto',
+                    overflowX: 'visible'
                   }}>
                     {interests.map((interest, index) => {
                       const tooltips = {
@@ -278,12 +279,13 @@ export default function Interests() {
                               color: '#374151',
                               borderBottom: index < interests.length - 1 ? '1px solid #f3f4f6' : 'none',
                               transition: 'background-color 0.2s ease',
-                              borderRadius: index === 0 ? '1rem 1rem 0 0' : index === interests.length - 1 ? '0 0 1rem 1rem' : '0'
+                              borderRadius: index === 0 ? '1rem 1rem 0 0' : index === interests.length - 1 ? '0 0 1rem 1rem' : '0',
+                              position: 'relative'
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.backgroundColor = '#f8fafc'
                               // Show tooltip
-                              const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
+                              const tooltip = e.currentTarget.querySelector('.tooltip') as HTMLElement
                               if (tooltip) {
                                 tooltip.style.opacity = '1'
                                 tooltip.style.visibility = 'visible'
@@ -292,7 +294,7 @@ export default function Interests() {
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent'
                               // Hide tooltip
-                              const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
+                              const tooltip = e.currentTarget.querySelector('.tooltip') as HTMLElement
                               if (tooltip) {
                                 tooltip.style.opacity = '0'
                                 tooltip.style.visibility = 'hidden'
@@ -300,45 +302,46 @@ export default function Interests() {
                             }}
                           >
                             {interest}
+                            
+                            {/* Tooltip */}
+                            <div 
+                              className="tooltip"
+                              style={{
+                                position: 'fixed',
+                                left: '50%',
+                                bottom: '100%',
+                                transform: 'translateX(-50%)',
+                                background: '#1f2937',
+                                color: 'white',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '0.5rem',
+                                fontSize: '0.75rem',
+                                opacity: '0',
+                                visibility: 'hidden',
+                                transition: 'all 0.3s ease',
+                                zIndex: '1000',
+                                marginBottom: '0.5rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                maxWidth: '280px',
+                                width: 'max-content',
+                                whiteSpace: 'normal',
+                                textAlign: 'center',
+                                lineHeight: '1.3',
+                                pointerEvents: 'none'
+                              }}
+                            >
+                              {tooltips[interest as keyof typeof tooltips]}
+                              <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                borderLeft: '6px solid transparent',
+                                borderRight: '6px solid transparent',
+                                borderTop: '6px solid #1f2937'
+                              }}></div>
+                            </div>
                           </button>
-                          
-                          {/* Tooltip */}
-                          <div 
-                            className="tooltip"
-                            style={{
-                              position: 'absolute',
-                              left: '100%',
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              background: '#1f2937',
-                              color: 'white',
-                              padding: '0.75rem 1rem',
-                              borderRadius: '0.5rem',
-                              fontSize: '0.875rem',
-                              opacity: '0',
-                              visibility: 'hidden',
-                              transition: 'all 0.3s ease',
-                              zIndex: '20',
-                              marginLeft: '0.5rem',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                              maxWidth: '280px',
-                              whiteSpace: 'normal',
-                              textAlign: 'left',
-                              lineHeight: '1.3',
-                              pointerEvents: 'none'
-                            }}
-                          >
-                            {tooltips[interest as keyof typeof tooltips]}
-                            <div style={{
-                              position: 'absolute',
-                              right: '100%',
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              borderTop: '6px solid transparent',
-                              borderBottom: '6px solid transparent',
-                              borderRight: '6px solid #1f2937'
-                            }}></div>
-                          </div>
                         </div>
                       )
                     })}
