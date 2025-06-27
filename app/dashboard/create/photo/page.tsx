@@ -305,7 +305,7 @@ export default function PhotoUpload() {
         padding: '2rem 1rem',
         borderBottom: '1px solid #f3f4f6'
       }}>
-        {/* Step Tracker */}
+        {/* Step Tracker - Updated to 6 steps */}
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -377,6 +377,19 @@ export default function PhotoUpload() {
             fontSize: '0.875rem',
             fontWeight: '600'
           }}>5</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>6</div>
         </div>
         {/* Title */}
         <h1 style={{
@@ -389,15 +402,6 @@ export default function PhotoUpload() {
         }}>
           Add Your Photo
         </h1>
-        <p style={{
-          color: '#6b7280',
-          textAlign: 'center',
-          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          maxWidth: '600px',
-          margin: '0 auto'
-        }}>
-          Capture the moment or upload an inspiring photo to enhance your story
-        </p>
       </div>
       <div style={{
         flex: '1',
@@ -612,7 +616,7 @@ export default function PhotoUpload() {
           alignItems: 'center',
           gap: '1rem',
           width: '100%',
-          marginBottom: '2rem'
+          marginBottom: '1rem'
         }}>
           <button
             onClick={handleSkip}
@@ -652,34 +656,32 @@ export default function PhotoUpload() {
             Next →
           </button>
         </div>
-        {/* Logo - Brand Reinforcement */}
+        {/* Logo - Brand Reinforcement - Deactivated */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '2rem',
-          paddingTop: '2rem'
+          marginBottom: '1rem',
+          paddingTop: '0'
         }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{
-              color: BRAND_PURPLE,
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-              fontWeight: '900',
-              display: 'inline'
-            }}>click</div>
-            <div style={{
-              color: BRAND_ORANGE,
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>speak</div>
-            <div style={{
-              color: BRAND_BLUE,
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>send</div>
-          </Link>
+          <div style={{
+            color: BRAND_PURPLE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline'
+          }}>click</div>
+          <div style={{
+            color: BRAND_ORANGE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>speak</div>
+          <div style={{
+            color: BRAND_BLUE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>send</div>
         </div>
       </div>
       {/* Bottom Navigation */}
