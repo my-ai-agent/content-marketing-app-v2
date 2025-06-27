@@ -9,6 +9,8 @@ const BRAND_BLUE = '#11B3FF'
 export default function PlatformFormatSelection() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [selectedFormats, setSelectedFormats] = useState<string[]>([])
+  const [isPlatformDropdownOpen, setIsPlatformDropdownOpen] = useState(false)
+  const [isFormatDropdownOpen, setIsFormatDropdownOpen] = useState(false)
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const platforms = [
@@ -205,7 +207,7 @@ export default function PlatformFormatSelection() {
           }}>
             <div style={{
               width: '100%',
-              minHeight: '200px',
+              minHeight: '300px',
               border: '2px solid #d1d5db',
               borderRadius: '1.5rem',
               display: 'flex',
@@ -225,47 +227,105 @@ export default function PlatformFormatSelection() {
                 Where do you want to share? 🚀
               </h3>
 
-              {/* Platform Checkboxes */}
-              <div style={{ width: '100%' }}>
-                {platforms.map((platform, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handlePlatformToggle(platform)}
-                    onMouseEnter={() => setHoveredTooltip(platform)}
-                    onMouseLeave={() => setHoveredTooltip(null)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0.75rem 1rem',
-                      margin: '0.5rem 0',
-                      backgroundColor: selectedPlatforms.includes(platform) ? '#f0f9ff' : 'white',
-                      border: selectedPlatforms.includes(platform) ? '2px solid #0ea5e9' : '1px solid #e5e7eb',
-                      borderRadius: '0.75rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                      color: '#374151'
-                    }}
-                  >
-                    <div style={{
-                      width: '1.25rem',
-                      height: '1.25rem',
-                      border: selectedPlatforms.includes(platform) ? '2px solid #0ea5e9' : '2px solid #d1d5db',
-                      borderRadius: '0.25rem',
-                      marginRight: '0.75rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: selectedPlatforms.includes(platform) ? '#0ea5e9' : 'white',
-                      color: 'white',
-                      fontSize: '0.75rem',
-                      fontWeight: '600'
-                    }}>
-                      {selectedPlatforms.includes(platform) ? '✓' : ''}
-                    </div>
-                    <span style={{ flex: 1 }}>{platform}</span>
+              {/* Platform Dropdown */}
+              <div style={{ position: 'relative', width: '100%' }}>
+                <button
+                  onClick={() => setIsPlatformDropdownOpen(!isPlatformDropdownOpen)}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    border: 'none',
+                    borderRadius: '1rem',
+                    backgroundColor: 'white',
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: isPlatformDropdownOpen ? `0 0 0 2px ${BRAND_PURPLE}40` : '0 1px 3px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    color: selectedPlatforms.length > 0 ? '#374151' : '#9ca3af',
+                    fontWeight: selectedPlatforms.length > 0 ? '500' : '400'
+                  }}
+                >
+                  <span style={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap',
+                    maxWidth: '90%'
+                  }}>
+                    {selectedPlatforms.length > 0 
+                      ? `${selectedPlatforms.length} platform${selectedPlatforms.length > 1 ? 's' : ''} selected`
+                      : 'Select your platforms...'}
+                  </span>
+                  <span style={{ 
+                    transform: isPlatformDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                    fontSize: '1.2rem'
+                  }}>
+                    ▼
+                  </span>
+                </button>
+
+                {/* Platform Dropdown Options with Checkboxes */}
+                {isPlatformDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    width: '100%',
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                    zIndex: '10',
+                    marginTop: '0.5rem',
+                    maxHeight: '300px',
+                    overflowY: 'auto'
+                  }}>
+                    {platforms.map((platform, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <div
+                          onClick={() => handlePlatformToggle(platform)}
+                          onMouseEnter={() => setHoveredTooltip(platform)}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                          style={{
+                            width: '100%',
+                            padding: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                            color: '#374151',
+                            borderBottom: index < platforms.length - 1 ? '1px solid #f3f4f6' : 'none',
+                            transition: 'background-color 0.2s ease',
+                            borderRadius: index === 0 ? '1rem 1rem 0 0' : index === platforms.length - 1 ? '0 0 1rem 1rem' : '0',
+                            backgroundColor: hoveredTooltip === platform ? '#f8fafc' : 'transparent'
+                          }}
+                        >
+                          <div style={{
+                            width: '1.25rem',
+                            height: '1.25rem',
+                            border: selectedPlatforms.includes(platform) ? '2px solid #0ea5e9' : '2px solid #d1d5db',
+                            borderRadius: '0.25rem',
+                            marginRight: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: selectedPlatforms.includes(platform) ? '#0ea5e9' : 'white',
+                            color: 'white',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}>
+                            {selectedPlatforms.includes(platform) ? '✓' : ''}
+                          </div>
+                          <span style={{ flex: 1, textAlign: 'left' }}>{platform}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Platform Selection Display */}
@@ -297,7 +357,7 @@ export default function PlatformFormatSelection() {
           }}>
             <div style={{
               width: '100%',
-              minHeight: '200px',
+              minHeight: '300px',
               border: '2px solid #d1d5db',
               borderRadius: '1.5rem',
               display: 'flex',
@@ -317,47 +377,105 @@ export default function PlatformFormatSelection() {
                 What format works best? 📝
               </h3>
 
-              {/* Format Checkboxes */}
-              <div style={{ width: '100%' }}>
-                {formats.map((format, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleFormatToggle(format)}
-                    onMouseEnter={() => setHoveredTooltip(format)}
-                    onMouseLeave={() => setHoveredTooltip(null)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0.75rem 1rem',
-                      margin: '0.5rem 0',
-                      backgroundColor: selectedFormats.includes(format) ? '#f0f9ff' : 'white',
-                      border: selectedFormats.includes(format) ? '2px solid #0ea5e9' : '1px solid #e5e7eb',
-                      borderRadius: '0.75rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                      color: '#374151'
-                    }}
-                  >
-                    <div style={{
-                      width: '1.25rem',
-                      height: '1.25rem',
-                      border: selectedFormats.includes(format) ? '2px solid #0ea5e9' : '2px solid #d1d5db',
-                      borderRadius: '0.25rem',
-                      marginRight: '0.75rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: selectedFormats.includes(format) ? '#0ea5e9' : 'white',
-                      color: 'white',
-                      fontSize: '0.75rem',
-                      fontWeight: '600'
-                    }}>
-                      {selectedFormats.includes(format) ? '✓' : ''}
-                    </div>
-                    <span style={{ flex: 1 }}>{format}</span>
+              {/* Format Dropdown */}
+              <div style={{ position: 'relative', width: '100%' }}>
+                <button
+                  onClick={() => setIsFormatDropdownOpen(!isFormatDropdownOpen)}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    border: 'none',
+                    borderRadius: '1rem',
+                    backgroundColor: 'white',
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: isFormatDropdownOpen ? `0 0 0 2px ${BRAND_PURPLE}40` : '0 1px 3px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    color: selectedFormats.length > 0 ? '#374151' : '#9ca3af',
+                    fontWeight: selectedFormats.length > 0 ? '500' : '400'
+                  }}
+                >
+                  <span style={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap',
+                    maxWidth: '90%'
+                  }}>
+                    {selectedFormats.length > 0 
+                      ? `${selectedFormats.length} format${selectedFormats.length > 1 ? 's' : ''} selected`
+                      : 'Select your formats...'}
+                  </span>
+                  <span style={{ 
+                    transform: isFormatDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                    fontSize: '1.2rem'
+                  }}>
+                    ▼
+                  </span>
+                </button>
+
+                {/* Format Dropdown Options with Checkboxes */}
+                {isFormatDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    width: '100%',
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                    zIndex: '10',
+                    marginTop: '0.5rem',
+                    maxHeight: '300px',
+                    overflowY: 'auto'
+                  }}>
+                    {formats.map((format, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <div
+                          onClick={() => handleFormatToggle(format)}
+                          onMouseEnter={() => setHoveredTooltip(format)}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                          style={{
+                            width: '100%',
+                            padding: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                            color: '#374151',
+                            borderBottom: index < formats.length - 1 ? '1px solid #f3f4f6' : 'none',
+                            transition: 'background-color 0.2s ease',
+                            borderRadius: index === 0 ? '1rem 1rem 0 0' : index === formats.length - 1 ? '0 0 1rem 1rem' : '0',
+                            backgroundColor: hoveredTooltip === format ? '#f8fafc' : 'transparent'
+                          }}
+                        >
+                          <div style={{
+                            width: '1.25rem',
+                            height: '1.25rem',
+                            border: selectedFormats.includes(format) ? '2px solid #0ea5e9' : '2px solid #d1d5db',
+                            borderRadius: '0.25rem',
+                            marginRight: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: selectedFormats.includes(format) ? '#0ea5e9' : 'white',
+                            color: 'white',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}>
+                            {selectedFormats.includes(format) ? '✓' : ''}
+                          </div>
+                          <span style={{ flex: 1, textAlign: 'left' }}>{format}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Format Selection Display */}
@@ -380,7 +498,7 @@ export default function PlatformFormatSelection() {
         </div>
 
         {/* Floating Tooltip */}
-        {hoveredTooltip && (
+        {hoveredTooltip && (isPlatformDropdownOpen || isFormatDropdownOpen) && (
           <div style={{
             position: 'fixed',
             left: '50%',
