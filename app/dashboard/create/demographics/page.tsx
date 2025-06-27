@@ -8,15 +8,16 @@ const BRAND_BLUE = '#11B3FF'
 
 export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const demographics = [
-  'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
-  'Millennials (1981-1996) - Experience-focused, cultural seekers', 
-  'Gen X (1965-1980) - Family-focused, value-conscious',
-  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
-  'Multi-Generational Families - Mixed-age groups',
-  'Business & Corporate Travellers - Professional efficiency-focused'
-]
+    'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
+    'Millennials (1981-1996) - Experience-focused, cultural seekers', 
+    'Gen X (1965-1980) - Family-focused, value-conscious',
+    'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
+    'Multi-Generational Families - Mixed-age groups',
+    'Business & Corporate Travellers - Professional efficiency-focused'
+  ]
 
   const handleNext = () => {
     if (selectedDemographic) {
@@ -25,6 +26,16 @@ export default function Demographics() {
     } else {
       alert('Please select a target audience before continuing.')
     }
+  }
+
+  const handleSkip = () => {
+    localStorage.setItem('selectedDemographics', JSON.stringify(['Millennials (1981-1996) - Experience-focused, cultural seekers']))
+    window.location.href = '/dashboard/create/interests'
+  }
+
+  const handleDropdownSelect = (demographic: string) => {
+    setSelectedDemographic(demographic)
+    setIsDropdownOpen(false)
   }
 
   return (
@@ -45,7 +56,7 @@ export default function Demographics() {
         borderBottom: '1px solid #f3f4f6'
       }}>
 
-        {/* Step Tracker */}
+        {/* Step Tracker - Updated to 6 steps */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -83,7 +94,7 @@ export default function Demographics() {
             width: '2rem', 
             height: '2rem', 
             borderRadius: '50%', 
-            backgroundColor: '#1f2937', 
+            backgroundColor: '#10b981', 
             color: 'white', 
             display: 'flex', 
             alignItems: 'center', 
@@ -117,6 +128,19 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>5</div>
+          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>6</div>
         </div>
 
         {/* Title */}
@@ -130,15 +154,6 @@ export default function Demographics() {
         }}>
           Target Audience
         </h1>
-        <p style={{ 
-          color: '#6b7280', 
-          textAlign: 'center', 
-          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          maxWidth: '600px',
-          margin: '0 auto'
-        }}>
-          Who is your story for?
-        </p>
       </div>
 
       <div style={{ 
@@ -149,144 +164,167 @@ export default function Demographics() {
         padding: '2rem 1rem' 
       }}>
 
-        {/* Demographics Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1rem',
-          marginBottom: '3rem'
-        }}>
-          {demographics.map((demographic) => {
-            const tooltips = {
-              'Female Travellers': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
-              'Families': 'Parents with children, multi-generational trips, visiting friends & relatives',
-              'Young Adults (18-35)': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
-              'Business Travellers': 'Corporate travellers, conference attendees, business meeting planners',
-              'Solo Travellers': 'Independent explorers, digital nomads, solo adventure enthusiasts',
-              'Mature Travellers': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
-            }
+        {/* Single Dropdown Selection - Matching Photo/Story Page Style */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            margin: '0 auto',
+            position: 'relative'
+          }}>
+            <div style={{
+              width: '100%',
+              minHeight: '300px',
+              border: '2px solid #d1d5db',
+              borderRadius: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: '#fafafa',
+              position: 'relative',
+              padding: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '1rem',
+                margin: '0 0 1rem 0',
+                textAlign: 'left'
+              }}>
+                Who is your story for? 🎯
+              </h3>
 
-            return (
-              <div key={demographic} style={{ position: 'relative' }}>
+              {/* Custom Dropdown */}
+              <div style={{ position: 'relative', width: '100%' }}>
                 <button
-                  onClick={() => setSelectedDemographic(demographic)}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   style={{
                     width: '100%',
-                    padding: '1.5rem',
-                    border: selectedDemographic === demographic ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                    padding: '1rem',
+                    border: 'none',
                     borderRadius: '1rem',
-                    backgroundColor: selectedDemographic === demographic ? '#eff6ff' : 'white',
-                    color: '#374151',
-                    fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
-                    fontWeight: '500',
+                    backgroundColor: 'white',
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                    textAlign: 'left',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    textAlign: 'center',
-                    minHeight: '4rem',
                     display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedDemographic !== demographic) {
-                      e.currentTarget.style.borderColor = '#9ca3af'
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.1)'
-                    }
-                    // Show tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '1'
-                      tooltip.style.visibility = 'visible'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedDemographic !== demographic) {
-                      e.currentTarget.style.borderColor = '#e5e7eb'
-                      e.currentTarget.style.backgroundColor = 'white'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }
-                    // Hide tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '0'
-                      tooltip.style.visibility = 'hidden'
-                    }
-                  }}
-                >
-                  {demographic}
-                </button>
-                
-                {/* Tooltip */}
-                <div 
-                  className="tooltip"
-                  style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#1f2937',
-                    color: 'white',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    opacity: '0',
-                    visibility: 'hidden',
+                    boxShadow: isDropdownOpen ? `0 0 0 2px ${BRAND_PURPLE}40` : '0 1px 3px rgba(0,0,0,0.1)',
                     transition: 'all 0.3s ease',
-                    zIndex: '10',
-                    marginBottom: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    maxWidth: '280px',
-                    whiteSpace: 'normal',
-                    textAlign: 'center',
-                    lineHeight: '1.3'
+                    color: selectedDemographic ? '#374151' : '#9ca3af',
+                    fontWeight: selectedDemographic ? '500' : '400'
                   }}
                 >
-                  {tooltips[demographic as keyof typeof tooltips]}
+                  <span style={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap',
+                    maxWidth: '90%'
+                  }}>
+                    {selectedDemographic || 'Select your target audience...'}
+                  </span>
+                  <span style={{ 
+                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                    fontSize: '1.2rem'
+                  }}>
+                    ▼
+                  </span>
+                </button>
+
+                {/* Dropdown Options */}
+                {isDropdownOpen && (
                   <div style={{
                     position: 'absolute',
                     top: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderTop: '6px solid #1f2937'
-                  }}></div>
-                </div>
+                    left: '0',
+                    width: '100%',
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                    zIndex: '10',
+                    marginTop: '0.5rem',
+                    maxHeight: '300px',
+                    overflowY: 'auto'
+                  }}>
+                    {demographics.map((demographic, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleDropdownSelect(demographic)}
+                        style={{
+                          width: '100%',
+                          padding: '1rem',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                          color: '#374151',
+                          borderBottom: index < demographics.length - 1 ? '1px solid #f3f4f6' : 'none',
+                          transition: 'background-color 0.2s ease',
+                          borderRadius: index === 0 ? '1rem 1rem 0 0' : index === demographics.length - 1 ? '0 0 1rem 1rem' : '0'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8fafc'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                        }}
+                      >
+                        {demographic}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )
-          })}
+
+              {/* Selection Display */}
+              {selectedDemographic && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#f0f9ff',
+                  border: '1px solid #0ea5e9',
+                  borderRadius: '0.75rem',
+                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                  color: '#0369a1',
+                  fontWeight: '500'
+                }}>
+                  ✓ Selected: {selectedDemographic}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Selection Guidance */}
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          textAlign: 'center',
-          marginBottom: '3rem'
-        }}>
-          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🎯</span>
-          <span style={{ 
-            color: '#1e40af', 
-            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-            fontWeight: '500'
-          }}>
-            Select one target audience for the most effective messaging
-          </span>
-        </div>
-
-        {/* Next Button */}
+        {/* Navigation Buttons */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          width: '100%', 
-          marginBottom: '2rem' 
+          gap: '1rem',
+          width: '100%',
+          marginBottom: '1rem'
         }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              background: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+              fontWeight: '600',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Skip for now
+          </button>
+
           <button
             onClick={handleNext}
             disabled={!selectedDemographic}
@@ -302,8 +340,6 @@ export default function Demographics() {
               border: 'none',
               cursor: selectedDemographic ? 'pointer' : 'not-allowed',
               boxShadow: selectedDemographic ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-              display: 'block',
-              margin: '0 auto',
               transition: 'all 0.2s'
             }}
             className={selectedDemographic ? "transition-all hover:scale-105" : ""}
@@ -312,34 +348,32 @@ export default function Demographics() {
           </button>
         </div>
 
-        {/* Logo - Brand Reinforcement */}
+        {/* Logo - Brand Reinforcement - Deactivated */}
         <div style={{ 
           textAlign: 'center', 
-          marginBottom: '2rem',
-          paddingTop: '2rem'
+          marginBottom: '1rem',
+          paddingTop: '0'
         }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{ 
-              color: BRAND_PURPLE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline'
-            }}>click</div>
-            <div style={{ 
-              color: BRAND_ORANGE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>speak</div>
-            <div style={{ 
-              color: BRAND_BLUE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>send</div>
-          </Link>
+          <div style={{ 
+            color: BRAND_PURPLE, 
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            fontWeight: '900',
+            display: 'inline'
+          }}>click</div>
+          <div style={{ 
+            color: BRAND_ORANGE, 
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>speak</div>
+          <div style={{ 
+            color: BRAND_BLUE, 
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>send</div>
         </div>
       </div>
 
@@ -350,7 +384,7 @@ export default function Demographics() {
         borderTop: '1px solid #f3f4f6'
       }}>
         <Link 
-          href="/dashboard/create/photo"
+          href="/dashboard/create/story"
           style={{ 
             color: '#6b7280', 
             textDecoration: 'none',
@@ -358,7 +392,7 @@ export default function Demographics() {
             fontSize: 'clamp(0.875rem, 2vw, 1rem)'
           }}
         >
-          ← Back to Photo
+          ← Back to Story
         </Link>
       </div>
     </div>
