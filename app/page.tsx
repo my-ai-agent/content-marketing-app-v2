@@ -127,13 +127,13 @@ export default function Home() {
       {/* Updated Value Proposition */}
       <div style={{ textAlign: 'center', marginBottom: '3rem', maxWidth: '800px' }}>
         <h2 style={{
-          fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+          fontSize: 'clamp(1.25rem, 4vw, 2rem)',
           fontWeight: '700',
           color: '#2D3748',
           margin: '0 0 1rem 0',
           lineHeight: '1.2'
         }}>
-          Transform Your Single Story + Photo into 16 Different Platforms Instantly!
+          Transform Your Single Story + Photo into 20 Different Platforms Instantly!
         </h2>
       </div>
 
