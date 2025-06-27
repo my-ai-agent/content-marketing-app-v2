@@ -9,6 +9,7 @@ const BRAND_BLUE = '#11B3FF'
 export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const interests = [
     'Cultural Experiences',
@@ -20,6 +21,17 @@ export default function Interests() {
     'Gardens & Nature',
     'Arts & Creative Experiences'
   ]
+
+  const tooltips = {
+    'Cultural Experiences': 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals',
+    'Adventure & Outdoor Activities': 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities',
+    'Food & Wine': 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals',
+    'Relaxation & Wellness': 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts',
+    'History & Heritage': 'Historical sites, battlefields, colonial history, archaeological sites, guided tours',
+    'Photography & Social Media': 'Instagram spots, scenic viewpoints, photography tours, influencer experiences',
+    'Gardens & Nature': 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours',
+    'Arts & Creative Experiences': 'Art galleries, workshops, creative retreats, local artisans, craft experiences'
+  }
 
   const handleNext = () => {
     if (selectedInterest) {
@@ -249,102 +261,71 @@ export default function Interests() {
                     zIndex: '10',
                     marginTop: '0.5rem',
                     maxHeight: '300px',
-                    overflowY: 'auto',
-                    overflowX: 'visible'
+                    overflowY: 'auto'
                   }}>
-                    {interests.map((interest, index) => {
-                      const tooltips = {
-                        'Cultural Experiences': 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals',
-                        'Adventure & Outdoor Activities': 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities',
-                        'Food & Wine': 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals',
-                        'Relaxation & Wellness': 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts',
-                        'History & Heritage': 'Historical sites, battlefields, colonial history, archaeological sites, guided tours',
-                        'Photography & Social Media': 'Instagram spots, scenic viewpoints, photography tours, influencer experiences',
-                        'Gardens & Nature': 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours',
-                        'Arts & Creative Experiences': 'Art galleries, workshops, creative retreats, local artisans, craft experiences'
-                      }
+                    {interests.map((interest, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleDropdownSelect(interest)}
+                        onMouseEnter={() => setHoveredTooltip(interest)}
+                        onMouseLeave={() => setHoveredTooltip(null)}
+                        style={{
+                          width: '100%',
+                          padding: '1rem',
+                          border: 'none',
+                          backgroundColor: hoveredTooltip === interest ? '#f8fafc' : 'transparent',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                          color: '#374151',
+                          borderBottom: index < interests.length - 1 ? '1px solid #f3f4f6' : 'none',
+                          transition: 'background-color 0.2s ease',
+                          borderRadius: index === 0 ? '1rem 1rem 0 0' : index === interests.length - 1 ? '0 0 1rem 1rem' : '0',
+                          position: 'relative'
+                        }}
+                      >
+                        {interest}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                      return (
-                        <div key={index} style={{ position: 'relative' }}>
-                          <button
-                            onClick={() => handleDropdownSelect(interest)}
-                            style={{
-                              width: '100%',
-                              padding: '1rem',
-                              border: 'none',
-                              backgroundColor: 'transparent',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                              color: '#374151',
-                              borderBottom: index < interests.length - 1 ? '1px solid #f3f4f6' : 'none',
-                              transition: 'background-color 0.2s ease',
-                              borderRadius: index === 0 ? '1rem 1rem 0 0' : index === interests.length - 1 ? '0 0 1rem 1rem' : '0',
-                              position: 'relative'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f8fafc'
-                              // Show tooltip
-                              const tooltip = e.currentTarget.querySelector('.tooltip') as HTMLElement
-                              if (tooltip) {
-                                tooltip.style.opacity = '1'
-                                tooltip.style.visibility = 'visible'
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent'
-                              // Hide tooltip
-                              const tooltip = e.currentTarget.querySelector('.tooltip') as HTMLElement
-                              if (tooltip) {
-                                tooltip.style.opacity = '0'
-                                tooltip.style.visibility = 'hidden'
-                              }
-                            }}
-                          >
-                            {interest}
-                            
-                            {/* Tooltip */}
-                            <div 
-                              className="tooltip"
-                              style={{
-                                position: 'fixed',
-                                left: '50%',
-                                bottom: '100%',
-                                transform: 'translateX(-50%)',
-                                background: '#1f2937',
-                                color: 'white',
-                                padding: '0.75rem 1rem',
-                                borderRadius: '0.5rem',
-                                fontSize: '0.75rem',
-                                opacity: '0',
-                                visibility: 'hidden',
-                                transition: 'all 0.3s ease',
-                                zIndex: '1000',
-                                marginBottom: '0.5rem',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                                maxWidth: '280px',
-                                width: 'max-content',
-                                whiteSpace: 'normal',
-                                textAlign: 'center',
-                                lineHeight: '1.3',
-                                pointerEvents: 'none'
-                              }}
-                            >
-                              {tooltips[interest as keyof typeof tooltips]}
-                              <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                borderLeft: '6px solid transparent',
-                                borderRight: '6px solid transparent',
-                                borderTop: '6px solid #1f2937'
-                              }}></div>
-                            </div>
-                          </button>
-                        </div>
-                      )
-                    })}
+                {/* Floating Tooltip */}
+                {hoveredTooltip && isDropdownOpen && (
+                  <div style={{
+                    position: 'fixed',
+                    left: '50%',
+                    top: '20%',
+                    transform: 'translateX(-50%)',
+                    background: '#1f2937',
+                    color: 'white',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.875rem',
+                    zIndex: '1000',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                    maxWidth: '320px',
+                    textAlign: 'center',
+                    lineHeight: '1.4',
+                    animation: 'fadeIn 0.2s ease-in'
+                  }}>
+                    <div style={{ 
+                      fontWeight: '600', 
+                      marginBottom: '0.5rem',
+                      color: '#10b981'
+                    }}>
+                      {hoveredTooltip}
+                    </div>
+                    {tooltips[hoveredTooltip as keyof typeof tooltips]}
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      borderLeft: '8px solid transparent',
+                      borderRight: '8px solid transparent',
+                      borderTop: '8px solid #1f2937'
+                    }}></div>
                   </div>
                 )}
               </div>
