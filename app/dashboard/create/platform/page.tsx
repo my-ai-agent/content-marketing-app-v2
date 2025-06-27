@@ -14,18 +14,15 @@ export default function PlatformFormatSelection() {
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const platforms = [
-    'Instagram - Posts & Stories',
     'Facebook - Social sharing',
+    'Blog - SEO content',
+    'Website - Your website',
+    'Instagram - Posts & Stories',
     'TikTok - Video content',
     'YouTube - Video/Shorts',
     'Pinterest - Visual discovery',
     'Twitter/X - Quick updates',
-    'LinkedIn - Professional network',
-    'Website - Your website',
-    'Email - Newsletter',
-    'Blog - SEO content',
-    'Medium - Article platform',
-    'Substack - Newsletter platform'
+    'LinkedIn - Professional network'
   ]
 
   const formats = [
@@ -43,18 +40,15 @@ export default function PlatformFormatSelection() {
   ]
 
   const platformTooltips = {
-    'Instagram - Posts & Stories': 'Visual storytelling, hashtags, stories, reels, high engagement rates',
     'Facebook - Social sharing': 'Community building, event promotion, link sharing, older demographics',
+    'Blog - SEO content': 'Search engine optimization, detailed content, authority building, lead generation',
+    'Website - Your website': 'Complete control, SEO benefits, detailed analytics, professional credibility',
+    'Instagram - Posts & Stories': 'Visual storytelling, hashtags, stories, reels, high engagement rates',
     'TikTok - Video content': 'Short-form videos, trending sounds, younger audience, viral potential',
     'YouTube - Video/Shorts': 'Long-form and short content, monetization, search optimization, global reach',
     'Pinterest - Visual discovery': 'Visual search, DIY content, travel inspiration, female-heavy audience',
     'Twitter/X - Quick updates': 'Real-time updates, news sharing, professional networking, hashtag campaigns',
-    'LinkedIn - Professional network': 'B2B content, thought leadership, professional networking, industry insights',
-    'Website - Your website': 'Complete control, SEO benefits, detailed analytics, professional credibility',
-    'Email - Newsletter': 'Direct communication, high ROI, personalized content, customer retention',
-    'Blog - SEO content': 'Search engine optimization, detailed content, authority building, lead generation',
-    'Medium - Article platform': 'Thought leadership, writing community, built-in audience, easy publishing',
-    'Substack - Newsletter platform': 'Paid subscriptions, email-first content, independent publishing, loyal readership'
+    'LinkedIn - Professional network': 'B2B content, thought leadership, professional networking, industry insights'
   }
 
   const formatTooltips = {
