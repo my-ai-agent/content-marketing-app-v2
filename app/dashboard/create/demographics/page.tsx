@@ -12,6 +12,7 @@ export default function Demographics() {
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const demographics = [
+    'Female Travellers - Solo and group female adventurers',
     'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
     'Millennials (1981-1996) - Experience-focused, cultural seekers', 
     'Gen X (1965-1980) - Family-focused, value-conscious',
@@ -23,6 +24,7 @@ export default function Demographics() {
   ]
 
   const tooltips = {
+    'Female Travellers - Solo and group female adventurers': 'Safety-conscious travel, women-only experiences, empowerment activities, solo female adventures, female-friendly accommodations',
     'Gen Z (1997-2012) - Digital natives prioritizing authenticity': 'Social media savvy, sustainability-focused, authentic experiences, technology-integrated travel, influencer-driven decisions',
     'Millennials (1981-1996) - Experience-focused, cultural seekers': 'Instagram-worthy moments, cultural immersion, unique experiences, work-life balance, adventure travel',
     'Gen X (1965-1980) - Family-focused, value-conscious': 'Family-friendly activities, practical accommodations, value for money, multi-generational trips, educational experiences',
