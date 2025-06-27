@@ -16,7 +16,9 @@ export default function Demographics() {
     'Gen X (1965-1980) - Family-focused, value-conscious',
     'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
     'Multi-Generational Families - Mixed-age groups',
-    'Business & Corporate Travellers - Professional efficiency-focused'
+    'Business & Corporate Travellers - Professional efficiency-focused',
+    'Visiting Friends & Relatives - Personal connection travelers',
+    'Students & Education - Learning-focused, budget-conscious'
   ]
 
   const handleNext = () => {
