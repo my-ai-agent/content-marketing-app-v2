@@ -11,6 +11,10 @@ export default function TellYourStory() {
   const [story, setStory] = useState('')
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0)
+  const [selectedPersona, setSelectedPersona] = useState('')
+  const [customPersonaText, setCustomPersonaText] = useState('')
+  const [showPersonaSelection, setShowPersonaSelection] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const storyPrompts = [
     "What made this moment special?",
@@ -20,6 +24,83 @@ export default function TellYourStory() {
     "What's the story behind this image?",
     "What would you want others to know about this place?"
   ]
+
+  const personas = [
+    {
+      id: 'tourism-business-owner',
+      title: 'Tourism Business Owner',
+      subtitle: 'leads & bookings focus',
+      description: 'Content optimized for lead generation, customer acquisition, and showcasing business offerings'
+    },
+    {
+      id: 'content-creator',
+      title: 'Travel Content Creator',
+      subtitle: 'engagement & reach focus',
+      description: 'Engaging content designed to build audience, increase social reach, and establish creative portfolio'
+    },
+    {
+      id: 'travel-enthusiast',
+      title: 'Travel Enthusiast',
+      subtitle: 'sharing & inspiration focus',
+      description: 'Authentic storytelling that inspires others to explore and discover new destinations'
+    },
+    {
+      id: 'conference-attendee',
+      title: 'Conference or Event Attendee',
+      subtitle: 'networking & professional sharing',
+      description: 'Professional content for networking, industry connections, and event experiences'
+    },
+    {
+      id: 'corporate-travel-manager',
+      title: 'Corporate Travel Manager',
+      subtitle: 'team experiences & business travel',
+      description: 'Business-focused content for team building, corporate experiences, and professional travel'
+    },
+    {
+      id: 'tourism-educator',
+      title: 'Tourism Educator/Guide',
+      subtitle: 'educational content & cultural sharing',
+      description: 'Educational storytelling that teaches, informs, and shares cultural knowledge authentically'
+    },
+    {
+      id: 'travel-journalist',
+      title: 'Travel Journalist/Blogger',
+      subtitle: 'professional storytelling & reviews',
+      description: 'Professional travel writing with journalistic quality, reviews, and in-depth destination coverage'
+    },
+    {
+      id: 'family-travel-planner',
+      title: 'Family Travel Planner',
+      subtitle: 'family memories & recommendations',
+      description: 'Family-friendly content focusing on creating memories and helping other families plan trips'
+    },
+    {
+      id: 'student-backpacker',
+      title: 'Student/Backpacker',
+      subtitle: 'budget travel & authentic experiences',
+      description: 'Budget-conscious travel content with authentic experiences and practical tips for young travelers'
+    },
+    {
+      id: 'luxury-enthusiast',
+      title: 'Luxury Travel Enthusiast',
+      subtitle: 'premium experiences & high-end content',
+      description: 'Premium travel content showcasing luxury experiences, fine dining, and exclusive destinations'
+    },
+    {
+      id: 'adventure-sports',
+      title: 'Adventure Sports Enthusiast',
+      subtitle: 'action-focused & adrenaline content',
+      description: 'High-energy content focused on adventure activities, extreme sports, and adrenaline experiences'
+    },
+    {
+      id: 'other',
+      title: 'Other',
+      subtitle: 'custom content focus',
+      description: 'Describe your unique content creation purpose and goals'
+    }
+  ]
+
+  const selectedPersonaData = personas.find(p => p.id === selectedPersona)
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -34,6 +115,16 @@ export default function TellYourStory() {
       setStory(existingStory)
     }
 
+    // Get any existing persona selection
+    const existingPersona = localStorage.getItem('selectedPersona')
+    const existingCustomPersona = localStorage.getItem('customPersonaText')
+    if (existingPersona) {
+      setSelectedPersona(existingPersona)
+    }
+    if (existingCustomPersona) {
+      setCustomPersonaText(existingCustomPersona)
+    }
+
     // Carousel effect for prompts
     const interval = setInterval(() => {
       setCurrentPromptIndex((prev) => (prev + 1) % storyPrompts.length)
@@ -42,9 +133,27 @@ export default function TellYourStory() {
     return () => clearInterval(interval)
   }, [storyPrompts.length])
 
+  // Show persona selection when story has content
+  useEffect(() => {
+    if (story.trim().length > 50) {
+      setShowPersonaSelection(true)
+    } else {
+      setShowPersonaSelection(false)
+    }
+  }, [story])
+
   const handleNext = () => {
     if (story.trim()) {
       localStorage.setItem('userStoryContext', story.trim())
+      
+      // Save persona data for Executive Prompt Builder
+      if (selectedPersona) {
+        localStorage.setItem('selectedPersona', selectedPersona)
+        if (selectedPersona === 'other' && customPersonaText.trim()) {
+          localStorage.setItem('customPersonaText', customPersonaText.trim())
+        }
+      }
+      
       window.location.href = '/dashboard/create/demographics'
     } else {
       alert('Please tell us about your photo before continuing.')
@@ -53,6 +162,8 @@ export default function TellYourStory() {
 
   const handleSkip = () => {
     localStorage.setItem('userStoryContext', 'Amazing cultural experience in New Zealand')
+    // Set default persona when skipping
+    localStorage.setItem('selectedPersona', 'content-creator')
     window.location.href = '/dashboard/create/demographics'
   }
 
@@ -210,7 +321,7 @@ export default function TellYourStory() {
         )}
 
         {/* Story Input - Matching Photo Page Style */}
-        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
           <div style={{
             width: '100%',
             maxWidth: '500px',
@@ -291,11 +402,252 @@ export default function TellYourStory() {
                 color: '#9ca3af',
                 transition: 'opacity 0.3s ease'
               }}>
-                {currentPromptIndex + 1}/6
+                {story.length}/600
               </div>
             </div>
           </div>
         </div>
+
+        {/* Persona Selection - Shows when story has content */}
+        {showPersonaSelection && (
+          <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto',
+              position: 'relative'
+            }}>
+              <div style={{
+                width: '100%',
+                border: '2px solid #d1d5db',
+                borderRadius: '1.5rem',
+                backgroundColor: '#fafafa',
+                padding: '1.5rem'
+              }}>
+                <h3 style={{
+                  fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '1rem',
+                  margin: '0 0 1rem 0',
+                  textAlign: 'left'
+                }}>
+                  Who are you creating content as? 🎯
+                </h3>
+
+                <div style={{ position: 'relative' }}>
+                  {/* Dropdown Button */}
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    style={{
+                      width: '100%',
+                      padding: '1rem',
+                      backgroundColor: 'white',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '1rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                      color: selectedPersona ? '#1f2937' : '#9ca3af',
+                      transition: 'all 0.2s ease',
+                      textAlign: 'left'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = '#d1d5db'
+                      e.target.style.backgroundColor = '#f9fafb'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = '#e5e7eb'
+                      e.target.style.backgroundColor = 'white'
+                    }}
+                  >
+                    <span>
+                      {selectedPersonaData ? 
+                        (selectedPersona === 'other' && customPersonaText.trim() ? 
+                          `Other: ${customPersonaText.slice(0, 50)}${customPersonaText.length > 50 ? '...' : ''}` 
+                          : selectedPersonaData.title
+                        ) 
+                        : 'Select your content creator type...'
+                      }
+                    </span>
+                    <svg 
+                      style={{ 
+                        width: '20px',
+                        height: '20px',
+                        transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown List */}
+                  {isDropdownOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '0',
+                      right: '0',
+                      backgroundColor: 'white',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '1rem',
+                      marginTop: '0.5rem',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                      zIndex: 10,
+                      maxHeight: '300px',
+                      overflowY: 'auto'
+                    }}>
+                      {personas.map((persona, index) => (
+                        <div key={persona.id}>
+                          <div
+                            onClick={() => {
+                              setSelectedPersona(persona.id)
+                              if (persona.id !== 'other') {
+                                setIsDropdownOpen(false)
+                              }
+                            }}
+                            style={{
+                              padding: '1rem',
+                              borderBottom: persona.id === 'other' ? 'none' : (index < personas.length - 1 ? '1px solid #f3f4f6' : 'none'),
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '0.75rem',
+                              transition: 'background-color 0.2s ease',
+                              backgroundColor: selectedPersona === persona.id ? '#eef2ff' : 'transparent'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (selectedPersona !== persona.id) {
+                                e.currentTarget.style.backgroundColor = '#f9fafb'
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (selectedPersona !== persona.id) {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                              }
+                            }}
+                          >
+                            {/* Custom Checkbox */}
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              border: selectedPersona === persona.id ? '2px solid #6366f1' : '2px solid #d1d5db',
+                              borderRadius: '4px',
+                              backgroundColor: selectedPersona === persona.id ? '#6366f1' : 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginTop: '2px',
+                              transition: 'all 0.2s ease'
+                            }}>
+                              {selectedPersona === persona.id && (
+                                <svg width="12" height="12" fill="white" viewBox="0 0 12 12">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 3L4.5 8.5L2 6" />
+                                </svg>
+                              )}
+                            </div>
+
+                            {/* Content */}
+                            <div style={{ flex: 1, textAlign: 'left' }}>
+                              <div style={{
+                                fontWeight: '600',
+                                color: '#1f2937',
+                                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                                marginBottom: '0.25rem'
+                              }}>
+                                {persona.title}
+                              </div>
+                              <div style={{
+                                color: '#6366f1',
+                                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                fontWeight: '500',
+                                marginBottom: '0.25rem'
+                              }}>
+                                {persona.subtitle}
+                              </div>
+                              <div style={{
+                                color: '#6b7280',
+                                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                lineHeight: '1.4'
+                              }}>
+                                {persona.description}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Custom Text Input for "Other" */}
+                          {selectedPersona === 'other' && persona.id === 'other' && (
+                            <div style={{
+                              padding: '1rem',
+                              borderTop: '1px solid #f3f4f6',
+                              backgroundColor: '#f9fafb'
+                            }}>
+                              <textarea
+                                value={customPersonaText}
+                                onChange={(e) => setCustomPersonaText(e.target.value)}
+                                placeholder="Describe your content creation goals and focus (e.g., 'Digital nomad sharing remote work experiences' or 'Local historian promoting cultural heritage')"
+                                style={{
+                                  width: '100%',
+                                  minHeight: '80px',
+                                  padding: '0.75rem',
+                                  border: '2px solid #e5e7eb',
+                                  borderRadius: '0.5rem',
+                                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                                  fontFamily: 'inherit',
+                                  resize: 'vertical',
+                                  outline: 'none',
+                                  transition: 'border-color 0.2s ease'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                              />
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: '0.5rem'
+                              }}>
+                                <div style={{
+                                  fontSize: '0.75rem',
+                                  color: '#6b7280'
+                                }}>
+                                  Help us understand your unique content goals
+                                </div>
+                                <button
+                                  onClick={() => setIsDropdownOpen(false)}
+                                  disabled={!customPersonaText.trim()}
+                                  style={{
+                                    padding: '0.5rem 1rem',
+                                    backgroundColor: customPersonaText.trim() ? '#6366f1' : '#e5e7eb',
+                                    color: customPersonaText.trim() ? 'white' : '#9ca3af',
+                                    border: 'none',
+                                    borderRadius: '0.5rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500',
+                                    cursor: customPersonaText.trim() ? 'pointer' : 'not-allowed',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  Done
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div style={{ 
@@ -346,7 +698,7 @@ export default function TellYourStory() {
           </button>
         </div>
 
-        {/* Logo - Brand Reinforcement - Deactivated */}
+        {/* Logo - Brand Reinforcement */}
         <div style={{ 
           textAlign: 'center', 
           marginBottom: '1rem',
