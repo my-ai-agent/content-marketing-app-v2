@@ -2,6 +2,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -15,6 +16,9 @@ export default function TellYourStory() {
   const [customPersonaText, setCustomPersonaText] = useState('')
   const [showPersonaSelection, setShowPersonaSelection] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  // Initialize Executive Prompt Builder
+  const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
 
   const storyPrompts = [
     "What made this moment special?",
@@ -142,6 +146,20 @@ export default function TellYourStory() {
     }
   }, [story])
 
+  // NEW: Update Executive Prompt Builder when story changes
+  useEffect(() => {
+    if (story.trim().length > 10) {
+      promptBuilder.updateStoryData(story)
+    }
+  }, [story, promptBuilder])
+
+  // NEW: Update Executive Prompt Builder when persona changes
+  useEffect(() => {
+    if (selectedPersona) {
+      promptBuilder.updatePersonaData(selectedPersona, customPersonaText)
+    }
+  }, [selectedPersona, customPersonaText, promptBuilder])
+
   const handleNext = () => {
     if (story.trim()) {
       localStorage.setItem('userStoryContext', story.trim())
@@ -152,8 +170,14 @@ export default function TellYourStory() {
         if (selectedPersona === 'other' && customPersonaText.trim()) {
           localStorage.setItem('customPersonaText', customPersonaText.trim())
         }
+        // NEW: Ensure data is in Executive Prompt Builder
+        promptBuilder.updatePersonaData(selectedPersona, customPersonaText)
       }
       
+      // NEW: Ensure story data is in Executive Prompt Builder
+      promptBuilder.updateStoryData(story.trim())
+      
+      console.log('🚀 Moving to Demographics with story and persona data captured')
       window.location.href = '/dashboard/create/demographics'
     } else {
       alert('Please tell us about your photo before continuing.')
@@ -164,6 +188,12 @@ export default function TellYourStory() {
     localStorage.setItem('userStoryContext', 'Amazing cultural experience in New Zealand')
     // Set default persona when skipping
     localStorage.setItem('selectedPersona', 'content-creator')
+    
+    // NEW: Update Executive Prompt Builder with defaults
+    promptBuilder.updateStoryData('Amazing cultural experience in New Zealand')
+    promptBuilder.updatePersonaData('content-creator', '')
+    
+    console.log('⏭️ Skipping story step with defaults')
     window.location.href = '/dashboard/create/demographics'
   }
 
