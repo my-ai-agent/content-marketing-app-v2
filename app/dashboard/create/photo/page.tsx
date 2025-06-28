@@ -126,9 +126,8 @@ export default function PhotoUpload() {
       if (pendingFile) {
         localStorage.setItem('photoFileName', pendingFile.name)
         localStorage.setItem('photoFileSize', pendingFile.size.toString())
-        
-        // NEW: Update Executive Prompt Builder with photo data
-        promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
+        // TypeScript-safe usage: string | null
+        promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name ?? null)
         console.log('✅ Photo data saved to Executive Prompt Builder')
       }
     } catch (err: any) {
@@ -153,12 +152,10 @@ export default function PhotoUpload() {
     if (selectedPhoto) {
       try {
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
-        
-        // NEW: Ensure photo data is in Executive Prompt Builder
+        // TypeScript-safe usage: string | null
         if (pendingFile) {
-          promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
+          promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name ?? null)
         }
-        
         console.log('🚀 Moving to Story step with photo data captured')
         window.location.href = '/dashboard/create/story'
       } catch {
@@ -179,7 +176,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
     await removeImageFromIndexedDB('selectedPhoto')
-    
+
     // NEW: Update Executive Prompt Builder with no-photo data
     promptBuilder.promptData.photo = {
       hasPhoto: false,
@@ -194,7 +191,7 @@ export default function PhotoUpload() {
     }
     promptBuilder.saveAndValidate()
     console.log('⏭️ Skipping photo - proceeding with text-only content')
-    
+
     window.location.href = '/dashboard/create/story'
   }
 
@@ -209,7 +206,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
-    
+
     // NEW: Clear photo data from Executive Prompt Builder
     promptBuilder.promptData.photo = null
     promptBuilder.saveAndValidate()
