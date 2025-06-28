@@ -128,7 +128,7 @@ export default function PhotoUpload() {
         localStorage.setItem('photoFileSize', pendingFile.size.toString())
         
         // NEW: Update Executive Prompt Builder with photo data
-        promptBuilder.updatePhotoData(pendingFile, null, pendingFile.name)
+        promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
         console.log('✅ Photo data saved to Executive Prompt Builder')
       }
     } catch (err: any) {
@@ -156,7 +156,7 @@ export default function PhotoUpload() {
         
         // NEW: Ensure photo data is in Executive Prompt Builder
         if (pendingFile) {
-          promptBuilder.updatePhotoData(pendingFile, null, pendingFile.name)
+          promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
         }
         
         console.log('🚀 Moving to Story step with photo data captured')
