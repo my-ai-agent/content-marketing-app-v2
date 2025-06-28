@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -65,11 +66,95 @@ export default function PlatformFormatSelection() {
     'Staff Memo - Internal communication': 'Clear directives, team-focused language, actionable items, company culture alignment'
   }
 
+  // NEW: Initialize Executive Prompt Builder
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const promptBuilder = new ExecutivePromptBuilder()
+      
+      // Load existing selections from localStorage
+      const savedPlatforms = localStorage.getItem('selectedPlatforms')
+      const savedFormats = localStorage.getItem('selectedFormats')
+      
+      if (savedPlatforms) {
+        try {
+          const platforms = JSON.parse(savedPlatforms)
+          setSelectedPlatforms(platforms.map((p: string) => `${p} - ${getDefaultDescription(p)}`))
+        } catch (e) {
+          console.log('Error loading saved platforms:', e)
+        }
+      }
+      
+      if (savedFormats) {
+        try {
+          const formats = JSON.parse(savedFormats)
+          setSelectedFormats(formats.map((f: string) => `${f} - ${getDefaultFormatDescription(f)}`))
+        } catch (e) {
+          console.log('Error loading saved formats:', e)
+        }
+      }
+    }
+  }, [])
+
+  // NEW: Helper functions for default descriptions
+  const getDefaultDescription = (platform: string) => {
+    const descriptions = {
+      'Facebook': 'Social sharing',
+      'Blog': 'SEO content',
+      'Website': 'Your website',
+      'Instagram': 'Posts & Stories',
+      'TikTok': 'Video content',
+      'YouTube': 'Video/Shorts',
+      'Pinterest': 'Visual discovery',
+      'Twitter/X': 'Quick updates',
+      'LinkedIn': 'Professional network'
+    }
+    return descriptions[platform as keyof typeof descriptions] || 'Platform'
+  }
+
+  const getDefaultFormatDescription = (format: string) => {
+    const descriptions = {
+      'Social Post': 'Ready-to-post content',
+      'Blog Article': 'SEO-optimized post',
+      'Email Newsletter': 'Email template',
+      'Video Script': 'TikTok/YouTube script',
+      'Brochure': 'Print-ready PDF',
+      'Flyer': 'Marketing material',
+      'Poster': 'Large format print',
+      'Press Release': 'Media format',
+      'Board Report': 'Executive summary',
+      'Stakeholder Letter': 'Partner communication',
+      'Staff Memo': 'Internal communication'
+    }
+    return descriptions[format as keyof typeof descriptions] || 'Format'
+  }
+
+  // NEW: Update Executive Prompt Builder when selections change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (selectedPlatforms.length > 0 || selectedFormats.length > 0)) {
+      const promptBuilder = new ExecutivePromptBuilder()
+      promptBuilder.updatePlatformData(
+        selectedPlatforms.map(p => p.split(' - ')[0]),
+        selectedFormats.map(f => f.split(' - ')[0])
+      )
+      console.log('✅ Platform and format data saved to Executive Prompt Builder')
+    }
+  }, [selectedPlatforms, selectedFormats])
+
   const handleNext = () => {
     if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
       // Store selections in localStorage
       localStorage.setItem('selectedPlatforms', JSON.stringify(selectedPlatforms.map(p => p.split(' - ')[0])))
       localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats.map(f => f.split(' - ')[0])))
+      
+      // NEW: Final update to Executive Prompt Builder
+      if (typeof window !== 'undefined') {
+        const promptBuilder = new ExecutivePromptBuilder()
+        promptBuilder.updatePlatformData(
+          selectedPlatforms.map(p => p.split(' - ')[0]),
+          selectedFormats.map(f => f.split(' - ')[0])
+        )
+        console.log('✅ Final platform data update completed')
+      }
       
       // Navigate to AI generation
       window.location.href = '/dashboard/create/generate'
@@ -80,8 +165,18 @@ export default function PlatformFormatSelection() {
 
   const handleSkip = () => {
     // Set smart defaults
-    localStorage.setItem('selectedPlatforms', JSON.stringify(['Instagram']))
-    localStorage.setItem('selectedFormats', JSON.stringify(['Social Post']))
+    const defaultPlatforms = ['Instagram']
+    const defaultFormats = ['Social Post']
+    
+    localStorage.setItem('selectedPlatforms', JSON.stringify(defaultPlatforms))
+    localStorage.setItem('selectedFormats', JSON.stringify(defaultFormats))
+    
+    // NEW: Update Executive Prompt Builder with defaults
+    if (typeof window !== 'undefined') {
+      const promptBuilder = new ExecutivePromptBuilder()
+      promptBuilder.updatePlatformData(defaultPlatforms, defaultFormats)
+      console.log('✅ Smart defaults saved to Executive Prompt Builder')
+    }
     
     window.location.href = '/dashboard/create/generate'
   }
