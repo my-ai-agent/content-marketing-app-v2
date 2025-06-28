@@ -177,18 +177,8 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoFileSize')
     await removeImageFromIndexedDB('selectedPhoto')
 
-    // NEW: Update Executive Prompt Builder with no-photo data
-    promptBuilder.promptData.photo = {
-      hasPhoto: false,
-      fileName: 'no-photo-placeholder',
-      fileSize: 0,
-      visualElements: {
-        hasPhoto: false,
-        suggestedVisualElements: 'Text-based content without photo',
-        photoDescription: 'User chose to proceed without photo'
-      },
-      timestamp: new Date().toISOString()
-    }
+    // FIX: Set photo data to null to satisfy type, not an object
+    promptBuilder.promptData.photo = null
     promptBuilder.saveAndValidate()
     console.log('⏭️ Skipping photo - proceeding with text-only content')
 
@@ -207,7 +197,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
 
-    // NEW: Clear photo data from Executive Prompt Builder
+    // Clear photo data from Executive Prompt Builder
     promptBuilder.promptData.photo = null
     promptBuilder.saveAndValidate()
     console.log('🔄 Photo cleared from Executive Prompt Builder')
