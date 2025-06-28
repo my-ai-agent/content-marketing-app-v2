@@ -9,8 +9,8 @@ const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
 export default function PhotoCapture() {
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [uploadedPhoto, setUploadedPhoto] = useState(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [promptProgress, setPromptProgress] = useState(0)
   const fileInputRef = useRef(null)
@@ -24,7 +24,7 @@ export default function PhotoCapture() {
       setUploadedPhoto(existingPhoto)
     }
 
-    const handleProgress = (event) => {
+    const handleProgress = (event: CustomEvent) => {
       setPromptProgress(event.detail.percentage)
     }
     
@@ -36,14 +36,14 @@ export default function PhotoCapture() {
     return () => window.removeEventListener('promptProgress', handleProgress)
   }, [promptBuilder])
 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0]
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
     if (file) {
       processFile(file)
     }
   }
 
-  const processFile = (file) => {
+  const processFile = (file: File) => {
     setIsProcessing(true)
     setSelectedFile(file)
 
@@ -61,7 +61,7 @@ export default function PhotoCapture() {
 
     const reader = new FileReader()
     reader.onload = (e) => {
-      const imageUrl = e.target.result
+      const imageUrl = e.target?.result as string
       setUploadedPhoto(imageUrl)
       
       localStorage.setItem('uploadedPhoto', imageUrl)
