@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -10,6 +11,9 @@ export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+
+  // Initialize Executive Prompt Builder
+  const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
 
   const interests = [
     'Cultural Experiences',
@@ -36,6 +40,11 @@ export default function Interests() {
   const handleNext = () => {
     if (selectedInterest) {
       localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
+      
+      // NEW: Update Executive Prompt Builder
+      promptBuilder.updateInterestsData(selectedInterest)
+      console.log('🚀 Moving to Platform with interests data captured')
+      
       window.location.href = '/dashboard/create/platform'
     } else {
       alert('Please select an interest before continuing.')
@@ -43,13 +52,23 @@ export default function Interests() {
   }
 
   const handleSkip = () => {
-    localStorage.setItem('selectedInterests', JSON.stringify(['Cultural Experiences']))
+    const defaultInterest = 'Cultural Experiences'
+    localStorage.setItem('selectedInterests', JSON.stringify([defaultInterest]))
+    
+    // NEW: Update Executive Prompt Builder with default
+    promptBuilder.updateInterestsData(defaultInterest)
+    console.log('⏭️ Skipping interests with default selection')
+    
     window.location.href = '/dashboard/create/platform'
   }
 
   const handleDropdownSelect = (interest: string) => {
     setSelectedInterest(interest)
     setIsDropdownOpen(false)
+    
+    // NEW: Update Executive Prompt Builder immediately when selected
+    promptBuilder.updateInterestsData(interest)
+    console.log('✅ Interests data updated in Executive Prompt Builder')
   }
 
   return (
