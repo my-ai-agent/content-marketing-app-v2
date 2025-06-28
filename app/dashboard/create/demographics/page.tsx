@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -10,6 +11,9 @@ export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+
+  // Initialize Executive Prompt Builder
+  const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
 
   const demographics = [
     'Female Travellers - Solo and group female adventurers',
@@ -38,6 +42,11 @@ export default function Demographics() {
   const handleNext = () => {
     if (selectedDemographic) {
       localStorage.setItem('selectedDemographics', JSON.stringify([selectedDemographic]))
+      
+      // NEW: Update Executive Prompt Builder
+      promptBuilder.updateAudienceData(selectedDemographic)
+      console.log('🚀 Moving to Interests with audience data captured')
+      
       window.location.href = '/dashboard/create/interests'
     } else {
       alert('Please select a target audience before continuing.')
@@ -45,13 +54,23 @@ export default function Demographics() {
   }
 
   const handleSkip = () => {
-    localStorage.setItem('selectedDemographics', JSON.stringify(['Millennials (1981-1996) - Experience-focused, cultural seekers']))
+    const defaultDemographic = 'Millennials (1981-1996) - Experience-focused, cultural seekers'
+    localStorage.setItem('selectedDemographics', JSON.stringify([defaultDemographic]))
+    
+    // NEW: Update Executive Prompt Builder with default
+    promptBuilder.updateAudienceData(defaultDemographic)
+    console.log('⏭️ Skipping demographics with default selection')
+    
     window.location.href = '/dashboard/create/interests'
   }
 
   const handleDropdownSelect = (demographic: string) => {
     setSelectedDemographic(demographic)
     setIsDropdownOpen(false)
+    
+    // NEW: Update Executive Prompt Builder immediately when selected
+    promptBuilder.updateAudienceData(demographic)
+    console.log('✅ Demographics data updated in Executive Prompt Builder')
   }
 
   return (
