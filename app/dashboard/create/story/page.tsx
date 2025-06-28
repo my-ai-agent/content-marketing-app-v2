@@ -386,10 +386,12 @@ export default function TellYourStory() {
                   transition: 'all 0.3s ease'
                 }}
                 onFocus={(e) => {
-                  e.target.style.boxShadow = `0 0 0 2px ${BRAND_PURPLE}40`
+                  const target = e.target as HTMLTextAreaElement
+                  target.style.boxShadow = `0 0 0 2px ${BRAND_PURPLE}40`
                 }}
                 onBlur={(e) => {
-                  e.target.style.boxShadow = 'none'
+                  const target = e.target as HTMLTextAreaElement
+                  target.style.boxShadow = 'none'
                 }}
               />
               
@@ -455,12 +457,14 @@ export default function TellYourStory() {
                       textAlign: 'left'
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.borderColor = '#d1d5db'
-                      e.target.style.backgroundColor = '#f9fafb'
+                      const target = e.target as HTMLButtonElement
+                      target.style.borderColor = '#d1d5db'
+                      target.style.backgroundColor = '#f9fafb'
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.borderColor = '#e5e7eb'
-                      e.target.style.backgroundColor = 'white'
+                      const target = e.target as HTMLButtonElement
+                      target.style.borderColor = '#e5e7eb'
+                      target.style.backgroundColor = 'white'
                     }}
                   >
                     <span>
@@ -604,8 +608,14 @@ export default function TellYourStory() {
                                   outline: 'none',
                                   transition: 'border-color 0.2s ease'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-                                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                onFocus={(e) => {
+                                  const target = e.target as HTMLTextAreaElement
+                                  target.style.borderColor = '#6366f1'
+                                }}
+                                onBlur={(e) => {
+                                  const target = e.target as HTMLTextAreaElement
+                                  target.style.borderColor = '#e5e7eb'
+                                }}
                               />
                               <div style={{
                                 display: 'flex',
