@@ -126,8 +126,8 @@ export default function PhotoUpload() {
       if (pendingFile) {
         localStorage.setItem('photoFileName', pendingFile.name)
         localStorage.setItem('photoFileSize', pendingFile.size.toString())
-        // TypeScript-safe usage: string | null
-        promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name ?? null)
+        // FIX: Only pass null for fileName, since updatePhotoData expects null | undefined
+        promptBuilder.updatePhotoData(pendingFile, undefined, null)
         console.log('✅ Photo data saved to Executive Prompt Builder')
       }
     } catch (err: any) {
@@ -152,9 +152,9 @@ export default function PhotoUpload() {
     if (selectedPhoto) {
       try {
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
-        // TypeScript-safe usage: string | null
+        // FIX: Only pass null for fileName
         if (pendingFile) {
-          promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name ?? null)
+          promptBuilder.updatePhotoData(pendingFile, undefined, null)
         }
         console.log('🚀 Moving to Story step with photo data captured')
         window.location.href = '/dashboard/create/story'
