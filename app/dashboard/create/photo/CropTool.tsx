@@ -8,9 +8,13 @@ interface CropToolProps {
 }
 
 const CROP_RATIOS = [
+  { name: 'Facebook', ratio: 1.91, icon: '📘' },
+  { name: 'Blog', ratio: 16/9, icon: '📝' },
+  { name: 'Instagram', ratio: 1, icon: '📷' },
+  { name: 'TikTok', ratio: 9/16, icon: '🎵' },
+  { name: 'LinkedIn', ratio: 1.91, icon: '💼' },
+  { name: 'Website', ratio: 16/9, icon: '🌐' },
   { name: 'Square', ratio: 1, icon: '⬜' },
-  { name: 'Instagram Post', ratio: 1, icon: '📱' },
-  { name: 'Instagram Story', ratio: 9/16, icon: '📳' },
   { name: 'Landscape', ratio: 16/9, icon: '🖼️' },
   { name: 'Portrait', ratio: 3/4, icon: '🖼️' },
   { name: 'Custom', ratio: null, icon: '✂️' }
@@ -24,7 +28,7 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
   const [selectedRatio, setSelectedRatio] = useState(CROP_RATIOS[0])
   const [crop, setCrop] = useState({ x: 0, y: 0, width: 200, height: 200 })
   const [dragging, setDragging] = useState<{
-    type: 'move' | 'resize'
+    type: string
     startX: number
     startY: number
     startCrop: typeof crop
@@ -143,7 +147,7 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
   }
 
   // Mouse/touch handlers
-  const startDrag = (e: React.MouseEvent | React.TouchEvent, type: 'move' | 'resize') => {
+  const startDrag = (e: React.MouseEvent | React.TouchEvent, type: string) => {
     e.preventDefault()
     e.stopPropagation()
     
@@ -181,7 +185,6 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
       pageY = (e as MouseEvent).pageY
     }
     
-    const rect = containerRef.current.getBoundingClientRect()
     const dx = pageX - dragging.startX
     const dy = pageY - dragging.startY
     
@@ -200,15 +203,56 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
       newY = Math.max(0, Math.min(imgDims.height - crop.height, newY))
       
       setCrop(c => ({ ...c, x: newX, y: newY }))
-    } else if (dragging.type === 'resize' && selectedRatio.name === 'Custom') {
-      let newWidth = Math.max(50, dragging.startCrop.width + imageDx)
-      let newHeight = Math.max(50, dragging.startCrop.height + imageDy)
+    } else if (dragging.type.startsWith('resize-') && selectedRatio.name === 'Custom') {
+      const direction = dragging.type.split('-')[1]
+      let newCrop = { ...dragging.startCrop }
+      
+      switch (direction) {
+        case 'nw':
+          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
+          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
+          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
+          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
+          break
+        case 'ne':
+          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
+          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
+          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
+          break
+        case 'sw':
+          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
+          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
+          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
+          break
+        case 'se':
+          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
+          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
+          break
+        case 'n':
+          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
+          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
+          break
+        case 's':
+          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
+          break
+        case 'w':
+          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
+          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
+          break
+        case 'e':
+          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
+          break
+      }
       
       // Clamp within image bounds
-      newWidth = Math.min(imgDims.width - crop.x, newWidth)
-      newHeight = Math.min(imgDims.height - crop.y, newHeight)
+      if (newCrop.x + newCrop.width > imgDims.width) {
+        newCrop.width = imgDims.width - newCrop.x
+      }
+      if (newCrop.y + newCrop.height > imgDims.height) {
+        newCrop.height = imgDims.height - newCrop.y
+      }
       
-      setCrop(c => ({ ...c, width: newWidth, height: newHeight }))
+      setCrop(newCrop)
     }
   }
 
@@ -364,7 +408,7 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
                   pointerEvents: 'none'
                 }} />
                 
-                {/* Clear crop area */}
+                {/* Clear crop area with resize handles */}
                 <div style={{
                   position: 'absolute',
                   left: `${displayCrop.x}px`,
@@ -381,21 +425,97 @@ export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
                   onMouseDown={(e) => startDrag(e, 'move')}
                   onTouchStart={(e) => startDrag(e, 'move')}
                 >
-                  {/* Resize handle for custom ratio */}
+                  {/* Resize handles for custom ratio */}
                   {selectedRatio.name === 'Custom' && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '-4px',
-                      right: '-4px',
-                      width: '12px',
-                      height: '12px',
-                      background: '#6B2EFF',
-                      borderRadius: '2px',
-                      cursor: 'se-resize'
-                    }}
-                      onMouseDown={(e) => startDrag(e, 'resize')}
-                      onTouchStart={(e) => startDrag(e, 'resize')}
-                    />
+                    <>
+                      {/* Corner handles */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '-6px', left: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'nw-resize', border: '2px solid white'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-nw')}
+                        onTouchStart={(e) => startDrag(e, 'resize-nw')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        top: '-6px', right: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'ne-resize', border: '2px solid white'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-ne')}
+                        onTouchStart={(e) => startDrag(e, 'resize-ne')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-6px', left: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'sw-resize', border: '2px solid white'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-sw')}
+                        onTouchStart={(e) => startDrag(e, 'resize-sw')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-6px', right: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'se-resize', border: '2px solid white'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-se')}
+                        onTouchStart={(e) => startDrag(e, 'resize-se')}
+                      />
+                      
+                      {/* Side handles */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%', left: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'w-resize', border: '2px solid white',
+                        transform: 'translateY(-50%)'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-w')}
+                        onTouchStart={(e) => startDrag(e, 'resize-w')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%', right: '-6px',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'e-resize', border: '2px solid white',
+                        transform: 'translateY(-50%)'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-e')}
+                        onTouchStart={(e) => startDrag(e, 'resize-e')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        top: '-6px', left: '50%',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 'n-resize', border: '2px solid white',
+                        transform: 'translateX(-50%)'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-n')}
+                        onTouchStart={(e) => startDrag(e, 'resize-n')}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-6px', left: '50%',
+                        width: '12px', height: '12px',
+                        background: '#6B2EFF', borderRadius: '50%',
+                        cursor: 's-resize', border: '2px solid white',
+                        transform: 'translateX(-50%)'
+                      }}
+                        onMouseDown={(e) => startDrag(e, 'resize-s')}
+                        onTouchStart={(e) => startDrag(e, 'resize-s')}
+                      />
+                    </>
                   )}
                 </div>
               </>
