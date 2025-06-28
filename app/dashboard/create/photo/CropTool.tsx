@@ -1,5 +1,8 @@
-'use client'
 import React, { useRef, useState, useEffect } from 'react'
+
+// Types
+type CropBox = { x: number; y: number; width: number; height: number }
+type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
 interface CropToolProps {
   image: string
@@ -7,607 +10,431 @@ interface CropToolProps {
   onCancel: () => void
 }
 
-const CROP_RATIOS = [
-  { name: 'Facebook', ratio: 1.91, icon: '📘' },
-  { name: 'Blog', ratio: 16/9, icon: '📝' },
-  { name: 'Instagram', ratio: 1, icon: '📷' },
-  { name: 'TikTok', ratio: 9/16, icon: '🎵' },
-  { name: 'LinkedIn', ratio: 1.91, icon: '💼' },
-  { name: 'Website', ratio: 16/9, icon: '🌐' },
-  { name: 'Square', ratio: 1, icon: '⬜' },
-  { name: 'Landscape', ratio: 16/9, icon: '🖼️' },
-  { name: 'Portrait', ratio: 3/4, icon: '🖼️' },
-  { name: 'Custom', ratio: null, icon: '✂️' }
+// Utility for touch/mouse coordinate extraction
+function getClientPos(e: MouseEvent | TouchEvent) {
+  let clientX = 0, clientY = 0
+  if ('touches' in e && e.touches.length > 0) {
+    clientX = e.touches[0].clientX
+    clientY = e.touches[0].clientY
+  } else if ('clientX' in e) {
+    clientX = (e as MouseEvent).clientX
+    clientY = (e as MouseEvent).clientY
+  }
+  return { clientX, clientY }
+}
+
+const handles = [
+  { dir: 'n', top: -8, left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 's', top: '100%', left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, 50%)' } },
+  { dir: 'e', top: '50%', left: '100%', cursor: 'ew-resize', style: { transform: 'translate(50%, -50%)' } },
+  { dir: 'w', top: '50%', left: -8, cursor: 'ew-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 'ne', top: -8, left: '100%', cursor: 'nesw-resize', style: { transform: 'translate(50%, -50%)' } },
+  { dir: 'nw', top: -8, left: -8, cursor: 'nwse-resize', style: { transform: 'translate(-50%, -50%)' } },
+  { dir: 'se', top: '100%', left: '100%', cursor: 'nwse-resize', style: { transform: 'translate(50%, 50%)' } },
+  { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
+] as const
+
+const aspectRatios = [
+  { name: "Free", value: null },
+  { name: "1:1", value: 1 },
+  { name: "4:3", value: 4 / 3 },
+  { name: "3:4", value: 3 / 4 },
+  { name: "16:9", value: 16 / 9 },
 ]
 
-export default function CropTool({ image, onApply, onCancel }: CropToolProps) {
+const MIN_SIZE = 40
+
+const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const imgRef = useRef<HTMLImageElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  
-  const [selectedRatio, setSelectedRatio] = useState(CROP_RATIOS[0])
-  const [crop, setCrop] = useState({ x: 0, y: 0, width: 200, height: 200 })
-  const [dragging, setDragging] = useState<{
-    type: string
-    startX: number
-    startY: number
-    startCrop: typeof crop
-  } | null>(null)
-  const [imgDims, setImgDims] = useState({ width: 0, height: 0, displayWidth: 0, displayHeight: 0 })
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const [imgDims, setImgDims] = useState({ width: 1, height: 1 })
+  const [cropBox, setCropBox] = useState<CropBox>({ x: 40, y: 40, width: 200, height: 200 })
+  const [dragging, setDragging] = useState(false)
+  const [resizing, setResizing] = useState<ResizeDir>(null)
+  const [aspect, setAspect] = useState<number | null>(null)
+  const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
-  // Calculate crop dimensions based on ratio
-  const calculateCropFromRatio = (ratio: number | null, imgWidth: number, imgHeight: number) => {
-    if (!ratio) return crop // Custom - keep current dimensions
-    
-    let width, height
-    if (ratio === 1) {
-      // Square - use minimum dimension
-      const size = Math.min(imgWidth, imgHeight) * 0.8
-      width = height = size
-    } else if (ratio > 1) {
-      // Landscape
-      width = imgWidth * 0.8
-      height = width / ratio
-      if (height > imgHeight * 0.8) {
-        height = imgHeight * 0.8
-        width = height * ratio
-      }
-    } else {
-      // Portrait
-      height = imgHeight * 0.8
-      width = height * ratio
-      if (width > imgWidth * 0.8) {
-        width = imgWidth * 0.8
-        height = width / ratio
-      }
-    }
-    
-    return {
-      x: Math.max(0, (imgWidth - width) / 2),
-      y: Math.max(0, (imgHeight - height) / 2),
-      width,
-      height
-    }
-  }
-
-  // Load image and set initial crop
+  // Set image dimensions on load
   useEffect(() => {
     const img = imgRef.current
-    if (!img) return
-    
-    const handleLoad = () => {
-      const displayWidth = img.offsetWidth
-      const displayHeight = img.offsetHeight
-      const naturalWidth = img.naturalWidth
-      const naturalHeight = img.naturalHeight
-      
-      setImgDims({
-        width: naturalWidth,
-        height: naturalHeight,
-        displayWidth,
-        displayHeight
-      })
-      
-      // Set initial crop based on selected ratio
-      const initialCrop = calculateCropFromRatio(selectedRatio.ratio, naturalWidth, naturalHeight)
-      setCrop(initialCrop)
+    if (img) {
+      const setDims = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      img.onload = setDims
+      // If already loaded (cache), trigger manually
+      if (img.complete) setDims()
     }
-    
-    img.addEventListener('load', handleLoad)
-    if (img.complete) handleLoad()
-    return () => img.removeEventListener('load', handleLoad)
   }, [image])
 
-  // Update crop when ratio changes
-  useEffect(() => {
-    if (imgDims.width > 0 && imgDims.height > 0) {
-      const newCrop = calculateCropFromRatio(selectedRatio.ratio, imgDims.width, imgDims.height)
-      setCrop(newCrop)
-    }
-  }, [selectedRatio, imgDims])
+  // Clamp crop box within image and aspect ratio
+  function clamp(box: CropBox): CropBox {
+    let { x, y, width, height } = box
 
-  // Draw crop preview
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const img = imgRef.current
-    if (!canvas || !img || crop.width === 0 || crop.height === 0) return
-    
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    
-    // Draw cropped region
-    ctx.drawImage(
-      img,
-      crop.x, crop.y, crop.width, crop.height,
-      0, 0, canvas.width, canvas.height
-    )
-  }, [crop, image])
+    // Enforce min size
+    width = Math.max(width, MIN_SIZE)
+    height = Math.max(height, MIN_SIZE)
 
-  // Convert display coordinates to image coordinates
-  const displayToImage = (displayX: number, displayY: number) => {
-    const scaleX = imgDims.width / imgDims.displayWidth
-    const scaleY = imgDims.height / imgDims.displayHeight
-    return {
-      x: displayX * scaleX,
-      y: displayY * scaleY
+    // Enforce aspect ratio if set
+    if (aspect) {
+      if (width / height > aspect) {
+        width = Math.round(height * aspect)
+      } else {
+        height = Math.round(width / aspect)
+      }
     }
+
+    // Clamp to bounds
+    if (x < 0) x = 0
+    if (y < 0) y = 0
+    if (x + width > imgDims.width) x = imgDims.width - width
+    if (y + height > imgDims.height) y = imgDims.height - height
+    return { x, y, width, height }
   }
 
-  // Convert image coordinates to display coordinates
-  const imageToDisplay = (imageX: number, imageY: number) => {
-    const scaleX = imgDims.displayWidth / imgDims.width
-    const scaleY = imgDims.displayHeight / imgDims.height
-    return {
-      x: imageX * scaleX,
-      y: imageY * scaleY
-    }
-  }
+  // Event handler for drag/resize
+  useEffect(() => {
+    function onMove(e: MouseEvent | TouchEvent) {
+      e.preventDefault()
+      const { clientX, clientY } = getClientPos(e)
+      let dx = clientX - lastPos.current.x
+      let dy = clientY - lastPos.current.y
+      lastPos.current = { x: clientX, y: clientY }
 
-  // Mouse/touch handlers
-  const startDrag = (e: React.MouseEvent | React.TouchEvent, type: string) => {
+      setCropBox(prev => {
+        if (dragging) {
+          return clamp({
+            ...prev,
+            x: prev.x + dx,
+            y: prev.y + dy
+          })
+        }
+        if (resizing) {
+          let { x, y, width, height } = prev
+          switch (resizing) {
+            case 'n':
+              y += dy
+              height -= dy
+              break
+            case 's':
+              height += dy
+              break
+            case 'e':
+              width += dx
+              break
+            case 'w':
+              x += dx
+              width -= dx
+              break
+            case 'ne':
+              y += dy
+              height -= dy
+              width += dx
+              break
+            case 'nw':
+              y += dy
+              height -= dy
+              x += dx
+              width -= dx
+              break
+            case 'se':
+              width += dx
+              height += dy
+              break
+            case 'sw':
+              x += dx
+              width -= dx
+              height += dy
+              break
+          }
+          return clamp({ x, y, width, height })
+        }
+        return prev
+      })
+    }
+
+    function onUp() {
+      setDragging(false)
+      setResizing(null)
+      window.removeEventListener('mousemove', onMove as any)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onMove as any)
+      window.removeEventListener('touchend', onUp)
+    }
+
+    // Only attach listeners if dragging/resizing
+    if (dragging || resizing) {
+      window.addEventListener('mousemove', onMove as any, { passive: false })
+      window.addEventListener('mouseup', onUp)
+      window.addEventListener('touchmove', onMove as any, { passive: false })
+      window.addEventListener('touchend', onUp)
+      return () => {
+        window.removeEventListener('mousemove', onMove as any)
+        window.removeEventListener('mouseup', onUp)
+        window.removeEventListener('touchmove', onMove as any)
+        window.removeEventListener('touchend', onUp)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging, resizing])
+
+  // Begin drag
+  function startDrag(e: React.MouseEvent | React.TouchEvent) {
     e.preventDefault()
     e.stopPropagation()
-    
-    let pageX = 0, pageY = 0
-    if ('touches' in e) {
-      pageX = e.touches[0].pageX
-      pageY = e.touches[0].pageY
-    } else {
-      pageX = e.pageX
-      pageY = e.pageY
-    }
-    
-    setDragging({ 
-      type, 
-      startX: pageX, 
-      startY: pageY, 
-      startCrop: { ...crop } 
-    })
-    
-    window.addEventListener('mousemove', onDragMove)
-    window.addEventListener('mouseup', stopDrag)
-    window.addEventListener('touchmove', onDragMove as any)
-    window.addEventListener('touchend', stopDrag as any)
-  }
-
-  const onDragMove = (e: MouseEvent | TouchEvent) => {
-    if (!dragging || !containerRef.current) return
-    
-    let pageX = 0, pageY = 0
-    if ('touches' in e && e.touches.length > 0) {
-      pageX = e.touches[0].pageX
-      pageY = e.touches[0].pageY
-    } else if ('pageX' in e) {
-      pageX = (e as MouseEvent).pageX
-      pageY = (e as MouseEvent).pageY
-    }
-    
-    const dx = pageX - dragging.startX
-    const dy = pageY - dragging.startY
-    
-    // Convert to image coordinates
-    const scaleX = imgDims.width / imgDims.displayWidth
-    const scaleY = imgDims.height / imgDims.displayHeight
-    const imageDx = dx * scaleX
-    const imageDy = dy * scaleY
-    
-    if (dragging.type === 'move') {
-      let newX = dragging.startCrop.x + imageDx
-      let newY = dragging.startCrop.y + imageDy
-      
-      // Clamp within image bounds
-      newX = Math.max(0, Math.min(imgDims.width - crop.width, newX))
-      newY = Math.max(0, Math.min(imgDims.height - crop.height, newY))
-      
-      setCrop(c => ({ ...c, x: newX, y: newY }))
-    } else if (dragging.type.startsWith('resize-') && selectedRatio.name === 'Custom') {
-      const direction = dragging.type.split('-')[1]
-      let newCrop = { ...dragging.startCrop }
-      
-      switch (direction) {
-        case 'nw':
-          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
-          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
-          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
-          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
-          break
-        case 'ne':
-          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
-          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
-          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
-          break
-        case 'sw':
-          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
-          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
-          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
-          break
-        case 'se':
-          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
-          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
-          break
-        case 'n':
-          newCrop.y = Math.max(0, dragging.startCrop.y + imageDy)
-          newCrop.height = Math.max(50, dragging.startCrop.height - imageDy)
-          break
-        case 's':
-          newCrop.height = Math.max(50, dragging.startCrop.height + imageDy)
-          break
-        case 'w':
-          newCrop.x = Math.max(0, dragging.startCrop.x + imageDx)
-          newCrop.width = Math.max(50, dragging.startCrop.width - imageDx)
-          break
-        case 'e':
-          newCrop.width = Math.max(50, dragging.startCrop.width + imageDx)
-          break
-      }
-      
-      // Clamp within image bounds
-      if (newCrop.x + newCrop.width > imgDims.width) {
-        newCrop.width = imgDims.width - newCrop.x
-      }
-      if (newCrop.y + newCrop.height > imgDims.height) {
-        newCrop.height = imgDims.height - newCrop.y
-      }
-      
-      setCrop(newCrop)
-    }
-  }
-
-  const stopDrag = () => {
-    setDragging(null)
-    window.removeEventListener('mousemove', onDragMove)
-    window.removeEventListener('mouseup', stopDrag)
-    window.removeEventListener('touchmove', onDragMove as any)
-    window.removeEventListener('touchend', stopDrag as any)
-  }
-
-  // Apply crop
-  const handleApply = () => {
-    const img = imgRef.current
-    if (!img) return
-    
-    const canvas = document.createElement('canvas')
-    canvas.width = crop.width
-    canvas.height = crop.height
-    
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    ctx.drawImage(
-      img,
-      crop.x, crop.y, crop.width, crop.height,
-      0, 0, crop.width, crop.height
+    setDragging(true)
+    const { clientX, clientY } = getClientPos(
+      'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
     )
-    
-    const url = canvas.toDataURL('image/jpeg', 0.92)
-    onApply(url)
+    lastPos.current = { x: clientX, y: clientY }
   }
 
-  // Get display crop for overlay
-  const displayCrop = {
-    x: (crop.x / imgDims.width) * imgDims.displayWidth,
-    y: (crop.y / imgDims.height) * imgDims.displayHeight,
-    width: (crop.width / imgDims.width) * imgDims.displayWidth,
-    height: (crop.height / imgDims.height) * imgDims.displayHeight
+  // Begin resize
+  function startResize(dir: ResizeDir) {
+    return (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setResizing(dir)
+      const { clientX, clientY } = getClientPos(
+        'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
+      )
+      lastPos.current = { x: clientX, y: clientY }
+    }
   }
+
+  // Convert displayed crop box to natural image pixels
+  function getCropPixels() {
+    const display = overlayRef.current?.getBoundingClientRect()
+    const imgEl = imgRef.current?.getBoundingClientRect()
+    if (!display || !imgEl) return cropBox
+    const scaleX = imgDims.width / imgEl.width
+    const scaleY = imgDims.height / imgEl.height
+    return {
+      x: Math.round((cropBox.x - (imgEl.left - display.left)) * scaleX),
+      y: Math.round((cropBox.y - (imgEl.top - display.top)) * scaleY),
+      width: Math.round(cropBox.width * scaleX),
+      height: Math.round(cropBox.height * scaleY)
+    }
+  }
+
+  // Defensive cropping and validation
+  async function handleApplyCrop() {
+    const { x, y, width, height } = getCropPixels()
+    // Defensive: don't allow zero or negative crop
+    if (width <= 0 || height <= 0) {
+      onApply('')
+      return
+    }
+    const img = new window.Image()
+    img.src = image
+
+    try {
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+    } catch {
+      onApply('')
+      return
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      onApply('')
+      return
+    }
+    ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
+    const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
+    if (!croppedUrl.startsWith('data:image/')) {
+      onApply('')
+      return
+    }
+    onApply(croppedUrl)
+  }
+
+  // Set crop box to centered default on first image load or aspect ratio change
+  useEffect(() => {
+    const img = imgRef.current
+    if (img && img.naturalWidth && img.naturalHeight) {
+      let w = Math.round(img.naturalWidth * 0.7)
+      let h = Math.round(img.naturalHeight * 0.7)
+      if (aspect) {
+        if (w / h > aspect) {
+          w = Math.round(h * aspect)
+        } else {
+          h = Math.round(w / aspect)
+        }
+      }
+      setCropBox({
+        x: Math.round((img.naturalWidth - w) / 2),
+        y: Math.round((img.naturalHeight - h) / 2),
+        width: w,
+        height: h
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imgDims.width, imgDims.height, image, aspect])
+
+  // Responsive: constrain displayed width/height for mobile
+  const displayMax = 400
+  let displayW = displayMax, displayH = displayMax
+  if (imgDims.width > imgDims.height) {
+    displayH = Math.round(imgDims.height * (displayMax / imgDims.width))
+  } else {
+    displayW = Math.round(imgDims.width * (displayMax / imgDims.height))
+  }
+
+  // Only enable Apply if the crop is valid and image is loaded
+  const cropValid = imgDims.width > 0 && imgDims.height > 0 && cropBox.width > 0 && cropBox.height > 0
 
   return (
     <div style={{
       position: 'fixed',
-      zIndex: 9999,
-      left: 0, top: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)',
+      inset: 0,
+      zIndex: 50,
+      background: 'rgba(0,0,0,0.65)',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem'
+      justifyContent: 'center'
     }}>
       <div style={{
         background: 'white',
         borderRadius: '1rem',
-        padding: '1.5rem',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-        maxWidth: '90vw',
-        maxHeight: '90vh',
-        overflow: 'auto'
+        boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+        padding: '2rem 2rem 1.5rem 2rem',
+        maxWidth: 600,
+        width: '90vw',
+        position: 'relative',
+        textAlign: 'center'
       }}>
-        <h2 style={{ 
-          margin: '0 0 1rem 0', 
-          fontWeight: '700',
-          fontSize: '1.5rem',
+        <div style={{
+          fontWeight: 700,
+          fontSize: '1.25rem',
+          marginBottom: '1rem',
           color: '#1f2937'
-        }}>
-          Crop your photo
-        </h2>
-        
-        {/* Ratio Selection */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ 
-            fontSize: '0.875rem', 
-            color: '#6b7280', 
-            marginBottom: '0.5rem',
-            fontWeight: '600'
-          }}>
-            Choose crop ratio:
-          </div>
-          <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            flexWrap: 'wrap'
-          }}>
-            {CROP_RATIOS.map((ratio) => (
-              <button
-                key={ratio.name}
-                onClick={() => setSelectedRatio(ratio)}
+        }}>Crop Your Photo</div>
+        {/* Aspect Ratio Presets */}
+        <div style={{ marginBottom: "1rem" }}>
+          {aspectRatios.map(opt => (
+            <button
+              key={opt.name}
+              onClick={() => setAspect(opt.value)}
+              style={{
+                fontWeight: aspect === opt.value ? 700 : 400,
+                background: aspect === opt.value ? "#10b981" : "#e5e7eb",
+                color: aspect === opt.value ? "white" : "#374151",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.5rem 1rem",
+                marginRight: "0.5rem",
+                marginBottom: "0.25rem",
+                cursor: "pointer"
+              }}
+            >
+              {opt.name}
+            </button>
+          ))}
+        </div>
+        <div
+          ref={overlayRef}
+          style={{
+            position: 'relative',
+            display: 'inline-block',
+            width: displayW,
+            height: displayH,
+            background: '#f3f4f6',
+            borderRadius: '0.75rem',
+            userSelect: 'none',
+            touchAction: 'none'
+          }}
+        >
+          <img
+            ref={imgRef}
+            src={image}
+            alt="Crop preview"
+            style={{
+              width: displayW,
+              height: displayH,
+              display: 'block',
+              borderRadius: '0.75rem'
+            }}
+            draggable={false}
+          />
+          {/* Crop Frame */}
+          <div
+            style={{
+              position: 'absolute',
+              left: cropBox.x * (displayW / imgDims.width),
+              top: cropBox.y * (displayH / imgDims.height),
+              width: cropBox.width * (displayW / imgDims.width),
+              height: cropBox.height * (displayH / imgDims.height),
+              border: '2px solid #3b82f6',
+              background: 'rgba(59, 130, 246, 0.10)',
+              cursor: dragging ? 'grabbing' : 'move',
+              boxSizing: 'border-box',
+              borderRadius: '0.4rem',
+              transition: dragging || resizing ? 'none' : 'box-shadow 0.15s',
+              boxShadow: dragging || resizing ? '0 0 0 2px #3b82f6' : '0 2px 24px 0 rgba(59,130,246,0.1)'
+            }}
+            onMouseDown={startDrag}
+            onTouchStart={startDrag}
+          >
+            {/* Resize Handles */}
+            {handles.map(handle => (
+              <div
+                key={handle.dir}
                 style={{
-                  background: selectedRatio.name === ratio.name ? '#6B2EFF' : '#f3f4f6',
-                  color: selectedRatio.name === ratio.name ? 'white' : '#374151',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem'
+                  position: 'absolute',
+                  top: handle.top,
+                  left: handle.left,
+                  width: 24, // Larger for touch
+                  height: 24,
+                  background: '#3b82f6',
+                  borderRadius: '50%',
+                  border: '2px solid white',
+                  cursor: handle.cursor,
+                  ...handle.style
                 }}
-              >
-                <span>{ratio.icon}</span>
-                <span>{ratio.name}</span>
-              </button>
+                onMouseDown={startResize(handle.dir as ResizeDir)}
+                onTouchStart={startResize(handle.dir as ResizeDir)}
+              />
             ))}
           </div>
         </div>
-
-        <div style={{
-          display: 'flex',
-          flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-          gap: '1.5rem',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {/* Main crop area */}
-          <div 
-            ref={containerRef}
-            style={{ 
-              position: 'relative', 
-              width: '400px', 
-              height: '400px', 
-              background: '#f9fafb', 
-              borderRadius: '0.5rem', 
-              overflow: 'hidden',
-              border: '1px solid #e5e7eb'
-            }}
-          >
-            <img
-              ref={imgRef}
-              src={image}
-              alt="To crop"
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'contain', 
-                display: 'block'
-              }}
-              draggable={false}
-            />
-            
-            {/* Crop overlay */}
-            {imgDims.displayWidth > 0 && (
-              <>
-                {/* Dark overlay outside crop area */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  background: 'rgba(0,0,0,0.5)',
-                  pointerEvents: 'none'
-                }} />
-                
-                {/* Clear crop area with resize handles */}
-                <div style={{
-                  position: 'absolute',
-                  left: `${displayCrop.x}px`,
-                  top: `${displayCrop.y}px`,
-                  width: `${displayCrop.width}px`,
-                  height: `${displayCrop.height}px`,
-                  background: 'transparent',
-                  border: '2px solid #6B2EFF',
-                  borderRadius: '4px',
-                  boxSizing: 'border-box',
-                  cursor: 'move',
-                  clipPath: 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%)'
-                }}
-                  onMouseDown={(e) => startDrag(e, 'move')}
-                  onTouchStart={(e) => startDrag(e, 'move')}
-                >
-                  {/* Resize handles for custom ratio */}
-                  {selectedRatio.name === 'Custom' && (
-                    <>
-                      {/* Corner handles */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '-6px', left: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'nw-resize', border: '2px solid white'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-nw')}
-                        onTouchStart={(e) => startDrag(e, 'resize-nw')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        top: '-6px', right: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'ne-resize', border: '2px solid white'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-ne')}
-                        onTouchStart={(e) => startDrag(e, 'resize-ne')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '-6px', left: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'sw-resize', border: '2px solid white'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-sw')}
-                        onTouchStart={(e) => startDrag(e, 'resize-sw')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '-6px', right: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'se-resize', border: '2px solid white'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-se')}
-                        onTouchStart={(e) => startDrag(e, 'resize-se')}
-                      />
-                      
-                      {/* Side handles */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%', left: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'w-resize', border: '2px solid white',
-                        transform: 'translateY(-50%)'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-w')}
-                        onTouchStart={(e) => startDrag(e, 'resize-w')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%', right: '-6px',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'e-resize', border: '2px solid white',
-                        transform: 'translateY(-50%)'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-e')}
-                        onTouchStart={(e) => startDrag(e, 'resize-e')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        top: '-6px', left: '50%',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 'n-resize', border: '2px solid white',
-                        transform: 'translateX(-50%)'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-n')}
-                        onTouchStart={(e) => startDrag(e, 'resize-n')}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '-6px', left: '50%',
-                        width: '12px', height: '12px',
-                        background: '#6B2EFF', borderRadius: '50%',
-                        cursor: 's-resize', border: '2px solid white',
-                        transform: 'translateX(-50%)'
-                      }}
-                        onMouseDown={(e) => startDrag(e, 'resize-s')}
-                        onTouchStart={(e) => startDrag(e, 'resize-s')}
-                      />
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Preview */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ 
-              marginBottom: '0.75rem', 
-              fontSize: '0.875rem', 
-              color: '#6b7280',
-              fontWeight: '600'
-            }}>
-              Preview:
-            </div>
-            <canvas
-              ref={canvasRef}
-              width={150}
-              height={150}
-              style={{
-                borderRadius: '0.5rem',
-                border: '2px solid #e5e7eb',
-                background: '#fafafa',
-                width: '150px',
-                height: '150px',
-                objectFit: 'cover'
-              }}
-            />
-            <div style={{
-              marginTop: '0.5rem',
-              fontSize: '0.75rem',
-              color: '#9ca3af'
-            }}>
-              {Math.round(crop.width)} × {Math.round(crop.height)}px
-            </div>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '1rem', 
-          marginTop: '1.5rem',
-          justifyContent: 'center'
-        }}>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <button
             onClick={onCancel}
             style={{
-              background: '#f3f4f6',
-              color: '#6b7280',
-              fontWeight: '600',
-              border: 'none',
-              borderRadius: '0.5rem',
               padding: '0.75rem 1.5rem',
-              cursor: 'pointer',
-              fontSize: '1rem'
+              background: '#e5e7eb',
+              color: '#374151',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
             }}
           >
             Cancel
           </button>
           <button
-            onClick={handleApply}
+            onClick={handleApplyCrop}
             style={{
-              background: 'linear-gradient(45deg, #6B2EFF 0%, #FF7B1C 100%)',
-              color: 'white',
-              fontWeight: '700',
+              padding: '0.75rem 1.5rem',
+              background: cropValid ? '#10b981' : '#a7f3d0',
+              color: cropValid ? 'white' : '#6b7280',
               border: 'none',
-              borderRadius: '0.5rem',
-              padding: '0.75rem 2rem',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              boxShadow: '0 4px 12px rgba(107, 46, 255, 0.3)'
+              borderRadius: '8px',
+              cursor: cropValid ? 'pointer' : 'not-allowed',
+              fontWeight: '600'
             }}
+            disabled={!cropValid}
           >
-            Apply Crop
+            ✂️ Apply Crop
           </button>
-        </div>
-
-        {/* Instructions */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          background: '#f0f9ff',
-          border: '1px solid #0ea5e9',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          color: '#0369a1'
-        }}>
-          💡 <strong>Tips:</strong> Drag the crop area to move it. For custom ratio, drag the corner handle to resize.
         </div>
       </div>
     </div>
   )
 }
+
+export default CropTool
