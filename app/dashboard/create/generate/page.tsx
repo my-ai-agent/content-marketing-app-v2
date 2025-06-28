@@ -127,21 +127,16 @@ export default function GenerateContent() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '0.5rem',
+          gap: '1rem',
           marginBottom: '1.5rem'
         }}>
-          {[1,2,3,4,5,6].map((step, index) => (
-            <div key={step}>
-              <div style={{
-                width: '2rem', height: '2rem', borderRadius: '50%',
-                backgroundColor: '#10b981', color: 'white',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.875rem', fontWeight: '600'
-              }}>{step}</div>
-              {index < 5 && (
-                <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981', display: 'inline-block', marginLeft: '0.5rem' }}></div>
-              )}
-            </div>
+          {[1,2,3,4,5,6].map((step) => (
+            <div key={step} style={{
+              width: '2rem', height: '2rem', borderRadius: '50%',
+              backgroundColor: '#10b981', color: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.875rem', fontWeight: '600'
+            }}>{step}</div>
           ))}
         </div>
 
