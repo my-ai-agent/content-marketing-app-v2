@@ -22,7 +22,7 @@ export default function GenerateContent() {
       setPromptData(data)
       
       // Generate the executive prompt
-      const prompt = promptBuilder.generateExecutivePrompt()
+      const prompt = promptBuilder.generateClaudePrompt()
       setExecutivePrompt(prompt)
       
       console.log('📋 Executive Prompt Builder Data:', data)
