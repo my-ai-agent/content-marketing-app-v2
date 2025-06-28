@@ -17,16 +17,21 @@ export default function GenerateContent() {
   // Initialize and load Executive Prompt data
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const promptBuilder = new ExecutivePromptBuilder()
-      const data = promptBuilder.exportPromptData()
-      setPromptData(data)
-      
-      // Generate the executive prompt
-      const prompt = promptBuilder.generateClaudePrompt()
-      setExecutivePrompt(prompt)
-      
-      console.log('📋 Executive Prompt Builder Data:', data)
-      console.log('🎯 Generated Executive Prompt:', prompt)
+      try {
+        const promptBuilder = new ExecutivePromptBuilder()
+        const data = promptBuilder.exportPromptData()
+        setPromptData(data)
+        
+        // Generate the executive prompt
+        const prompt = promptBuilder.generateClaudePrompt()
+        setExecutivePrompt(prompt)
+        
+        console.log('📋 Executive Prompt Builder Data:', data)
+        console.log('🎯 Generated Executive Prompt:', prompt)
+      } catch (error) {
+        console.error('Error initializing Executive Prompt Builder:', error)
+        setError('Error loading your content data. Please try refreshing the page.')
+      }
     }
   }, [])
 
