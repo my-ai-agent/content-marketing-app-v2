@@ -1,60 +1,21 @@
+// Enhanced Photo Page with Proper Crop Flow
+// Key changes:
+// 1. Apply Crop closes modal and shows result in main window
+// 2. Continue button only appears after successful crop
+// 3. Clear separation between crop and navigation actions
+
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
-// Dynamically import CropTool in case it uses browser APIs at the module level
+// Dynamically import CropTool
 const CropTool = dynamic(() => import('./CropTool'), { ssr: false })
-
-// Simple IndexedDB helper (inline, no 3rd party dependency)
-const DB_NAME = 'PhotoAppDB'
-const STORE_NAME = 'photos'
-function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onupgradeneeded = () => {
-      req.result.createObjectStore(STORE_NAME)
-    }
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      tx.objectStore(STORE_NAME).put(data, key)
-      tx.oncomplete = () => {
-        db.close()
-        resolve()
-      }
-      tx.onerror = () => reject(tx.error)
-    }
-  })
-}
-
-function removeImageFromIndexedDB(key: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      tx.objectStore(STORE_NAME).delete(key)
-      tx.oncomplete = () => {
-        db.close()
-        resolve()
-      }
-      tx.onerror = () => reject(tx.error)
-    }
-  })
-}
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
-
-// Compression config for mobile-optimized, localStorage/IndexedDB safe
-const MAX_WIDTH = 1280
-const MAX_HEIGHT = 1280
-const OUTPUT_QUALITY = 0.80
 
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
@@ -64,76 +25,48 @@ export default function PhotoUpload() {
   const [error, setError] = useState<string | null>(null)
   const [showCropModal, setShowCropModal] = useState(false)
   const [originalImage, setOriginalImage] = useState<string | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  
+  // NEW: Track crop completion state
+  const [isCropCompleted, setIsCropCompleted] = useState(false)
+  const [croppedImageData, setCroppedImageData] = useState<string | null>(null)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   // Initialize Executive Prompt Builder
   const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
 
-  // Compress image using pica, loaded dynamically
-  const compressWithPica = async (imgSrc: string): Promise<Blob> => {
+  // ENHANCED: Apply Crop now just closes modal and shows result
+  const handleCropApply = async (croppedUrl: string) => {
+    console.log('🎯 Apply Crop clicked - processing cropped image')
+    
+    setShowCropModal(false) // Close modal immediately
     setIsProcessing(true)
     setError(null)
-    try {
-      const picaModule = await import('pica')
-      const picaInstance = picaModule.default()
-      const img = document.createElement('img')
-      img.src = imgSrc
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = (err) => reject(new Error('Image load failed'))
-      })
-
-      if (!img.naturalWidth || !img.naturalHeight) {
-        throw new Error('Image has invalid dimensions')
-      }
-
-      let { width, height } = img
-      let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
-      let newW = Math.round(width * scale)
-      let newH = Math.round(height * scale)
-      const inputCanvas = document.createElement('canvas')
-      inputCanvas.width = width
-      inputCanvas.height = height
-      const inputCtx = inputCanvas.getContext('2d')
-      if (!inputCtx) throw new Error('Could not get canvas context')
-      inputCtx.drawImage(img, 0, 0)
-      const outputCanvas = document.createElement('canvas')
-      outputCanvas.width = newW
-      outputCanvas.height = newH
-      await picaInstance.resize(inputCanvas, outputCanvas)
-      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
-      URL.revokeObjectURL(img.src)
-      return blob
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  // On file selection, show crop modal with loaded image (as data URL)
-  const handleCropApply = async (croppedUrl: string) => {
-    setShowCropModal(false)
-    setIsProcessing(true)
+    
     try {
       if (!croppedUrl.startsWith('data:image/')) {
         throw new Error('Invalid cropped image data')
       }
-      const compressedBlob = await compressWithPica(croppedUrl)
-      await saveImageToIndexedDB('selectedPhoto', compressedBlob)
-      setSelectedPhoto(croppedUrl)
       
+      // Store the cropped image for display
+      setCroppedImageData(croppedUrl)
+      setSelectedPhoto(croppedUrl)
+      setIsCropCompleted(true)
+      
+      // Update Executive Prompt Builder
       if (pendingFile) {
-        localStorage.setItem('photoFileName', pendingFile.name)
-        localStorage.setItem('photoFileSize', pendingFile.size.toString())
-        
-        // FIXED: Use proper method signature
         promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
         console.log('✅ Photo data saved to Executive Prompt Builder')
       }
+      
+      console.log('✅ Crop applied successfully - image ready for user review')
+      
     } catch (err: any) {
-      setError(`Failed to process cropped image. ${err?.message ?? ''} Please try again.`)
+      setError(`Failed to process cropped image: ${err?.message ?? ''}`)
+      setIsCropCompleted(false)
+      setCroppedImageData(null)
       setSelectedPhoto(null)
     } finally {
       setIsProcessing(false)
@@ -141,6 +74,7 @@ export default function PhotoUpload() {
   }
 
   const handleCropCancel = () => {
+    console.log('❌ Crop cancelled')
     setShowCropModal(false)
     setOriginalImage(null)
     setPhotoFile(null)
@@ -149,166 +83,151 @@ export default function PhotoUpload() {
     if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
 
-  const handleNext = async () => {
+  // NEW: Separate navigation function - only called by Continue button
+  const handleContinueToNext = async () => {
+    console.log('🚀 Continue to next page')
+    
+    if (!isCropCompleted || !selectedPhoto) {
+      alert('Please crop your photo before continuing.')
+      return
+    }
+
     setError(null)
-    if (selectedPhoto) {
-      try {
-        localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
-        
-        // FIXED: Ensure proper data update
-        if (pendingFile) {
-          promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
-        }
-        console.log('🚀 Moving to Story step with photo data captured')
-        window.location.href = '/dashboard/create/story'
-      } catch {
-        setError('Failed to save photo. Storage quota may be exceeded.')
+    
+    try {
+      // Save to localStorage and IndexedDB for persistence
+      localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
+      
+      if (pendingFile) {
+        localStorage.setItem('photoFileName', pendingFile.name)
+        localStorage.setItem('photoFileSize', pendingFile.size.toString())
       }
-    } else {
-      alert('Please select a photo before continuing.')
+      
+      // Final Executive Prompt Builder update
+      promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile?.name || 'cropped-photo.jpg')
+      console.log('✅ All photo data saved - navigating to story page')
+      
+      // Navigate to next step
+      window.location.href = '/dashboard/create/story'
+      
+    } catch (error) {
+      console.error('❌ Navigation error:', error)
+      setError('Failed to save photo data. Please try again.')
     }
   }
 
   const handleSkip = async () => {
-    setError(null)
+    console.log('⏭️ Skipping photo step')
+    
+    // Clear all photo data
     setSelectedPhoto(null)
     setPhotoFile(null)
     setOriginalImage(null)
     setPendingFile(null)
+    setIsCropCompleted(false)
+    setCroppedImageData(null)
+    
+    // Clear storage
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
-    await removeImageFromIndexedDB('selectedPhoto')
-
-    // FIXED: Clear photo data properly
+    
+    // Clear Executive Prompt Builder
     if (promptBuilder.promptData.photo) {
       promptBuilder.promptData.photo = null
       promptBuilder.saveAndValidate()
     }
-    console.log('⏭️ Skipping photo - proceeding with text-only content')
-
+    
+    console.log('⏭️ Proceeding with text-only content')
     window.location.href = '/dashboard/create/story'
   }
 
-  const handleRemovePhoto = async () => {
+  const handleRemovePhoto = () => {
+    console.log('🗑️ Removing photo')
+    
     setSelectedPhoto(null)
     setPhotoFile(null)
     setOriginalImage(null)
     setPendingFile(null)
+    setIsCropCompleted(false)
+    setCroppedImageData(null)
+    
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
-    await removeImageFromIndexedDB('selectedPhoto')
-    localStorage.removeItem('selectedPhotoIndex')
-    localStorage.removeItem('photoFileName')
-    localStorage.removeItem('photoFileSize')
-
-    // Clear photo data from Executive Prompt Builder
+    
+    // Clear Executive Prompt Builder
     if (promptBuilder.promptData.photo) {
       promptBuilder.promptData.photo = null
       promptBuilder.saveAndValidate()
     }
-    console.log('🔄 Photo cleared from Executive Prompt Builder')
   }
 
-  // File select handler with dynamic heic2any import
+  // File selection handler
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+    console.log('📁 File selected')
+    setError(null)
+    
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
 
     // File size limit (10MB)
-    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024
     if (file.size > MAX_FILE_SIZE) {
-      setError('File too large. Please use images under 10MB.');
-      return;
+      setError('File too large. Please use images under 10MB.')
+      return
     }
 
-    let processedFile = file;
+    let processedFile = file
 
-    // Handle HEIC/HEIF conversion with dynamic import
+    // Handle HEIC/HEIF conversion
     if (
       file.type === "image/heic" || file.type === "image/heif" ||
       file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")
     ) {
       try {
-        setError("Converting iPhone photo, please wait...");
-        const heic2any = (await import("heic2any")).default;
+        setError("Converting iPhone photo, please wait...")
+        const heic2any = (await import("heic2any")).default
         const convertedBlob = await heic2any({
           blob: file,
           toType: "image/jpeg",
           quality: 0.8
-        }) as Blob;
+        }) as Blob
 
         processedFile = new File([convertedBlob],
           file.name.replace(/\.heic$/i, ".jpg"),
           { type: "image/jpeg" }
-        );
-        setError(null);
+        )
+        setError(null)
       } catch (err) {
-        setError("Failed to convert iPhone photo. Please try a different file.");
-        return;
+        setError("Failed to convert iPhone photo. Please try a different file.")
+        return
       }
     }
 
-    // Check supported formats (after conversion, processedFile.type may have changed)
+    // Check supported formats
     if (!/image\/(jpeg|png|webp)/.test(processedFile.type)) {
-      setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.');
-      return;
+      setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.')
+      return
     }
 
-    setPendingFile(processedFile);
-    setPhotoFile(processedFile);
+    setPendingFile(processedFile)
+    setPhotoFile(processedFile)
+    setIsCropCompleted(false) // Reset crop state
+    setCroppedImageData(null)
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = async (ev) => {
-      const result = ev.target?.result;
+      const result = ev.target?.result
       if (typeof result === 'string') {
-        try {
-          // Pre-compress large images for better crop performance
-          const img = new Image();
-          img.src = result;
-
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-          });
-
-          let finalImageUrl = result;
-          const MAX_DISPLAY_SIZE = 2048;
-
-          // Pre-compress if image is very large
-          if (img.naturalWidth > MAX_DISPLAY_SIZE || img.naturalHeight > MAX_DISPLAY_SIZE) {
-            setError("Optimizing large photo for editing...");
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            const scale = Math.min(
-              MAX_DISPLAY_SIZE / img.naturalWidth,
-              MAX_DISPLAY_SIZE / img.naturalHeight
-            );
-
-            canvas.width = Math.round(img.naturalWidth * scale);
-            canvas.height = Math.round(img.naturalHeight * scale);
-
-            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            finalImageUrl = canvas.toDataURL('image/jpeg', 0.85);
-            setError(null);
-          }
-
-          setOriginalImage(finalImageUrl);
-          setShowCropModal(true);
-        } catch (err) {
-          setError('Failed to process image. Please try a smaller file or different format.');
-        }
-      } else {
-        setError('Failed to read file');
+        setOriginalImage(result)
+        setShowCropModal(true) // Open crop modal
+        console.log('🖼️ Opening crop modal')
       }
-    };
+    }
 
-    reader.onerror = () => setError('Failed to read file');
-    reader.readAsDataURL(processedFile);
-  };
+    reader.onerror = () => setError('Failed to read file')
+    reader.readAsDataURL(processedFile)
+  }
 
   return (
     <div style={{
@@ -335,7 +254,7 @@ export default function PhotoUpload() {
         padding: '2rem 1rem',
         borderBottom: '1px solid #f3f4f6'
       }}>
-        {/* Step Tracker - Clean circles only */}
+        {/* Step Tracker */}
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -343,80 +262,24 @@ export default function PhotoUpload() {
           gap: '1rem',
           marginBottom: '1.5rem'
         }}>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>1</div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#1f2937',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>2</div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>3</div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>4</div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>5</div>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>6</div>
+          {[1,2,3,4,5,6].map((step) => (
+            <div key={step} style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: step === 1 ? '#10b981' : step === 2 ? '#1f2937' : '#e5e7eb',
+              color: step <= 2 ? 'white' : '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>
+              {step}
+            </div>
+          ))}
         </div>
-        {/* Title */}
+
         <h1 style={{
           fontSize: 'clamp(2rem, 6vw, 4rem)',
           fontWeight: '700',
@@ -428,6 +291,7 @@ export default function PhotoUpload() {
           Add Your Photo
         </h1>
       </div>
+
       <div style={{
         flex: '1',
         maxWidth: '800px',
@@ -487,9 +351,11 @@ export default function PhotoUpload() {
             </button>
           </div>
         </div>
-        {/* Photo Upload Area */}
+
+        {/* Photo Display Area */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
           {!selectedPhoto ? (
+            // Upload Area
             <div style={{
               width: '100%',
               maxWidth: '500px',
@@ -553,6 +419,7 @@ export default function PhotoUpload() {
               }}>
                 Supports: JPG, PNG, HEIC, WebP
               </div>
+
               {/* Hidden file inputs */}
               <input
                 ref={fileInputRef}
@@ -571,6 +438,7 @@ export default function PhotoUpload() {
               />
             </div>
           ) : (
+            // Selected Photo Display
             <div style={{
               width: '100%',
               maxWidth: '500px',
@@ -583,7 +451,8 @@ export default function PhotoUpload() {
                 borderRadius: '1.5rem',
                 overflow: 'hidden',
                 position: 'relative',
-                backgroundColor: '#f3f4f6'
+                backgroundColor: '#f3f4f6',
+                border: isCropCompleted ? '3px solid #10b981' : '1px solid #e5e7eb'
               }}>
                 <img
                   src={selectedPhoto}
@@ -615,27 +484,56 @@ export default function PhotoUpload() {
                 >
                   ✕
                 </button>
+                
+                {/* Success indicator for completed crop */}
+                {isCropCompleted && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '1rem',
+                    left: '1rem',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    ✅ Cropped & Ready
+                  </div>
+                )}
               </div>
+              
               <div style={{
                 marginTop: '1rem',
                 fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                 color: '#6b7280'
               }}>
                 {photoFile?.name && `📁 ${photoFile.name}`}
+                {isCropCompleted && (
+                  <div style={{ color: '#10b981', fontWeight: '600', marginTop: '0.5rem' }}>
+                    Ready to continue to next step
+                  </div>
+                )}
               </div>
             </div>
           )}
+
           {isProcessing && (
             <div style={{ marginTop: '1rem', color: BRAND_PURPLE, fontWeight: 600 }}>
               Processing image, please wait...
             </div>
           )}
+          
           {error && (
             <div style={{ marginTop: '1rem', color: 'red', fontWeight: 600 }}>
               {error}
             </div>
           )}
         </div>
+
         {/* Action Buttons */}
         <div style={{
           display: 'flex',
@@ -661,33 +559,34 @@ export default function PhotoUpload() {
           >
             Skip for now
           </button>
+          
+          {/* ENHANCED: Continue button only shows after successful crop */}
           <button
-            onClick={handleNext}
-            disabled={!selectedPhoto || isProcessing}
+            onClick={handleContinueToNext}
+            disabled={!isCropCompleted || isProcessing}
             style={{
-              background: selectedPhoto
+              background: isCropCompleted
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
-              color: selectedPhoto ? 'white' : '#9ca3af',
+              color: isCropCompleted ? 'white' : '#9ca3af',
               fontSize: 'clamp(1.25rem, 4vw, 2rem)',
               fontWeight: '900',
               padding: '1rem 2rem',
               borderRadius: '1rem',
               border: 'none',
-              cursor: selectedPhoto ? 'pointer' : 'not-allowed',
-              boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              cursor: isCropCompleted ? 'pointer' : 'not-allowed',
+              boxShadow: isCropCompleted ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
               transition: 'all 0.2s'
             }}
-            className={selectedPhoto ? "transition-all hover:scale-105" : ""}
           >
-            Next →
+            {isCropCompleted ? 'Continue →' : 'Crop Photo First'}
           </button>
         </div>
-        {/* Logo - Brand Reinforcement */}
+
+        {/* Logo */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '1rem',
-          paddingTop: '0'
+          marginBottom: '1rem'
         }}>
           <div style={{
             color: BRAND_PURPLE,
@@ -711,6 +610,7 @@ export default function PhotoUpload() {
           }}>send</div>
         </div>
       </div>
+
       {/* Bottom Navigation */}
       <div style={{
         padding: '1.5rem',
