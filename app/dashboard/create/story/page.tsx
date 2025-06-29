@@ -1,4 +1,3 @@
-// Tell Your Story Page: /app/dashboard/create/story/page.tsx
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
@@ -9,7 +8,21 @@ const BRAND_BLUE = '#11B3FF'
 
 export default function TellYourStory() {
   const [story, setStory] = useState('')
+  const [selectedPersona, setSelectedPersona] = useState('')
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
+
+  const personaOptions = [
+    { value: 'professional', label: 'Professional/Business Owner' },
+    { value: 'influencer', label: 'Influencer/Content Creator' },
+    { value: 'adventure', label: 'Adventure Seeker' },
+    { value: 'female', label: 'Female Traveller' },
+    { value: 'cultural', label: 'Cultural Explorer' },
+    { value: 'family', label: 'Family Traveller' },
+    { value: 'storyteller', label: 'Storyteller/Writer' },
+    { value: 'eco', label: 'Eco Tourism Champion' },
+    { value: 'vfr', label: 'Visiting Friends & Family' },
+    { value: 'independent', label: 'Free & Independent Traveller' }
+  ]
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -18,35 +31,33 @@ export default function TellYourStory() {
       setUploadedPhoto(photoData)
     }
 
-    // Get any existing story
+    // Get any existing story and persona
     const existingStory = localStorage.getItem('userStoryContext')
     if (existingStory) {
       setStory(existingStory)
     }
+
+    const existingPersona = localStorage.getItem('selectedPersona')
+    if (existingPersona) {
+      setSelectedPersona(existingPersona)
+    }
   }, [])
 
   const handleNext = () => {
-    if (story.trim()) {
+    if (story.trim() && selectedPersona) {
       localStorage.setItem('userStoryContext', story.trim())
+      localStorage.setItem('selectedPersona', selectedPersona)
       window.location.href = '/dashboard/create/demographics'
     } else {
-      alert('Please tell us about your photo before continuing.')
+      alert('Please tell us about your photo and select your persona before continuing.')
     }
   }
 
   const handleSkip = () => {
     localStorage.setItem('userStoryContext', 'Amazing cultural experience in New Zealand')
+    localStorage.setItem('selectedPersona', 'cultural')
     window.location.href = '/dashboard/create/demographics'
   }
-
-  const storyPrompts = [
-    "What made this moment special?",
-    "Where was this photo taken?", 
-    "Who was with you during this experience?",
-    "What emotions did you feel here?",
-    "What's the story behind this image?",
-    "What would you want others to know about this place?"
-  ]
 
   return (
     <div style={{ 
@@ -239,7 +250,7 @@ export default function TellYourStory() {
           </p>
         </div>
 
-        {/* Story Prompts */}
+        {/* Persona Selection */}
         <div style={{
           backgroundColor: '#f8fafc',
           borderRadius: '1rem',
@@ -247,46 +258,46 @@ export default function TellYourStory() {
           marginBottom: '2rem'
         }}>
           <h3 style={{
-            fontSize: '1rem',
+            fontSize: '1.125rem',
             fontWeight: '600',
             color: '#374151',
             marginBottom: '1rem'
           }}>
-            💡 Need inspiration? Try answering:
+            👤 Share something about Yourself
           </h3>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '0.5rem'
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            marginBottom: '1rem'
           }}>
-            {storyPrompts.map((prompt, index) => (
-              <button
-                key={index}
-                onClick={() => setStory(story + (story ? ' ' : '') + prompt + ' ')}
-                style={{
-                  padding: '0.75rem',
-                  textAlign: 'left',
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  color: '#374151',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = BRAND_PURPLE
-                  e.currentTarget.style.backgroundColor = '#fafafa'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e5e7eb'
-                  e.currentTarget.style.backgroundColor = 'white'
-                }}
-              >
-                {prompt}
-              </button>
+            Help us understand your travel style to create content that matches your voice
+          </p>
+          
+          <select
+            value={selectedPersona}
+            onChange={(e) => setSelectedPersona(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              backgroundColor: 'white',
+              color: '#374151',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="">Select your travel persona...</option>
+            {personaOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Navigation Buttons */}
@@ -325,29 +336,29 @@ export default function TellYourStory() {
 
           <button
             onClick={handleNext}
-            disabled={!story.trim()}
+            disabled={!story.trim() || !selectedPersona}
             style={{
-              background: story.trim() 
+              background: (story.trim() && selectedPersona)
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
-              color: story.trim() ? 'white' : '#9ca3af',
+              color: (story.trim() && selectedPersona) ? 'white' : '#9ca3af',
               fontSize: '1.25rem',
               fontWeight: '700',
               padding: '1rem 2rem',
               borderRadius: '1rem',
               border: 'none',
-              cursor: story.trim() ? 'pointer' : 'not-allowed',
-              boxShadow: story.trim() ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
+              cursor: (story.trim() && selectedPersona) ? 'pointer' : 'not-allowed',
+              boxShadow: (story.trim() && selectedPersona) ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
               transition: 'all 0.2s'
             }}
             onMouseEnter={(e) => {
-              if (story.trim()) {
+              if (story.trim() && selectedPersona) {
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
               }
             }}
             onMouseLeave={(e) => {
-              if (story.trim()) {
+              if (story.trim() && selectedPersona) {
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
               }
@@ -372,7 +383,7 @@ export default function TellYourStory() {
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             fontWeight: '500'
           }}>
-            Your story helps AI create authentic, personalized content that resonates with your chosen audience
+            Your story and persona help AI create authentic, personalized content that resonates with your chosen audience
           </span>
         </div>
 
