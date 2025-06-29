@@ -1,19 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
-import dynamic from 'next/dynamic'
 import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
-
-// Dynamically import CropTool
-const CropTool = dynamic(() => import('./CropTool'), { ssr: false })
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-// Smart downscaling configuration
-const MAX_DIMENSION = 2048
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+// Auto-optimization settings
+const MAX_DIMENSION = 1600 // Reasonable size for all devices
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
@@ -22,13 +18,6 @@ export default function PhotoUpload() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingMessage, setProcessingMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [showCropModal, setShowCropModal] = useState(false)
-  const [originalImage, setOriginalImage] = useState<string | null>(null)
-  const [optimizedImage, setOptimizedImage] = useState<string | null>(null) // NEW: Optimized version
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
-  
-  // Track crop completion state
-  const [isCropCompleted, setIsCropCompleted] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -36,67 +25,67 @@ export default function PhotoUpload() {
   // Initialize Executive Prompt Builder
   const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
 
-  // NEW: Smart auto-downscaling function
-  const autoOptimizeImage = async (imageDataUrl: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  // Simple auto-optimization (based on your working Pica approach)
+  const optimizeImage = async (imageDataUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
       const img = new Image()
       
       img.onload = () => {
-        console.log('🔍 Original image size:', img.width, 'x', img.height)
+        console.log('📐 Original image:', img.width, 'x', img.height)
         
-        // Check if downscaling is needed
-        const needsDownscaling = img.width > MAX_DIMENSION || img.height > MAX_DIMENSION
-        
-        if (!needsDownscaling) {
-          console.log('✅ Image size OK, no downscaling needed')
+        // Check if optimization is needed
+        if (img.width <= MAX_DIMENSION && img.height <= MAX_DIMENSION) {
+          console.log('✅ Image size OK, no optimization needed')
           resolve(imageDataUrl)
           return
         }
         
-        // Calculate new dimensions maintaining aspect ratio
+        // Calculate new dimensions
         const scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height)
         const newWidth = Math.round(img.width * scale)
         const newHeight = Math.round(img.height * scale)
         
-        console.log('📐 Downscaling to:', newWidth, 'x', newHeight, 'Scale:', scale.toFixed(2))
-        setProcessingMessage(`Optimizing ${img.width}x${img.height} → ${newWidth}x${newHeight}...`)
+        console.log('🔧 Optimizing:', img.width + 'x' + img.height, '→', newWidth + 'x' + newHeight)
+        setProcessingMessage(`Optimizing ${img.width}×${img.height} → ${newWidth}×${newHeight}...`)
         
-        // Create canvas for downscaling
+        // Create canvas for optimization
         const canvas = document.createElement('canvas')
         canvas.width = newWidth
         canvas.height = newHeight
         
         const ctx = canvas.getContext('2d')
         if (!ctx) {
-          reject(new Error('Canvas context not available'))
+          console.log('⚠️ Canvas context unavailable, using original')
+          resolve(imageDataUrl)
           return
         }
         
-        // High-quality downscaling
+        // High-quality scaling
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
-        
-        // Draw downscaled image
         ctx.drawImage(img, 0, 0, newWidth, newHeight)
         
-        // Convert to optimized data URL
-        const quality = img.width > 3000 ? 0.8 : 0.85 // More compression for very large images
-        const optimizedUrl = canvas.toDataURL('image/jpeg', quality)
-        
-        console.log('✅ Auto-optimization complete')
-        resolve(optimizedUrl)
+        // Export optimized image
+        try {
+          const optimizedUrl = canvas.toDataURL('image/jpeg', 0.85)
+          console.log('✅ Image optimized successfully')
+          resolve(optimizedUrl)
+        } catch (error) {
+          console.log('⚠️ Optimization failed, using original')
+          resolve(imageDataUrl)
+        }
       }
       
       img.onerror = () => {
-        console.error('❌ Failed to load image for optimization')
-        resolve(imageDataUrl) // Fallback to original
+        console.log('⚠️ Image load failed, using original')
+        resolve(imageDataUrl)
       }
       
       img.src = imageDataUrl
     })
   }
 
-  // Enhanced file selection with auto-optimization
+  // Simple file selection with auto-optimization
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('📁 File selected')
     setError(null)
@@ -110,14 +99,14 @@ export default function PhotoUpload() {
     }
 
     try {
-      // File size validation
-      if (file.size > 20 * 1024 * 1024) { // 20MB limit
-        throw new Error('File too large. Please use images under 20MB.')
+      // Basic validation
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error('File too large. Please use images under 10MB.')
       }
 
       let processedFile = file
 
-      // Handle HEIC conversion
+      // Handle HEIC conversion (keep this working part)
       if (file.type === "image/heic" || file.type === "image/heif" || 
           file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
         try {
@@ -143,48 +132,40 @@ export default function PhotoUpload() {
         throw new Error('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.')
       }
 
-      setPendingFile(processedFile)
+      // Store file info
       setPhotoFile(processedFile)
-      setIsCropCompleted(false)
 
-      // Read file as data URL
-      setProcessingMessage('Reading image data...')
+      // Read and optimize image
+      setProcessingMessage('Reading image...')
       const reader = new FileReader()
       
       reader.onload = async (ev) => {
         const result = ev.target?.result
         if (typeof result === 'string') {
           try {
-            // AUTO-OPTIMIZATION: Downscale if needed
-            setProcessingMessage('Optimizing for cropping...')
-            const optimizedDataUrl = await autoOptimizeImage(result)
+            // Auto-optimize image
+            setProcessingMessage('Optimizing image...')
+            const optimizedImage = await optimizeImage(result)
             
-            // Store both versions
-            setOriginalImage(result) // Keep original for reference
-            setOptimizedImage(optimizedDataUrl) // Use optimized for cropping
+            // Store optimized image
+            setSelectedPhoto(optimizedImage)
             
-            setProcessingMessage('Ready to crop!')
+            // Update Executive Prompt Builder
+            promptBuilder.updatePhotoData(processedFile, undefined, processedFile.name)
+            console.log('✅ Photo data saved to Executive Prompt Builder')
             
-            // Brief pause to show success message
-            setTimeout(() => {
-              setShowCropModal(true)
-              setProcessingMessage('')
-              console.log('🖼️ Opening crop modal with optimized image')
-            }, 500)
+            setProcessingMessage('Photo ready!')
+            setTimeout(() => setProcessingMessage(''), 1000)
             
           } catch (err) {
-            console.error('Optimization failed:', err)
-            // Fallback: use original image
-            setOriginalImage(result)
-            setOptimizedImage(result)
-            setShowCropModal(true)
-            setProcessingMessage('')
+            console.error('Processing failed:', err)
+            setError('Failed to process image. Please try a different photo.')
           }
         }
       }
 
       reader.onerror = () => {
-        throw new Error('Failed to read file')
+        setError('Failed to read file')
       }
       
       reader.readAsDataURL(processedFile)
@@ -197,70 +178,29 @@ export default function PhotoUpload() {
     }
   }
 
-  // Apply crop with optimized image
-  const handleCropApply = async (croppedUrl: string) => {
-    console.log('🎯 Apply Crop clicked - processing cropped image')
-    
-    setShowCropModal(false)
-    setIsProcessing(true)
-    setProcessingMessage('Applying crop...')
-    
-    try {
-      if (!croppedUrl.startsWith('data:image/')) {
-        throw new Error('Invalid cropped image data')
-      }
-      
-      setSelectedPhoto(croppedUrl)
-      setIsCropCompleted(true)
-      
-      // Update Executive Prompt Builder
-      if (pendingFile) {
-        promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile.name)
-        console.log('✅ Photo data saved to Executive Prompt Builder')
-      }
-      
-      setProcessingMessage('Crop applied successfully!')
-      setTimeout(() => setProcessingMessage(''), 1000)
-      
-    } catch (err: any) {
-      setError(`Failed to process cropped image: ${err?.message ?? ''}`)
-      setIsCropCompleted(false)
-      setSelectedPhoto(null)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleCropCancel = () => {
-    console.log('❌ Crop cancelled')
-    setShowCropModal(false)
-    setOriginalImage(null)
-    setOptimizedImage(null)
-    setPhotoFile(null)
-    setPendingFile(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    if (cameraInputRef.current) cameraInputRef.current.value = ''
-  }
-
-  const handleContinueToNext = async () => {
+  const handleContinue = async () => {
     console.log('🚀 Continue to next page')
     
-    if (!isCropCompleted || !selectedPhoto) {
-      alert('Please crop your photo before continuing.')
+    if (!selectedPhoto) {
+      alert('Please select a photo before continuing.')
       return
     }
 
     try {
+      // Save photo data
       localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
+      localStorage.setItem('selectedPhoto', selectedPhoto)
       
-      if (pendingFile) {
-        localStorage.setItem('photoFileName', pendingFile.name)
-        localStorage.setItem('photoFileSize', pendingFile.size.toString())
+      if (photoFile) {
+        localStorage.setItem('photoFileName', photoFile.name)
+        localStorage.setItem('photoFileSize', photoFile.size.toString())
       }
       
-      promptBuilder.updatePhotoData(pendingFile, undefined, pendingFile?.name || 'cropped-photo.jpg')
+      // Final Executive Prompt Builder update
+      promptBuilder.updatePhotoData(photoFile, undefined, photoFile?.name || 'photo.jpg')
       console.log('✅ All photo data saved - navigating to story page')
       
+      // Navigate to next step
       window.location.href = '/dashboard/create/story'
       
     } catch (error) {
@@ -275,15 +215,13 @@ export default function PhotoUpload() {
     // Clear all data
     setSelectedPhoto(null)
     setPhotoFile(null)
-    setOriginalImage(null)
-    setOptimizedImage(null)
-    setPendingFile(null)
-    setIsCropCompleted(false)
     
     localStorage.removeItem('selectedPhotoIndex')
+    localStorage.removeItem('selectedPhoto')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
     
+    // Clear Executive Prompt Builder
     if (promptBuilder.promptData.photo) {
       promptBuilder.promptData.photo = null
       promptBuilder.saveAndValidate()
@@ -297,14 +235,11 @@ export default function PhotoUpload() {
     
     setSelectedPhoto(null)
     setPhotoFile(null)
-    setOriginalImage(null)
-    setOptimizedImage(null)
-    setPendingFile(null)
-    setIsCropCompleted(false)
     
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     
+    // Clear Executive Prompt Builder
     if (promptBuilder.promptData.photo) {
       promptBuilder.promptData.photo = null
       promptBuilder.saveAndValidate()
@@ -318,15 +253,6 @@ export default function PhotoUpload() {
       minHeight: '100vh',
       backgroundColor: 'white'
     }}>
-      {/* Crop Modal - Using optimized image */}
-      {showCropModal && optimizedImage && (
-        <CropTool
-          image={optimizedImage}
-          onApply={handleCropApply}
-          onCancel={handleCropCancel}
-        />
-      )}
-
       {/* Header with Step Tracker */}
       <div style={{
         display: 'flex',
@@ -372,6 +298,16 @@ export default function PhotoUpload() {
         }}>
           Add Your Photo
         </h1>
+
+        <p style={{
+          fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+          color: '#6b7280',
+          textAlign: 'center',
+          maxWidth: '600px',
+          margin: 0
+        }}>
+          Upload your amazing travel photo and we'll optimize it automatically
+        </p>
       </div>
 
       <div style={{
@@ -509,7 +445,7 @@ export default function PhotoUpload() {
                 fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
                 color: '#9ca3af'
               }}>
-                {isProcessing ? '🔄 Auto-optimizing for best quality...' : 'Supports: JPG, PNG, HEIC, WebP'}
+                {isProcessing ? '🔄 Auto-optimizing for best results...' : 'Supports: JPG, PNG, HEIC, WebP (under 10MB)'}
               </div>
 
               {/* Hidden file inputs */}
@@ -546,7 +482,7 @@ export default function PhotoUpload() {
                 overflow: 'hidden',
                 position: 'relative',
                 backgroundColor: '#f3f4f6',
-                border: isCropCompleted ? '3px solid #10b981' : '1px solid #e5e7eb'
+                border: '3px solid #10b981'
               }}>
                 <img
                   src={selectedPhoto}
@@ -580,24 +516,22 @@ export default function PhotoUpload() {
                 </button>
                 
                 {/* Success indicator */}
-                {isCropCompleted && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '1rem',
-                    left: '1rem',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    ✅ Cropped & Ready
-                  </div>
-                )}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '1rem',
+                  left: '1rem',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  ✅ Photo Ready
+                </div>
               </div>
               
               <div style={{
@@ -606,11 +540,9 @@ export default function PhotoUpload() {
                 color: '#6b7280'
               }}>
                 {photoFile?.name && `📁 ${photoFile.name}`}
-                {isCropCompleted && (
-                  <div style={{ color: '#10b981', fontWeight: '600', marginTop: '0.5rem' }}>
-                    Ready to continue to next step
-                  </div>
-                )}
+                <div style={{ color: '#10b981', fontWeight: '600', marginTop: '0.5rem' }}>
+                  Ready to continue to next step
+                </div>
               </div>
             </div>
           )}
@@ -649,24 +581,24 @@ export default function PhotoUpload() {
           </button>
           
           <button
-            onClick={handleContinueToNext}
-            disabled={!isCropCompleted || isProcessing}
+            onClick={handleContinue}
+            disabled={!selectedPhoto || isProcessing}
             style={{
-              background: (isCropCompleted && !isProcessing)
+              background: (selectedPhoto && !isProcessing)
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
-              color: (isCropCompleted && !isProcessing) ? 'white' : '#9ca3af',
+              color: (selectedPhoto && !isProcessing) ? 'white' : '#9ca3af',
               fontSize: 'clamp(1.25rem, 4vw, 2rem)',
               fontWeight: '900',
               padding: '1rem 2rem',
               borderRadius: '1rem',
               border: 'none',
-              cursor: (isCropCompleted && !isProcessing) ? 'pointer' : 'not-allowed',
-              boxShadow: (isCropCompleted && !isProcessing) ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              cursor: (selectedPhoto && !isProcessing) ? 'pointer' : 'not-allowed',
+              boxShadow: (selectedPhoto && !isProcessing) ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
               transition: 'all 0.2s'
             }}
           >
-            {isCropCompleted ? 'Continue →' : 'Crop Photo First'}
+            {selectedPhoto ? 'Continue →' : 'Upload Photo First'}
           </button>
         </div>
 
