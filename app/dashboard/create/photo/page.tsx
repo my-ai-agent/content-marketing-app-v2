@@ -1,15 +1,10 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
-import ExecutivePromptBuilder from '../../../utils/ExecutivePromptBuilder'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
-
-// Auto-optimization settings
-const MAX_DIMENSION = 1600 // Reasonable size for all devices
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
@@ -17,78 +12,13 @@ export default function PhotoUpload() {
   const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingMessage, setProcessingMessage] = useState('')
-  const [error, setError] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  // Initialize Executive Prompt Builder
-  const [promptBuilder] = useState(() => new ExecutivePromptBuilder())
-
-  // Simple auto-optimization (based on your working Pica approach)
-  const optimizeImage = async (imageDataUrl: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image()
-      
-      img.onload = () => {
-        console.log('📐 Original image:', img.width, 'x', img.height)
-        
-        // Check if optimization is needed
-        if (img.width <= MAX_DIMENSION && img.height <= MAX_DIMENSION) {
-          console.log('✅ Image size OK, no optimization needed')
-          resolve(imageDataUrl)
-          return
-        }
-        
-        // Calculate new dimensions
-        const scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height)
-        const newWidth = Math.round(img.width * scale)
-        const newHeight = Math.round(img.height * scale)
-        
-        console.log('🔧 Optimizing:', img.width + 'x' + img.height, '→', newWidth + 'x' + newHeight)
-        setProcessingMessage(`Optimizing ${img.width}×${img.height} → ${newWidth}×${newHeight}...`)
-        
-        // Create canvas for optimization
-        const canvas = document.createElement('canvas')
-        canvas.width = newWidth
-        canvas.height = newHeight
-        
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          console.log('⚠️ Canvas context unavailable, using original')
-          resolve(imageDataUrl)
-          return
-        }
-        
-        // High-quality scaling
-        ctx.imageSmoothingEnabled = true
-        ctx.imageSmoothingQuality = 'high'
-        ctx.drawImage(img, 0, 0, newWidth, newHeight)
-        
-        // Export optimized image
-        try {
-          const optimizedUrl = canvas.toDataURL('image/jpeg', 0.85)
-          console.log('✅ Image optimized successfully')
-          resolve(optimizedUrl)
-        } catch (error) {
-          console.log('⚠️ Optimization failed, using original')
-          resolve(imageDataUrl)
-        }
-      }
-      
-      img.onerror = () => {
-        console.log('⚠️ Image load failed, using original')
-        resolve(imageDataUrl)
-      }
-      
-      img.src = imageDataUrl
-    })
-  }
-
-  // Simple file selection with auto-optimization
+  // Simple file selection with basic optimization
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('📁 File selected')
-    setError(null)
     setIsProcessing(true)
     setProcessingMessage('Loading image...')
     
@@ -100,133 +30,78 @@ export default function PhotoUpload() {
 
     try {
       // Basic validation
-      if (file.size > MAX_FILE_SIZE) {
-        throw new Error('File too large. Please use images under 10MB.')
-      }
-
-      let processedFile = file
-
-      // Handle HEIC conversion (keep this working part)
-      if (file.type === "image/heic" || file.type === "image/heif" || 
-          file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
-        try {
-          setProcessingMessage("Converting iPhone photo...")
-          const heic2any = (await import("heic2any")).default
-          const convertedBlob = await heic2any({
-            blob: file,
-            toType: "image/jpeg",
-            quality: 0.8
-          }) as Blob
-
-          processedFile = new File([convertedBlob],
-            file.name.replace(/\.heic$/i, ".jpg"),
-            { type: "image/jpeg" }
-          )
-        } catch (err) {
-          throw new Error("Failed to convert iPhone photo. Please try a different file.")
-        }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File too large. Please use images under 10MB.')
+        setIsProcessing(false)
+        return
       }
 
       // Format validation
-      if (!/image\/(jpeg|png|webp)/.test(processedFile.type)) {
-        throw new Error('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.')
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.')
+        setIsProcessing(false)
+        return
       }
 
-      // Store file info
-      setPhotoFile(processedFile)
+      setPhotoFile(file)
+      setProcessingMessage('Processing image...')
 
-      // Read and optimize image
-      setProcessingMessage('Reading image...')
+      // Simple file reading
       const reader = new FileReader()
       
-      reader.onload = async (ev) => {
+      reader.onload = (ev) => {
         const result = ev.target?.result
         if (typeof result === 'string') {
+          setSelectedPhoto(result)
+          setProcessingMessage('Photo ready!')
+          
+          // Store in localStorage (simple approach)
           try {
-            // Auto-optimize image
-            setProcessingMessage('Optimizing image...')
-            const optimizedImage = await optimizeImage(result)
-            
-            // Store optimized image
-            setSelectedPhoto(optimizedImage)
-            
-            // Update Executive Prompt Builder
-            promptBuilder.updatePhotoData(processedFile, undefined, processedFile.name)
-            console.log('✅ Photo data saved to Executive Prompt Builder')
-            
-            setProcessingMessage('Photo ready!')
-            setTimeout(() => setProcessingMessage(''), 1000)
-            
+            localStorage.setItem('userPhoto', result)
+            localStorage.setItem('userPhotoName', file.name)
+            console.log('✅ Photo saved successfully')
           } catch (err) {
-            console.error('Processing failed:', err)
-            setError('Failed to process image. Please try a different photo.')
+            console.log('⚠️ LocalStorage full, but photo still ready')
           }
+          
+          setTimeout(() => setProcessingMessage(''), 1000)
         }
       }
 
       reader.onerror = () => {
-        setError('Failed to read file')
+        alert('Failed to read file. Please try again.')
       }
       
-      reader.readAsDataURL(processedFile)
+      reader.readAsDataURL(file)
 
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error) {
       console.error('File processing error:', error)
+      alert('Failed to process image. Please try a different photo.')
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     console.log('🚀 Continue to next page')
     
     if (!selectedPhoto) {
-      alert('Please select a photo before continuing.')
+      alert('Please select a photo first.')
       return
     }
 
-    try {
-      // Save photo data
-      localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
-      localStorage.setItem('selectedPhoto', selectedPhoto)
-      
-      if (photoFile) {
-        localStorage.setItem('photoFileName', photoFile.name)
-        localStorage.setItem('photoFileSize', photoFile.size.toString())
-      }
-      
-      // Final Executive Prompt Builder update
-      promptBuilder.updatePhotoData(photoFile, undefined, photoFile?.name || 'photo.jpg')
-      console.log('✅ All photo data saved - navigating to story page')
-      
-      // Navigate to next step
-      window.location.href = '/dashboard/create/story'
-      
-    } catch (error) {
-      console.error('❌ Navigation error:', error)
-      setError('Failed to save photo data. Please try again.')
-    }
+    // Simple navigation - no complex data handling
+    window.location.href = '/dashboard/create/story'
   }
 
-  const handleSkip = async () => {
+  const handleSkip = () => {
     console.log('⏭️ Skipping photo step')
     
-    // Clear all data
-    setSelectedPhoto(null)
-    setPhotoFile(null)
+    // Clear any stored photo data
+    localStorage.removeItem('userPhoto')
+    localStorage.removeItem('userPhotoName')
     
-    localStorage.removeItem('selectedPhotoIndex')
-    localStorage.removeItem('selectedPhoto')
-    localStorage.removeItem('photoFileName')
-    localStorage.removeItem('photoFileSize')
-    
-    // Clear Executive Prompt Builder
-    if (promptBuilder.promptData.photo) {
-      promptBuilder.promptData.photo = null
-      promptBuilder.saveAndValidate()
-    }
-    
+    // Go to next step
     window.location.href = '/dashboard/create/story'
   }
 
@@ -239,11 +114,9 @@ export default function PhotoUpload() {
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     
-    // Clear Executive Prompt Builder
-    if (promptBuilder.promptData.photo) {
-      promptBuilder.promptData.photo = null
-      promptBuilder.saveAndValidate()
-    }
+    // Clear stored data
+    localStorage.removeItem('userPhoto')
+    localStorage.removeItem('userPhotoName')
   }
 
   return (
@@ -306,7 +179,7 @@ export default function PhotoUpload() {
           maxWidth: '600px',
           margin: 0
         }}>
-          Upload your amazing travel photo and we'll optimize it automatically
+          Upload your amazing travel photo - we'll handle the rest!
         </p>
       </div>
 
@@ -445,7 +318,7 @@ export default function PhotoUpload() {
                 fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
                 color: '#9ca3af'
               }}>
-                {isProcessing ? '🔄 Auto-optimizing for best results...' : 'Supports: JPG, PNG, HEIC, WebP (under 10MB)'}
+                Supports: JPG, PNG, HEIC, WebP (under 10MB)
               </div>
 
               {/* Hidden file inputs */}
@@ -544,12 +417,6 @@ export default function PhotoUpload() {
                   Ready to continue to next step
                 </div>
               </div>
-            </div>
-          )}
-
-          {error && (
-            <div style={{ marginTop: '1rem', color: 'red', fontWeight: 600 }}>
-              {error}
             </div>
           )}
         </div>
