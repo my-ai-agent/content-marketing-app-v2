@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -10,13 +10,39 @@ export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
 
   const demographics = [
-  'Gen Z (1997-2012) - Digital natives prioritizing authenticity',
-  'Millennials (1981-1996) - Experience-focused, cultural seekers', 
-  'Gen X (1965-1980) - Family-focused, value-conscious',
-  'Baby Boomers (1946-1964) - Comfort-seeking, knowledge-focused',
-  'Multi-Generational Families - Mixed-age groups',
-  'Business & Corporate Travellers - Professional efficiency-focused'
-]
+    { value: 'baby-boomers', label: 'Baby Boomers (1946-1964)', description: 'Comfort-seeking, knowledge-focused, heritage experiences' },
+    { value: 'gen-x', label: 'Gen X (1965-1980)', description: 'Family-focused, value-conscious, authentic experiences' },
+    { value: 'millennials', label: 'Millennials (1981-1996)', description: 'Experience-focused, cultural seekers, social media savvy' },
+    { value: 'gen-z', label: 'Gen Z (1997-2012)', description: 'Digital natives prioritizing authenticity and sustainability' },
+    { value: 'female-travellers', label: 'Female Travellers', description: 'Solo female adventurers, women\'s groups, safety-conscious' },
+    { value: 'families', label: 'Family Travellers', description: 'Multi-generational groups, child-friendly experiences' },
+    { value: 'eco-tourism', label: 'Eco-Tourism Enthusiasts', description: 'Sustainability-focused, environmental conservation minded' },
+    { value: 'vfr', label: 'Visiting Friends & Relatives', description: 'Personal connections, local experiences, extended stays' },
+    { value: 'conference', label: 'Event/Conference Delegates', description: 'Business travelers, networking opportunities, efficiency-focused' },
+    { value: 'independent', label: 'Free & Independent Travellers', description: 'Self-planned journeys, flexibility, off-the-beaten-path' },
+    { value: 'luxury', label: 'Luxury/Premium Travellers', description: 'High-end experiences, personalized service, exclusive access' },
+    { value: 'adventure', label: 'Adventure/Active Travellers', description: 'Outdoor experiences, physical activities, adrenaline seekers' },
+    { value: 'cultural', label: 'Cultural Heritage Seekers', description: 'History enthusiasts, museum visitors, traditional experiences' },
+    { value: 'digital-nomads', label: 'Digital Nomads', description: 'Remote workers, long-stay travelers, workspace requirements' },
+    { value: 'honeymoon', label: 'Honeymoon/Romance Travellers', description: 'Couples experiences, romantic settings, special occasions' },
+    { value: 'solo', label: 'Solo Travellers', description: 'Independent explorers, personal growth focused, flexible schedules' },
+    { value: 'accessible', label: 'Accessible Tourism', description: 'Travelers with accessibility needs, inclusive experiences' }
+  ]
+
+  useEffect(() => {
+    // Get any existing demographic selection
+    const existingDemographic = localStorage.getItem('selectedDemographics')
+    if (existingDemographic) {
+      try {
+        const parsed = JSON.parse(existingDemographic)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedDemographic(parsed[0])
+        }
+      } catch (error) {
+        console.error('Error parsing existing demographic:', error)
+      }
+    }
+  }, [])
 
   const handleNext = () => {
     if (selectedDemographic) {
@@ -27,6 +53,13 @@ export default function Demographics() {
     }
   }
 
+  const handleSkip = () => {
+    localStorage.setItem('selectedDemographics', JSON.stringify(['millennials']))
+    window.location.href = '/dashboard/create/interests'
+  }
+
+  const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
+
   return (
     <div style={{ 
       display: 'flex', 
@@ -35,7 +68,7 @@ export default function Demographics() {
       backgroundColor: 'white'
     }}>
       
-      {/* Header with Step Tracker Only */}
+      {/* Header with Step Tracker */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -83,7 +116,7 @@ export default function Demographics() {
             width: '2rem', 
             height: '2rem', 
             borderRadius: '50%', 
-            backgroundColor: '#1f2937', 
+            backgroundColor: '#10b981', 
             color: 'white', 
             display: 'flex', 
             alignItems: 'center', 
@@ -143,150 +176,135 @@ export default function Demographics() {
 
       <div style={{ 
         flex: '1', 
-        maxWidth: '800px', 
+        maxWidth: '900px', 
         margin: '0 auto', 
         width: '100%', 
         padding: '2rem 1rem' 
       }}>
 
-        {/* Demographics Grid */}
+        {/* Target Audience Selection */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1rem',
-          marginBottom: '3rem'
+          backgroundColor: '#f8fafc',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '2rem'
         }}>
-          {demographics.map((demographic) => {
-            const tooltips = {
-              'Female Travellers': 'Solo female adventurers, women\'s groups, female business travellers, female event participants',
-              'Families': 'Parents with children, multi-generational trips, visiting friends & relatives',
-              'Young Adults (18-35)': 'Students, backpackers, young professionals, adventure seekers, environmental warriors',
-              'Business Travellers': 'Corporate travellers, conference attendees, business meeting planners',
-              'Solo Travellers': 'Independent explorers, digital nomads, solo adventure enthusiasts',
-              'Mature Travellers': 'Empty nesters, retirees, luxury travellers, cultural enthusiasts'
-            }
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#374151',
+            marginBottom: '1rem'
+          }}>
+            🎯 Select Your Target Audience
+          </h3>
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            marginBottom: '1rem'
+          }}>
+            Choose the primary audience that will resonate most with your story
+          </p>
+          
+          <select
+            value={selectedDemographic}
+            onChange={(e) => setSelectedDemographic(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              backgroundColor: 'white',
+              color: '#374151',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="">Select your target audience...</option>
+            {demographics.map((demo) => (
+              <option key={demo.value} value={demo.value}>
+                {demo.label}
+              </option>
+            ))}
+          </select>
 
-            return (
-              <div key={demographic} style={{ position: 'relative' }}>
-                <button
-                  onClick={() => setSelectedDemographic(demographic)}
-                  style={{
-                    width: '100%',
-                    padding: '1.5rem',
-                    border: selectedDemographic === demographic ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                    borderRadius: '1rem',
-                    backgroundColor: selectedDemographic === demographic ? '#eff6ff' : 'white',
-                    color: '#374151',
-                    fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    textAlign: 'center',
-                    minHeight: '4rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedDemographic !== demographic) {
-                      e.currentTarget.style.borderColor = '#9ca3af'
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.1)'
-                    }
-                    // Show tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '1'
-                      tooltip.style.visibility = 'visible'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedDemographic !== demographic) {
-                      e.currentTarget.style.borderColor = '#e5e7eb'
-                      e.currentTarget.style.backgroundColor = 'white'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }
-                    // Hide tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '0'
-                      tooltip.style.visibility = 'hidden'
-                    }
-                  }}
-                >
-                  {demographic}
-                </button>
-                
-                {/* Tooltip */}
-                <div 
-                  className="tooltip"
-                  style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#1f2937',
-                    color: 'white',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    opacity: '0',
-                    visibility: 'hidden',
-                    transition: 'all 0.3s ease',
-                    zIndex: '10',
-                    marginBottom: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    maxWidth: '280px',
-                    whiteSpace: 'normal',
-                    textAlign: 'center',
-                    lineHeight: '1.3'
-                  }}
-                >
-                  {tooltips[demographic as keyof typeof tooltips]}
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderTop: '6px solid #1f2937'
-                  }}></div>
-                </div>
-              </div>
-            )
-          })}
+          {/* Selected Audience Description */}
+          {selectedDemo && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#dcfce7',
+              border: '1px solid #bbf7d0',
+              borderRadius: '0.75rem'
+            }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#15803d',
+                margin: '0',
+                fontWeight: '500'
+              }}>
+                <strong>{selectedDemo.label}:</strong> {selectedDemo.description}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Selection Guidance */}
+        {/* Audience Targeting Benefits */}
         <div style={{
           backgroundColor: '#eff6ff',
           border: '1px solid #bfdbfe',
           borderRadius: '1rem',
           padding: '1.5rem',
           textAlign: 'center',
-          marginBottom: '3rem'
+          marginBottom: '2rem'
         }}>
-          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🎯</span>
+          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>💡</span>
           <span style={{ 
             color: '#1e40af', 
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             fontWeight: '500'
           }}>
-            Select one target audience for the most effective messaging
+            Selecting a specific audience helps AI create more targeted, effective messaging that resonates with your ideal readers
           </span>
         </div>
 
-        {/* Next Button */}
+        {/* Navigation Buttons */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'center', 
+          justifyContent: 'space-between', 
           alignItems: 'center', 
-          width: '100%', 
-          marginBottom: '2rem' 
+          gap: '1rem',
+          marginBottom: '2rem',
+          flexWrap: 'wrap'
         }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              backgroundColor: 'transparent',
+              color: '#6b7280',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#9ca3af'
+              e.currentTarget.style.color = '#374151'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb'
+              e.currentTarget.style.color = '#6b7280'
+            }}
+          >
+            Skip for now
+          </button>
+
           <button
             onClick={handleNext}
             disabled={!selectedDemographic}
@@ -295,24 +313,33 @@ export default function Demographics() {
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
               color: selectedDemographic ? 'white' : '#9ca3af',
-              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-              fontWeight: '900',
+              fontSize: '1.25rem',
+              fontWeight: '700',
               padding: '1rem 2rem',
               borderRadius: '1rem',
               border: 'none',
               cursor: selectedDemographic ? 'pointer' : 'not-allowed',
-              boxShadow: selectedDemographic ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-              display: 'block',
-              margin: '0 auto',
+              boxShadow: selectedDemographic ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
               transition: 'all 0.2s'
             }}
-            className={selectedDemographic ? "transition-all hover:scale-105" : ""}
+            onMouseEnter={(e) => {
+              if (selectedDemographic) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedDemographic) {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
+              }
+            }}
           >
-            Next →
+            Continue →
           </button>
         </div>
 
-        {/* Logo - Brand Reinforcement */}
+        {/* Logo */}
         <div style={{ 
           textAlign: 'center', 
           marginBottom: '2rem',
@@ -350,7 +377,7 @@ export default function Demographics() {
         borderTop: '1px solid #f3f4f6'
       }}>
         <Link 
-          href="/dashboard/create/photo"
+          href="/dashboard/create/story"
           style={{ 
             color: '#6b7280', 
             textDecoration: 'none',
@@ -358,7 +385,7 @@ export default function Demographics() {
             fontSize: 'clamp(0.875rem, 2vw, 1rem)'
           }}
         >
-          ← Back to Photo
+          ← Back to Story
         </Link>
       </div>
     </div>
