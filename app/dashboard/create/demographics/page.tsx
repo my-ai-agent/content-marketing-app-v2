@@ -1,34 +1,34 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import DemographicDropdown, { Demographic } from './DemographicDropdown'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
 const BRAND_BLUE = '#11B3FF'
 
+const DEMOGRAPHICS: Demographic[] = [
+  { value: 'baby-boomers', label: 'Baby Boomers (1946-1964)', description: 'Comfort-seeking, knowledge-focused, heritage experiences' },
+  { value: 'gen-x', label: 'Gen X (1965-1980)', description: 'Family-focused, value-conscious, authentic experiences' },
+  { value: 'millennials', label: 'Millennials (1981-1996)', description: 'Experience-focused, cultural seekers, social media savvy' },
+  { value: 'gen-z', label: 'Gen Z (1997-2012)', description: 'Digital natives prioritizing authenticity and sustainability' },
+  { value: 'female-travellers', label: 'Female Travellers', description: 'Solo female adventurers, women\'s groups, safety-conscious' },
+  { value: 'families', label: 'Family Travellers', description: 'Multi-generational groups, child-friendly experiences' },
+  { value: 'eco-tourism', label: 'Eco-Tourism Enthusiasts', description: 'Sustainability-focused, environmental conservation minded' },
+  { value: 'vfr', label: 'Visiting Friends & Relatives', description: 'Personal connections, local experiences, extended stays' },
+  { value: 'conference', label: 'Event/Conference Delegates', description: 'Business travelers, networking opportunities, efficiency-focused' },
+  { value: 'independent', label: 'Free & Independent Travellers', description: 'Self-planned journeys, flexibility, off-the-beaten-path' },
+  { value: 'luxury', label: 'Luxury/Premium Travellers', description: 'High-end experiences, personalized service, exclusive access' },
+  { value: 'adventure', label: 'Adventure/Active Travellers', description: 'Outdoor experiences, physical activities, adrenaline seekers' },
+  { value: 'cultural', label: 'Cultural Heritage Seekers', description: 'History enthusiasts, museum visitors, traditional experiences' },
+  { value: 'digital-nomads', label: 'Digital Nomads', description: 'Remote workers, long-stay travelers, workspace requirements' },
+  { value: 'honeymoon', label: 'Honeymoon/Romance Travellers', description: 'Couples experiences, romantic settings, special occasions' },
+  { value: 'solo', label: 'Solo Travellers', description: 'Independent explorers, personal growth focused, flexible schedules' },
+  { value: 'accessible', label: 'Accessible Tourism', description: 'Travelers with accessibility needs, inclusive experiences' }
+]
+
 export default function Demographics() {
   const [selectedDemographic, setSelectedDemographic] = useState('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-
-  const demographics = [
-    { value: 'baby-boomers', label: 'Baby Boomers (1946-1964)', description: 'Comfort-seeking, knowledge-focused, heritage experiences' },
-    { value: 'gen-x', label: 'Gen X (1965-1980)', description: 'Family-focused, value-conscious, authentic experiences' },
-    { value: 'millennials', label: 'Millennials (1981-1996)', description: 'Experience-focused, cultural seekers, social media savvy' },
-    { value: 'gen-z', label: 'Gen Z (1997-2012)', description: 'Digital natives prioritizing authenticity and sustainability' },
-    { value: 'female-travellers', label: 'Female Travellers', description: 'Solo female adventurers, women\'s groups, safety-conscious' },
-    { value: 'families', label: 'Family Travellers', description: 'Multi-generational groups, child-friendly experiences' },
-    { value: 'eco-tourism', label: 'Eco-Tourism Enthusiasts', description: 'Sustainability-focused, environmental conservation minded' },
-    { value: 'vfr', label: 'Visiting Friends & Relatives', description: 'Personal connections, local experiences, extended stays' },
-    { value: 'conference', label: 'Event/Conference Delegates', description: 'Business travelers, networking opportunities, efficiency-focused' },
-    { value: 'independent', label: 'Free & Independent Travellers', description: 'Self-planned journeys, flexibility, off-the-beaten-path' },
-    { value: 'luxury', label: 'Luxury/Premium Travellers', description: 'High-end experiences, personalized service, exclusive access' },
-    { value: 'adventure', label: 'Adventure/Active Travellers', description: 'Outdoor experiences, physical activities, adrenaline seekers' },
-    { value: 'cultural', label: 'Cultural Heritage Seekers', description: 'History enthusiasts, museum visitors, traditional experiences' },
-    { value: 'digital-nomads', label: 'Digital Nomads', description: 'Remote workers, long-stay travelers, workspace requirements' },
-    { value: 'honeymoon', label: 'Honeymoon/Romance Travellers', description: 'Couples experiences, romantic settings, special occasions' },
-    { value: 'solo', label: 'Solo Travellers', description: 'Independent explorers, personal growth focused, flexible schedules' },
-    { value: 'accessible', label: 'Accessible Tourism', description: 'Travelers with accessibility needs, inclusive experiences' }
-  ]
 
   useEffect(() => {
     // Get any existing demographic selection
@@ -58,8 +58,6 @@ export default function Demographics() {
     localStorage.setItem('selectedDemographics', JSON.stringify(['millennials']))
     window.location.href = '/dashboard/create/interests'
   }
-
-  const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
 
   return (
     <div style={{ 
@@ -206,158 +204,11 @@ export default function Demographics() {
             Choose the primary audience that will resonate most with your story
           </p>
           
-          {/* Custom Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                fontSize: '1rem',
-                backgroundColor: 'white',
-                color: selectedDemographic ? '#374151' : '#9ca3af',
-                outline: 'none',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s',
-                textAlign: 'left',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            >
-              <span>
-                {selectedDemo ? selectedDemo.label : 'Select your target audience...'}
-              </span>
-              <span style={{ 
-                fontSize: '0.75rem', 
-                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s'
-              }}>
-                ▼
-              </span>
-            </button>
-
-            {/* Dropdown Options */}
-            {isDropdownOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: '0',
-                right: '0',
-                backgroundColor: 'white',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                marginTop: '0.25rem',
-                maxHeight: '300px',
-                overflowY: 'auto',
-                zIndex: 10,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-              }}>
-                {demographics.map((demo, index) => (
-                  <div
-                    key={demo.value}
-                    onClick={() => {
-                      setSelectedDemographic(demo.value)
-                      setIsDropdownOpen(false)
-                    }}
-                    style={{
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      borderBottom: index < demographics.length - 1 ? '1px solid #f3f4f6' : 'none',
-                      position: 'relative',
-                      backgroundColor: selectedDemographic === demo.value ? '#f0f9ff' : 'white',
-                      color: '#374151',
-                      fontSize: '0.95rem'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedDemographic !== demo.value) {
-                        e.currentTarget.style.backgroundColor = '#f9fafb'
-                      }
-                      // Show tooltip
-                      const tooltip = e.currentTarget.querySelector('.custom-tooltip') as HTMLElement
-                      if (tooltip) {
-                        tooltip.style.opacity = '1'
-                        tooltip.style.visibility = 'visible'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedDemographic !== demo.value) {
-                        e.currentTarget.style.backgroundColor = 'white'
-                      }
-                      // Hide tooltip
-                      const tooltip = e.currentTarget.querySelector('.custom-tooltip') as HTMLElement
-                      if (tooltip) {
-                        tooltip.style.opacity = '0'
-                        tooltip.style.visibility = 'hidden'
-                      }
-                    }}
-                  >
-                    {demo.label}
-                    
-                    {/* Hover Tooltip */}
-                    <div 
-                      className="custom-tooltip"
-                      style={{
-                        position: 'absolute',
-                        left: '100%',
-                        top: '0',
-                        marginLeft: '0.5rem',
-                        background: '#1f2937',
-                        color: 'white',
-                        padding: '0.75rem 1rem',
-                        borderRadius: '0.5rem',
-                        fontSize: '0.875rem',
-                        opacity: '0',
-                        visibility: 'hidden',
-                        transition: 'all 0.3s ease',
-                        zIndex: '20',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        maxWidth: '280px',
-                        whiteSpace: 'normal',
-                        lineHeight: '1.4',
-                        pointerEvents: 'none'
-                      }}
-                    >
-                      {demo.description}
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '-6px',
-                        transform: 'translateY(-50%)',
-                        borderTop: '6px solid transparent',
-                        borderBottom: '6px solid transparent',
-                        borderRight: '6px solid #1f2937'
-                      }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Selected Audience Description */}
-          {selectedDemo && (
-            <div style={{
-              marginTop: '1rem',
-              padding: '1rem',
-              backgroundColor: '#dcfce7',
-              border: '1px solid #bbf7d0',
-              borderRadius: '0.75rem'
-            }}>
-              <p style={{
-                fontSize: '0.875rem',
-                color: '#15803d',
-                margin: '0',
-                fontWeight: '500'
-              }}>
-                <strong>{selectedDemo.label}:</strong> {selectedDemo.description}
-              </p>
-            </div>
-          )}
+          <DemographicDropdown
+            demographics={DEMOGRAPHICS}
+            selectedDemographic={selectedDemographic}
+            setSelectedDemographic={setSelectedDemographic}
+          />
         </div>
 
         {/* Audience Targeting Benefits */}
