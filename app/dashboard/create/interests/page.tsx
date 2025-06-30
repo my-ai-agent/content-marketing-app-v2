@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
@@ -10,24 +10,46 @@ export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
 
   const interests = [
-    'Cultural Experiences',
-    'Adventure & Outdoor Activities',
-    'Food & Wine',
-    'Relaxation & Wellness',
-    'History & Heritage',
-    'Photography & Social Media',
-    'Gardens & Nature',
-    'Arts & Creative Experiences'
+    { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
+    { value: 'adventure', label: 'Adventure & Outdoor Activities', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
+    { value: 'food-wine', label: 'Food & Wine', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
+    { value: 'wellness', label: 'Relaxation & Wellness', description: 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts' },
+    { value: 'history', label: 'History & Heritage', description: 'Historical sites, battlefields, colonial history, archaeological sites, guided tours' },
+    { value: 'photography', label: 'Photography & Social Media', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
+    { value: 'nature', label: 'Gardens & Nature', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
+    { value: 'arts', label: 'Arts & Creative Experiences', description: 'Art galleries, workshops, creative retreats, local artisans, craft experiences' }
   ]
 
+  useEffect(() => {
+    // Get any existing interest selection
+    const existingInterest = localStorage.getItem('selectedInterests')
+    if (existingInterest) {
+      try {
+        const parsed = JSON.parse(existingInterest)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedInterest(parsed[0])
+        }
+      } catch (error) {
+        console.error('Error parsing existing interest:', error)
+      }
+    }
+  }, [])
+
   const handleNext = () => {
-  if (selectedInterest) {
-    localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
-    window.location.href = '/dashboard/create/platform'
-  } else {
-    alert('Please select an interest before continuing.')
+    if (selectedInterest) {
+      localStorage.setItem('selectedInterests', JSON.stringify([selectedInterest]))
+      window.location.href = '/dashboard/create/platform'
+    } else {
+      alert('Please select an interest before continuing.')
+    }
   }
-}
+
+  const handleSkip = () => {
+    localStorage.setItem('selectedInterests', JSON.stringify(['cultural']))
+    window.location.href = '/dashboard/create/platform'
+  }
+
+  const selectedInterestObj = interests.find(interest => interest.value === selectedInterest)
 
   return (
     <div style={{ 
@@ -37,7 +59,7 @@ export default function Interests() {
       backgroundColor: 'white'
     }}>
       
-      {/* Header with Step Tracker Only */}
+      {/* Header with Step Tracker */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -98,7 +120,7 @@ export default function Interests() {
             width: '2rem', 
             height: '2rem', 
             borderRadius: '50%', 
-            backgroundColor: '#1f2937', 
+            backgroundColor: '#10b981', 
             color: 'white', 
             display: 'flex', 
             alignItems: 'center', 
@@ -149,7 +171,7 @@ export default function Interests() {
           margin: '0.5rem auto 0 auto',
           fontStyle: 'italic'
         }}>
-          Select your primary interest now - you can create an additional content publication for other interests later!
+          Select your primary interest now - you can create additional content for other interests later!
         </p>
       </div>
 
@@ -161,146 +183,129 @@ export default function Interests() {
         padding: '2rem 1rem' 
       }}>
 
-        {/* Interests Grid */}
+        {/* Interest Selection */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1rem',
-          marginBottom: '3rem'
+          backgroundColor: '#f8fafc',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '2rem'
         }}>
-          {interests.map((interest) => {
-            const tooltips = {
-              'Cultural Experiences': 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals',
-              'Adventure & Outdoor Activities': 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities',
-              'Food & Wine': 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals',
-              'Relaxation & Wellness': 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts',
-              'History & Heritage': 'Historical sites, battlefields, colonial history, archaeological sites, guided tours',
-              'Photography & Social Media': 'Instagram spots, scenic viewpoints, photography tours, influencer experiences',
-              'Gardens & Nature': 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours',
-              'Arts & Creative Experiences': 'Art galleries, workshops, creative retreats, local artisans, craft experiences'
-            }
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#374151',
+            marginBottom: '1rem'
+          }}>
+            🎯 Select Primary Interest
+          </h3>
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            marginBottom: '1rem'
+          }}>
+            Choose the interest that best matches your audience's preferences
+          </p>
+          
+          <select
+            value={selectedInterest}
+            onChange={(e) => setSelectedInterest(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              backgroundColor: 'white',
+              color: '#374151',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="">Select primary interest...</option>
+            {interests.map((interest) => (
+              <option key={interest.value} value={interest.value}>
+                {interest.label}
+              </option>
+            ))}
+          </select>
 
-            return (
-              <div key={interest} style={{ position: 'relative' }}>
-                <button
-                  onClick={() => setSelectedInterest(interest)}
-                  style={{
-                    width: '100%',
-                    padding: '1.5rem',
-                    border: selectedInterest === interest ? '2px solid #10b981' : '2px solid #e5e7eb',
-                    borderRadius: '1rem',
-                    backgroundColor: selectedInterest === interest ? '#dcfce7' : 'white',
-                    color: '#374151',
-                    fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    textAlign: 'center',
-                    minHeight: '4rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedInterest !== interest) {
-                      e.currentTarget.style.borderColor = '#9ca3af'
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.1)'
-                    }
-                    // Show tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '1'
-                      tooltip.style.visibility = 'visible'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedInterest !== interest) {
-                      e.currentTarget.style.borderColor = '#e5e7eb'
-                      e.currentTarget.style.backgroundColor = 'white'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }
-                    // Hide tooltip
-                    const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip') as HTMLElement
-                    if (tooltip) {
-                      tooltip.style.opacity = '0'
-                      tooltip.style.visibility = 'hidden'
-                    }
-                  }}
-                >
-                  {interest}
-                </button>
-                
-                {/* Tooltip */}
-                <div 
-                  className="tooltip"
-                  style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#1f2937',
-                    color: 'white',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    opacity: '0',
-                    visibility: 'hidden',
-                    transition: 'all 0.3s ease',
-                    zIndex: '10',
-                    marginBottom: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    maxWidth: '280px',
-                    whiteSpace: 'normal',
-                    textAlign: 'center',
-                    lineHeight: '1.3'
-                  }}
-                >
-                  {tooltips[interest as keyof typeof tooltips]}
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderTop: '6px solid #1f2937'
-                  }}></div>
-                </div>
-              </div>
-            )
-          })}
+          {/* Selected Interest Description */}
+          {selectedInterestObj && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#dcfce7',
+              border: '1px solid #bbf7d0',
+              borderRadius: '0.75rem'
+            }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#15803d',
+                margin: '0',
+                fontWeight: '500'
+              }}>
+                <strong>{selectedInterestObj.label}:</strong> {selectedInterestObj.description}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Selection Guidance */}
+        {/* Interest Targeting Benefits */}
         <div style={{
           backgroundColor: '#dcfce7',
           border: '1px solid #bbf7d0',
           borderRadius: '1rem',
           padding: '1.5rem',
           textAlign: 'center',
-          marginBottom: '3rem'
+          marginBottom: '2rem'
         }}>
-          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🎯</span>
+          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>💡</span>
           <span style={{ 
             color: '#15803d', 
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             fontWeight: '500'
           }}>
-            Select one primary interest for the most effective content targeting
+            Selecting a primary interest helps create focused content that drives engagement with your chosen audience
           </span>
         </div>
 
-        {/* Next Button */}
+        {/* Navigation Buttons */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'center', 
+          justifyContent: 'space-between', 
           alignItems: 'center', 
-          width: '100%', 
-          marginBottom: '2rem' 
+          gap: '1rem',
+          marginBottom: '2rem',
+          flexWrap: 'wrap'
         }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              backgroundColor: 'transparent',
+              color: '#6b7280',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#9ca3af'
+              e.currentTarget.style.color = '#374151'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb'
+              e.currentTarget.style.color = '#6b7280'
+            }}
+          >
+            Skip for now
+          </button>
+
           <button
             onClick={handleNext}
             disabled={!selectedInterest}
@@ -309,24 +314,33 @@ export default function Interests() {
                 ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
                 : '#e5e7eb',
               color: selectedInterest ? 'white' : '#9ca3af',
-              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-              fontWeight: '900',
+              fontSize: '1.25rem',
+              fontWeight: '700',
               padding: '1rem 2rem',
               borderRadius: '1rem',
               border: 'none',
               cursor: selectedInterest ? 'pointer' : 'not-allowed',
-              boxShadow: selectedInterest ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-              display: 'block',
-              margin: '0 auto',
+              boxShadow: selectedInterest ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
               transition: 'all 0.2s'
             }}
-            className={selectedInterest ? "transition-all hover:scale-105" : ""}
+            onMouseEnter={(e) => {
+              if (selectedInterest) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedInterest) {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
+              }
+            }}
           >
-            Next →
+            Continue →
           </button>
         </div>
 
-        {/* Logo - Brand Reinforcement */}
+        {/* Logo */}
         <div style={{ 
           textAlign: 'center', 
           marginBottom: '2rem',
