@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 
+const BRAND_PURPLE = '#6B2EFF'
+
 export interface Demographic {
   value: string
   label: string
@@ -34,144 +36,165 @@ export default function DemographicDropdown({
     setTooltipDemo(null)
   }
 
-  return (
-    <div
-      style={{ position: 'relative' }}
-      ref={dropdownRef}
-      onTouchStart={handleTouchStart}
-    >
-      <button
-        aria-haspopup="listbox"
-        aria-expanded={isDropdownOpen}
-        onClick={() => setIsDropdownOpen((v) => !v)}
-        style={{
-          width: '100%',
-          padding: '0.75rem 1rem',
-          border: '2px solid #e5e7eb',
-          borderRadius: '0.75rem',
-          fontSize: '1rem',
-          backgroundColor: 'white',
-          color: selectedDemographic ? '#374151' : '#9ca3af',
-          outline: 'none',
-          cursor: 'pointer',
-          transition: 'border-color 0.2s',
-          textAlign: 'left',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span>
-          {selectedDemographic
-            ? demographics.find((d) => d.value === selectedDemographic)?.label
-            : 'Select your target audience...'}
-        </span>
-        <span
-          style={{
-            fontSize: '0.75rem',
-            transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
-          }}
-        >
-          ▼
-        </span>
-      </button>
+  const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
 
-      {isDropdownOpen && (
-        <div
+  return (
+    <>
+      <div
+        style={{ position: 'relative' }}
+        ref={dropdownRef}
+        onTouchStart={handleTouchStart}
+      >
+        <button
+          aria-haspopup="listbox"
+          aria-expanded={isDropdownOpen}
+          onClick={() => setIsDropdownOpen((v) => !v)}
           style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            backgroundColor: 'white',
+            width: '100%',
+            padding: '0.75rem 1rem',
             border: '2px solid #e5e7eb',
             borderRadius: '0.75rem',
-            marginTop: '0.25rem',
-            maxHeight: '320px',
-            overflowY: 'auto',
-            zIndex: 10,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            fontSize: '1rem',
+            backgroundColor: 'white',
+            color: selectedDemographic ? '#374151' : '#9ca3af',
+            outline: 'none',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s',
+            textAlign: 'left',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
-          role="listbox"
+          onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         >
-          {demographics.map((demo) => (
-            <div
-              key={demo.value}
-              role="option"
-              aria-selected={selectedDemographic === demo.value}
-              tabIndex={0}
-              onMouseEnter={() => !isTouch && setTooltipDemo(demo)}
-              onMouseLeave={() => !isTouch && setTooltipDemo(null)}
-              onFocus={() => !isTouch && setTooltipDemo(demo)}
-              onBlur={() => !isTouch && setTooltipDemo(null)}
-              onTouchStart={() => setTooltipDemo(demo)}
-              onClick={() => {
-                setSelectedDemographic(demo.value)
-                setIsDropdownOpen(false)
-                setTooltipDemo(null)
-              }}
-              style={{
-                padding: '0.75rem 1rem',
-                cursor: 'pointer',
-                borderBottom:
-                  demo.value !== demographics[demographics.length - 1].value
-                    ? '1px solid #f3f4f6'
-                    : 'none',
-                position: 'relative',
-                backgroundColor:
-                  selectedDemographic === demo.value
-                    ? '#f0f9ff'
-                    : tooltipDemo?.value === demo.value
-                    ? '#f9fafb'
-                    : 'white',
-                color: '#374151',
-                fontSize: '0.98rem',
-                outline: tooltipDemo?.value === demo.value ? '2px solid #6B2EFF' : 'none',
-              }}
-            >
-              {demo.label}
+          <span>
+            {selectedDemo ? selectedDemo.label : 'Select your target audience...'}
+          </span>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+            }}
+          >
+            ▼
+          </span>
+        </button>
 
-              {/* Tooltip for desktop */}
-              {!isTouch && tooltipDemo?.value === demo.value && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '100%',
-                    top: '0',
-                    marginLeft: '0.5rem',
-                    background: '#1f2937',
-                    color: 'white',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.88rem',
-                    opacity: 1,
-                    visibility: 'visible',
-                    zIndex: 20,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    maxWidth: '260px',
-                    minWidth: '180px',
-                    whiteSpace: 'normal',
-                    lineHeight: 1.4,
-                    pointerEvents: 'none',
-                  }}
-                >
-                  {demo.description}
+        {isDropdownOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: 'white',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              marginTop: '0.25rem',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              zIndex: 10,
+              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            }}
+            role="listbox"
+          >
+            {demographics.map((demo, index) => (
+              <div
+                key={demo.value}
+                role="option"
+                aria-selected={selectedDemographic === demo.value}
+                tabIndex={0}
+                onMouseEnter={() => !isTouch && setTooltipDemo(demo)}
+                onMouseLeave={() => !isTouch && setTooltipDemo(null)}
+                onFocus={() => !isTouch && setTooltipDemo(demo)}
+                onBlur={() => !isTouch && setTooltipDemo(null)}
+                onTouchStart={() => setTooltipDemo(demo)}
+                onClick={() => {
+                  setSelectedDemographic(demo.value)
+                  setIsDropdownOpen(false)
+                  setTooltipDemo(null)
+                }}
+                style={{
+                  padding: '0.75rem 1rem',
+                  cursor: 'pointer',
+                  borderBottom: index < demographics.length - 1 ? '1px solid #f3f4f6' : 'none',
+                  position: 'relative',
+                  backgroundColor:
+                    selectedDemographic === demo.value
+                      ? '#f0f9ff'
+                      : tooltipDemo?.value === demo.value
+                      ? '#f9fafb'
+                      : 'white',
+                  color: '#374151',
+                  fontSize: '0.95rem',
+                  outline: tooltipDemo?.value === demo.value ? `2px solid ${BRAND_PURPLE}` : 'none',
+                }}
+              >
+                {demo.label}
+
+                {/* Tooltip for desktop */}
+                {!isTouch && tooltipDemo?.value === demo.value && (
                   <div
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '-6px',
-                      transform: 'translateY(-50%)',
-                      borderTop: '6px solid transparent',
-                      borderBottom: '6px solid transparent',
-                      borderRight: '6px solid #1f2937',
+                      left: '100%',
+                      top: '0',
+                      marginLeft: '0.5rem',
+                      background: '#1f2937',
+                      color: 'white',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      opacity: 1,
+                      visibility: 'visible',
+                      zIndex: 20,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                      maxWidth: '280px',
+                      minWidth: '200px',
+                      whiteSpace: 'normal',
+                      lineHeight: '1.4',
+                      pointerEvents: 'none',
                     }}
-                  ></div>
-                </div>
-              )}
-            </div>
-          ))}
+                  >
+                    {demo.description}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '-6px',
+                        transform: 'translateY(-50%)',
+                        borderTop: '6px solid transparent',
+                        borderBottom: '6px solid transparent',
+                        borderRight: '6px solid #1f2937',
+                      }}
+                    ></div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Audience Description */}
+      {selectedDemo && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#dcfce7',
+          border: '1px solid #bbf7d0',
+          borderRadius: '0.75rem'
+        }}>
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#15803d',
+            margin: '0',
+            fontWeight: '500'
+          }}>
+            <strong>{selectedDemo.label}:</strong> {selectedDemo.description}
+          </p>
         </div>
       )}
 
@@ -206,22 +229,21 @@ export default function DemographicDropdown({
             }}
             onClick={handleBackdropClick}
           >
-            <div style={{ marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '1.1em' }}>
+            <div style={{ marginBottom: '0.75rem', fontWeight: 'bold', fontSize: '1.1em' }}>
               {tooltipDemo.label}
             </div>
-            {tooltipDemo.description}
-            <div
-              style={{
-                marginTop: '1rem',
-                color: '#fbbf24',
-                fontSize: '0.95em',
-              }}
-            >
+            <div style={{ marginBottom: '1rem', lineHeight: '1.4' }}>
+              {tooltipDemo.description}
+            </div>
+            <div style={{
+              color: '#fbbf24',
+              fontSize: '0.875em',
+            }}>
               Tap anywhere to close
             </div>
           </div>
         </>
       )}
-    </div>
+    </>
   )
 }
