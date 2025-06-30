@@ -653,7 +653,7 @@ export default function PhotoUpload() {
             }}
             className={selectedPhoto ? "transition-all hover:scale-105" : ""}
           >
-            Next →
+            Continue →
           </button>
         </div>
         {/* Logo - Brand Reinforcement - Deactivated */}
