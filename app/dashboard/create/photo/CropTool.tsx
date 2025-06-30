@@ -23,6 +23,41 @@ function getClientPos(e: MouseEvent | TouchEvent) {
   return { clientX, clientY }
 }
 
+// ENHANCED: Data URL validation utility
+function isValidDataURL(dataUrl: string): boolean {
+  if (!dataUrl || typeof dataUrl !== 'string') return false
+  if (!dataUrl.startsWith('data:image/')) return false
+  
+  // Check if it has actual image data (not just header)
+  const base64Part = dataUrl.split(',')[1]
+  if (!base64Part || base64Part.length < 100) {
+    console.warn('⚠️ Data URL too short, likely invalid:', dataUrl.length)
+    return false
+  }
+  
+  return true
+}
+
+// ENHANCED: Validate crop dimensions
+function validateCropDimensions(crop: CropBox, imgDims: {width: number, height: number}): boolean {
+  if (crop.width <= 0 || crop.height <= 0) {
+    console.error('❌ Invalid crop dimensions:', crop)
+    return false
+  }
+  
+  if (crop.x < 0 || crop.y < 0) {
+    console.error('❌ Invalid crop position:', crop)
+    return false
+  }
+  
+  if (crop.x + crop.width > imgDims.width || crop.y + crop.height > imgDims.height) {
+    console.error('❌ Crop extends beyond image bounds:', crop, imgDims)
+    return false
+  }
+  
+  return true
+}
+
 const handles = [
   { dir: 'n', top: -8, left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, -50%)' } },
   { dir: 's', top: '100%', left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, 50%)' } },
@@ -55,15 +90,27 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
+  // ENHANCED: Validate input image on mount
+  useEffect(() => {
+    console.log('🔍 CropTool received image, length:', image?.length)
+    if (!isValidDataURL(image)) {
+      console.error('❌ Invalid input image data URL')
+    }
+  }, [image])
+
   // Set image dimensions on load
   useEffect(() => {
     const img = imgRef.current
     if (img) {
       const setDims = () => {
         console.log('🖼️ Image loaded:', img.naturalWidth, 'x', img.naturalHeight)
+        console.log('🖼️ Display size:', img.offsetWidth, 'x', img.offsetHeight)
         setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
       }
       img.onload = setDims
+      img.onerror = () => {
+        console.error('❌ Failed to load image in CropTool')
+      }
       // If already loaded (cache), trigger manually
       if (img.complete && img.naturalWidth > 0) setDims()
     }
@@ -209,14 +256,28 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     }
   }
 
-  // Convert displayed crop box to natural image pixels
+  // ENHANCED: Convert displayed crop box to natural image pixels with validation
   function getCropPixels() {
     const display = overlayRef.current?.getBoundingClientRect()
     const imgEl = imgRef.current?.getBoundingClientRect()
-    if (!display || !imgEl) return cropBox
+    
+    if (!display || !imgEl) {
+      console.error('❌ Missing display or image element bounds')
+      return cropBox
+    }
+    
+    if (imgEl.width <= 0 || imgEl.height <= 0) {
+      console.error('❌ Image element has zero dimensions')
+      return cropBox
+    }
     
     const scaleX = imgDims.width / imgEl.width
     const scaleY = imgDims.height / imgEl.height
+    
+    console.log('📐 Scale factors:', { scaleX, scaleY })
+    console.log('📐 Display crop:', cropBox)
+    console.log('📐 Image dimensions:', imgDims)
+    console.log('📐 Element dimensions:', { width: imgEl.width, height: imgEl.height })
     
     const pixels = {
       x: Math.round(cropBox.x * scaleX),
@@ -225,108 +286,158 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       height: Math.round(cropBox.height * scaleY)
     }
     
-    console.log('📐 Crop pixels:', pixels)
+    console.log('📐 Calculated crop pixels:', pixels)
     return pixels
   }
 
-  // FIXED: Enhanced cropping with proper error handling and validation
+  // ENHANCED: Robust cropping with comprehensive error handling
   async function handleApplyCrop() {
     console.log('✂️ Starting crop process...')
     setIsProcessing(true)
     
     try {
-      // Get crop dimensions
-      const { x, y, width, height } = getCropPixels()
+      // Validate input image first
+      if (!isValidDataURL(image)) {
+        throw new Error('Invalid input image data URL')
+      }
       
-      // Validate crop dimensions
-      if (width <= 0 || height <= 0) {
-        console.error('❌ Invalid crop dimensions:', { width, height })
+      // Get crop dimensions
+      const cropPixels = getCropPixels()
+      const { x, y, width, height } = cropPixels
+      
+      console.log('📊 Crop parameters:', { x, y, width, height, imgDims })
+      
+      // Enhanced validation
+      if (!validateCropDimensions(cropPixels, imgDims)) {
         throw new Error('Invalid crop dimensions')
       }
       
-      // Validate image is loaded
-      if (!imgDims.width || !imgDims.height) {
-        console.error('❌ Image not loaded properly')
-        throw new Error('Image not loaded')
+      // Validate image dimensions
+      if (!imgDims.width || !imgDims.height || imgDims.width < 1 || imgDims.height < 1) {
+        console.error('❌ Invalid image dimensions:', imgDims)
+        throw new Error('Invalid image dimensions')
       }
       
       // Create image element for cropping
       const img = new window.Image()
-      img.crossOrigin = 'anonymous' // Handle CORS if needed
+      // Don't set crossOrigin for data URLs
+      if (!image.startsWith('data:')) {
+        img.crossOrigin = 'anonymous'
+      }
       
-      // Wait for image to load
+      // Wait for image to load with timeout
       await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Image load timeout'))
+        }, 10000) // 10 second timeout
+        
         img.onload = () => {
-          console.log('✅ Image loaded for cropping')
+          clearTimeout(timeout)
+          console.log('✅ Image loaded for cropping:', img.naturalWidth, 'x', img.naturalHeight)
           resolve()
         }
-        img.onerror = () => {
-          console.error('❌ Failed to load image for cropping')
+        img.onerror = (error) => {
+          clearTimeout(timeout)
+          console.error('❌ Failed to load image for cropping:', error)
           reject(new Error('Failed to load image'))
         }
         img.src = image
       })
       
-      // Validate image loaded correctly
+      // Validate loaded image
       if (!img.naturalWidth || !img.naturalHeight) {
-        throw new Error('Image has no dimensions')
+        throw new Error('Loaded image has no dimensions')
       }
+      
+      // Final dimension validation
+      const finalWidth = Math.max(1, Math.min(width, img.naturalWidth - x))
+      const finalHeight = Math.max(1, Math.min(height, img.naturalHeight - y))
+      const finalX = Math.max(0, Math.min(x, img.naturalWidth - 1))
+      const finalY = Math.max(0, Math.min(y, img.naturalHeight - 1))
+      
+      console.log('🔧 Final crop parameters:', { 
+        x: finalX, y: finalY, width: finalWidth, height: finalHeight 
+      })
       
       // Create canvas for cropping
       const canvas = document.createElement('canvas')
-      canvas.width = Math.max(1, width)
-      canvas.height = Math.max(1, height)
+      canvas.width = finalWidth
+      canvas.height = finalHeight
+      
+      console.log('📋 Canvas size:', canvas.width, 'x', canvas.height)
       
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         throw new Error('Failed to get canvas context')
       }
       
-      // Perform the crop
+      // Clear canvas first
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // Perform the crop with validated parameters
       console.log('🖼️ Drawing cropped image...')
-      ctx.drawImage(
-        img, 
-        Math.max(0, x), 
-        Math.max(0, y), 
-        Math.max(1, width), 
-        Math.max(1, height), 
-        0, 
-        0, 
-        canvas.width, 
-        canvas.height
-      )
-      
-      // Convert to data URL
-      const croppedUrl = canvas.toDataURL('image/jpeg', 0.92)
-      
-      // Final validation
-      if (!croppedUrl || !croppedUrl.startsWith('data:image/')) {
-        throw new Error('Failed to generate valid image data')
+      try {
+        ctx.drawImage(
+          img, 
+          finalX, 
+          finalY, 
+          finalWidth, 
+          finalHeight, 
+          0, 
+          0, 
+          canvas.width, 
+          canvas.height
+        )
+      } catch (drawError) {
+        console.error('❌ Canvas drawImage failed:', drawError)
+        throw new Error('Failed to draw image on canvas')
       }
       
-      console.log('✅ Crop successful, data URL generated')
+      // Convert to data URL with high quality
+      const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
+      
+      console.log('📏 Generated data URL length:', croppedUrl.length)
+      console.log('📋 Data URL preview:', croppedUrl.substring(0, 100) + '...')
+      
+      // Final validation of output
+      if (!isValidDataURL(croppedUrl)) {
+        throw new Error('Generated invalid data URL')
+      }
+      
+      console.log('✅ Crop successful!')
       onApply(croppedUrl)
       
     } catch (error) {
       console.error('❌ Crop failed:', error)
       
-      // Instead of failing, provide the original image as fallback
-      console.log('🔄 Using original image as fallback')
-      if (image && image.startsWith('data:image/')) {
+      // Enhanced fallback strategy
+      if (isValidDataURL(image)) {
+        console.log('🔄 Using original image as fallback')
         onApply(image)
       } else {
-        // Last resort: create a minimal valid image
+        console.log('🆘 Creating emergency fallback image')
+        // Create a simple fallback image
         const canvas = document.createElement('canvas')
-        canvas.width = 100
-        canvas.height = 100
+        canvas.width = 300
+        canvas.height = 200
         const ctx = canvas.getContext('2d')
         if (ctx) {
-          ctx.fillStyle = '#f3f4f6'
-          ctx.fillRect(0, 0, 100, 100)
-          ctx.fillStyle = '#9ca3af'
-          ctx.font = '12px sans-serif'
+          // Create a gradient background
+          const gradient = ctx.createLinearGradient(0, 0, 300, 200)
+          gradient.addColorStop(0, '#f3f4f6')
+          gradient.addColorStop(1, '#e5e7eb')
+          ctx.fillStyle = gradient
+          ctx.fillRect(0, 0, 300, 200)
+          
+          // Add text
+          ctx.fillStyle = '#6b7280'
+          ctx.font = 'bold 16px sans-serif'
           ctx.textAlign = 'center'
-          ctx.fillText('Crop Error', 50, 50)
+          ctx.fillText('Image Processing Error', 150, 90)
+          ctx.font = '12px sans-serif'
+          ctx.fillText('Please try uploading a different image', 150, 120)
+          
           const fallbackUrl = canvas.toDataURL('image/jpeg', 0.8)
           onApply(fallbackUrl)
         }
@@ -354,14 +465,15 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       w = Math.max(w, MIN_SIZE)
       h = Math.max(h, MIN_SIZE)
       
-      setCropBox({
+      const newCropBox = {
         x: Math.round((imgDims.width - w) / 2),
         y: Math.round((imgDims.height - h) / 2),
         width: w,
         height: h
-      })
+      }
       
-      console.log('📏 Set default crop box:', { w, h, aspect })
+      setCropBox(newCropBox)
+      console.log('📏 Set default crop box:', newCropBox)
     }
   }, [imgDims.width, imgDims.height, aspect])
 
@@ -374,8 +486,10 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     displayW = Math.round(imgDims.width * (displayMax / imgDims.height))
   }
 
-  // Only enable Apply if the crop is valid and image is loaded
-  const cropValid = imgDims.width > 1 && imgDims.height > 1 && cropBox.width > 0 && cropBox.height > 0
+  // Enhanced validation for Apply button
+  const cropValid = imgDims.width > 1 && imgDims.height > 1 && 
+                   cropBox.width > 0 && cropBox.height > 0 &&
+                   isValidDataURL(image)
 
   return (
     <div style={{
@@ -403,6 +517,20 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           marginBottom: '1rem',
           color: '#1f2937'
         }}>Crop Your Photo</div>
+        
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#6b7280',
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#f9fafb',
+            borderRadius: '0.25rem'
+          }}>
+            Debug: Img {imgDims.width}×{imgDims.height} | Crop {cropBox.width}×{cropBox.height} | Valid: {cropValid ? '✅' : '❌'}
+          </div>
+        )}
         
         {/* Aspect Ratio Presets */}
         <div style={{ marginBottom: "1rem" }}>
