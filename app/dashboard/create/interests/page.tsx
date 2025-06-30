@@ -1,16 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import InterestDropdown, { Interest } from './InterestDropdown'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
 const BRAND_BLUE = '#11B3FF'
 
-export default function Interests() {
-  const [selectedInterest, setSelectedInterest] = useState('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-
-  const interests = [
+const INTERESTS: Interest[] = [
     { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
     { value: 'adventure', label: 'Adventure & Outdoor Activities', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
     { value: 'food-wine', label: 'Food & Wine', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
@@ -19,7 +16,10 @@ export default function Interests() {
     { value: 'photography', label: 'Photography & Social Media', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
     { value: 'nature', label: 'Gardens & Nature', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
     { value: 'arts', label: 'Arts & Creative Experiences', description: 'Art galleries, workshops, creative retreats, local artisans, craft experiences' }
-  ]
+]
+
+export default function Interests() {
+  const [selectedInterest, setSelectedInterest] = useState('')
 
   useEffect(() => {
     // Get any existing interest selection
@@ -50,7 +50,7 @@ export default function Interests() {
     window.location.href = '/dashboard/create/platform'
   }
 
-  const selectedInterestObj = interests.find(interest => interest.value === selectedInterest)
+  const selectedInterestObj = INTERESTS.find(interest => interest.value === selectedInterest)
 
   return (
     <div style={{ 
@@ -207,109 +207,11 @@ export default function Interests() {
             Choose the interest that best matches your audience's preferences
           </p>
           
-          {/* Custom Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                fontSize: '1rem',
-                backgroundColor: 'white',
-                color: selectedInterest ? '#374151' : '#9ca3af',
-                outline: 'none',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s',
-                textAlign: 'left',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            >
-              <span>
-                {selectedInterestObj ? selectedInterestObj.label : 'Select primary interest...'}
-              </span>
-              <span style={{ 
-                fontSize: '0.75rem', 
-                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s'
-              }}>
-                ▼
-              </span>
-            </button>
-
-            {/* Dropdown Options */}
-            {isDropdownOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: '0',
-                right: '0',
-                backgroundColor: 'white',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                marginTop: '0.25rem',
-                maxHeight: '300px',
-                overflowY: 'auto',
-                zIndex: 10,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-              }}>
-                {interests.map((interest, index) => (
-                  <div
-                    key={interest.value}
-                    onClick={() => {
-                      setSelectedInterest(interest.value)
-                      setIsDropdownOpen(false)
-                    }}
-                    style={{
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      borderBottom: index < interests.length - 1 ? '1px solid #f3f4f6' : 'none',
-                      backgroundColor: selectedInterest === interest.value ? '#f0f9ff' : 'white',
-                      color: '#374151',
-                      fontSize: '0.95rem'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedInterest !== interest.value) {
-                        e.currentTarget.style.backgroundColor = '#f9fafb'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedInterest !== interest.value) {
-                        e.currentTarget.style.backgroundColor = 'white'
-                      }
-                    }}
-                  >
-                    {interest.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Selected Interest Description */}
-          {selectedInterestObj && (
-            <div style={{
-              marginTop: '1rem',
-              padding: '1rem',
-              backgroundColor: '#dcfce7',
-              border: '1px solid #bbf7d0',
-              borderRadius: '0.75rem'
-            }}>
-              <p style={{
-                fontSize: '0.875rem',
-                color: '#15803d',
-                margin: '0',
-                fontWeight: '500'
-              }}>
-                <strong>{selectedInterestObj.label}:</strong> {selectedInterestObj.description}
-              </p>
-            </div>
-          )}
+          <InterestDropdown
+            interests={INTERESTS}
+            selectedInterest={selectedInterest}
+            setSelectedInterest={setSelectedInterest}
+          />
         </div>
 
         {/* Interest Targeting Benefits */}
