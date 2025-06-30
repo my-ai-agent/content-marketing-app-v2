@@ -12,16 +12,16 @@ export default function TellYourStory() {
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
 
   const personaOptions = [
+    { value: 'independent', label: 'Free & Independent Traveller' },
+    { value: 'vfr', label: 'Visiting Friends & Family' },
+    { value: 'storyteller', label: 'Storyteller/Writer' },
     { value: 'professional', label: 'Professional/Business Owner' },
     { value: 'influencer', label: 'Influencer/Content Creator' },
     { value: 'adventure', label: 'Adventure Seeker' },
     { value: 'female', label: 'Female Traveller' },
-    { value: 'cultural', label: 'Cultural Explorer' },
-    { value: 'family', label: 'Family Traveller' },
-    { value: 'storyteller', label: 'Storyteller/Writer' },
-    { value: 'eco', label: 'Eco Tourism Champion' },
-    { value: 'vfr', label: 'Visiting Friends & Family' },
-    { value: 'independent', label: 'Free & Independent Traveller' }
+    { value: 'cultural', label: 'Cultural Explorer' },        
+    { value: 'eco', label: 'Eco Tourism Champion' }    
+    
   ]
 
   useEffect(() => {
