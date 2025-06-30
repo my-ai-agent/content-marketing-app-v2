@@ -66,13 +66,13 @@ export default function GenerateContent() {
     // Handle photo
     if (!privacy.includePhoto && sanitized.photo) {
       // Convert photo to description instead of sending actual image
-      sanitized.photo = "Cultural experience photo"
+      sanitized.photo = "Cultural tourism experience photo"
       delete sanitized.photo // Remove actual photo data
     }
 
     // Handle story details
     if (!privacy.shareStoryDetails) {
-      sanitized.story = "Authentic New Zealand cultural experience"
+      sanitized.story = "Authentic New Zealand tourism experience"
     } else if (privacy.anonymizeLocation && sanitized.story) {
       // Remove specific location details
       sanitized.story = sanitized.story
@@ -203,19 +203,39 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
 
   // Generate mock content (replace with actual API response processing)
   const generateMockContent = (data: UserData) => {
+    // Helper function to generate user-friendly engagement text
+    const getEngagementText = (platform: string, audience: string) => {
+      const audienceAge = audience?.toLowerCase() || ''
+      
+      if (audienceAge.includes('baby-boomers') || audienceAge.includes('gen-x')) {
+        return 'Share this with friends and family who would love this experience!'
+      } else if (platform === 'TikTok') {
+        return 'Tag someone who needs to see this! (Type @ followed by their username)'
+      } else if (platform === 'LinkedIn') {
+        return 'Share your thoughts in the comments below.'
+      } else {
+        return 'Tag a friend who needs to experience this! (Type @ + their name)'
+      }
+    }
+
     return {
       platforms: data.platforms?.map(platform => ({
         name: platform,
         content: {
-          text: `🌟 ${data.story?.substring(0, 120)}...\n\nAn incredible cultural experience that perfectly captures the spirit of Aotearoa New Zealand! ${platform === 'Instagram' ? '✨' : ''}\n\n${platform === 'LinkedIn' ? 'This authentic encounter showcases the importance of cultural tourism done right.' : 'Tag someone who needs to experience this magic!'}\n\n#NewZealand #CulturalTourism #Authentic${platform === 'Instagram' ? ' #TravelGram #Culture' : ''}`,
+          text: `🌟 ${data.story?.substring(0, 120)}...\n\nAn incredible cultural experience that perfectly captures the spirit of Aotearoa New Zealand! ${platform === 'Instagram' ? '✨' : ''}\n\n${platform === 'LinkedIn' ? 'This authentic encounter showcases the importance of cultural tourism done right.' : getEngagementText(platform, data.audience || '')}\n\n#NewZealand #CulturalTourism #Authentic${platform === 'Instagram' ? ' #TravelGram #Culture' : ''}`,
           hashtags: platform === 'Instagram' 
             ? ['#NewZealand', '#CulturalTourism', '#TravelGram', '#Authentic', '#Culture', '#Māori', '#Thermal', '#Travel']
             : ['#NewZealand', '#CulturalTourism', '#Authentic'],
           callToAction: data.persona === 'professional' 
             ? 'Experience authentic cultural tourism - book your visit today!'
-            : 'Save this post and tag someone who needs to see this!',
+            : getEngagementText(platform, data.audience || ''),
           optimalTiming: platform === 'Instagram' ? 'Post between 11am-1pm or 7-9pm NZST' : 'Post weekdays 8-10am NZST',
-          engagementTips: `Optimized for ${platform} - ${data.audience} engagement`
+          engagementTips: `Optimized for ${platform} - ${data.audience} engagement`,
+          platformTips: platform === 'TikTok' 
+            ? 'Tip: Use @ followed by a username to tag someone (e.g. @yourfriend)'
+            : platform === 'Instagram' 
+            ? 'Tip: Tag friends by typing @ and their username in comments'
+            : 'Tip: Engage authentically with your network'
         }
       })) || [],
       metrics: {
@@ -687,7 +707,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
                 fontSize: '1rem',
                 margin: 0
               }}>
-                Your culturally-sensitive, personalized content is ready to share
+                Your culturally-sensitive, personalized tourism content is ready to share
               </p>
             </div>
 
@@ -765,6 +785,21 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
                       <strong style={{ color: '#374151' }}>Best Time to Post:</strong>
                       <div style={{ color: '#6b7280' }}>{platform.content.optimalTiming}</div>
                     </div>
+                    {platform.content.platformTips && (
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <strong style={{ color: '#7c3aed' }}>💡 Platform Tip:</strong>
+                        <div style={{ 
+                          color: '#6b7280', 
+                          fontStyle: 'italic',
+                          backgroundColor: '#f8fafc',
+                          padding: '0.5rem',
+                          borderRadius: '0.25rem',
+                          marginTop: '0.25rem'
+                        }}>
+                          {platform.content.platformTips}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
