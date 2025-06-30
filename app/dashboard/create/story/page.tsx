@@ -161,7 +161,7 @@ export default function TellYourStory() {
             justifyContent: 'center', 
             fontSize: '0.875rem', 
             fontWeight: '600' 
-          }}>5</div>
+          }}>6</div>
         </div>
 
         {/* Title */}
