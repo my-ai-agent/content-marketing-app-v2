@@ -237,6 +237,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
     window.location.href = '/dashboard/create/photo'
   }
 
+  // Render privacy controls view
   if (showPrivacyControls) {
     return (
       <div style={{
@@ -543,8 +544,9 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
         </div>
       </div>
     )
-  
-  // Main generation and results view
+  }
+
+  // Render main generation and results view
   return (
     <div style={{
       display: 'flex',
@@ -791,3 +793,136 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                   gap: '1rem'
                 }}>
+                  <div>
+                    <strong style={{ color: '#0369a1' }}>Estimated Reach:</strong>
+                    <div style={{ color: '#374151' }}>{generatedContent.metrics.estimatedReach}</div>
+                  </div>
+                  <div>
+                    <strong style={{ color: '#0369a1' }}>Engagement Rate:</strong>
+                    <div style={{ color: '#374151' }}>{generatedContent.metrics.engagementRate}</div>
+                  </div>
+                  <div>
+                    <strong style={{ color: '#0369a1' }}>Cultural Sensitivity:</strong>
+                    <div style={{ color: '#374151' }}>{generatedContent.metrics.culturalSensitivityScore}</div>
+                  </div>
+                  <div>
+                    <strong style={{ color: '#0369a1' }}>Sustainability:</strong>
+                    <div style={{ color: '#374151' }}>{generatedContent.metrics.sustainabilityRating}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recommendations */}
+            {generatedContent.recommendations && (
+              <div style={{
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                marginBottom: '2rem'
+              }}>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#166534',
+                  marginBottom: '1rem'
+                }}>
+                  ✅ Content Quality Checklist
+                </h3>
+                
+                <div style={{ fontSize: '0.875rem' }}>
+                  {generatedContent.recommendations.map((rec: string, index: number) => (
+                    <div key={index} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginBottom: '0.5rem',
+                      color: '#166534'
+                    }}>
+                      <span>✓</span>
+                      <span>{rec}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <button
+                onClick={() => {
+                  setShowPrivacyControls(true)
+                  setGeneratedContent(null)
+                  setIsGenerating(false)
+                }}
+                style={{
+                  background: BRAND_PURPLE,
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                🔄 Generate New Content
+              </button>
+              
+              <button
+                onClick={handleStartOver}
+                style={{
+                  background: 'white',
+                  color: BRAND_PURPLE,
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  border: `2px solid ${BRAND_PURPLE}`,
+                  cursor: 'pointer'
+                }}
+              >
+                🏠 Start New Journey
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Initial state - should not happen with current flow */
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 2rem'
+          }}>
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '1rem'
+            }}>
+              Ready to Generate Content
+            </h3>
+            <p style={{
+              color: '#6b7280',
+              fontSize: '1rem'
+            }}>
+              Click the generate button to create your personalized content.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Add spinning animation */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
