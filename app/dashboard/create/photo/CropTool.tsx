@@ -349,17 +349,33 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
         throw new Error('Loaded image has no dimensions')
       }
       
-      // Final dimension validation
-      const finalWidth = Math.max(1, Math.min(width, img.naturalWidth - x))
-      const finalHeight = Math.max(1, Math.min(height, img.naturalHeight - y))
+      // Final dimension validation with aspect ratio preservation
+      let finalWidth = Math.max(1, Math.min(width, img.naturalWidth - x))
+      let finalHeight = Math.max(1, Math.min(height, img.naturalHeight - y))
       const finalX = Math.max(0, Math.min(x, img.naturalWidth - 1))
       const finalY = Math.max(0, Math.min(y, img.naturalHeight - 1))
       
+      // FIXED: Preserve aspect ratio in final output
+      if (aspect) {
+        const currentAspect = finalWidth / finalHeight
+        if (Math.abs(currentAspect - aspect) > 0.01) { // If aspect doesn't match
+          if (currentAspect > aspect) {
+            // Too wide, reduce width
+            finalWidth = Math.round(finalHeight * aspect)
+          } else {
+            // Too tall, reduce height  
+            finalHeight = Math.round(finalWidth / aspect)
+          }
+        }
+      }
+      
       console.log('🔧 Final crop parameters:', { 
-        x: finalX, y: finalY, width: finalWidth, height: finalHeight 
+        x: finalX, y: finalY, width: finalWidth, height: finalHeight,
+        aspectRatio: aspect, 
+        finalAspect: finalWidth / finalHeight
       })
       
-      // Create canvas for cropping
+      // Create canvas for cropping with corrected dimensions
       const canvas = document.createElement('canvas')
       canvas.width = finalWidth
       canvas.height = finalHeight
