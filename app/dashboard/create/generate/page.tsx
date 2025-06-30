@@ -66,13 +66,13 @@ export default function GenerateContent() {
     // Handle photo
     if (!privacy.includePhoto && sanitized.photo) {
       // Convert photo to description instead of sending actual image
-      sanitized.photo = "Cultural tourism experience photo"
+      sanitized.photo = "Cultural experience photo"
       delete sanitized.photo // Remove actual photo data
     }
 
     // Handle story details
     if (!privacy.shareStoryDetails) {
-      sanitized.story = "Authentic New Zealand tourism experience"
+      sanitized.story = "Authentic New Zealand cultural experience"
     } else if (privacy.anonymizeLocation && sanitized.story) {
       // Remove specific location details
       sanitized.story = sanitized.story
@@ -687,7 +687,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
                 fontSize: '1rem',
                 margin: 0
               }}>
-                Your culturally-sensitive, personalized tourism content is ready to share
+                Your culturally-sensitive, personalized content is ready to share
               </p>
             </div>
 
