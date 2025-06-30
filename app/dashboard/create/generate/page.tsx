@@ -543,8 +543,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
         </div>
       </div>
     )
-  }
-
+  
   // Main generation and results view
   return (
     <div style={{
