@@ -8,6 +8,7 @@ const BRAND_BLUE = '#11B3FF'
 
 export default function Interests() {
   const [selectedInterest, setSelectedInterest] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const interests = [
     { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
@@ -206,31 +207,89 @@ export default function Interests() {
             Choose the interest that best matches your audience's preferences
           </p>
           
-          <select
-            value={selectedInterest}
-            onChange={(e) => setSelectedInterest(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '0.75rem',
-              fontSize: '1rem',
-              backgroundColor: 'white',
-              color: '#374151',
-              outline: 'none',
-              cursor: 'pointer',
-              transition: 'border-color 0.2s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-          >
-            <option value="">Select primary interest...</option>
-            {interests.map((interest) => (
-              <option key={interest.value} value={interest.value}>
-                {interest.label}
-              </option>
-            ))}
-          </select>
+          {/* Custom Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '1rem',
+                backgroundColor: 'white',
+                color: selectedInterest ? '#374151' : '#9ca3af',
+                outline: 'none',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s',
+                textAlign: 'left',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <span>
+                {selectedInterestObj ? selectedInterestObj.label : 'Select primary interest...'}
+              </span>
+              <span style={{ 
+                fontSize: '0.75rem', 
+                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
+              }}>
+                ▼
+              </span>
+            </button>
+
+            {/* Dropdown Options */}
+            {isDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '0',
+                right: '0',
+                backgroundColor: 'white',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                marginTop: '0.25rem',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                zIndex: 10,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+              }}>
+                {interests.map((interest, index) => (
+                  <div
+                    key={interest.value}
+                    onClick={() => {
+                      setSelectedInterest(interest.value)
+                      setIsDropdownOpen(false)
+                    }}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      borderBottom: index < interests.length - 1 ? '1px solid #f3f4f6' : 'none',
+                      backgroundColor: selectedInterest === interest.value ? '#f0f9ff' : 'white',
+                      color: '#374151',
+                      fontSize: '0.95rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedInterest !== interest.value) {
+                        e.currentTarget.style.backgroundColor = '#f9fafb'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedInterest !== interest.value) {
+                        e.currentTarget.style.backgroundColor = 'white'
+                      }
+                    }}
+                  >
+                    {interest.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Selected Interest Description */}
           {selectedInterestObj && (
@@ -255,8 +314,8 @@ export default function Interests() {
 
         {/* Interest Targeting Benefits */}
         <div style={{
-          backgroundColor: '#dcfce7',
-          border: '1px solid #bbf7d0',
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
           borderRadius: '1rem',
           padding: '1.5rem',
           textAlign: 'center',
@@ -264,7 +323,7 @@ export default function Interests() {
         }}>
           <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>💡</span>
           <span style={{ 
-            color: '#15803d', 
+            color: '#1e40af', 
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             fontWeight: '500'
           }}>
