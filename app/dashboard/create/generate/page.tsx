@@ -544,6 +544,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
       </div>
     )
   }
+  }
 
   // Main generation and results view
   return (
