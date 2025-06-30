@@ -97,7 +97,7 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>1</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          
           <div style={{ 
             width: '2rem', 
             height: '2rem', 
@@ -110,7 +110,7 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>2</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#10b981' }}></div>
+          
           <div style={{ 
             width: '2rem', 
             height: '2rem', 
@@ -123,7 +123,7 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>3</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          
           <div style={{ 
             width: '2rem', 
             height: '2rem', 
@@ -136,7 +136,7 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>4</div>
-          <div style={{ width: '2.5rem', height: '2px', backgroundColor: '#e5e7eb' }}></div>
+          
           <div style={{ 
             width: '2rem', 
             height: '2rem', 
@@ -149,6 +149,19 @@ export default function Demographics() {
             fontSize: '0.875rem', 
             fontWeight: '600' 
           }}>5</div>
+
+          <div style={{ 
+            width: '2rem', 
+            height: '2rem', 
+            borderRadius: '50%', 
+            backgroundColor: '#e5e7eb', 
+            color: '#9ca3af', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: '0.875rem', 
+            fontWeight: '600' 
+          }}>6</div>
         </div>
 
         {/* Title */}
