@@ -87,7 +87,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   const [cropBox, setCropBox] = useState<CropBox>({ x: 40, y: 40, width: 200, height: 200 })
   const [dragging, setDragging] = useState(false)
   const [resizing, setResizing] = useState<ResizeDir>(null)
-  const [aspect, setAspect] = useState<number | null>(null)
+  const [aspect, setAspect] = useState<number | null | string>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
@@ -126,7 +126,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     height = Math.max(height, MIN_SIZE)
 
     // Enforce aspect ratio if set
-    if (aspect) {
+    if (aspect && aspect !== "none" && typeof aspect === 'number') {
       if (width / height > aspect) {
         width = Math.round(height * aspect)
       } else {
@@ -484,7 +484,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       let w = Math.round(imgDims.width * 0.7)
       let h = Math.round(imgDims.height * 0.7)
       
-      if (aspect && aspect !== "none") {
+      if (aspect && aspect !== "none" && typeof aspect === 'number') {
         if (w / h > aspect) {
           w = Math.round(h * aspect)
         } else {
