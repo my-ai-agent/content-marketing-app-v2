@@ -76,6 +76,7 @@ const CropTool: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
   const [resizing, setResizing] = useState<ResizeDir>(null)
   const [aspect, setAspect] = useState<number | null | string>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [draggingState, setDraggingState] = useState<null | { startX: number; startY: number; startCrop: CropPercentBox }>(null)
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
   // Update displayDims when image or container is rendered (Copilot's approach)
@@ -147,7 +148,7 @@ const CropTool: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
     const rect = containerRef.current.getBoundingClientRect()
     const px = (pointer.clientX - rect.left) / rect.width
     const py = (pointer.clientY - rect.top) / rect.height
-    setDragging({ startX: px, startY: py, startCrop: { ...cropBox } })
+    setDraggingState({ startX: px, startY: py, startCrop: { ...cropBox } })
   }
 
   const [draggingState, setDragging] = useState<null | { startX: number; startY: number; startCrop: CropPercentBox }>(null)
@@ -226,7 +227,7 @@ const CropTool: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
   )
 
   const handlePointerUp = React.useCallback(() => {
-    setDragging(null)
+    setDraggingState(null)
     setResizing(null)
   }, [])
 
