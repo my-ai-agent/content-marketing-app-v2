@@ -21,7 +21,7 @@ const DEFAULT_ASPECTS = [
 
 const MIN_SIZE = 0.08; // as percent (8% of image)
 
-export const CropTool: React.FC<CropToolProps> = ({ imageUrl, aspect, onCrop, onCancel }) => {
+const CropTool: React.FC<CropToolProps> = ({ imageUrl, aspect, onCrop, onCancel }) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
