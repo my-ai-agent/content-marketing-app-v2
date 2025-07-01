@@ -1,5 +1,6 @@
+'use client'
 import React, { useRef, useState, useLayoutEffect, useCallback } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type CropPercentBox = { x: number; y: number; width: number; height: number }; // all 0..1
 
@@ -203,15 +204,22 @@ const CropPage: React.FC = () => {
   const router = useRouter();
   // In production, load imageUrl from router query or app state
   // Here we use a placeholder:
-  const imageUrl = typeof window !== "undefined" ? localStorage.getItem("pendingImageUrl") || "" : "";
+  const [imageUrl, setImageUrl] = useState<string>("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedImage = localStorage.getItem("pendingImageUrl") || "";
+      setImageUrl(savedImage);
+    }
+  }, []);
 
   const [croppedUrl, setCroppedUrl] = useState<string | null>(null);
 
   const handleCrop = (url: string) => {
     setCroppedUrl(url);
     // Save, upload, or route to result page as needed
-    // Example: localStorage.setItem("croppedImageUrl", url);
-    router.push("/photo/result");
+    localStorage.setItem("croppedImageUrl", url);
+    router.push("/photo/results");
   };
 
   const handleCancel = () => {
@@ -219,7 +227,18 @@ const CropPage: React.FC = () => {
   };
 
   if (!imageUrl) {
-    return <div>No image to crop.</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100vh',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        No image to crop. Please upload an image first.
+      </div>
+    );
   }
 
   return (
