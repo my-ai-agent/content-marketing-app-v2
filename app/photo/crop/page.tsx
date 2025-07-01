@@ -25,7 +25,6 @@ const CropTool: React.FC = () => {
   const [dragging, setDragging] = useState(false)
   const [resizing, setResizing] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [showPrivacyControls, setShowPrivacyControls] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -38,7 +37,7 @@ const CropTool: React.FC = () => {
       if (pendingImage) {
         setImageUrl(pendingImage)
       } else {
-        router.push('/photo') // No image found, go back
+        router.push('/photo')
       }
     }
   }, [router])
@@ -98,7 +97,6 @@ const CropTool: React.FC = () => {
   const handleAspectChange = useCallback((newAspect: number | null | string) => {
     setAspect(newAspect)
     if (newAspect === 'none') {
-      // For "No Crop", set crop box to full image
       setCropBox({ x: 0, y: 0, width: 1, height: 1 })
     } else {
       setCropBox(prev => clamp(prev, newAspect))
@@ -273,7 +271,7 @@ const CropTool: React.FC = () => {
             <button
               onClick={handleApplyCrop}
               disabled={processing}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium disabled:opacity-50"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium disabled:opacity-50 transition-colors"
             >
               {processing ? 'Processing...' : 'Continue with Original'}
             </button>
@@ -385,14 +383,14 @@ const CropTool: React.FC = () => {
         <div className="flex justify-center gap-4">
           <button
             onClick={() => router.push('/photo')}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleApplyCrop}
             disabled={processing}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50"
+            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
           >
             {processing ? 'Processing...' : 'Apply Crop'}
           </button>
