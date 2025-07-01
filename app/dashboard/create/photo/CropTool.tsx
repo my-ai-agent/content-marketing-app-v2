@@ -621,28 +621,25 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
               onTouchStart={startDrag}
             >
               {/* Resize Handles */}
-              {handles.map(
-                (handle) =>
-                  aspect !== "none" && (
-                    <div
-                      key={handle.dir}
-                      style={{
-                        position: 'absolute',
-                        top: handle.top,
-                        left: handle.left,
-                        width: 24,
-                        height: 24,
-                        background: '#3b82f6',
-                        borderRadius: '50%',
-                        border: '2px solid white',
-                        cursor: handle.cursor,
-                        ...handle.style,
-                      }}
-                      onMouseDown={startResize(handle.dir as ResizeDir)}
-                      onTouchStart={startResize(handle.dir as ResizeDir)}
-                    />
-                  )
-              )}
+              {handles.map((handle) => (
+                <div
+                  key={handle.dir}
+                  style={{
+                    position: 'absolute',
+                    top: handle.top,
+                    left: handle.left,
+                    width: 24,
+                    height: 24,
+                    background: '#3b82f6',
+                    borderRadius: '50%',
+                    border: '2px solid white',
+                    cursor: handle.cursor,
+                    ...handle.style,
+                  }}
+                  onMouseDown={startResize(handle.dir as ResizeDir)}
+                  onTouchStart={startResize(handle.dir as ResizeDir)}
+                />
+              ))}
             </div>
           )}
         </div>
