@@ -62,31 +62,51 @@ const CropTool: React.FC = () => {
   const clamp = useCallback((box: CropPercentBox, aspectRatio: number | null | string): CropPercentBox => {
     let { x, y, width, height } = box
 
-    // Clamp to 0-1 bounds
-    x = Math.max(0, Math.min(1 - width, x))
-    y = Math.max(0, Math.min(1 - height, y))
-    width = Math.max(0.1, Math.min(1 - x, width))
-    height = Math.max(0.1, Math.min(1 - y, height))
+    // Clamp to 0-1 bounds first
+    x = Math.max(0, Math.min(1, x))
+    y = Math.max(0, Math.min(1, y))
+    width = Math.max(0.1, Math.min(1, width))
+    height = Math.max(0.1, Math.min(1, height))
 
-    // Apply aspect ratio if it's a number
+    // Ensure crop box stays within image bounds
+    if (x + width > 1) {
+      if (width <= 1) {
+        x = 1 - width
+      } else {
+        width = 1
+        x = 0
+      }
+    }
+    
+    if (y + height > 1) {
+      if (height <= 1) {
+        y = 1 - height
+      } else {
+        height = 1
+        y = 0
+      }
+    }
+
+    // Apply aspect ratio ONLY if it's a number (not null for "Free" or "none" for "No Crop")
     if (typeof aspectRatio === 'number' && aspectRatio > 0) {
       const currentAspect = width / height
       if (Math.abs(currentAspect - aspectRatio) > 0.01) {
         if (currentAspect > aspectRatio) {
+          // Too wide, reduce width
           width = height * aspectRatio
         } else {
+          // Too tall, reduce height
           height = width / aspectRatio
         }
         
         // Re-clamp after aspect ratio adjustment
-        width = Math.min(width, 1 - x)
-        height = Math.min(height, 1 - y)
-        
-        if (width < 1 - x) {
-          x = Math.max(0, x)
+        if (x + width > 1) {
+          width = 1 - x
+          height = width / aspectRatio
         }
-        if (height < 1 - y) {
-          y = Math.max(0, y)
+        if (y + height > 1) {
+          height = 1 - y
+          width = height * aspectRatio
         }
       }
     }
@@ -96,10 +116,42 @@ const CropTool: React.FC = () => {
 
   const handleAspectChange = useCallback((newAspect: number | null | string) => {
     setAspect(newAspect)
+    
     if (newAspect === 'none') {
+      // For "No Crop", set crop box to full image
       setCropBox({ x: 0, y: 0, width: 1, height: 1 })
+    } else if (newAspect === null) {
+      // For "Free", don't change the current crop box - keep it as is
+      // This allows free resizing without aspect ratio constraints
+      setCropBox(prev => clamp(prev, null))
     } else {
-      setCropBox(prev => clamp(prev, newAspect))
+      // For specific aspect ratios, adjust the current crop box to match
+      setCropBox(prev => {
+        // Start with current position and try to maintain it
+        const centerX = prev.x + prev.width / 2
+        const centerY = prev.y + prev.height / 2
+        
+        // Calculate new dimensions based on aspect ratio
+        let newWidth = prev.width
+        let newHeight = prev.height
+        
+        const targetAspect = newAspect as number
+        const currentAspect = newWidth / newHeight
+        
+        if (currentAspect > targetAspect) {
+          // Too wide, reduce width
+          newWidth = newHeight * targetAspect
+        } else {
+          // Too tall, reduce height
+          newHeight = newWidth / targetAspect
+        }
+        
+        // Center the new crop box
+        let newX = centerX - newWidth / 2
+        let newY = centerY - newHeight / 2
+        
+        return clamp({ x: newX, y: newY, width: newWidth, height: newHeight }, newAspect)
+      })
     }
   }, [clamp])
 
@@ -118,6 +170,7 @@ const CropTool: React.FC = () => {
 
   const handleMouseDown = useCallback((e: React.MouseEvent, action: string) => {
     e.preventDefault()
+    e.stopPropagation()
     const coords = getCoordinatesFromEvent(e)
     
     if (action === 'drag') {
@@ -147,19 +200,19 @@ const CropTool: React.FC = () => {
         let newBox = { ...prev }
         
         if (resizing.includes('right')) {
-          newBox.width = coords.x - prev.x
+          newBox.width = Math.max(0.1, coords.x - prev.x)
         }
         if (resizing.includes('left')) {
-          const newWidth = prev.x + prev.width - coords.x
-          newBox.x = coords.x
+          const newWidth = Math.max(0.1, prev.x + prev.width - coords.x)
+          newBox.x = prev.x + prev.width - newWidth
           newBox.width = newWidth
         }
         if (resizing.includes('bottom')) {
-          newBox.height = coords.y - prev.y
+          newBox.height = Math.max(0.1, coords.y - prev.y)
         }
         if (resizing.includes('top')) {
-          const newHeight = prev.y + prev.height - coords.y
-          newBox.y = coords.y
+          const newHeight = Math.max(0.1, prev.y + prev.height - coords.y)
+          newBox.y = prev.y + prev.height - newHeight
           newBox.height = newHeight
         }
         
@@ -196,7 +249,6 @@ const CropTool: React.FC = () => {
       const sh = Math.round(cropBox.height * imgDims.height)
       
       console.log('🔧 Natural image pixels:', { sx, sy, sw, sh })
-      console.log('📏 Image dimensions:', imgDims)
 
       // Create canvas for crop
       const canvas = document.createElement('canvas')
@@ -206,8 +258,6 @@ const CropTool: React.FC = () => {
       // Set canvas to crop size
       canvas.width = sw
       canvas.height = sh
-      
-      console.log('📊 Canvas size:', `${canvas.width} x ${canvas.height}`)
 
       // Create image for cropping
       const img = new Image()
@@ -215,15 +265,11 @@ const CropTool: React.FC = () => {
       
       await new Promise<void>((resolve, reject) => {
         img.onload = () => {
-          console.log('🖼️ Image loaded for cropping:', `${img.naturalWidth} x ${img.naturalHeight}`)
-          
           // Draw cropped portion
-          console.log('🎨 Drawing cropped image...')
           ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh)
           
           // Convert to data URL
           const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-          console.log('📄 Generated data URL length:', dataUrl.length)
           
           // Store result
           localStorage.setItem('croppedImageUrl', dataUrl)
@@ -342,7 +388,7 @@ const CropTool: React.FC = () => {
               }}
               onMouseDown={(e) => handleMouseDown(e, 'drag')}
             >
-              {/* Resize Handles */}
+              {/* Corner Resize Handles */}
               {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((handle) => (
                 <div
                   key={handle}
