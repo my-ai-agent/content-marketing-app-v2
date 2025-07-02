@@ -178,7 +178,7 @@ const CropPage: React.FC = () => {
             break
         }
 
-        return clamp(newBox, activeRatio === 'Free' ? 0 : aspectRatios.find(r => r.name === activeRatio)?.ratio)
+        return clamp(newBox, activeRatio === 'Free' ? 0 : aspectRatios.find(r => r.name === activeRatio)?.ratio || 1)
       })
       
       setDragStart(pos)
