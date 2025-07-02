@@ -121,37 +121,33 @@ const CropTool: React.FC = () => {
       // For "No Crop", set crop box to full image
       setCropBox({ x: 0, y: 0, width: 1, height: 1 })
     } else if (newAspect === null) {
-      // For "Free", don't change the current crop box - keep it as is
-      // This allows free resizing without aspect ratio constraints
-      setCropBox(prev => clamp(prev, null))
+      // For "Free", reset to standard crop box without aspect constraints
+      setCropBox({ x: 0.1, y: 0.1, width: 0.8, height: 0.8 })
     } else {
-      // For specific aspect ratios, adjust the current crop box to match
-      setCropBox(prev => {
-        // Start with current position and try to maintain it
-        const centerX = prev.x + prev.width / 2
-        const centerY = prev.y + prev.height / 2
-        
-        // Calculate new dimensions based on aspect ratio
-        let newWidth = prev.width
-        let newHeight = prev.height
-        
-        const targetAspect = newAspect as number
-        const currentAspect = newWidth / newHeight
-        
-        if (currentAspect > targetAspect) {
-          // Too wide, reduce width
-          newWidth = newHeight * targetAspect
-        } else {
-          // Too tall, reduce height
-          newHeight = newWidth / targetAspect
-        }
-        
-        // Center the new crop box
-        let newX = centerX - newWidth / 2
-        let newY = centerY - newHeight / 2
-        
-        return clamp({ x: newX, y: newY, width: newWidth, height: newHeight }, newAspect)
-      })
+      // For specific aspect ratios, always start with a fresh standard crop box
+      // This prevents the shrinking cascade effect
+      const baseCrop = { x: 0.1, y: 0.1, width: 0.8, height: 0.8 }
+      const targetAspect = newAspect as number
+      
+      // Calculate dimensions that fit the aspect ratio within the base crop area
+      let newWidth = baseCrop.width
+      let newHeight = baseCrop.height
+      
+      const baseAspect = newWidth / newHeight
+      
+      if (baseAspect > targetAspect) {
+        // Base is too wide, adjust width to match target aspect
+        newWidth = newHeight * targetAspect
+      } else {
+        // Base is too tall, adjust height to match target aspect  
+        newHeight = newWidth / targetAspect
+      }
+      
+      // Center the crop box in the image
+      const newX = 0.5 - newWidth / 2
+      const newY = 0.5 - newHeight / 2
+      
+      setCropBox(clamp({ x: newX, y: newY, width: newWidth, height: newHeight }, newAspect))
     }
   }, [clamp])
 
