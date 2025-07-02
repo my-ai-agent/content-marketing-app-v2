@@ -19,7 +19,7 @@ const PhotoUploadPage: React.FC = () => {
     try {
       // Convert to data URL without compression for upload display
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const result = e.target?.result as string
         setSelectedPhoto(result)
         
