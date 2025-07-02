@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { saveImageBlob, resizeDataUrl } from '@/lib/imageStorage'
 
 const PhotoUploadPage: React.FC = () => {
   const router = useRouter()
@@ -23,8 +24,9 @@ const PhotoUploadPage: React.FC = () => {
         setSelectedPhoto(result)
         
         // Store ORIGINAL image for cropping
-        localStorage.setItem('pendingImageUrl', result)
-        localStorage.removeItem('croppedImageUrl') // Clear any previous crops
+        const resizedDataUrl = await resizeDataUrl(result, 1600)
+await saveImageBlob('pendingImage', resizedDataUrl)
+localStorage.removeItem('croppedImageUrl')
       }
       reader.readAsDataURL(file)
     } catch (error) {
