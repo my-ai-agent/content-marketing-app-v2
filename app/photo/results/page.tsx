@@ -11,7 +11,7 @@ const ResultsPage: React.FC = () => {
 
   useLayoutEffect(() => {
     if (typeof window !== 'undefined') {
-      const cropped = localStorage.getItem('croppedImageUrl')
+      const cropped = localStorage.getItem('croppedImageUrl') || sessionStorage.getItem('croppedImageUrl')
       if (cropped) {
         setCroppedImageUrl(cropped)
       } else {
