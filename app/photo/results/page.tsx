@@ -39,8 +39,8 @@ const ResultsPage: React.FC = () => {
   }
 
   const handleContinueToContent = () => {
-    // Navigate to next step in your workflow
-    router.push('/dashboard/create/persona') // Adjust path as needed
+    // Navigate to next step in your 6-step workflow
+    router.push('/dashboard/create/persona') // Your existing workflow path
   }
 
   const handleStartOver = () => {
