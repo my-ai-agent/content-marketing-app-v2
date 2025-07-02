@@ -54,8 +54,8 @@ const CropTool: React.FC = () => {
     { label: 'No Crop', value: 'none' },
     { label: 'Free', value: null },
     { label: '1:1', value: 1 },
-    { label: '4:3', value: 4/3 },
-    { label: '3:4', value: 3/4 },
+    { label: '4:5', value: 4/5 },
+    { label: '9:16', value: 9/16 },
     { label: '16:9', value: 16/9 }
   ]
 
@@ -121,8 +121,8 @@ const CropTool: React.FC = () => {
       // For "No Crop", set crop box to full image
       setCropBox({ x: 0, y: 0, width: 1, height: 1 })
     } else if (newAspect === null) {
-      // For "Free", reset to standard crop box without aspect constraints
-      setCropBox({ x: 0.1, y: 0.1, width: 0.8, height: 0.8 })
+      // For "Free", reset to landscape rectangle to differentiate from 1:1
+      setCropBox({ x: 0.1, y: 0.25, width: 0.8, height: 0.5 })
     } else {
       // For specific aspect ratios, always start with a fresh standard crop box
       // This prevents the shrinking cascade effect
