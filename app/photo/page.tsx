@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { saveImageBlob, resizeDataUrl, dataURLtoBlob } from '@/lib/imageStorage'
 
 const PhotoUploadPage: React.FC = () => {
   const router = useRouter()
@@ -16,15 +17,24 @@ const PhotoUploadPage: React.FC = () => {
     setProcessing(true)
     
     try {
-      // Convert to data URL without compression for upload display
+      // Convert to data URL for display
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const result = e.target?.result as string
         setSelectedPhoto(result)
         
-        // Store ORIGINAL image for cropping
-        localStorage.setItem('pendingImageUrl', result)
-        localStorage.removeItem('croppedImageUrl') // Clear any previous crops
+        try {
+          // Store ORIGINAL image for cropping using IndexedDB
+          const resizedDataUrl = await resizeDataUrl(result, 1600)
+          const resizedBlob = dataURLtoBlob(resizedDataUrl)
+          await saveImageBlob('pendingImage', resizedBlob)
+          localStorage.removeItem('croppedImageUrl') // Clear any previous crops
+        } catch (error) {
+          console.error('Error storing image in IndexedDB:', error)
+          // Fallback to localStorage for compatibility
+          localStorage.setItem('pendingImageUrl', result)
+          localStorage.removeItem('croppedImageUrl')
+        }
       }
       reader.readAsDataURL(file)
     } catch (error) {

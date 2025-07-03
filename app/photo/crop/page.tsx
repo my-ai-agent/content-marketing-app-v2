@@ -1,451 +1,277 @@
 'use client'
 
-import React, { useState, useRef, useLayoutEffect, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { saveImageBlob, dataURLtoBlob, resizeDataUrl } from '@/lib/imageStorage'
+import Cropper from 'react-easy-crop'
+import { getImageBlob, saveImageBlob, dataURLtoBlob } from '@/lib/imageStorage'
 
-type CropPercentBox = {
-  x: number // 0-1
-  y: number // 0-1  
-  width: number // 0-1
-  height: number // 0-1
-}
-
-const MAX_IMG_DIM = 1600; // Resize before storage for quota safety
-const CROPPED_IMAGE_KEY = 'croppedImageBlob';
-
-const CropPage: React.FC = () => {
+const PhotoCropPage: React.FC = () => {
   const router = useRouter()
-  
-  // Image and crop state
-  const [imageDataUrl, setImageDataUrl] = useState<string>('')
-  const [naturalDimensions, setNaturalDimensions] = useState({ width: 0, height: 0 })
-  const [cropBox, setCropBox] = useState<CropPercentBox>({ x: 0.1, y: 0.1, width: 0.8, height: 0.8 })
-  const [isProcessing, setIsProcessing] = useState(false)
-  
-  // Container and interaction state
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [isResizing, setIsResizing] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [resizeHandle, setResizeHandle] = useState<string>('')
-  const [activeRatio, setActiveRatio] = useState<string>('Free')
+  const [imageSrc, setImageSrc] = useState<string>('')
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  // Load image from localStorage on mount
-  useLayoutEffect(() => {
-    const storedImage = localStorage.getItem('uploadedImage')
-    if (storedImage) {
-      setImageDataUrl(storedImage)
-      
-      const img = new window.Image()
-      img.onload = () => setNaturalDimensions({ width: img.naturalWidth, height: img.naturalHeight })
-      img.src = storedImage
-    }
-  }, [])
-
-  // Update container size on layout changes
-  useLayoutEffect(() => {
-    const updateContainerSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        setContainerSize({ width: rect.width, height: rect.height })
-      }
-    }
-
-    updateContainerSize()
-    window.addEventListener('resize', updateContainerSize)
-    return () => window.removeEventListener('resize', updateContainerSize)
-  }, [imageDataUrl])
-
-  // Aspect ratio configurations
-  const aspectRatios = [
-    { name: 'No Crop', ratio: null, description: 'Keep original dimensions' },
-    { name: 'Free', ratio: 0, description: 'Custom crop area' },
-    { name: '1:1', ratio: 1, description: 'Square - Instagram posts' },
-    { name: '4:5', ratio: 4/5, description: 'Portrait - Instagram posts' },
-    { name: '9:16', ratio: 9/16, description: 'Vertical - Stories/Reels' },
-    { name: '16:9', ratio: 16/9, description: 'Landscape - YouTube' }
-  ]
-
-  // Clamp crop box to container bounds with aspect ratio
-  const clamp = useCallback((box: CropPercentBox, aspectRatio?: number): CropPercentBox => {
-    let { x, y, width, height } = box
-
-    // Apply aspect ratio constraint if specified
-    if (aspectRatio && aspectRatio > 0) {
-      height = width / aspectRatio
-    }
-
-    // Clamp to bounds
-    if (x + width > 1) x = 1 - width
-    if (y + height > 1) y = 1 - height
-    if (x < 0) x = 0
-    if (y < 0) y = 0
-    if (width > 1) width = 1
-    if (height > 1) height = 1
-
-    return { x, y, width, height }
-  }, [])
-
-  // Handle aspect ratio selection
-  const handleAspectRatio = useCallback((ratioName: string, ratio: number | null) => {
-    setActiveRatio(ratioName)
-    
-    if (ratio === null) return // No Crop
-    
-    // Start with fresh base crop for each ratio change
-    const baseCrop = { x: 0.1, y: 0.1, width: 0.8, height: 0.8 }
-    
-    if (ratio === 0) {
-      // Free mode - use base crop as-is
-      setCropBox(baseCrop)
-    } else {
-      // Apply specific aspect ratio to base crop
-      const newCrop = clamp(baseCrop, ratio)
-      setCropBox(newCrop)
-    }
-  }, [clamp])
-
-  // Mouse/touch event handlers
-  const getEventPos = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-    
-    if (!containerRef.current) return { x: 0, y: 0 }
-    
-    const rect = containerRef.current.getBoundingClientRect()
-    return {
-      x: (clientX - rect.left) / rect.width,
-      y: (clientY - rect.top) / rect.height
-    }
-  }, [])
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    const pos = getEventPos(e)
-    const target = e.target as HTMLElement
-    
-    if (target.dataset.handle) {
-      setIsResizing(true)
-      setResizeHandle(target.dataset.handle)
-    } else {
-      setIsDragging(true)
-    }
-    
-    setDragStart(pos)
-  }, [getEventPos])
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const pos = getEventPos(e)
-    const deltaX = pos.x - dragStart.x
-    const deltaY = pos.y - dragStart.y
-
-    if (isDragging) {
-      setCropBox(prev => clamp({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY,
-        width: prev.width,
-        height: prev.height
-      }, activeRatio === 'Free' ? 0 : aspectRatios.find(r => r.name === activeRatio)?.ratio || 1))
-      
-      setDragStart(pos)
-    } else if (isResizing && resizeHandle) {
-      setCropBox(prev => {
-        let newBox = { ...prev }
-        
-        switch (resizeHandle) {
-          case 'nw':
-            newBox.width += newBox.x - pos.x
-            newBox.height += newBox.y - pos.y
-            newBox.x = pos.x
-            newBox.y = pos.y
-            break
-          case 'ne':
-            newBox.width = pos.x - newBox.x
-            newBox.height += newBox.y - pos.y
-            newBox.y = pos.y
-            break
-          case 'sw':
-            newBox.width += newBox.x - pos.x
-            newBox.height = pos.y - newBox.y
-            newBox.x = pos.x
-            break
-          case 'se':
-            newBox.width = pos.x - newBox.x
-            newBox.height = pos.y - newBox.y
-            break
+  // Load image from IndexedDB
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const imageBlob = await getImageBlob('pendingImage')
+        if (imageBlob) {
+          const dataUrl = URL.createObjectURL(imageBlob)
+          setImageSrc(dataUrl)
+        } else {
+          // Fallback to localStorage
+          const fallbackImage = localStorage.getItem('pendingImageUrl')
+          if (fallbackImage) {
+            setImageSrc(fallbackImage)
+          }
         }
-
-        return clamp(newBox, activeRatio === 'Free' ? 0 : aspectRatios.find(r => r.name === activeRatio)?.ratio || 1)
-      })
-      
-      setDragStart(pos)
+      } catch (error) {
+        console.error('Error loading image:', error)
+        // Fallback to localStorage
+        const fallbackImage = localStorage.getItem('pendingImageUrl')
+        if (fallbackImage) {
+          setImageSrc(fallbackImage)
+        }
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [isDragging, isResizing, resizeHandle, dragStart, getEventPos, clamp, activeRatio, aspectRatios])
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false)
-    setIsResizing(false)
-    setResizeHandle('')
+    loadImage()
   }, [])
 
-  // Apply crop and save to IndexedDB
-  const handleApplyCrop = useCallback(async () => {
-    if (!imageDataUrl || !naturalDimensions.width || !naturalDimensions.height) return
+  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }, [])
 
-    setIsProcessing(true)
-    console.log('🎯 Starting crop process...')
+  const createCroppedImage = async () => {
+    if (!croppedAreaPixels || !imageSrc) return null
 
-    try {
-      // Convert percentage crop box to pixel coordinates
-      const pixelCrop = {
-        x: Math.round(cropBox.x * naturalDimensions.width),
-        y: Math.round(cropBox.y * naturalDimensions.height),
-        width: Math.round(cropBox.width * naturalDimensions.width),
-        height: Math.round(cropBox.height * naturalDimensions.height)
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const image = new Image()
+
+    return new Promise<string>((resolve) => {
+      image.onload = () => {
+        canvas.width = croppedAreaPixels.width
+        canvas.height = croppedAreaPixels.height
+
+        ctx?.drawImage(
+          image,
+          croppedAreaPixels.x,
+          croppedAreaPixels.y,
+          croppedAreaPixels.width,
+          croppedAreaPixels.height,
+          0,
+          0,
+          croppedAreaPixels.width,
+          croppedAreaPixels.height
+        )
+
+        resolve(canvas.toDataURL('image/jpeg', 0.8))
       }
+      image.src = imageSrc
+    })
+  }
 
-      console.log('🎯 Percentage crop box:', cropBox)
-      console.log('🔧 Natural image pixels:', naturalDimensions)
-      console.log('🔧 Pixel crop coordinates:', pixelCrop)
-
-      // Create canvas and apply crop
-      const canvas = document.createElement('canvas')
-      canvas.width = pixelCrop.width
-      canvas.height = pixelCrop.height
-      
-      const ctx = canvas.getContext('2d')!
-      const img = new window.Image()
-      
-      await new Promise((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(
-            img,
-            pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
-            0, 0, pixelCrop.width, pixelCrop.height
-          )
-          resolve(void 0)
+  const handleNoCrop = async () => {
+    try {
+      // Save original image as cropped result
+      const imageBlob = await getImageBlob('pendingImage')
+      if (imageBlob) {
+        await saveImageBlob('croppedImage', imageBlob)
+      } else {
+        // Fallback: convert from localStorage
+        const fallbackImage = localStorage.getItem('pendingImageUrl')
+        if (fallbackImage) {
+          const blob = dataURLtoBlob(fallbackImage)
+          await saveImageBlob('croppedImage', blob)
         }
-        img.onerror = reject
-        img.src = imageDataUrl
-      })
-
-      // Get cropped image as data URL
-      let croppedDataUrl = canvas.toDataURL('image/jpeg', 0.8)
-      console.log('🔧 Initial crop size:', (croppedDataUrl.length / 1024 / 1024).toFixed(2), 'MB')
-
-      // Resize if too large (for storage efficiency)
-      if (pixelCrop.width > MAX_IMG_DIM || pixelCrop.height > MAX_IMG_DIM) {
-        console.log('🔧 Resizing large crop for storage...')
-        croppedDataUrl = await resizeDataUrl(croppedDataUrl, MAX_IMG_DIM)
-        console.log('🔧 Resized crop size:', (croppedDataUrl.length / 1024 / 1024).toFixed(2), 'MB')
       }
-
-      // Convert to Blob and save to IndexedDB
-      const blob = dataURLtoBlob(croppedDataUrl)
-      await saveImageBlob(CROPPED_IMAGE_KEY, blob)
-
-      console.log('✅ Percentage-based crop successful!')
-      router.push('/photo/results')
-      
+      localStorage.setItem('croppedImageUrl', imageSrc) // For compatibility
+      router.push('/story')
     } catch (error) {
-      console.error('❌ Crop process failed:', error)
-      alert('Failed to process image. Please try again.')
-    } finally {
-      setIsProcessing(false)
+      console.error('Error saving original image:', error)
+      // Fallback to localStorage
+      localStorage.setItem('croppedImageUrl', imageSrc)
+      router.push('/story')
     }
-  }, [imageDataUrl, naturalDimensions, cropBox, router])
+  }
 
-  // Handle "Continue with Original"
-  const handleContinueOriginal = useCallback(async () => {
-    if (!imageDataUrl) return
-
-    setIsProcessing(true)
-    console.log('🎯 Continuing with original image...')
-
+  const handleApplyCrop = async () => {
     try {
-      // Resize original if needed
-      let processedDataUrl = imageDataUrl
-      if (naturalDimensions.width > MAX_IMG_DIM || naturalDimensions.height > MAX_IMG_DIM) {
-        console.log('🔧 Resizing original for storage...')
-        processedDataUrl = await resizeDataUrl(imageDataUrl, MAX_IMG_DIM)
+      const croppedDataUrl = await createCroppedImage()
+      if (croppedDataUrl) {
+        // Save cropped image to IndexedDB
+        const croppedBlob = dataURLtoBlob(croppedDataUrl)
+        await saveImageBlob('croppedImage', croppedBlob)
+        localStorage.setItem('croppedImageUrl', croppedDataUrl) // For compatibility
+        router.push('/story')
       }
-
-      // Convert to Blob and save to IndexedDB
-      const blob = dataURLtoBlob(processedDataUrl)
-      await saveImageBlob(CROPPED_IMAGE_KEY, blob)
-
-      console.log('✅ Original image saved successfully!')
-      router.push('/photo/results')
-      
     } catch (error) {
-      console.error('❌ Failed to save original:', error)
-      alert('Failed to process image. Please try again.')
-    } finally {
-      setIsProcessing(false)
+      console.error('Error creating cropped image:', error)
     }
-  }, [imageDataUrl, naturalDimensions, router])
+  }
 
-  if (!imageDataUrl) {
+  const handleBack = () => {
+    router.push('/photo')
+  }
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-600 mb-4">No image found</div>
-          <Link href="/photo" className="text-blue-600 hover:text-blue-800 underline">
-            ← Back to Upload
-          </Link>
+          <div className="text-2xl font-semibold text-gray-600">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!imageSrc) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl font-semibold text-gray-600 mb-4">No image found</div>
+          <button
+            onClick={handleBack}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+          >
+            Go Back
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Crop Your Photo</h1>
-              <p className="text-gray-600 mt-1">Select the perfect crop for your content</p>
-            </div>
-            <Link href="/photo" className="text-blue-600 hover:text-blue-800 font-medium">
-              ← Back
-            </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* Progress indicator */}
+      <div className="flex justify-center pt-8 mb-8">
+        <div className="flex items-center space-x-4">
+          <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+            1
           </div>
+          <div className="w-8 h-1 bg-green-500"></div>
+          <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+            2
+          </div>
+          {[3, 4, 5, 6].map((step) => (
+            <React.Fragment key={step}>
+              <div className="w-8 h-1 bg-gray-300"></div>
+              <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">
+                {step}
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Crop Area */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div 
-                ref={containerRef}
-                className="relative w-full aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden cursor-move select-none"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                {/* Background Image */}
-                <img
-                  src={imageDataUrl}
-                  alt="Crop preview"
-                  className="w-full h-full object-contain"
-                  draggable={false}
-                />
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Crop Your Photo</h1>
+          <p className="text-gray-600">Focus on what matters most in your story</p>
+        </div>
 
-                {/* Crop Overlay */}
-                {containerSize.width > 0 && (
-                  <>
-                    {/* Dark overlay outside crop area */}
-                    <div 
-                      className="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"
-                      style={{
-                        clipPath: `polygon(
-                          0% 0%, 
-                          ${cropBox.x * 100}% 0%, 
-                          ${cropBox.x * 100}% ${cropBox.y * 100}%, 
-                          ${(cropBox.x + cropBox.width) * 100}% ${cropBox.y * 100}%, 
-                          ${(cropBox.x + cropBox.width) * 100}% 0%, 
-                          100% 0%, 
-                          100% 100%, 
-                          ${(cropBox.x + cropBox.width) * 100}% 100%, 
-                          ${(cropBox.x + cropBox.width) * 100}% ${(cropBox.y + cropBox.height) * 100}%, 
-                          ${cropBox.x * 100}% ${(cropBox.y + cropBox.height) * 100}%, 
-                          ${cropBox.x * 100}% 100%, 
-                          0% 100%
-                        )`
-                      }}
-                    />
+        {/* Simple choice buttons */}
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            onClick={() => setShowCropper(false)}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              !showCropper
+                ? 'bg-green-500 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            No Crop
+          </button>
+          <button
+            onClick={() => setShowCropper(true)}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              showCropper
+                ? 'bg-green-500 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            Free Crop
+          </button>
+        </div>
 
-                    {/* Crop box border */}
-                    <div
-                      className="absolute border-2 border-white shadow-lg pointer-events-none"
-                      style={{
-                        left: `${cropBox.x * 100}%`,
-                        top: `${cropBox.y * 100}%`,
-                        width: `${cropBox.width * 100}%`,
-                        height: `${cropBox.height * 100}%`
-                      }}
-                    />
-
-                    {/* Resize handles */}
-                    {['nw', 'ne', 'sw', 'se'].map((handle) => (
-                      <div
-                        key={handle}
-                        data-handle={handle}
-                        className="absolute w-4 h-4 bg-white border-2 border-blue-500 rounded-full cursor-pointer hover:bg-blue-50 transition-colors"
-                        style={{
-                          left: `${(cropBox.x + (handle.includes('e') ? cropBox.width : 0)) * 100}%`,
-                          top: `${(cropBox.y + (handle.includes('s') ? cropBox.height : 0)) * 100}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                      />
-                    ))}
-                  </>
-                )}
-              </div>
+        {/* Image display area */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          {showCropper ? (
+            <div className="relative h-96 w-full">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+                style={{
+                  containerStyle: {
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '12px',
+                  },
+                }}
+              />
             </div>
+          ) : (
+            <div className="text-center">
+              <img
+                src={imageSrc}
+                alt="Original photo"
+                className="max-w-full max-h-96 mx-auto rounded-lg shadow-md"
+              />
+              <p className="text-sm text-gray-500 mt-4">Original image - no cropping applied</p>
+            </div>
+          )}
+        </div>
+
+        {/* Zoom control for cropper */}
+        {showCropper && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Zoom: {zoom.toFixed(1)}x
+            </label>
+            <input
+              type="range"
+              value={zoom}
+              min={1}
+              max={3}
+              step={0.1}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+            />
           </div>
+        )}
 
-          {/* Crop Controls */}
-          <div className="space-y-6">
-            {/* Aspect Ratios */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Crop Ratios</h3>
-              <div className="space-y-3">
-                {aspectRatios.map((ratio) => (
-                  <button
-                    key={ratio.name}
-                    onClick={() => handleAspectRatio(ratio.name, ratio.ratio)}
-                    className={`w-full text-left p-3 rounded-lg border transition-all ${
-                      activeRatio === ratio.name
-                        ? 'border-blue-500 bg-blue-50 text-blue-900'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                    }`}
-                  >
-                    <div className="font-medium">{ratio.name}</div>
-                    <div className="text-sm opacity-75">{ratio.description}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+        {/* Action buttons */}
+        <div className="flex justify-between items-center">
+          <button
+            onClick={handleBack}
+            className="text-gray-600 hover:text-gray-800 font-medium"
+          >
+            ← Back
+          </button>
 
-            {/* Action Buttons */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
-              <div className="space-y-3">
-                {activeRatio === 'No Crop' ? (
-                  <button
-                    onClick={handleContinueOriginal}
-                    disabled={isProcessing}
-                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                  >
-                    {isProcessing ? 'Processing...' : 'Continue with Original'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleApplyCrop}
-                    disabled={isProcessing}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                  >
-                    {isProcessing ? 'Processing...' : 'Apply Crop'}
-                  </button>
-                )}
-                
-                <Link
-                  href="/photo"
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors text-center block"
-                >
-                  Start Over
-                </Link>
-              </div>
-            </div>
+          <button
+            onClick={showCropper ? handleApplyCrop : handleNoCrop}
+            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white rounded-lg font-medium transition-colors"
+          >
+            Continue →
+          </button>
+        </div>
+
+        {/* Branding */}
+        <div className="text-center mt-8">
+          <div className="text-2xl font-bold">
+            <span className="text-blue-600">click</span>
+            <span className="text-orange-500"> speak</span>
+            <span className="text-blue-600"> send</span>
           </div>
         </div>
       </div>
@@ -453,4 +279,4 @@ const CropPage: React.FC = () => {
   )
 }
 
-export default CropPage
+export default PhotoCropPage
