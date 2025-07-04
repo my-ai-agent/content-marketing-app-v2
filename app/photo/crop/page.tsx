@@ -10,7 +10,7 @@ const PhotoCropPage: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string>('')
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
   const [showCropper, setShowCropper] = useState(false)
   const [loading, setLoading] = useState(true)
 
