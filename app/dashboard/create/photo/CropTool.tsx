@@ -71,7 +71,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
   
   const [dragging, setDragging] = useState(false)
   const [resizing, setResizing] = useState<ResizeDir>(null)
-  const [aspect, setAspect] = useState<number | null | string>(null)
+  const [aspect, setAspect] = useState<number | null | string>("none") // FIXED: Start with "none" instead of null
   const [isProcessing, setIsProcessing] = useState(false)
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
@@ -454,7 +454,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
             backgroundColor: '#f9fafb',
             borderRadius: '0.25rem'
           }}>
-            Debug: Percentage crop {cropBox.x.toFixed(2)},{cropBox.y.toFixed(2)} {cropBox.width.toFixed(2)}×{cropBox.height.toFixed(2)} | Valid: {cropValid ? '✅' : '❌'}
+            Debug: Aspect={JSON.stringify(aspect)} | Crop {cropBox.x.toFixed(2)},{cropBox.y.toFixed(2)} {cropBox.width.toFixed(2)}×{cropBox.height.toFixed(2)} | Valid: {cropValid ? '✅' : '❌'}
           </div>
         )}
         
@@ -463,7 +463,10 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           {aspectRatios.map(opt => (
             <button
               key={opt.name}
-              onClick={() => setAspect(opt.value)}
+              onClick={() => {
+                console.log('🎯 Aspect button clicked:', opt.name, 'value:', opt.value)
+                setAspect(opt.value)
+              }}
               style={{
                 fontWeight: aspect === opt.value ? 700 : 400,
                 background: aspect === opt.value ? "#10b981" : "#e5e7eb",
