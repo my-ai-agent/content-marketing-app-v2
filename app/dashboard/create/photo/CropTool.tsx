@@ -385,18 +385,15 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           }
         }
       }
-      // For "Free" mode (aspect === null), keep the default 70% square crop box
-      
-      // Ensure minimum size
-      w = Math.max(w, MIN_SIZE_PERCENT)
-      h = Math.max(h, MIN_SIZE_PERCENT)
-      
-      const newCropBox = {
-        x: (1 - w) / 2, // Center horizontally
-        y: (1 - h) / 2, // Center vertically
-        width: w,
-        height: h
-      }
+      // For "Free" mode (aspect === null), start with a perfect square
+if (aspect === null) {
+  w = 0.5  // 50% width
+  h = 0.5  // 50% height (same as width = perfect square)
+} else {
+  // Your existing logic for other modes
+  w = Math.max(w, MIN_SIZE_PERCENT)
+  h = Math.max(h, MIN_SIZE_PERCENT)
+}
       
       setCropBox(newCropBox)
       console.log('📏 Set percentage-based crop box for mode:', aspect, newCropBox)
