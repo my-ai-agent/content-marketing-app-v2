@@ -651,7 +651,7 @@ export default function PhotoUpload() {
               boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
               transition: 'all 0.2s'
             }}
-            className=""}
+            className=""
           >
             Continue →
           </button>
