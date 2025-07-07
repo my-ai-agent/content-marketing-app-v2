@@ -1,597 +1,470 @@
 'use client'
-import React, { useRef, useState, useEffect } from 'react'
 
-// Types - Updated to use percentage coordinates
-type CropPercentBox = { x: number; y: number; width: number; height: number } // all 0..1
-type ResizeDir = null | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { X, RotateCcw, Download } from 'lucide-react'
 
 interface CropToolProps {
-  image: string
-  onApply: (croppedUrl: string) => void
-  onCancel: () => void
+  imageUrl: string
+  onClose: () => void
+  onCropComplete: (croppedImageUrl: string) => void
 }
 
-// Utility for touch/mouse coordinate extraction
-function getClientPos(e: MouseEvent | TouchEvent) {
-  let clientX = 0, clientY = 0
-  if ('touches' in e && e.touches.length > 0) {
-    clientX = e.touches[0].clientX
-    clientY = e.touches[0].clientY
-  } else if ('clientX' in e) {
-    clientX = (e as MouseEvent).clientX
-    clientY = (e as MouseEvent).clientY
-  }
-  return { clientX, clientY }
+interface CropBox {
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
-// Data URL validation utility
-function isValidDataURL(dataUrl: string): boolean {
-  if (!dataUrl || typeof dataUrl !== 'string') return false
-  if (!dataUrl.startsWith('data:image/')) return false
-  
-  const base64Part = dataUrl.split(',')[1]
-  if (!base64Part || base64Part.length < 100) {
-    console.warn('⚠️ Data URL too short, likely invalid:', dataUrl.length)
-    return false
-  }
-  
-  return true
+interface ImageDimensions {
+  width: number
+  height: number
 }
 
-const handles = [
-  { dir: 'n', top: -8, left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, -50%)' } },
-  { dir: 's', top: '100%', left: '50%', cursor: 'ns-resize', style: { transform: 'translate(-50%, 50%)' } },
-  { dir: 'e', top: '50%', left: '100%', cursor: 'ew-resize', style: { transform: 'translate(50%, -50%)' } },
-  { dir: 'w', top: '50%', left: -8, cursor: 'ew-resize', style: { transform: 'translate(-50%, -50%)' } },
-  { dir: 'ne', top: -8, left: '100%', cursor: 'nesw-resize', style: { transform: 'translate(50%, -50%)' } },
-  { dir: 'nw', top: -8, left: -8, cursor: 'nwse-resize', style: { transform: 'translate(-50%, -50%)' } },
-  { dir: 'se', top: '100%', left: '100%', cursor: 'nwse-resize', style: { transform: 'translate(50%, 50%)' } },
-  { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
-] as const
-
-// UPDATED: Simplified aspect ratios - removed 1:1, 4:3, 3:4, 16:9 for cleaner UX
-const aspectRatios = [
-  { name: "No Crop", value: "none" },
-  { name: "Free", value: null },
+const ASPECT_RATIOS = [
+  { label: 'Free', value: null },
+  { label: 'Square', value: 1 },
+  { label: '4:3', value: 4/3 },
+  { label: '16:9', value: 16/9 },
+  { label: '3:4', value: 3/4 },
+  { label: '9:16', value: 9/16 },
+  { label: 'No Crop', value: 'none' }
 ]
 
-const MIN_SIZE_PERCENT = 0.05 // 5% minimum size as percentage
+const MIN_SIZE_PERCENT = 0.1
 
-const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
-  const imgRef = useRef<HTMLImageElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
+export default function CropTool({ imageUrl, onClose, onCropComplete }: CropToolProps) {
+  const [cropBox, setCropBox] = useState<CropBox>({ x: 0.1, y: 0.1, width: 0.8, height: 0.8 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [dragType, setDragType] = useState<'move' | 'resize' | null>(null)
+  const [resizeHandle, setResizeHandle] = useState<string>('')
+  const [aspect, setAspect] = useState<number | null | 'none'>(1)
+  const [imgDims, setImgDims] = useState<ImageDimensions>({ width: 0, height: 0 })
+  const [rotation, setRotation] = useState(0)
   
-  // Store natural image dimensions
-  const [imgDims, setImgDims] = useState({ width: 1, height: 1 })
-  
-  // FIXED: Store crop box as percentages (0-1) instead of pixels
-  const [cropBox, setCropBox] = useState<CropPercentBox>({ 
-    x: 0.1, y: 0.1, width: 0.8, height: 0.8 
-  })
-  
-  const [dragging, setDragging] = useState(false)
-  const [resizing, setResizing] = useState<ResizeDir>(null)
-  const [aspect, setAspect] = useState<number | null | string>("none") // FIXED: Start with "none" instead of null
-  const [isProcessing, setIsProcessing] = useState(false)
-  const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
 
-  // Validate input image on mount
+  // Load image and set dimensions
   useEffect(() => {
-    console.log('🔍 CropTool received image, length:', image?.length)
-    if (!isValidDataURL(image)) {
-      console.error('❌ Invalid input image data URL')
+    const img = new Image()
+    img.onload = () => {
+      setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
     }
-  }, [image])
+    img.src = imageUrl
+  }, [imageUrl])
 
-  // Set image dimensions on load
+  // Update crop box when aspect ratio changes
   useEffect(() => {
-    const img = imgRef.current
-    if (img) {
-      const setDims = () => {
-        console.log('🖼️ Image loaded:', img.naturalWidth, 'x', img.naturalHeight)
-        setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
-      }
-      img.onload = setDims
-      img.onerror = () => {
-        console.error('❌ Failed to load image in CropTool')
-      }
-      if (img.complete && img.naturalWidth > 0) setDims()
-    }
-  }, [image])
+    if (imgDims.width === 0 || imgDims.height === 0) return
+    if (aspect === 'none') return
 
-  // FIXED: Clamp crop box within bounds using percentages
-  function clampPercentage(box: CropPercentBox): CropPercentBox {
+    let w = cropBox.width
+    let h = cropBox.height
+
+    if (aspect !== null) {
+      // Calculate crop box based on aspect ratio
+      const imageAspect = imgDims.width / imgDims.height
+
+      if (imageAspect > aspect) {
+        // Image is wider than desired aspect
+        h = Math.min(0.9, imgDims.height / imgDims.width * aspect)
+        w = h * aspect * (imgDims.width / imgDims.height)
+        if (w > 0.9) {
+          w = 0.9
+          h = w / aspect * (imgDims.height / imgDims.width)
+        }
+      } else {
+        // Image is taller than desired aspect
+        w = h * aspect * (imgDims.width / imgDims.height)
+        if (w > 0.9) {
+          w = 0.9
+          h = w / aspect * (imgDims.height / imgDims.width)
+        }
+      }
+
+      // Ensure minimum size
+      w = Math.max(w, MIN_SIZE_PERCENT)
+      h = Math.max(h, MIN_SIZE_PERCENT)
+    } else {
+      // For "Free" mode (aspect === null), start with a perfect square
+      w = 0.5  // 50% width
+      h = 0.5  // 50% height (same as width = perfect square)
+    }
+
+    const newCropBox = {
+      x: (1 - w) / 2, // Center horizontally
+      y: (1 - h) / 2, // Center vertically
+      width: w,
+      height: h
+    }
+
+    setCropBox(newCropBox)
+    console.log('📏 Set percentage-based crop box for mode:', aspect, newCropBox)
+  }, [imgDims.width, imgDims.height, aspect])
+
+  const handleAspectChange = (newAspect: number | null | 'none') => {
+    console.log('🎯 Aspect button clicked:', ASPECT_RATIOS.find(ar => ar.value === newAspect)?.label, 'value:', newAspect)
+    setAspect(newAspect)
+  }
+
+  const constrainCropBox = useCallback((box: CropBox): CropBox => {
     let { x, y, width, height } = box
 
-    // Enforce min size as percentage
+    // Ensure minimum size
     width = Math.max(width, MIN_SIZE_PERCENT)
     height = Math.max(height, MIN_SIZE_PERCENT)
 
-    // FIXED: Only enforce aspect ratio for numeric values, NOT for "Free" (null) mode
-    if (aspect && aspect !== "none" && aspect !== null && typeof aspect === 'number') {
+    // Ensure crop box stays within image bounds
+    x = Math.max(0, Math.min(x, 1 - width))
+    y = Math.max(0, Math.min(y, 1 - height))
+
+    // Apply aspect ratio constraint if set
+    if (aspect !== null && aspect !== 'none') {
       const currentAspect = width / height
-      if (Math.abs(currentAspect - aspect) > 0.01) {
-        if (currentAspect > aspect) {
-          width = height * aspect
+      const targetAspect = aspect
+      
+      if (Math.abs(currentAspect - targetAspect) > 0.01) {
+        if (currentAspect > targetAspect) {
+          // Too wide, adjust width
+          width = height * targetAspect
         } else {
-          height = width / aspect
+          // Too tall, adjust height
+          height = width / targetAspect
+        }
+        
+        // Re-check bounds after aspect adjustment
+        if (x + width > 1) {
+          width = 1 - x
+          height = width / targetAspect
+        }
+        if (y + height > 1) {
+          height = 1 - y
+          width = height * targetAspect
         }
       }
     }
 
-    // Clamp to bounds (percentages 0-1)
-    x = Math.max(0, Math.min(1 - width, x))
-    y = Math.max(0, Math.min(1 - height, y))
-    
-    // Final validation
-    if (x + width > 1) width = 1 - x
-    if (y + height > 1) height = 1 - y
-    
     return { x, y, width, height }
+  }, [aspect])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (aspect === 'none') return
+    
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+
+    setDragStart({ x: e.clientX, y: e.clientY })
+    setIsDragging(true)
+
+    // Check if clicking on resize handles
+    const handleSize = 0.02
+    const { x: cropX, y: cropY, width: cropW, height: cropH } = cropBox
+
+    const handles = [
+      { name: 'nw', x: cropX, y: cropY },
+      { name: 'ne', x: cropX + cropW, y: cropY },
+      { name: 'sw', x: cropX, y: cropY + cropH },
+      { name: 'se', x: cropX + cropW, y: cropY + cropH },
+      { name: 'n', x: cropX + cropW/2, y: cropY },
+      { name: 's', x: cropX + cropW/2, y: cropY + cropH },
+      { name: 'w', x: cropX, y: cropY + cropH/2 },
+      { name: 'e', x: cropX + cropW, y: cropY + cropH/2 }
+    ]
+
+    const clickedHandle = handles.find(handle => 
+      Math.abs(x - handle.x) < handleSize && Math.abs(y - handle.y) < handleSize
+    )
+
+    if (clickedHandle) {
+      setDragType('resize')
+      setResizeHandle(clickedHandle.name)
+    } else if (x >= cropX && x <= cropX + cropW && y >= cropY && y <= cropY + cropH) {
+      setDragType('move')
+    }
   }
 
-  // Event handler for drag/resize
-  useEffect(() => {
-    function onMove(e: MouseEvent | TouchEvent) {
-      e.preventDefault()
-      const { clientX, clientY } = getClientPos(e)
-      
-      // FIXED: Convert pixel deltas to percentage deltas
-      const imgEl = imgRef.current?.getBoundingClientRect()
-      if (!imgEl) return
-      
-      const dx = (clientX - lastPos.current.x) / imgEl.width
-      const dy = (clientY - lastPos.current.y) / imgEl.height
-      lastPos.current = { x: clientX, y: clientY }
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || aspect === 'none') return
 
-      setCropBox(prev => {
-        if (dragging) {
-          return clampPercentage({
-            ...prev,
-            x: prev.x + dx,
-            y: prev.y + dy
-          })
-        }
-        if (resizing) {
-          let { x, y, width, height } = prev
-          switch (resizing) {
-            case 'n':
-              y += dy
-              height -= dy
-              break
-            case 's':
-              height += dy
-              break
-            case 'e':
-              width += dx
-              break
-            case 'w':
-              x += dx
-              width -= dx
+    const deltaX = (e.clientX - dragStart.x) * 0.001
+    const deltaY = (e.clientY - dragStart.y) * 0.001
+
+    if (dragType === 'move') {
+      const newCropBox = constrainCropBox({
+        x: cropBox.x + deltaX,
+        y: cropBox.y + deltaY,
+        width: cropBox.width,
+        height: cropBox.height
+      })
+      setCropBox(newCropBox)
+    } else if (dragType === 'resize') {
+      let newBox = { ...cropBox }
+
+      switch (resizeHandle) {
+        case 'se':
+          newBox.width += deltaX
+          newBox.height += deltaY
+          break
+        case 'sw':
+          newBox.x += deltaX
+          newBox.width -= deltaX
+          newBox.height += deltaY
+          break
+        case 'ne':
+          newBox.width += deltaX
+          newBox.y += deltaY
+          newBox.height -= deltaY
+          break
+        case 'nw':
+          newBox.x += deltaX
+          newBox.width -= deltaX
+          newBox.y += deltaY
+          newBox.height -= deltaY
+          break
+        case 'n':
+          newBox.y += deltaY
+          newBox.height -= deltaY
+          break
+        case 's':
+          newBox.height += deltaY
+          break
+        case 'w':
+          newBox.x += deltaX
+          newBox.width -= deltaX
+          break
+        case 'e':
+          newBox.width += deltaX
+          break
+      }
+
+      setCropBox(constrainCropBox(newBox))
+    }
+
+    setDragStart({ x: e.clientX, y: e.clientY })
+  }, [isDragging, dragStart, dragType, resizeHandle, cropBox, constrainCropBox, aspect])
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+    setDragType(null)
+    setResizeHandle('')
+  }, [])
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp])
+
+  const handleRotate = () => {
+    setRotation(prev => (prev + 90) % 360)
+  }
+
+  const handleCrop = async () => {
+    if (!imageRef.current || !canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = imageRef.current
+    
+    if (aspect === 'none') {
+      // No crop - just rotate if needed
+      canvas.width = img.naturalWidth
+      canvas.height = img.naturalHeight
+      
+      ctx.save()
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate((rotation * Math.PI) / 180)
+      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
+      ctx.restore()
+    } else {
+      // Calculate crop dimensions
+      const cropWidth = Math.floor(cropBox.width * img.naturalWidth)
+      const cropHeight = Math.floor(cropBox.height * img.naturalHeight)
+      const cropX = Math.floor(cropBox.x * img.naturalWidth)
+      const cropY = Math.floor(cropBox.y * img.naturalHeight)
+
+      canvas.width = cropWidth
+      canvas.height = cropHeight
+
+      ctx.save()
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate((rotation * Math.PI) / 180)
+      
+      ctx.drawImage(
+        img,
+        cropX, cropY, cropWidth, cropHeight,
+        -cropWidth / 2, -cropHeight / 2, cropWidth, cropHeight
+      )
+      ctx.restore()
+    }
+
+    // Convert to blob and create URL
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const url = URL.createObjectURL(blob)
+        onCropComplete(url)
+      }
+    }, 'image/jpeg', 0.95)
+  }
+
+  const renderCropOverlay = () => {
+    if (aspect === 'none') return null
+
+    const { x, y, width, height } = cropBox
+    const left = `${x * 100}%`
+    const top = `${y * 100}%`
+    const w = `${width * 100}%`
+    const h = `${height * 100}%`
+
+    return (
+      <>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+        
+        {/* Clear crop area */}
+        <div 
+          className="absolute border-2 border-white shadow-lg pointer-events-none"
+          style={{ left, top, width: w, height: h }}
+        />
+        
+        {/* Resize handles */}
+        {['nw', 'ne', 'sw', 'se', 'n', 's', 'w', 'e'].map(handle => {
+          let handleLeft = '0%'
+          let handleTop = '0%'
+          let transform = ''
+          
+          switch (handle) {
+            case 'nw':
+              handleLeft = left
+              handleTop = top
+              transform = 'translate(-50%, -50%)'
               break
             case 'ne':
-              y += dy
-              height -= dy
-              width += dx
-              break
-            case 'nw':
-              y += dy
-              height -= dy
-              x += dx
-              width -= dx
-              break
-            case 'se':
-              width += dx
-              height += dy
+              handleLeft = `calc(${left} + ${w})`
+              handleTop = top
+              transform = 'translate(-50%, -50%)'
               break
             case 'sw':
-              x += dx
-              width -= dx
-              height += dy
+              handleLeft = left
+              handleTop = `calc(${top} + ${h})`
+              transform = 'translate(-50%, -50%)'
+              break
+            case 'se':
+              handleLeft = `calc(${left} + ${w})`
+              handleTop = `calc(${top} + ${h})`
+              transform = 'translate(-50%, -50%)'
+              break
+            case 'n':
+              handleLeft = `calc(${left} + ${w} / 2)`
+              handleTop = top
+              transform = 'translate(-50%, -50%)'
+              break
+            case 's':
+              handleLeft = `calc(${left} + ${w} / 2)`
+              handleTop = `calc(${top} + ${h})`
+              transform = 'translate(-50%, -50%)'
+              break
+            case 'w':
+              handleLeft = left
+              handleTop = `calc(${top} + ${h} / 2)`
+              transform = 'translate(-50%, -50%)'
+              break
+            case 'e':
+              handleLeft = `calc(${left} + ${w})`
+              handleTop = `calc(${top} + ${h} / 2)`
+              transform = 'translate(-50%, -50%)'
               break
           }
-          return clampPercentage({ x, y, width, height })
-        }
-        return prev
-      })
-    }
-
-    function onUp() {
-      setDragging(false)
-      setResizing(null)
-      window.removeEventListener('mousemove', onMove as any)
-      window.removeEventListener('mouseup', onUp)
-      window.removeEventListener('touchmove', onMove as any)
-      window.removeEventListener('touchend', onUp)
-    }
-
-    if (dragging || resizing) {
-      window.addEventListener('mousemove', onMove as any, { passive: false })
-      window.addEventListener('mouseup', onUp)
-      window.addEventListener('touchmove', onMove as any, { passive: false })
-      window.addEventListener('touchend', onUp)
-      return () => {
-        window.removeEventListener('mousemove', onMove as any)
-        window.removeEventListener('mouseup', onUp)
-        window.removeEventListener('touchmove', onMove as any)
-        window.removeEventListener('touchend', onUp)
-      }
-    }
-  }, [dragging, resizing])
-
-  // Begin drag
-  function startDrag(e: React.MouseEvent | React.TouchEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragging(true)
-    const { clientX, clientY } = getClientPos(
-      'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
+          
+          return (
+            <div
+              key={handle}
+              className="absolute w-3 h-3 bg-white border border-gray-400 cursor-pointer z-10"
+              style={{
+                left: handleLeft,
+                top: handleTop,
+                transform
+              }}
+            />
+          )
+        })}
+      </>
     )
-    lastPos.current = { x: clientX, y: clientY }
   }
-
-  // Begin resize
-  function startResize(dir: ResizeDir) {
-    return (e: React.MouseEvent | React.TouchEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setResizing(dir)
-      const { clientX, clientY } = getClientPos(
-        'nativeEvent' in e ? (e.nativeEvent as any) : (e as any)
-      )
-      lastPos.current = { x: clientX, y: clientY }
-    }
-  }
-
-  // FIXED: Handle "No Crop" and percentage-based cropping with 100% quality output
-  const handleApplyCrop = async () => {
-    // Check for "No Crop" option first - return original image at 100% quality
-    if (aspect === "none") {
-      console.log('📸 No Crop selected - using original image at 100% quality')
-      onApply(image)
-      return
-    }
-    
-    console.log('✂️ Starting percentage-based crop process with 100% quality output...')
-    setIsProcessing(true)
-    
-    try {
-      // Validate input image first
-      if (!isValidDataURL(image)) {
-        throw new Error('Invalid input image data URL')
-      }
-      
-      // FIXED: Convert percentages to natural image pixels for 100% quality crop
-      const { x, y, width, height } = cropBox
-      const sx = Math.round(x * imgDims.width)
-      const sy = Math.round(y * imgDims.height)
-      const sw = Math.round(width * imgDims.width)
-      const sh = Math.round(height * imgDims.height)
-      
-      console.log('🎯 Percentage crop box:', cropBox)
-      console.log('🔧 Natural image pixels for 100% quality:', { sx, sy, sw, sh })
-      console.log('📐 Image dimensions:', imgDims)
-      
-      // Validate crop dimensions
-      if (sw <= 0 || sh <= 0) {
-        throw new Error('Invalid crop dimensions')
-      }
-      
-      // Create image element for cropping
-      const img = new window.Image()
-      
-      // Wait for image to load with timeout
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Image load timeout'))
-        }, 10000)
-        
-        img.onload = () => {
-          clearTimeout(timeout)
-          console.log('✅ Image loaded for 100% quality cropping:', img.naturalWidth, 'x', img.naturalHeight)
-          resolve()
-        }
-        img.onerror = (error) => {
-          clearTimeout(timeout)
-          console.error('❌ Failed to load image for cropping:', error)
-          reject(new Error('Failed to load image'))
-        }
-        img.src = image
-      })
-      
-      // Validate loaded image
-      if (!img.naturalWidth || !img.naturalHeight) {
-        throw new Error('Loaded image has no dimensions')
-      }
-      
-      // Create canvas for cropping at 100% quality
-      const canvas = document.createElement('canvas')
-      canvas.width = sw
-      canvas.height = sh
-      
-      console.log('📋 Canvas size for 100% quality output:', canvas.width, 'x', canvas.height)
-      
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        throw new Error('Failed to get canvas context')
-      }
-      
-      // Clear canvas first
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
-      // FIXED: Perform the crop using percentage-calculated coordinates at full resolution
-      console.log('🖼️ Drawing cropped image at 100% quality...')
-      ctx.drawImage(
-        img, 
-        sx, sy, sw, sh,  // Source region (percentage-based, full resolution)
-        0, 0, sw, sh     // Destination (full canvas, 100% quality)
-      )
-      
-      // Convert to data URL with maximum quality (0.98 for best balance of quality/size)
-      const croppedUrl = canvas.toDataURL('image/jpeg', 0.98)
-      
-      console.log('📏 Generated 100% quality data URL length:', croppedUrl.length)
-      
-      // Final validation of output
-      if (!isValidDataURL(croppedUrl)) {
-        throw new Error('Generated invalid data URL')
-      }
-      
-      console.log('✅ 100% quality percentage-based crop successful!')
-      onApply(croppedUrl)
-      
-    } catch (error) {
-      console.error('❌ Crop failed:', error)
-      
-      // Enhanced fallback strategy - return original at 100% quality
-      if (isValidDataURL(image)) {
-        console.log('🔄 Using original image as fallback at 100% quality')
-        onApply(image)
-      }
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  // Set crop box to centered default when aspect ratio changes
-  useEffect(() => {
-    // Handle "No Crop" - hide crop box
-    if (aspect === "none") {
-      return
-    }
-    
-    if (imgDims.width > 1 && imgDims.height > 1) {
-      let w = 0.7 // 70% width as percentage
-      let h = 0.7 // 70% height as percentage
-      
-      // FIXED: Only apply aspect ratio constraints for numeric values, keep "Free" mode truly free
-      if (aspect && aspect !== "none" && aspect !== null && typeof aspect === 'number') {
-        // Adjust for aspect ratio while keeping as percentages
-        const imgAspect = imgDims.width / imgDims.height
-        if (imgAspect > aspect) {
-          // Image is wider than desired aspect
-          h = w / aspect * (imgDims.width / imgDims.height)
-          if (h > 0.9) {
-            h = 0.9
-            w = h * aspect * (imgDims.height / imgDims.width)
-          }
-        } else {
-          // Image is taller than desired aspect
-          w = h * aspect * (imgDims.width / imgDims.height)
-          if (w > 0.9) {
-            w = 0.9
-            h = w / aspect * (imgDims.height / imgDims.width)
-          }
-        }
-      }
-      // For "Free" mode (aspect === null), start with a perfect square
-if (aspect === null) {
-  w = 0.5  // 50% width
-  h = 0.5  // 50% height (same as width = perfect square)
-} else {
-  // Your existing logic for other modes
-  w = Math.max(w, MIN_SIZE_PERCENT)
-  h = Math.max(h, MIN_SIZE_PERCENT)
-}
-      
-      setCropBox(newCropBox)
-      console.log('📏 Set percentage-based crop box for mode:', aspect, newCropBox)
-    }
-  }, [imgDims.width, imgDims.height, aspect])
-
-  // Responsive: constrain displayed width/height for mobile
-  const displayMax = 400
-  let displayW = displayMax, displayH = displayMax
-  if (imgDims.width > imgDims.height) {
-    displayH = Math.round(imgDims.height * (displayMax / imgDims.width))
-  } else {
-    displayW = Math.round(imgDims.width * (displayMax / imgDims.height))
-  }
-
-  // Enhanced validation for Apply button
-  const cropValid = imgDims.width > 1 && imgDims.height > 1 && 
-                   (aspect === "none" || (cropBox.width > 0 && cropBox.height > 0)) &&
-                   isValidDataURL(image)
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 50,
-      background: 'rgba(0,0,0,0.65)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '1rem',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
-        padding: '2rem 2rem 1.5rem 2rem',
-        maxWidth: 600,
-        width: '90vw',
-        position: 'relative',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          fontWeight: 700,
-          fontSize: '1.25rem',
-          marginBottom: '1rem',
-          color: '#1f2937'
-        }}>Crop Your Photo</div>
-        
-        {/* Debug info for development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{
-            fontSize: '0.75rem',
-            color: '#6b7280',
-            marginBottom: '1rem',
-            padding: '0.5rem',
-            backgroundColor: '#f9fafb',
-            borderRadius: '0.25rem'
-          }}>
-            Debug: Aspect={JSON.stringify(aspect)} | Crop {cropBox.x.toFixed(2)},{cropBox.y.toFixed(2)} {cropBox.width.toFixed(2)}×{cropBox.height.toFixed(2)} | Valid: {cropValid ? '✅' : '❌'}
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Crop Image</h2>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="w-4 h-4" />
+            </Button>
           </div>
-        )}
-        
-        {/* Simplified Aspect Ratio Presets - Only "No Crop" and "Free" */}
-        <div style={{ marginBottom: "1rem" }}>
-          {aspectRatios.map(opt => (
-            <button
-              key={opt.name}
-              onClick={() => {
-                console.log('🎯 Aspect button clicked:', opt.name, 'value:', opt.value)
-                setAspect(opt.value)
-              }}
-              style={{
-                fontWeight: aspect === opt.value ? 700 : 400,
-                background: aspect === opt.value ? "#10b981" : "#e5e7eb",
-                color: aspect === opt.value ? "white" : "#374151",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.5rem 1rem",
-                marginRight: "0.5rem",
-                marginBottom: "0.25rem",
-                cursor: "pointer"
-              }}
-            >
-              {opt.name}
-            </button>
-          ))}
-        </div>
-        
-        <div
-          ref={overlayRef}
-          style={{
-            position: 'relative',
-            display: 'inline-block',
-            width: displayW,
-            height: displayH,
-            background: '#f3f4f6',
-            borderRadius: '0.75rem',
-            userSelect: 'none',
-            touchAction: 'none'
-          }}
-        >
-          <img
-            ref={imgRef}
-            src={image}
-            alt="Crop preview"
-            style={{
-              width: displayW,
-              height: displayH,
-              display: 'block',
-              borderRadius: '0.75rem'
-            }}
-            draggable={false}
-          />
-          
-          {/* Crop Frame - Hide for "No Crop" option */}
-          {imgDims.width > 1 && aspect !== "none" && (
-            <div
-              style={{
-                position: 'absolute',
-                left: `${cropBox.x * 100}%`,
-                top: `${cropBox.y * 100}%`,
-                width: `${cropBox.width * 100}%`,
-                height: `${cropBox.height * 100}%`,
-                border: '2px solid #3b82f6',
-                background: 'rgba(59, 130, 246, 0.10)',
-                cursor: dragging ? 'grabbing' : 'move',
-                boxSizing: 'border-box',
-                borderRadius: '0.4rem',
-                transition: dragging || resizing ? 'none' : 'box-shadow 0.15s',
-                boxShadow: dragging || resizing ? '0 0 0 2px #3b82f6' : '0 2px 24px 0 rgba(59,130,246,0.1)'
-              }}
-              onMouseDown={startDrag}
-              onTouchStart={startDrag}
-            >
-              {/* Resize Handles */}
-              {handles.map(handle => (
-                <div
-                  key={handle.dir}
-                  style={{
-                    position: 'absolute',
-                    top: handle.top,
-                    left: handle.left,
-                    width: 24,
-                    height: 24,
-                    background: '#3b82f6',
-                    borderRadius: '50%',
-                    border: '2px solid white',
-                    cursor: handle.cursor,
-                    ...handle.style
-                  }}
-                  onMouseDown={startResize(handle.dir as ResizeDir)}
-                  onTouchStart={startResize(handle.dir as ResizeDir)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#e5e7eb',
-              color: '#374151',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleApplyCrop}
-            disabled={!cropValid || isProcessing}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: (cropValid && !isProcessing) ? '#10b981' : '#a7f3d0',
-              color: (cropValid && !isProcessing) ? 'white' : '#6b7280',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: (cropValid && !isProcessing) ? 'pointer' : 'not-allowed',
-              fontWeight: '600'
-            }}
-          >
-            {isProcessing ? '⏳ Processing...' : '✂️ Apply Crop'}
-          </button>
-        </div>
-      </div>
 
-      {/* Add spinning animation */}
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+          {/* Aspect ratio buttons */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {ASPECT_RATIOS.map((ratio) => (
+              <Button
+                key={ratio.label}
+                variant={aspect === ratio.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleAspectChange(ratio.value)}
+              >
+                {ratio.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Image container */}
+          <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4" style={{ height: '400px' }}>
+            <img
+              ref={imageRef}
+              src={imageUrl}
+              alt="Crop preview"
+              className="w-full h-full object-contain"
+              style={{ transform: `rotate(${rotation}deg)` }}
+              onMouseDown={handleMouseDown}
+              draggable={false}
+            />
+            {renderCropOverlay()}
+          </div>
+
+          {/* Controls */}
+          <div className="flex justify-between items-center">
+            <Button variant="outline" onClick={handleRotate}>
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Rotate
+            </Button>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleCrop}>
+                <Download className="w-4 h-4 mr-2" />
+                Apply Crop
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+      
+      {/* Hidden canvas for cropping */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
   )
 }
-
-export default CropTool
