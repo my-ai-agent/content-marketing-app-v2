@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { X, RotateCcw, Download } from 'lucide-react'
 
 interface CropToolProps {
@@ -91,52 +89,44 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
       h = Math.max(h, MIN_SIZE_PERCENT)
     } else {
       // For "Free" mode (aspect === null), start with a perfect square
-      w = 0.5  // 50% width
-      h = 0.5  // 50% height (same as width = perfect square)
+      w = 0.5
+      h = 0.5
     }
 
     const newCropBox = {
-      x: (1 - w) / 2, // Center horizontally
-      y: (1 - h) / 2, // Center vertically
+      x: (1 - w) / 2,
+      y: (1 - h) / 2,
       width: w,
       height: h
     }
 
     setCropBox(newCropBox)
-    console.log('📏 Set percentage-based crop box for mode:', aspect, newCropBox)
   }, [imgDims.width, imgDims.height, aspect])
 
   const handleAspectChange = (newAspect: number | null | 'none') => {
-    console.log('🎯 Aspect button clicked:', ASPECT_RATIOS.find(ar => ar.value === newAspect)?.label, 'value:', newAspect)
     setAspect(newAspect)
   }
 
   const constrainCropBox = useCallback((box: CropBox): CropBox => {
     let { x, y, width, height } = box
 
-    // Ensure minimum size
     width = Math.max(width, MIN_SIZE_PERCENT)
     height = Math.max(height, MIN_SIZE_PERCENT)
 
-    // Ensure crop box stays within image bounds
     x = Math.max(0, Math.min(x, 1 - width))
     y = Math.max(0, Math.min(y, 1 - height))
 
-    // Apply aspect ratio constraint if set
     if (aspect !== null && aspect !== 'none') {
       const currentAspect = width / height
       const targetAspect = aspect
       
       if (Math.abs(currentAspect - targetAspect) > 0.01) {
         if (currentAspect > targetAspect) {
-          // Too wide, adjust width
           width = height * targetAspect
         } else {
-          // Too tall, adjust height
           height = width / targetAspect
         }
         
-        // Re-check bounds after aspect adjustment
         if (x + width > 1) {
           width = 1 - x
           height = width / targetAspect
@@ -161,7 +151,6 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
     setDragStart({ x: e.clientX, y: e.clientY })
     setIsDragging(true)
 
-    // Check if clicking on resize handles
     const handleSize = 0.02
     const { x: cropX, y: cropY, width: cropW, height: cropH } = cropBox
 
@@ -310,7 +299,6 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
       ctx.restore()
     }
 
-    // Convert to blob and create URL
     canvas.toBlob((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob)
@@ -330,16 +318,11 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
 
     return (
       <>
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-        
-        {/* Clear crop area */}
         <div 
           className="absolute border-2 border-white shadow-lg pointer-events-none"
           style={{ left, top, width: w, height: h }}
         />
-        
-        {/* Resize handles */}
         {['nw', 'ne', 'sw', 'se', 'n', 's', 'w', 'e'].map(handle => {
           let handleLeft = '0%'
           let handleTop = '0%'
@@ -406,38 +389,50 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-lg">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Crop Image</h2>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <button
+              type="button"
+              className="p-2 rounded hover:bg-gray-100 transition"
+              aria-label="Close"
+              onClick={onClose}
+            >
               <X className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
 
           {/* Aspect ratio buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
             {ASPECT_RATIOS.map((ratio) => (
-              <Button
+              <button
                 key={ratio.label}
-                variant={aspect === ratio.value ? "default" : "outline"}
-                size="sm"
+                type="button"
+                className={`px-4 py-2 rounded font-medium text-sm border transition
+                  ${aspect === ratio.value
+                    ? 'bg-green-600 text-white border-green-600 shadow'
+                    : 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200'}
+                `}
                 onClick={() => handleAspectChange(ratio.value)}
               >
                 {ratio.label}
-              </Button>
+              </button>
             ))}
           </div>
 
           {/* Image container */}
-          <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4" style={{ height: '400px' }}>
+          <div
+            className="relative bg-gray-100 rounded-lg overflow-hidden mb-4"
+            style={{ height: '400px', userSelect: 'none', cursor: aspect === 'none' ? 'default' : (isDragging ? 'grabbing' : 'grab') }}
+            onMouseDown={handleMouseDown}
+          >
             <img
               ref={imageRef}
               src={imageUrl}
               alt="Crop preview"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain pointer-events-none select-none"
               style={{ transform: `rotate(${rotation}deg)` }}
-              onMouseDown={handleMouseDown}
               draggable={false}
             />
             {renderCropOverlay()}
@@ -445,25 +440,35 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
 
           {/* Controls */}
           <div className="flex justify-between items-center">
-            <Button variant="outline" onClick={handleRotate}>
+            <button
+              type="button"
+              className="flex items-center px-4 py-2 rounded border border-gray-200 bg-white hover:bg-gray-100 text-gray-800 transition"
+              onClick={handleRotate}
+            >
               <RotateCcw className="w-4 h-4 mr-2" />
               Rotate
-            </Button>
+            </button>
             
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
+              <button
+                type="button"
+                className="px-4 py-2 rounded border border-gray-200 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 transition"
+                onClick={onClose}
+              >
                 Cancel
-              </Button>
-              <Button onClick={handleCrop}>
+              </button>
+              <button
+                type="button"
+                className="flex items-center px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                onClick={handleCrop}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Apply Crop
-              </Button>
+              </button>
             </div>
           </div>
         </div>
-      </Card>
-      
-      {/* Hidden canvas for cropping */}
+      </div>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
   )
