@@ -107,8 +107,8 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     width = Math.max(width, MIN_SIZE_PERCENT)
     height = Math.max(height, MIN_SIZE_PERCENT)
 
-    // Enforce aspect ratio if set (only for numeric values)
-    if (aspect && aspect !== "none" && typeof aspect === 'number') {
+    // FIXED: Only enforce aspect ratio for numeric values, NOT for "Free" (null) mode
+    if (aspect && aspect !== "none" && aspect !== null && typeof aspect === 'number') {
       const currentAspect = width / height
       if (Math.abs(currentAspect - aspect) > 0.01) {
         if (currentAspect > aspect) {
@@ -365,7 +365,8 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       let w = 0.7 // 70% width as percentage
       let h = 0.7 // 70% height as percentage
       
-      if (aspect && aspect !== "none" && typeof aspect === 'number') {
+      // FIXED: Only apply aspect ratio constraints for numeric values, keep "Free" mode truly free
+      if (aspect && aspect !== "none" && aspect !== null && typeof aspect === 'number') {
         // Adjust for aspect ratio while keeping as percentages
         const imgAspect = imgDims.width / imgDims.height
         if (imgAspect > aspect) {
@@ -384,6 +385,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           }
         }
       }
+      // For "Free" mode (aspect === null), keep the default 70% square crop box
       
       // Ensure minimum size
       w = Math.max(w, MIN_SIZE_PERCENT)
@@ -397,7 +399,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       }
       
       setCropBox(newCropBox)
-      console.log('📏 Set percentage-based crop box:', newCropBox)
+      console.log('📏 Set percentage-based crop box for mode:', aspect, newCropBox)
     }
   }, [imgDims.width, imgDims.height, aspect])
 
