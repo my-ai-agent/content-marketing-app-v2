@@ -290,10 +290,10 @@ export default function PhotoUpload() {
       {/* Crop Modal */}
       {showCropModal && originalImage && (
         <CropTool
-          imageUrl={originalImage}
-          onApply={handleCropApply}
-          onCancel={handleCropCancel}
-        />
+  imageUrl={originalImage}
+  onCropComplete={handleCropApply}  // ✅ Correct prop name
+  onClose={handleCropCancel}        // ✅ Correct prop name
+/>
       )}
 
       {/* Header with Step Tracker Only */}
