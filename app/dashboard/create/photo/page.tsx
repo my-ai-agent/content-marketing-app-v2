@@ -133,7 +133,6 @@ if (croppedUrl.startsWith('blob:')) {
 }
 
 const compressedBlob = await compressWithPica(finalImageUrl)
-      const compressedBlob = await compressWithPica(croppedUrl)
       await saveImageToIndexedDB('selectedPhoto', compressedBlob)
       setSelectedPhoto(croppedUrl)
       if (pendingFile) {
