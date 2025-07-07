@@ -278,6 +278,7 @@ export default function PhotoUpload() {
 
     reader.onerror = () => setError('Failed to read file');
     reader.readAsDataURL(processedFile);
+  }
   };
 
   return (
