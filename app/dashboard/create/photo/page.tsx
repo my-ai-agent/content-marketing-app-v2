@@ -110,8 +110,10 @@ export default function PhotoUpload() {
 
   // On file selection, show crop modal with loaded image (as data URL)
   const handleCropApply = async (croppedUrl: string) => {
+    console.log('🎯 Crop Apply Called!', croppedUrl?.substring(0, 50));
     setShowCropModal(false)
     setIsProcessing(true)
+    console.log('🔍 Checking URL format...', croppedUrl?.startsWith('data:image/'));
     try {
       if (!croppedUrl.startsWith('data:image/')) {
         throw new Error('Invalid cropped image data')
