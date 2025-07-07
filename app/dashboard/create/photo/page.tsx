@@ -290,7 +290,7 @@ export default function PhotoUpload() {
       {/* Crop Modal */}
       {showCropModal && originalImage && (
         <CropTool
-          image={originalImage}
+          imageUrl={originalImage}
           onApply={handleCropApply}
           onCancel={handleCropCancel}
         />
