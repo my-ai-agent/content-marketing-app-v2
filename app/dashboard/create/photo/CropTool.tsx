@@ -25,11 +25,6 @@ interface ImageDimensions {
 // ----- Constants -----
 const ASPECT_RATIOS: { label: string; value: AspectValue }[] = [
   { label: 'Free', value: null },
-  { label: 'Square', value: 1 },
-  { label: '4:3', value: 4/3 },
-  { label: '16:9', value: 16/9 },
-  { label: '3:4', value: 3/4 },
-  { label: '9:16', value: 9/16 },
   { label: 'No Crop', value: "none" }
 ]
 const MIN_SIZE_PERCENT = 0.1
