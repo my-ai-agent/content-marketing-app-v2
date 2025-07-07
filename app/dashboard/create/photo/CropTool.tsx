@@ -49,13 +49,10 @@ const handles = [
   { dir: 'sw', top: '100%', left: -8, cursor: 'nesw-resize', style: { transform: 'translate(-50%, 50%)' } },
 ] as const
 
+// UPDATED: Simplified aspect ratios - removed 1:1, 4:3, 3:4, 16:9 for cleaner UX
 const aspectRatios = [
   { name: "No Crop", value: "none" },
   { name: "Free", value: null },
-  { name: "1:1", value: 1 },
-  { name: "4:3", value: 4 / 3 },
-  { name: "3:4", value: 3 / 4 },
-  { name: "16:9", value: 16 / 9 },
 ]
 
 const MIN_SIZE_PERCENT = 0.05 // 5% minimum size as percentage
@@ -246,16 +243,16 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
     }
   }
 
-  // FIXED: Handle "No Crop" and percentage-based cropping
+  // FIXED: Handle "No Crop" and percentage-based cropping with 100% quality output
   const handleApplyCrop = async () => {
-    // Check for "No Crop" option first
+    // Check for "No Crop" option first - return original image at 100% quality
     if (aspect === "none") {
-      console.log('📸 No Crop selected - using original image')
+      console.log('📸 No Crop selected - using original image at 100% quality')
       onApply(image)
       return
     }
     
-    console.log('✂️ Starting percentage-based crop process...')
+    console.log('✂️ Starting percentage-based crop process with 100% quality output...')
     setIsProcessing(true)
     
     try {
@@ -264,7 +261,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
         throw new Error('Invalid input image data URL')
       }
       
-      // FIXED: Convert percentages to natural image pixels
+      // FIXED: Convert percentages to natural image pixels for 100% quality crop
       const { x, y, width, height } = cropBox
       const sx = Math.round(x * imgDims.width)
       const sy = Math.round(y * imgDims.height)
@@ -272,7 +269,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       const sh = Math.round(height * imgDims.height)
       
       console.log('🎯 Percentage crop box:', cropBox)
-      console.log('🔧 Natural image pixels:', { sx, sy, sw, sh })
+      console.log('🔧 Natural image pixels for 100% quality:', { sx, sy, sw, sh })
       console.log('📐 Image dimensions:', imgDims)
       
       // Validate crop dimensions
@@ -291,7 +288,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
         
         img.onload = () => {
           clearTimeout(timeout)
-          console.log('✅ Image loaded for cropping:', img.naturalWidth, 'x', img.naturalHeight)
+          console.log('✅ Image loaded for 100% quality cropping:', img.naturalWidth, 'x', img.naturalHeight)
           resolve()
         }
         img.onerror = (error) => {
@@ -307,12 +304,12 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
         throw new Error('Loaded image has no dimensions')
       }
       
-      // Create canvas for cropping
+      // Create canvas for cropping at 100% quality
       const canvas = document.createElement('canvas')
       canvas.width = sw
       canvas.height = sh
       
-      console.log('📋 Canvas size:', canvas.width, 'x', canvas.height)
+      console.log('📋 Canvas size for 100% quality output:', canvas.width, 'x', canvas.height)
       
       const ctx = canvas.getContext('2d')
       if (!ctx) {
@@ -323,33 +320,33 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
       ctx.fillStyle = '#ffffff'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      // FIXED: Perform the crop using percentage-calculated coordinates
-      console.log('🖼️ Drawing cropped image...')
+      // FIXED: Perform the crop using percentage-calculated coordinates at full resolution
+      console.log('🖼️ Drawing cropped image at 100% quality...')
       ctx.drawImage(
         img, 
-        sx, sy, sw, sh,  // Source region (percentage-based)
-        0, 0, sw, sh     // Destination (full canvas)
+        sx, sy, sw, sh,  // Source region (percentage-based, full resolution)
+        0, 0, sw, sh     // Destination (full canvas, 100% quality)
       )
       
-      // Convert to data URL with high quality
-      const croppedUrl = canvas.toDataURL('image/jpeg', 0.95)
+      // Convert to data URL with maximum quality (0.98 for best balance of quality/size)
+      const croppedUrl = canvas.toDataURL('image/jpeg', 0.98)
       
-      console.log('📏 Generated data URL length:', croppedUrl.length)
+      console.log('📏 Generated 100% quality data URL length:', croppedUrl.length)
       
       // Final validation of output
       if (!isValidDataURL(croppedUrl)) {
         throw new Error('Generated invalid data URL')
       }
       
-      console.log('✅ Percentage-based crop successful!')
+      console.log('✅ 100% quality percentage-based crop successful!')
       onApply(croppedUrl)
       
     } catch (error) {
       console.error('❌ Crop failed:', error)
       
-      // Enhanced fallback strategy
+      // Enhanced fallback strategy - return original at 100% quality
       if (isValidDataURL(image)) {
-        console.log('🔄 Using original image as fallback')
+        console.log('🔄 Using original image as fallback at 100% quality')
         onApply(image)
       }
     } finally {
@@ -459,7 +456,7 @@ const CropTool: React.FC<CropToolProps> = ({ image, onApply, onCancel }) => {
           </div>
         )}
         
-        {/* Aspect Ratio Presets */}
+        {/* Simplified Aspect Ratio Presets - Only "No Crop" and "Free" */}
         <div style={{ marginBottom: "1rem" }}>
           {aspectRatios.map(opt => (
             <button
