@@ -115,9 +115,24 @@ export default function PhotoUpload() {
     setIsProcessing(true)
     console.log('🔍 Checking URL format...', croppedUrl?.startsWith('data:image/'));
     try {
-      if (!croppedUrl.startsWith('data:image/')) {
-        throw new Error('Invalid cropped image data')
-      }
+      if (!croppedUrl.startsWith('data:image/') && !croppedUrl.startsWith('blob:')) {
+  throw new Error('Invalid cropped image data')
+}
+
+// Convert blob URL to data URL if needed
+let finalImageUrl = croppedUrl;
+if (croppedUrl.startsWith('blob:')) {
+  console.log('🔄 Converting blob URL to data URL for compression');
+  const response = await fetch(croppedUrl);
+  const blob = await response.blob();
+  finalImageUrl = await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
+
+const compressedBlob = await compressWithPica(finalImageUrl)
       const compressedBlob = await compressWithPica(croppedUrl)
       await saveImageToIndexedDB('selectedPhoto', compressedBlob)
       setSelectedPhoto(croppedUrl)
