@@ -181,64 +181,74 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
 
   // ----- Rotation & Crop -----
   const handleRotate = () => setRotation(prev => (prev + 90) % 360)
+  
   const handleCrop = () => {
     if (!imageRef.current || !canvasRef.current) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const img = imageRef.current
+
     if (aspect === 'none') {
-  canvas.width = img.naturalWidth
-  canvas.height = img.naturalHeight
-  if (rotation === 0) {
-    // No rotation - simple full image draw
-    ctx.drawImage(img, 0, 0)
-  } else {
-  // Get the actual display dimensions of the image
-  const imageElement = imageRef.current
-  const imageRect = imageElement.getBoundingClientRect()
-  
-  // Calculate the actual displayed image size (accounting for object-contain)
-  const imageAspectRatio = img.naturalWidth / img.naturalHeight
-  const containerAspectRatio = imageRect.width / imageRect.height
-  
-  let displayedWidth, displayedHeight, offsetX, offsetY
-  
-  if (imageAspectRatio > containerAspectRatio) {
-    // Image is wider - limited by container width
-    displayedWidth = imageRect.width
-    displayedHeight = imageRect.width / imageAspectRatio
-    offsetX = 0
-    offsetY = (imageRect.height - displayedHeight) / 2
-  } else {
-    // Image is taller - limited by container height
-    displayedWidth = imageRect.height * imageAspectRatio
-    displayedHeight = imageRect.height
-    offsetX = (imageRect.width - displayedWidth) / 2
-    offsetY = 0
-  }
-  
-  // Calculate scale factors from displayed image to original
-  const scaleX = img.naturalWidth / displayedWidth
-  const scaleY = img.naturalHeight / displayedHeight
-  
-  // Apply proper scaling to crop coordinates
-  const cropWidth = Math.floor(cropBox.width * displayedWidth * scaleX)
-  const cropHeight = Math.floor(cropBox.height * displayedHeight * scaleY)
-  const cropX = Math.floor(cropBox.x * displayedWidth * scaleX)
-  const cropY = Math.floor(cropBox.y * displayedHeight * scaleY)
-  
-  canvas.width = cropWidth
-  canvas.height = cropHeight
-  ctx.save()
-  ctx.translate(canvas.width / 2, canvas.height / 2)
-  ctx.rotate((rotation * Math.PI) / 180)
-  ctx.drawImage(
-    img, cropX, cropY, cropWidth, cropHeight,
-    -cropWidth / 2, -cropHeight / 2, cropWidth, cropHeight
-  )
-  ctx.restore()
-}
+      // No Crop mode - preserve full image
+      canvas.width = img.naturalWidth
+      canvas.height = img.naturalHeight
+      if (rotation === 0) {
+        // No rotation - simple full image draw
+        ctx.drawImage(img, 0, 0)
+      } else {
+        // With rotation - but still full image
+        ctx.save()
+        ctx.translate(canvas.width / 2, canvas.height / 2)
+        ctx.rotate((rotation * Math.PI) / 180)
+        ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
+        ctx.restore()
+      }
+    } else {
+      // Free crop mode - apply coordinate scaling
+      
+      // Get the actual display dimensions of the image
+      const imageElement = imageRef.current
+      const imageRect = imageElement.getBoundingClientRect()
+      
+      // Calculate the actual displayed image size (accounting for object-contain)
+      const imageAspectRatio = img.naturalWidth / img.naturalHeight
+      const containerAspectRatio = imageRect.width / imageRect.height
+      
+      let displayedWidth, displayedHeight
+      
+      if (imageAspectRatio > containerAspectRatio) {
+        // Image is wider - limited by container width
+        displayedWidth = imageRect.width
+        displayedHeight = imageRect.width / imageAspectRatio
+      } else {
+        // Image is taller - limited by container height
+        displayedWidth = imageRect.height * imageAspectRatio
+        displayedHeight = imageRect.height
+      }
+      
+      // Calculate scale factors from displayed image to original
+      const scaleX = img.naturalWidth / displayedWidth
+      const scaleY = img.naturalHeight / displayedHeight
+      
+      // Apply proper scaling to crop coordinates
+      const cropWidth = Math.floor(cropBox.width * displayedWidth * scaleX)
+      const cropHeight = Math.floor(cropBox.height * displayedHeight * scaleY)
+      const cropX = Math.floor(cropBox.x * displayedWidth * scaleX)
+      const cropY = Math.floor(cropBox.y * displayedHeight * scaleY)
+      
+      canvas.width = cropWidth
+      canvas.height = cropHeight
+      ctx.save()
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate((rotation * Math.PI) / 180)
+      ctx.drawImage(
+        img, cropX, cropY, cropWidth, cropHeight,
+        -cropWidth / 2, -cropHeight / 2, cropWidth, cropHeight
+      )
+      ctx.restore()
+    }
+
     canvas.toBlob((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob)
