@@ -1,5 +1,12 @@
 // pages/api/content/generate.js
-// Enhanced Content Generation API with all enhancement systems
+// Complete Claude API Integration
+
+import Anthropic from '@anthropic-ai/sdk';
+
+// Initialize Claude client
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 export default async function handler(req, res) {
   // Only allow POST requests
@@ -17,7 +24,8 @@ export default async function handler(req, res) {
       travelCategory,
       downloadFormat,
       includeSeasonalTrends = true,
-      includeCompetitiveAdvantage = true
+      includeCompetitiveAdvantage = true,
+      imageData // Base64 image data from frontend
     } = req.body;
 
     // Validate required fields
@@ -35,7 +43,7 @@ export default async function handler(req, res) {
 
     console.log(`🎯 Generating content for ${targetGeneration} in ${location}`);
 
-    // Enhanced response generation (simplified for now)
+    // Generate enhanced content data
     const enhancedResponses = generateEnhancedContent({
       location,
       targetAudience: targetGeneration,
@@ -64,25 +72,83 @@ export default async function handler(req, res) {
       includeCompetitiveAdvantage
     });
 
-    // For now, return enhanced metadata (Claude API integration comes next)
+    // 🔥 ACTUAL CLAUDE API CALL
+    const messages = [
+      {
+        role: 'user',
+        content: imageData ? [
+          {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: 'image/jpeg',
+              data: imageData
+            }
+          },
+          {
+            type: 'text',
+            text: enhancedPrompt
+          }
+        ] : enhancedPrompt
+      }
+    ];
+
+    const claudeResponse = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 4000,
+      temperature: 0.7,
+      messages: messages,
+      system: `You are a New Zealand travel content expert specializing in culturally respectful, generationally-targeted content creation. 
+
+Your expertise includes:
+- Deep respect for Māori culture and local iwi
+- Understanding of different generational travel motivations
+- Seasonal tourism trends in New Zealand
+- Platform-specific content optimization
+- Cultural sensitivity and authenticity
+
+Always incorporate manaakitanga (hospitality and care) principles and acknowledge the cultural significance of locations.
+
+Response format should be structured JSON with:
+{
+  "content": "Main content text",
+  "hashtags": ["relevant", "hashtags"],
+  "callToAction": "Engaging CTA",
+  "culturalNotes": "Cultural context and respect elements",
+  "platformOptimization": "Platform-specific tips"
+}`
+    });
+
+    // Parse Claude's response
+    let generatedContent;
+    try {
+      // Try to parse as JSON first
+      generatedContent = JSON.parse(claudeResponse.content[0].text);
+    } catch (parseError) {
+      // If not JSON, treat as plain text
+      generatedContent = {
+        content: claudeResponse.content[0].text,
+        hashtags: [],
+        callToAction: "",
+        culturalNotes: "",
+        platformOptimization: ""
+      };
+    }
+
+    // Build comprehensive response
     const response = {
-      content: `Enhanced content for ${targetGeneration} visiting ${location}:
-
-${prompt}
-
-This content has been enhanced with:
-- Cultural accuracy: ${enhancedResponses.culturalContext}
-- Generational targeting: ${generationalData.description}
-- Seasonal relevance: ${seasonalData.season} trends
-- Location-specific elements: ${enhancedResponses.uniqueElements}`,
-
+      // Claude-generated content
+      generatedContent: generatedContent,
+      
+      // Enhanced metadata (your existing excellent system)
       metadata: {
         request: {
           location,
           targetGeneration,
           contentType,
           platform,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          hasImage: !!imageData
         },
         
         enhancements: {
@@ -117,7 +183,9 @@ This content has been enhanced with:
       systemPerformance: {
         promptLength: enhancedPrompt.length,
         enhancementSystems: 5,
-        qualityScore: '95% (Cultural + Generational + Seasonal accuracy)'
+        qualityScore: '95% (Cultural + Generational + Seasonal accuracy)',
+        claudeModel: 'claude-3-5-sonnet-20241022',
+        tokensUsed: claudeResponse.usage?.input_tokens + claudeResponse.usage?.output_tokens
       }
     };
 
@@ -125,6 +193,24 @@ This content has been enhanced with:
 
   } catch (error) {
     console.error('❌ Content generation error:', error);
+    
+    // Handle specific Claude API errors
+    if (error.status === 401) {
+      return res.status(500).json({
+        error: 'API authentication failed',
+        details: 'Please check your Claude API key configuration',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    if (error.status === 429) {
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        details: 'Please wait before making another request',
+        timestamp: new Date().toISOString()
+      });
+    }
+
     res.status(500).json({
       error: 'Content generation failed',
       details: error.message,
@@ -255,6 +341,8 @@ function buildEnhancedPrompt(params) {
     prompt,
     location,
     targetGeneration,
+    contentType,
+    platform,
     enhancedResponses,
     generationalData,
     seasonalData
@@ -266,6 +354,8 @@ ENHANCED CONTENT GENERATION REQUEST:
 Original Request: ${prompt}
 Location: ${location}
 Target Generation: ${targetGeneration}
+Content Type: ${contentType || 'General'}
+Platform: ${platform || 'Multi-platform'}
 
 CULTURAL CONTEXT:
 - ${enhancedResponses.culturalContext}
@@ -284,6 +374,6 @@ SEASONAL RELEVANCE:
 UNIQUE LOCATION ELEMENTS:
 - ${enhancedResponses.uniqueElements}
 
-Create content that authentically combines cultural respect, generational psychology, and seasonal relevance.
+Create engaging ${contentType || 'travel content'} that authentically combines cultural respect, generational psychology, and seasonal relevance. Include relevant hashtags and a compelling call-to-action.
 `;
 }
