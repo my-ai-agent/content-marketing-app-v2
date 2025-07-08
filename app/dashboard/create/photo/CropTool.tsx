@@ -188,13 +188,19 @@ export default function CropTool({ imageUrl, onClose, onCropComplete }: CropTool
     if (!ctx) return
     const img = imageRef.current
     if (aspect === 'none') {
-      canvas.width = img.naturalWidth
-      canvas.height = img.naturalHeight
-      ctx.save()
-      ctx.translate(canvas.width / 2, canvas.height / 2)
-      ctx.rotate((rotation * Math.PI) / 180)
-      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
-      ctx.restore()
+  canvas.width = img.naturalWidth
+  canvas.height = img.naturalHeight
+  if (rotation === 0) {
+    // No rotation - simple full image draw
+    ctx.drawImage(img, 0, 0)
+  } else {
+    // With rotation - but still full image
+    ctx.save()
+    ctx.translate(canvas.width / 2, canvas.height / 2)
+    ctx.rotate((rotation * Math.PI) / 180)
+    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
+    ctx.restore()
+  }
     } else {
       const cropWidth = Math.floor(cropBox.width * img.naturalWidth)
       const cropHeight = Math.floor(cropBox.height * img.naturalHeight)
