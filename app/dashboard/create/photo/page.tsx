@@ -1,10 +1,6 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamically import CropTool in case it uses browser APIs at the module level
-const CropTool = dynamic(() => import('./CropTool'), { ssr: false })
 
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
@@ -61,11 +57,8 @@ export default function PhotoUpload() {
   const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showCropModal, setShowCropModal] = useState(false)
-  const [originalImage, setOriginalImage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   // Compress image using pica, loaded dynamically
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
@@ -108,54 +101,6 @@ export default function PhotoUpload() {
     }
   }
 
-  // On file selection, show crop modal with loaded image (as data URL)
-  const handleCropApply = async (croppedUrl: string) => {
-    console.log('🎯 Crop Apply Called!', croppedUrl?.substring(0, 50));
-    setShowCropModal(false)
-    setIsProcessing(true)
-    console.log('🔍 Checking URL format...', croppedUrl?.startsWith('data:image/'));
-    try {
-      if (!croppedUrl.startsWith('data:image/') && !croppedUrl.startsWith('blob:')) {
-  throw new Error('Invalid cropped image data')
-}
-
-// Convert blob URL to data URL if needed
-let finalImageUrl = croppedUrl;
-if (croppedUrl.startsWith('blob:')) {
-  console.log('🔄 Converting blob URL to data URL for compression');
-  const response = await fetch(croppedUrl);
-  const blob = await response.blob();
-  finalImageUrl = await new Promise<string>((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
-}
-
-const compressedBlob = await compressWithPica(finalImageUrl)
-      await saveImageToIndexedDB('selectedPhoto', compressedBlob)
-      setSelectedPhoto(croppedUrl)
-      if (pendingFile) {
-        localStorage.setItem('photoFileName', pendingFile.name)
-        localStorage.setItem('photoFileSize', pendingFile.size.toString())
-      }
-    } catch (err: any) {
-      setError(`Failed to process cropped image. ${err?.message ?? ''} Please try again.`)
-      setSelectedPhoto(null)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleCropCancel = () => {
-    setShowCropModal(false)
-    setOriginalImage(null)
-    setPhotoFile(null)
-    setPendingFile(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    if (cameraInputRef.current) cameraInputRef.current.value = ''
-  }
-
   const handleNext = async () => {
     setError(null)
     if (selectedPhoto) {
@@ -174,8 +119,6 @@ const compressedBlob = await compressWithPica(finalImageUrl)
     setError(null)
     setSelectedPhoto(null)
     setPhotoFile(null)
-    setOriginalImage(null)
-    setPendingFile(null)
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
@@ -186,8 +129,6 @@ const compressedBlob = await compressWithPica(finalImageUrl)
   const handleRemovePhoto = async () => {
     setSelectedPhoto(null)
     setPhotoFile(null)
-    setOriginalImage(null)
-    setPendingFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     await removeImageFromIndexedDB('selectedPhoto')
@@ -196,7 +137,7 @@ const compressedBlob = await compressWithPica(finalImageUrl)
     localStorage.removeItem('photoFileSize')
   }
 
-  // File select handler with dynamic heic2any import
+  // Simplified file select handler - direct to compression and save
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     const file = e.target.files && e.target.files[0];
@@ -242,7 +183,6 @@ const compressedBlob = await compressWithPica(finalImageUrl)
       return;
     }
 
-    setPendingFile(processedFile);
     setPhotoFile(processedFile);
 
     const reader = new FileReader();
@@ -250,42 +190,20 @@ const compressedBlob = await compressWithPica(finalImageUrl)
       const result = ev.target?.result;
       if (typeof result === 'string') {
         try {
-          // Pre-compress large images for better crop performance
-          const img = new Image();
-          img.src = result;
-
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-          });
-
-          let finalImageUrl = result;
-          const MAX_DISPLAY_SIZE = 2048;
-
-          // Pre-compress if image is very large
-          if (img.naturalWidth > MAX_DISPLAY_SIZE || img.naturalHeight > MAX_DISPLAY_SIZE) {
-            setError("Optimizing large photo for editing...");
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            const scale = Math.min(
-              MAX_DISPLAY_SIZE / img.naturalWidth,
-              MAX_DISPLAY_SIZE / img.naturalHeight
-            );
-
-            canvas.width = Math.round(img.naturalWidth * scale);
-            canvas.height = Math.round(img.naturalHeight * scale);
-
-            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            finalImageUrl = canvas.toDataURL('image/jpeg', 0.85);
-            setError(null);
-          }
-
-          setOriginalImage(finalImageUrl);
-          setShowCropModal(true);
+          // Compress and save directly - no crop step
+          setError("Processing image...");
+          const compressedBlob = await compressWithPica(result);
+          await saveImageToIndexedDB('selectedPhoto', compressedBlob);
+          setSelectedPhoto(result);
+          
+          // Save file metadata
+          localStorage.setItem('photoFileName', processedFile.name);
+          localStorage.setItem('photoFileSize', processedFile.size.toString());
+          
+          setError(null);
         } catch (err) {
           setError('Failed to process image. Please try a smaller file or different format.');
+          setSelectedPhoto(null);
         }
       } else {
         setError('Failed to read file');
@@ -303,15 +221,6 @@ const compressedBlob = await compressWithPica(finalImageUrl)
       minHeight: '100vh',
       backgroundColor: 'white'
     }}>
-      {/* Crop Modal */}
-      {showCropModal && originalImage && (
-        <CropTool
-  imageUrl={originalImage}
-  onCropComplete={handleCropApply}  // ✅ Correct prop name
-  onClose={handleCropCancel}        // ✅ Correct prop name
-/>
-      )}
-
       {/* Header with Step Tracker Only */}
       <div style={{
         display: 'flex',
@@ -667,12 +576,11 @@ const compressedBlob = await compressWithPica(finalImageUrl)
               boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
               transition: 'all 0.2s'
             }}
-            className=""
           >
             Continue →
           </button>
         </div>
-        {/* Logo - Brand Reinforcement - Deactivated */}
+        {/* Logo - Brand Reinforcement */}
         <div style={{
           textAlign: 'center',
           marginBottom: '1rem',
