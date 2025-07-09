@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
@@ -99,77 +98,147 @@ function PlatformCarousel() {
 }
 
 export default function Home() {
+  const handleSignIn = () => {
+    window.location.href = '/auth'
+  }
+
+  const handleStart = () => {
+    window.location.href = '/dashboard/create/photo'
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Brand Logo */}
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-          fontWeight: '900',
-          margin: '0 0 1rem 0',
-          lineHeight: '0.9'
+      {/* Header Navigation */}
+      <header style={{
+        width: '100%',
+        padding: '1rem 2rem',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+      }}>
+        {/* Clean Navigation - Sign In Only */}
+        <button
+          onClick={handleSignIn}
+          style={{
+            background: `linear-gradient(45deg, ${BRAND_BLUE}, ${BRAND_PURPLE})`,
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '25px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)'
+          }}
+        >
+          Sign In
+        </button>
+      </header>
+
+      {/* Main Content */}
+      <main style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        textAlign: 'center'
+      }}>
+        {/* Brand Logo */}
+        <div style={{ marginBottom: '3rem' }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            fontWeight: '900',
+            margin: '0 0 1rem 0',
+            lineHeight: '0.9'
+          }}>
+            <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
+            <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
+            <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
+          </h1>
+        </div>
+
+        {/* Value Proposition */}
+        <div style={{ marginBottom: '3rem', maxWidth: '800px' }}>
+          <h2 style={{
+            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+            fontWeight: '700',
+            color: '#2D3748',
+            margin: '0 0 1rem 0',
+            lineHeight: '1.2'
+          }}>
+            Transform Your Single Story + Photo into Global Platforms Instantly!
+          </h2>
+        </div>
+
+        {/* START Button - Routes to Photo Capture */}
+        <button
+          onClick={handleStart}
+          style={{
+            background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+            color: 'white',
+            padding: '1.5rem 3rem',
+            borderRadius: '50px',
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '4rem'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px)'
+            e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.3)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'
+          }}
+        >
+          START
+        </button>
+
+        {/* Platform Carousel */}
+        <PlatformCarousel />
+      </main>
+
+      {/* Footer with Additional Options */}
+      <footer style={{
+        padding: '2rem',
+        textAlign: 'center',
+        borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+        background: 'rgba(255, 255, 255, 0.5)'
+      }}>
+        <p style={{
+          color: '#718096',
+          fontSize: '0.9rem',
+          margin: 0
         }}>
-          <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
-          <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
-          <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
-        </h1>
-      </div>
-
-      {/* Updated Value Proposition */}
-      <div style={{ textAlign: 'center', marginBottom: '3rem', maxWidth: '800px' }}>
-        <h2 style={{
-          fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-          fontWeight: '700',
-          color: '#2D3748',
-          margin: '0 0 1rem 0',
-          lineHeight: '1.2'
-        }}>
-          Transform Your Single Story + Photo into Global Platforms Instantly!
-        </h2>
-      </div>
-
-      {/* Fixed START Button - Routes to Photo Capture */}
-      <Link 
-        href="/dashboard/create/photo" 
-        style={{
-          background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-          color: 'white',
-          padding: '1.5rem 3rem',
-          borderRadius: '50px',
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          textDecoration: 'none',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-          transition: 'all 0.3s ease',
-          border: 'none',
-          cursor: 'pointer',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          marginBottom: '4rem'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = 'translateY(-5px)'
-          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.3)'
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)'
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'
-        }}
-      >
-        START
-      </Link>
-
-      {/* Clean Platform Carousel */}
-      <PlatformCarousel />
+          The world's first culturally-intelligent content creation platform
+        </p>
+      </footer>
     </div>
   )
 }
