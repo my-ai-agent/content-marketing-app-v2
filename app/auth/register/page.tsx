@@ -177,15 +177,15 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: errors.email ? '2px solid #ef4444' : 'none',
+                border: (errors as any).email ? '2px solid #ef4444' : 'none',
                 background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '1rem'
               }}
             />
-            {errors.email && (
+            {(errors as any).email && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.email}
+                {(errors as any).email}
               </div>
             )}
           </div>
@@ -209,15 +209,15 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: errors.password ? '2px solid #ef4444' : 'none',
+                border: (errors as any).password ? '2px solid #ef4444' : 'none',
                 background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '1rem'
               }}
             />
-            {errors.password && (
+            {(errors as any).password && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.password}
+                {(errors as any).password}
               </div>
             )}
           </div>
@@ -241,15 +241,15 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: errors.confirmPassword ? '2px solid #ef4444' : 'none',
+                border: (errors as any).confirmPassword ? '2px solid #ef4444' : 'none',
                 background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '1rem'
               }}
             />
-            {errors.confirmPassword && (
+            {(errors as any).confirmPassword && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.confirmPassword}
+                {(errors as any).confirmPassword}
               </div>
             )}
           </div>
@@ -384,15 +384,15 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: errors.name ? '2px solid #ef4444' : 'none',
+                border: (errors as any).name ? '2px solid #ef4444' : 'none',
                 background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '1rem'
               }}
             />
-            {errors.name && (
+            {(errors as any).name && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.name}
+                {(errors as any).name}
               </div>
             )}
           </div>
@@ -415,7 +415,7 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: errors.role ? '2px solid #ef4444' : 'none',
+                border: (errors as any).role ? '2px solid #ef4444' : 'none',
                 background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '1rem',
@@ -429,9 +429,9 @@ export default function CulturalSignUpForm() {
                 </option>
               ))}
             </select>
-            {errors.role && (
+            {(errors as any).role && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.role}
+                {(errors as any).role}
               </div>
             )}
           </div>
