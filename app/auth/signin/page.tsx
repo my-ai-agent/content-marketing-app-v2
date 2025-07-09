@@ -185,7 +185,7 @@ export default function CulturalSignUpForm() {
             />
             {(errors as any).email && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {errors.email}
+                {(errors as any).email}
               </div>
             )}
           </div>
