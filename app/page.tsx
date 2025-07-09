@@ -287,8 +287,8 @@ export default function AuthenticatedHome() {
         {isAuthenticated ? (
           // Authenticated User - Show user menu
           <UserMenu 
-            userName={userProfile?.profile?.name || 'User'} 
-            userProfile={userProfile} 
+            userName={(userProfile as any)?.profile?.name || 'User'} 
+            userProfile={userProfile as any} 
           />
         ) : (
           // Non-authenticated User - Show Sign In button
