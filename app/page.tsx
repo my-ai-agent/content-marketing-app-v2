@@ -97,7 +97,7 @@ function PlatformCarousel() {
 }
 
 // User Menu Component for Authenticated Users
-function UserMenu({ userName, userProfile }) {
+function UserMenu({ userName, userProfile }: { userName: string; userProfile: any }) {
   const [showDropdown, setShowDropdown] = useState(false)
 
   const handleDashboard = () => {
