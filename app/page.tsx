@@ -359,7 +359,7 @@ export default function AuthenticatedHome() {
               color: BRAND_PURPLE,
               marginBottom: '0.5rem'
             }}>
-              Kia ora, {userProfile.profile?.name}! 👋
+              Kia ora, {(userProfile as any)?.profile?.name}! 👋
             </h3>
             <p style={{
               color: '#4A5568',
