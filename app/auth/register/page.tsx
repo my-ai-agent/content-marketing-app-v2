@@ -291,7 +291,7 @@ export default function CulturalSignUpForm() {
             ← Back to Options
           </button>
         </div>
-      </div>
+        </div>
 
       <div style={{
         textAlign: 'center',
