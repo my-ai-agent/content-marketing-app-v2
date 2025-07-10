@@ -164,7 +164,7 @@ export default function PlansPage() {
 
               {/* CTA Button */}
               <div className="px-8 pb-8">
-                <Link href="/dashboard">
+                <Link href="/auth/register">
                   <button
                     className="w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 hover:scale-105"
                     style={{
@@ -186,7 +186,7 @@ export default function PlansPage() {
           <p className="text-gray-600 mb-6">
             Ready to transform your tourism content marketing?
           </p>
-          <Link href="/dashboard">
+          <Link href="/auth/register">
             <button
               className="px-8 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 text-white"
               style={{
