@@ -218,7 +218,9 @@ export default function PlatformFormat() {
           backgroundColor: '#f8fafc',
           borderRadius: '1rem',
           padding: '1.5rem',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
           <h3 style={{
             fontSize: '1.125rem',
@@ -233,7 +235,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose where you want to share your content (select multiple)
+            Choose where you want to share your content (select multiple), and AI will create content optimized for each platform you select
           </p>
           
           <PlatformDropdown
@@ -248,7 +250,9 @@ export default function PlatformFormat() {
           backgroundColor: '#f8fafc',
           borderRadius: '1rem',
           padding: '1.5rem',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
           <h3 style={{
             fontSize: '1.125rem',
@@ -263,7 +267,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose the content formats you need (select multiple)
+            Choose the content formats you need (select multiple), and AI will create content optimized for each format you select
           </p>
           
           <FormatDropdown
@@ -273,25 +277,6 @@ export default function PlatformFormat() {
           />
         </div>
 
-        {/* Platform & Format Benefits */}
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🚀</span>
-          <span style={{ 
-            color: '#1e40af', 
-            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-            fontWeight: '500'
-          }}>
-            AI will create content optimized for each platform and format you select
-          </span>
-        </div>
-
         {/* Navigation Buttons */}
         <div style={{ 
           display: 'flex', 
@@ -299,7 +284,9 @@ export default function PlatformFormat() {
           alignItems: 'center', 
           gap: '1rem',
           marginBottom: '2rem',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
           <button
             onClick={handleSkip}
