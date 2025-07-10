@@ -139,9 +139,9 @@ export default function DemographicDropdown({
                   <div
                     style={{
                       position: 'absolute',
-                      left: '100%',
-                      top: '0',
-                      marginLeft: '0.5rem',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      top: '-60px',
                       background: '#1f2937',
                       color: 'white',
                       padding: '0.75rem 1rem',
@@ -149,25 +149,26 @@ export default function DemographicDropdown({
                       fontSize: '0.875rem',
                       opacity: 1,
                       visibility: 'visible',
-                      zIndex: 20,
+                      zIndex: 30,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                       maxWidth: '280px',
                       minWidth: '200px',
                       whiteSpace: 'normal',
                       lineHeight: '1.4',
                       pointerEvents: 'none',
+                      textAlign: 'center'
                     }}
                   >
                     {demo.description}
                     <div
                       style={{
                         position: 'absolute',
-                        top: '50%',
-                        left: '-6px',
-                        transform: 'translateY(-50%)',
-                        borderTop: '6px solid transparent',
-                        borderBottom: '6px solid transparent',
-                        borderRight: '6px solid #1f2937',
+                        bottom: '-6px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderTop: '6px solid #1f2937',
                       }}
                     ></div>
                   </div>
