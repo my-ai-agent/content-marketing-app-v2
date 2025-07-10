@@ -363,23 +363,7 @@ export default function AuthenticatedHome() {
               color: BRAND_PURPLE,
               marginBottom: '0.5rem'
             }}>
-              {/* Value Proposition */}
-        <div style={{ marginBottom: '3rem', maxWidth: '800px' }}>
-          <h2 style={{
-            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-            fontWeight: '700',
-            color: '#2D3748',
-            margin: '0 0 1rem 0',
-            lineHeight: '1.2'
-          }}>
-            {isAuthenticated 
-              ? 'Create Your Next Story + Photo into Global Platforms!'
-              : 'Transform Your Single Story + Photo into Global Platforms Instantly!'
-            }
-          </h2>
-        </div>
-        )}
-
+              
         {/* Value Proposition */}
         <div style={{ marginBottom: '3rem', maxWidth: '800px' }}>
           <h2 style={{
