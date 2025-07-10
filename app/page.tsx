@@ -36,7 +36,6 @@ function PlatformCarousel() {
     const interval = setInterval(() => {
       setCurrentSetIndex((prevIndex) => (prevIndex + 1) % platformSets.length)
     }, 3000)
-    
     return () => clearInterval(interval)
   }, [])
   
@@ -79,7 +78,6 @@ function PlatformCarousel() {
           </div>
         </div>
       ))}
-      
       <style jsx>{`
         @keyframes slideInFade {
           0% {
@@ -109,10 +107,9 @@ function UserMenu({ userName, userProfile }: { userName: string; userProfile: an
   }
 
   const handleSignOut = () => {
-    // Clear authentication data
     localStorage.removeItem('userToken')
     localStorage.removeItem('userProfile')
-    window.location.reload() // Refresh to show sign-in state
+    window.location.reload()
   }
 
   return (
@@ -139,7 +136,6 @@ function UserMenu({ userName, userProfile }: { userName: string; userProfile: an
         <span>{userName}</span>
         <span style={{ fontSize: '0.8rem' }}>▼</span>
       </button>
-
       {showDropdown && (
         <div style={{
           position: 'absolute',
@@ -214,14 +210,11 @@ export default function AuthenticatedHome() {
   const [isLoading, setIsLoading] = useState(true)
   const [userProfile, setUserProfile] = useState(null)
 
-  // Authentication check on component mount
   useEffect(() => {
     const checkAuthentication = () => {
       try {
-        // Check for user token and profile
         const userToken = localStorage.getItem('userToken')
         const userProfileData = localStorage.getItem('userProfile')
-        
         if (userToken && userProfileData) {
           const profile = JSON.parse(userProfileData)
           setUserProfile(profile)
@@ -229,13 +222,11 @@ export default function AuthenticatedHome() {
         }
       } catch (error) {
         console.error('Authentication check failed:', error)
-        // Clear invalid data
         localStorage.removeItem('userToken')
         localStorage.removeItem('userProfile')
       }
       setIsLoading(false)
     }
-
     checkAuthentication()
   }, [])
 
@@ -251,7 +242,6 @@ export default function AuthenticatedHome() {
     }
   }
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div style={{
@@ -277,7 +267,7 @@ export default function AuthenticatedHome() {
       flexDirection: 'column',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Header Navigation - Conditional based on auth status */}
+      {/* Header Navigation */}
       <header style={{
         width: '100%',
         padding: '1rem 2rem',
@@ -289,13 +279,11 @@ export default function AuthenticatedHome() {
         borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
       }}>
         {isAuthenticated ? (
-          // Authenticated User - Show user menu
           <UserMenu 
             userName={(userProfile as any)?.profile?.name || 'User'} 
             userProfile={userProfile as any} 
           />
         ) : (
-          // Non-authenticated User - Show Sign In button
           <button
             onClick={handleSignIn}
             style={{
@@ -348,22 +336,6 @@ export default function AuthenticatedHome() {
           </h1>
         </div>
 
-        {/* Personalized Welcome for Authenticated Users */}
-        {isAuthenticated && userProfile && (
-          <div style={{
-            background: 'rgba(255,255,255,0.8)',
-            borderRadius: '15px',
-            padding: '1.5rem',
-            marginBottom: '2rem',
-            maxWidth: '500px'
-          }}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: BRAND_PURPLE,
-              marginBottom: '0.5rem'
-            }}>
-              
         {/* Value Proposition */}
         <div style={{ marginBottom: '3rem', maxWidth: '800px' }}>
           <h2 style={{
