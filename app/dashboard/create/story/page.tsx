@@ -231,7 +231,9 @@ export default function TellYourStory() {
             minHeight: '60px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            maxWidth: '600px',
+            margin: '0 auto 1rem auto'
           }}>
             <p style={{
               fontSize: '1rem',
@@ -252,6 +254,7 @@ export default function TellYourStory() {
             placeholder="Share your experience... What made this moment special? What happened here? How did this place make you feel?"
             style={{
               width: '100%',
+              maxWidth: '600px',
               minHeight: '200px',
               padding: '1rem',
               border: '2px solid #e5e7eb',
@@ -261,7 +264,9 @@ export default function TellYourStory() {
               resize: 'vertical',
               outline: 'none',
               transition: 'border-color 0.2s',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              margin: '0 auto',
+              display: 'block'
             }}
             onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
             onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
