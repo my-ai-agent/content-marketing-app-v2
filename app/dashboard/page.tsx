@@ -129,7 +129,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           
           {/* Create New Story */}
-          <Link href="/dashboard/create" className="block">
+          <Link href="/dashboard/create/photo" className="block">
             <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300">
               <div className="flex items-center mb-4">
                 <div className="bg-blue-100 p-3 rounded-full">
@@ -224,7 +224,8 @@ export default function Dashboard() {
                 Perfect for tourism businesses to share experiences instantly!
               </p>
               <Link 
-                href="/dashboard/create"
+                <Link 
+                href="/dashboard/create/photo"
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors inline-flex items-center space-x-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
