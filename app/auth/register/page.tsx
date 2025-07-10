@@ -210,12 +210,20 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: (errors as any).password ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.9)',
+                border: (errors as any).password ? '2px solid #ef4444' : '1px solid #ccc',
+                backgroundColor: 'white',
                 color: '#333',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                boxSizing: 'border-box',
+                pointerEvents: 'auto',
+                userSelect: 'text',
+                WebkitUserSelect: 'text',
+                position: 'static',
+                zIndex: 'auto'
               }}
+              autoComplete="new-password"
+              data-testid="password-input"
             />
             {(errors as any).password && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
@@ -243,12 +251,20 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: (errors as any).confirmPassword ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.9)',
+                border: (errors as any).confirmPassword ? '2px solid #ef4444' : '1px solid #ccc',
+                backgroundColor: 'white',
                 color: '#333',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                boxSizing: 'border-box',
+                pointerEvents: 'auto',
+                userSelect: 'text',
+                WebkitUserSelect: 'text',
+                position: 'static',
+                zIndex: 'auto'
               }}
+              autoComplete="new-password"
+              data-testid="confirm-password-input"
             />
             {(errors as any).confirmPassword && (
               <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
@@ -256,7 +272,6 @@ export default function CulturalSignUpForm() {
               </div>
             )}
           </div>
-
           <button
             onClick={() => {
               if (validateAuthData()) {
