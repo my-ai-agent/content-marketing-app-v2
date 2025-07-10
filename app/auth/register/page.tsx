@@ -121,7 +121,77 @@ export default function CulturalSignUpForm() {
       flexDirection: 'column',
       padding: '1rem'
     }}>
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '2rem', paddingTop: '2rem' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
+        <h1 style={{
+          fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+          fontWeight: '700',
+          marginBottom: '0.5rem',
+          color: 'white'
+        }}>
+          Create Your Account
+        </h1>
+        <p style={{
+          fontSize: '1rem',
+          opacity: 0.9,
+          maxWidth: '300px',
+          margin: '0 auto',
+          color: 'white'
+        }}>
+          Start with your email and password
+        </p>
+      </div>
+
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: '400px',
+        margin: '0 auto',
+        width: '100%'
+      }}>
+        <div style={{
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '20px',
+          padding: '2rem',
+          backdropFilter: 'blur(10px)',
+          marginBottom: '2rem'
+        }}>
+          
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              fontWeight: '600',
+              marginBottom: '0.75rem',
+              fontSize: '0.9rem',
+              color: 'white'
+            }}>
+              Email Address *
+            </label>
+            <input
+              type="email"
+              value={authData.email}
+              onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
+              placeholder="Enter your email"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                borderRadius: '12px',
+                border: (errors as any).email ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.9)',
+                color: '#333',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+            {(errors as any).email && (
+              <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                {(errors as any).email}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
             <label style={{
               display: 'block',
               fontWeight: '600',
@@ -187,70 +257,6 @@ export default function CulturalSignUpForm() {
             )}
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: '600',
-              marginBottom: '0.75rem',
-              fontSize: '0.9rem',
-              color: 'white'
-            }}>
-              Password *
-            </label>
-            <input
-              type="password"
-              value={authData.password}
-              onChange={(e) => setAuthData(prev => ({ ...prev, password: e.target.value }))}
-              placeholder="Create a password (min 6 characters)"
-              style={{
-                width: '100%',
-                padding: '1rem',
-                borderRadius: '12px',
-                border: (errors as any).password ? '2px solid #ef4444' : 'none',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                fontSize: '1rem'
-              }}
-            />
-            {(errors as any).password && (
-              <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {(errors as any).password}
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: '600',
-              marginBottom: '0.75rem',
-              fontSize: '0.9rem',
-              color: 'white'
-            }}>
-              Confirm Password *
-            </label>
-            <input
-              type="password"
-              value={authData.confirmPassword}
-              onChange={(e) => setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              placeholder="Confirm your password"
-              style={{
-                width: '100%',
-                padding: '1rem',
-                borderRadius: '12px',
-                border: (errors as any).confirmPassword ? '2px solid #ef4444' : 'none',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                fontSize: '1rem'
-              }}
-            />
-            {(errors as any).confirmPassword && (
-              <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                {(errors as any).confirmPassword}
-              </div>
-            )}
-          </div>
-
           <button
             onClick={() => {
               if (validateAuthData()) {
@@ -291,7 +297,7 @@ export default function CulturalSignUpForm() {
             ← Back to Options
           </button>
         </div>
-        </div>
+      </div>
 
       <div style={{
         textAlign: 'center',
@@ -381,10 +387,11 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: (errors as any).name ? '2px solid #ef4444' : 'none',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                fontSize: '1rem'
+                border: (errors as any).name ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.9)',
+                color: '#333',
+                fontSize: '1rem',
+                outline: 'none'
               }}
             />
             {(errors as any).name && (
@@ -412,16 +419,17 @@ export default function CulturalSignUpForm() {
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: (errors as any).role ? '2px solid #ef4444' : 'none',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
+                border: (errors as any).role ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.9)',
+                color: '#333',
                 fontSize: '1rem',
-                appearance: 'none'
+                appearance: 'none',
+                outline: 'none'
               }}
             >
-              <option value="" style={{ color: '#333' }}>Select your role...</option>
+              <option value="">Select your role...</option>
               {personaOptions.map((option) => (
-                <option key={option.value} value={option.value} style={{ color: '#333' }}>
+                <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
@@ -432,10 +440,6 @@ export default function CulturalSignUpForm() {
               </div>
             )}
           </div>
-
-          {/* Continue with remaining form fields... */}
-          {/* Website, Location, Story Location, User Type */}
-          {/* (Same structure as cultural onboarding) */}
 
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button
