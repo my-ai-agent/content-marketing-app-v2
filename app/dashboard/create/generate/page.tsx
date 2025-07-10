@@ -320,6 +320,12 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
           margin: '0 auto',
           width: '100%',
           padding: '2rem 1rem'
+        <div style={{
+          flex: 1,
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '2rem 1rem'
         }}>
           
           {/* Data Summary */}
@@ -328,7 +334,9 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
             border: '1px solid #e2e8f0',
             borderRadius: '1rem',
             padding: '1.5rem',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
           }}>
             <h3 style={{
               fontSize: '1.25rem',
@@ -366,7 +374,9 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
             border: '1px solid #fed7aa',
             borderRadius: '1rem',
             padding: '1.5rem',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
           }}>
             <h3 style={{
               fontSize: '1.25rem',
@@ -458,7 +468,9 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
             border: '1px solid #0ea5e9',
             borderRadius: '1rem',
             padding: '1.5rem',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
           }}>
             <h3 style={{
               fontSize: '1.25rem',
@@ -500,7 +512,9 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
             border: '1px solid #e2e8f0',
             borderRadius: '1rem',
             padding: '1.5rem',
-            textAlign: 'center'
+            textAlign: 'center',
+            maxWidth: '600px',
+            margin: '0 auto'
           }}>
             <label style={{
               display: 'flex',
