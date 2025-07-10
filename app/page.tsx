@@ -240,11 +240,15 @@ export default function AuthenticatedHome() {
   }, [])
 
   const handleSignIn = () => {
-    window.location.href = '/auth'
+    window.location.href = '/auth/register'
   }
 
   const handleStart = () => {
-    window.location.href = '/dashboard/create/photo'
+    if (isAuthenticated) {
+      window.location.href = '/dashboard/create/photo'
+    } else {
+      window.location.href = '/auth/register'
+    }
   }
 
   // Show loading state while checking authentication
