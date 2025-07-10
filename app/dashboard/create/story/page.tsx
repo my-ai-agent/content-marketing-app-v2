@@ -210,7 +210,11 @@ export default function TellYourStory() {
         )}
 
         {/* Story Input with Carousel Prompts */}
-        <div style={{ marginBottom: '2rem' }}>
+        <div style={{ 
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
+        }}>
           <label style={{
             display: 'block',
             fontSize: '1.125rem',
@@ -231,9 +235,7 @@ export default function TellYourStory() {
             minHeight: '60px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            maxWidth: '600px',
-            margin: '0 auto 1rem auto'
+            justifyContent: 'center'
           }}>
             <p style={{
               fontSize: '1rem',
@@ -254,7 +256,6 @@ export default function TellYourStory() {
             placeholder="Share your experience... What made this moment special? What happened here? How did this place make you feel?"
             style={{
               width: '100%',
-              maxWidth: '600px',
               minHeight: '200px',
               padding: '1rem',
               border: '2px solid #e5e7eb',
@@ -264,9 +265,7 @@ export default function TellYourStory() {
               resize: 'vertical',
               outline: 'none',
               transition: 'border-color 0.2s',
-              fontFamily: 'inherit',
-              margin: '0 auto',
-              display: 'block'
+              fontFamily: 'inherit'
             }}
             onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
             onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
@@ -280,7 +279,9 @@ export default function TellYourStory() {
           alignItems: 'center', 
           gap: '1rem',
           marginBottom: '2rem',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
           <button
             onClick={handleSkip}
@@ -340,7 +341,6 @@ export default function TellYourStory() {
             Continue →
           </button>
         </div>
-
         {/* Logo */}
         <div style={{ 
           textAlign: 'center', 
