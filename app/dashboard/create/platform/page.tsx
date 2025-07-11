@@ -63,7 +63,7 @@ export default function PlatformFormat() {
     }
   }, [])
 
-  const handleNext = () => {
+  const handleGenerate = () => {
     if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
       localStorage.setItem('selectedPlatforms', JSON.stringify(selectedPlatforms))
       localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats))
@@ -314,7 +314,7 @@ export default function PlatformFormat() {
           </button>
 
           <button
-            onClick={handleNext}
+            onClick={handleGenerate}
             disabled={selectedPlatforms.length === 0 || selectedFormats.length === 0}
             style={{
               background: (selectedPlatforms.length > 0 && selectedFormats.length > 0)
@@ -343,7 +343,7 @@ export default function PlatformFormat() {
               }
             }}
           >
-            Continue →
+            🚀 Generate My Content
           </button>
         </div>
 
