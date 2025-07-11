@@ -301,7 +301,7 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
             marginBottom: '0.5rem',
             textAlign: 'center'
           }}>
-            Privacy & Content Settings
+            Privacy & Content
           </h1>
           
           <p style={{
