@@ -316,12 +316,6 @@ IMPORTANT: All content must honor Te Tiriti o Waitangi principles and support su
 
         <div style={{
           flex: 1,
-          maxWidth: '800px',
-          margin: '0 auto',
-          width: '100%',
-          padding: '2rem 1rem'
-        <div style={{
-          flex: 1,
           maxWidth: '900px',
           margin: '0 auto',
           width: '100%',
