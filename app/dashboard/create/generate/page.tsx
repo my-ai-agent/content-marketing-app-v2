@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { generateClaudePrompt, defaultPrivacySettings, UserData } from '@/utils/claudePrompt'
+import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '@/utils/claudePrompt'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -43,12 +43,11 @@ export default function QRDistributionHub() {
         const userData: UserData = {
           photo,
           story,
-          persona: parsedProfile.profile?.role || 'cultural-explorer',
+          persona: parsedProfile.profile?.role || 'cultural',
           audience,
           interests: interests || 'cultural-exploration',
           platforms: platforms ? JSON.parse(platforms) : ['instagram'],
-          formats: formats ? JSON.parse(formats) : ['social-post'],
-          privacySettings: defaultPrivacySettings
+          formats: formats ? JSON.parse(formats) : ['social-post']
         }
 
         setUserData(userData)
@@ -67,12 +66,12 @@ export default function QRDistributionHub() {
     try {
       setIsGenerating(true)
       
-      // Generate Claude prompt
-      const prompt = generateClaudePrompt(userData)
+      // Generate Claude prompt with proper privacy settings
+      const prompt = generateClaudePrompt(userData, defaultPrivacySettings)
       console.log('Generated prompt:', prompt)
 
-      // Mock content generation (replace with real Claude API call)
-      const mockContent = await mockGenerateContent(userData)
+      // Use your existing generateMockContent function
+      const mockContent = await mockGenerateContentWrapper(userData)
       setGeneratedContent(mockContent)
       
       setIsGenerating(false)
@@ -83,20 +82,26 @@ export default function QRDistributionHub() {
     }
   }
 
-  const mockGenerateContent = async (userData: UserData): Promise<GeneratedContent[]> => {
+  const mockGenerateContentWrapper = async (userData: UserData): Promise<GeneratedContent[]> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000))
 
-    const platforms = userData.platforms || ['instagram']
-    const story = userData.story || 'Amazing cultural experience'
+    // Use your existing generateMockContent function
+    const mockResult = generateMockContent(userData)
     
-    return platforms.map(platform => ({
-      platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-      content: `🌟 ${story}\n\n${getPlatformOptimizedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
-      qrCode: generateQRCode(`${platform}_${Date.now()}_${story.substring(0, 20)}`),
-      tips: getPlatformTips(platform),
-      optimalTime: getOptimalPostingTime(platform)
-    }))
+    const platforms = userData.platforms || ['instagram']
+    
+    return platforms.map(platform => {
+      const platformContent = mockResult.platforms.find(p => p.name.toLowerCase() === platform.toLowerCase())
+      
+      return {
+        platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+        content: platformContent?.content.text || `🌟 ${userData.story}\n\n${getPlatformOptimizedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+        qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
+        tips: platformContent?.content.platformTips ? [platformContent.content.platformTips] : getPlatformTips(platform),
+        optimalTime: platformContent?.content.optimalTiming || getOptimalPostingTime(platform)
+      }
+    })
   }
 
   const getPlatformOptimizedContent = (platform: string, userData: UserData) => {
