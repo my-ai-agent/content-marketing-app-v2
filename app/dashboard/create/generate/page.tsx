@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '@/utils/claudePrompt'
+import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '../../../utils/claudePrompt'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
