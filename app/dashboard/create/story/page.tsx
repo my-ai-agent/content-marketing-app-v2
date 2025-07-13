@@ -32,7 +32,7 @@ const getSpellingCorrections = (text: string) => {
   ]
   
   let correctedText = text
-  const suggestions = []
+  const suggestions: {original: string, corrected: string}[] = []
   
   corrections.forEach(({ original, corrected }) => {
     const regex = new RegExp(`\\b${original}\\b`, 'gi')
