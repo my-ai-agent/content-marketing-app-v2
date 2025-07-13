@@ -83,7 +83,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Dashboard Content */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
         {/* Welcome Section */}
         <div className="mb-8">
@@ -103,7 +103,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-bold">{currentPlan?.name} Plan</h3>
-              <p className="text-blue-100 mt-1">{currentPlan?.description}</p>
+              <p className="text-blue-100 mt-1">Create authentic and personalised content for your target audience</p>
               <div className="mt-3 flex items-center space-x-4 text-sm">
                 <span>📖 {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : currentPlan?.limits.storiesPerWeek} stories/week</span>
                 <span>📱 Universal QR distribution</span>
@@ -112,7 +112,11 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold">${currentPlan?.limits.price}/mo</div>
-              {isTrialActive && <div className="text-sm text-blue-200">Free during trial</div>}
+              {isTrialActive && (
+  <div className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full font-semibold mt-2">
+    Free during trial
+  </div>
+)}
               {!isTrialActive && (
                 <Link 
                   href="/dashboard/billing"
@@ -126,7 +130,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-3 mb-8">
           
           {/* Create New Story */}
           <Link href="/dashboard/create/photo" className="block">
