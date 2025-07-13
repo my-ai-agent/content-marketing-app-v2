@@ -23,7 +23,7 @@ const PLATFORMS: Platform[] = [
 
 const FORMATS: Format[] = [
   { value: 'social-post', label: 'Social Post', description: 'Ready-to-post content for social media' },
-  { value: 'blog-article', label: 'Blog Article', description: 'SEO-optimized detailed storytelling' },
+  { value: 'blog-article', label: 'Blog Article', description: 'SEO-optimised detailed storytelling' },
   { value: 'email-newsletter', label: 'Email Newsletter', description: 'Audience retention and engagement' },
   { value: 'video-script', label: 'Video Script', description: 'Growing demand, high engagement' },
   { value: 'brochure', label: 'Brochure', description: 'Tourism classic, print/digital' },
@@ -235,7 +235,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose where you want to share your content (select multiple), and AI will create content optimized for each platform you select
+            Choose where you want to share your content (select multiple), and AI will create content optimised for each platform you select
           </p>
           
           <PlatformDropdown
@@ -267,7 +267,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose the content formats you need (select multiple), and AI will create content optimized for each format you select
+            Choose the content formats you need (select multiple), and AI will create content optimised for each format you select
           </p>
           
           <FormatDropdown
