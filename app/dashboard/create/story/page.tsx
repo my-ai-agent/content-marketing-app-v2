@@ -16,10 +16,48 @@ const storyPrompts = [
   "The more you share, the more AI can personalise your story"
 ]
 
+// Simple spelling/grammar corrections
+const getSpellingCorrections = (text: string) => {
+  const corrections = [
+    { original: 'recieve', corrected: 'receive' },
+    { original: 'seperate', corrected: 'separate' },
+    { original: 'occured', corrected: 'occurred' },
+    { original: 'definately', corrected: 'definitely' },
+    { original: 'accomodate', corrected: 'accommodate' },
+    { original: 'begining', corrected: 'beginning' },
+    { original: 'beleive', corrected: 'believe' },
+    { original: 'existance', corrected: 'existence' },
+    { original: 'independant', corrected: 'independent' },
+    { original: 'wierd', corrected: 'weird' }
+  ]
+  
+  let correctedText = text
+  const suggestions = []
+  
+  corrections.forEach(({ original, corrected }) => {
+    const regex = new RegExp(`\\b${original}\\b`, 'gi')
+    if (regex.test(text)) {
+      suggestions.push({ original, corrected })
+      correctedText = correctedText.replace(regex, corrected)
+    }
+  })
+  
+  // Basic grammar improvements
+  correctedText = correctedText
+    .replace(/\bi\b/g, 'I') // Capitalize standalone 'i'
+    .replace(/\.\s+([a-z])/g, '. $1'.toUpperCase()) // Capitalize after periods
+    .replace(/^\s*([a-z])/g, (match, p1) => match.replace(p1, p1.toUpperCase())) // Capitalize first letter
+  
+  return { correctedText, suggestions }
+}
+
 export default function TellYourStory() {
   const [story, setStory] = useState('')
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0)
+  const [showCopilotSuggestions, setShowCopilotSuggestions] = useState(false)
+  const [copilotSuggestions, setCopilotSuggestions] = useState<{correctedText: string, suggestions: any[]}>({correctedText: '', suggestions: []})
+  const [isCheckingSpelling, setIsCheckingSpelling] = useState(false)
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -41,6 +79,34 @@ export default function TellYourStory() {
 
     return () => clearInterval(interval)
   }, [])
+
+  const handleCopilotCheck = () => {
+    if (!story.trim()) {
+      alert('Please write your story first before checking spelling and grammar.')
+      return
+    }
+
+    setIsCheckingSpelling(true)
+    
+    // Simulate brief processing time for better UX
+    setTimeout(() => {
+      const results = getSpellingCorrections(story)
+      setCopilotSuggestions(results)
+      setShowCopilotSuggestions(true)
+      setIsCheckingSpelling(false)
+    }, 800)
+  }
+
+  const acceptCopilotSuggestions = () => {
+    setStory(copilotSuggestions.correctedText)
+    setShowCopilotSuggestions(false)
+    setCopilotSuggestions({correctedText: '', suggestions: []})
+  }
+
+  const rejectCopilotSuggestions = () => {
+    setShowCopilotSuggestions(false)
+    setCopilotSuggestions({correctedText: '', suggestions: []})
+  }
 
   const handleNext = () => {
     if (story.trim()) {
@@ -270,7 +336,171 @@ export default function TellYourStory() {
             onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
             onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
           />
+
+          {/* Optional Copilot Assistant */}
+          <div style={{
+            marginTop: '1rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '0.75rem'
+          }}>
+            <button
+              onClick={handleCopilotCheck}
+              disabled={!story.trim() || isCheckingSpelling}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                backgroundColor: story.trim() ? '#f8fafc' : '#f3f4f6',
+                color: story.trim() ? BRAND_PURPLE : '#9ca3af',
+                border: `1px solid ${story.trim() ? '#e2e8f0' : '#e5e7eb'}`,
+                borderRadius: '0.5rem',
+                cursor: story.trim() ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                if (story.trim()) {
+                  e.currentTarget.style.backgroundColor = '#f1f5f9'
+                  e.currentTarget.style.borderColor = BRAND_PURPLE
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (story.trim()) {
+                  e.currentTarget.style.backgroundColor = '#f8fafc'
+                  e.currentTarget.style.borderColor = '#e2e8f0'
+                }
+              }}
+            >
+              {isCheckingSpelling ? (
+                <>⏳ Checking...</>
+              ) : (
+                <>✨ Check Spelling & Grammar</>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Copilot Suggestions Panel */}
+        {showCopilotSuggestions && (
+          <div style={{
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto',
+            backgroundColor: '#f8fafc',
+            border: '2px solid #e2e8f0',
+            borderRadius: '1rem',
+            padding: '1.5rem'
+          }}>
+            <h3 style={{
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              ✨ Copilot Suggestions
+            </h3>
+
+            {copilotSuggestions.suggestions.length > 0 ? (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  Found {copilotSuggestions.suggestions.length} spelling correction(s):
+                </p>
+                <ul style={{ fontSize: '0.875rem', color: '#374151', paddingLeft: '1rem' }}>
+                  {copilotSuggestions.suggestions.map((suggestion, index) => (
+                    <li key={index} style={{ marginBottom: '0.25rem' }}>
+                      <span style={{ textDecoration: 'line-through', color: '#ef4444' }}>
+                        {suggestion.original}
+                      </span>
+                      {' → '}
+                      <span style={{ color: '#10b981', fontWeight: '500' }}>
+                        {suggestion.corrected}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.875rem', color: '#10b981', marginBottom: '1rem' }}>
+                ✅ No spelling errors found! Applied some grammar improvements.
+              </p>
+            )}
+
+            <div style={{
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.5',
+              color: '#374151'
+            }}>
+              <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#6b7280' }}>
+                Improved version:
+              </p>
+              {copilotSuggestions.correctedText}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={acceptCopilotSuggestions}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  backgroundColor: BRAND_PURPLE,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#553C9A'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = BRAND_PURPLE
+                }}
+              >
+                ✅ Accept Changes
+              </button>
+              <button
+                onClick={rejectCopilotSuggestions}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  backgroundColor: 'white',
+                  color: '#6b7280',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb'
+                  e.currentTarget.style.borderColor = '#9ca3af'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white'
+                  e.currentTarget.style.borderColor = '#e5e7eb'
+                }}
+              >
+                Keep Original
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div style={{ 
