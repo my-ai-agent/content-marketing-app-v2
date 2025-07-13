@@ -148,58 +148,63 @@ export default function WorkingRegistrationForm() {
             {errors.confirmPassword && <div style={{ color: 'red', fontSize: '14px', marginTop: '4px' }}>{errors.confirmPassword}</div>}
           </div>
 
-          {/* Privacy Consent Section */}
-          <div style={{
-            marginBottom: '2rem',
-            padding: '1rem',
-            backgroundColor: '#f8fafc',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '12px'
-            }}>
-              <input
-                type="checkbox"
-                id="privacyConsent"
-                checked={privacyConsent}
-                onChange={(e) => {
-                  setPrivacyConsent(e.target.checked)
-                  if (errors.privacyConsent) {
-                    setErrors(prev => ({ ...prev, privacyConsent: '' }))
-                  }
-                }}
-                style={{
-                  marginTop: '2px',
-                  width: '18px',
-                  height: '18px',
-                  accentColor: BRAND_PURPLE
-                }}
-              />
-              <div>
-                <label htmlFor="privacyConsent" style={{
-                  fontSize: '0.9rem',
-                  lineHeight: '1.4',
-                  color: '#374151',
-                  cursor: 'pointer'
-                }}>
-                  <strong>Privacy & Content Consent:</strong> I consent to my story/photo being used for a one-off AI content generation, and understand that this will be deleted from AI's memory after processing.
-                </label>
-                {errors.privacyConsent && (
-                  <p style={{
-                    color: '#ef4444',
-                    fontSize: '0.8rem',
-                    marginTop: '0.5rem',
-                    margin: '0.5rem 0 0 0'
-                  }}>
-                    {errors.privacyConsent}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          // Replace the Privacy Consent Section (around line 95-125) with this:
+
+{/* Privacy Consent Section */}
+<div style={{
+  marginBottom: '2rem',
+  padding: '1rem',
+  backgroundColor: '#f8fafc',
+  borderRadius: '8px',
+  border: '1px solid #e2e8f0'
+}}>
+  <div style={{
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px'
+  }}>
+    <input
+      type="checkbox"
+      id="privacyConsent"
+      checked={privacyConsent}
+      onChange={(e) => {
+        setPrivacyConsent(e.target.checked)
+        if (errors.privacyConsent) {
+          setErrors(prev => ({ ...prev, privacyConsent: '' }))
+        }
+      }}
+      style={{
+        marginTop: '2px',
+        width: '18px',
+        height: '18px',
+        accentColor: BRAND_PURPLE,
+        cursor: 'pointer'
+      }}
+      required
+    />
+    <div style={{ flex: 1 }}>
+      <label htmlFor="privacyConsent" style={{
+        fontSize: '0.9rem',
+        lineHeight: '1.4',
+        color: '#374151',
+        cursor: 'pointer',
+        display: 'block'
+      }}>
+        I consent to my story/photo being used for AI content generation, and understand that this will be deleted from AI's memory after processing.
+      </label>
+      {errors.privacyConsent && (
+        <p style={{
+          color: '#ef4444',
+          fontSize: '0.8rem',
+          marginTop: '0.5rem',
+          margin: '0.5rem 0 0 0'
+        }}>
+          {errors.privacyConsent}
+        </p>
+      )}
+    </div>
+  </div>
+</div>
 
           <button
             type="submit"
