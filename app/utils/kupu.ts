@@ -114,11 +114,11 @@ export const KUPU_CORRECTIONS: KupuCorrection[] = [
 
   // PLACES & STRUCTURES
   {
-    incorrect: ['pa ', 'Pa ', 'pa'],
-    correct: 'pā',
-    meaning: 'fortified village',
-    category: 'place'
-  },
+  incorrect: ['pa', 'Pa'],
+  correct: 'pā',
+  meaning: 'fortified village',
+  category: 'place'
+},
   {
     incorrect: ['Taupo', 'taupo'],
     correct: 'Taupō',
@@ -132,11 +132,11 @@ export const KUPU_CORRECTIONS: KupuCorrection[] = [
     category: 'place'
   },
   {
-    incorrect: ['Te Pa Tu', 'Te pa tu', 'te pa tu'],
-    correct: 'Te Pā Tū',
-    meaning: 'cultural performance/experience',
-    category: 'cultural'
-  },
+  incorrect: ['Te Pa Tu', 'Te pa tu', 'te pa tu', 'Te Pa tu'],
+  correct: 'Te Pā Tū',
+  meaning: 'the gathering place',
+  category: 'cultural'
+},
 
   // CULTURAL PRACTICES & CONCEPTS
   {
