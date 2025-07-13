@@ -11,7 +11,7 @@ const INTERESTS: Interest[] = [
     { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
     { value: 'adventure', label: 'Adventure & Outdoor Activities', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
     { value: 'food-wine', label: 'Food & Wine', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
-    { value: 'wellness', label: 'Relaxation & Wellness', description: 'Spa retreats, hot springs, wellness centers, meditation, yoga, luxury resorts' },
+    { value: 'wellness', label: 'Relaxation & Wellness', description: 'Spa retreats, hot springs, wellness centres, meditation, yoga, luxury resorts' },
     { value: 'history', label: 'History & Heritage', description: 'Historical sites, battlefields, colonial history, archaeological sites, guided tours' },
     { value: 'photography', label: 'Photography & Social Media', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
     { value: 'nature', label: 'Gardens & Nature', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
