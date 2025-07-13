@@ -477,19 +477,25 @@ export default function PhotoUpload() {
             }}>
               <div style={{
                 width: '100%',
-                height: '300px',
+                maxHeight: '70vh',
                 borderRadius: '1.5rem',
                 overflow: 'hidden',
                 position: 'relative',
-                backgroundColor: '#f3f4f6'
+                backgroundColor: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
                 <img
                   src={selectedPhoto}
                   alt="Selected photo"
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
+                    maxWidth: '100%',
+                    maxHeight: '70vh',
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    borderRadius: '1.5rem'
                   }}
                 />
                 <button
@@ -508,7 +514,8 @@ export default function PhotoUpload() {
                     fontSize: '1rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    zIndex: 10
                   }}
                 >
                   ✕
