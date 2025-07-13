@@ -442,21 +442,41 @@ export default function TellYourStory() {
               </p>
             )}
 
-            <div style={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              padding: '1rem',
-              marginBottom: '1rem',
-              fontSize: '0.875rem',
-              lineHeight: '1.5',
-              color: '#374151'
-            }}>
-              <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#6b7280' }}>
-                Improved version:
-              </p>
-              {copilotSuggestions.correctedText}
-            </div>
+            // In your story page, replace the non-editable improved version section with this:
+
+<div style={{
+  backgroundColor: 'white',
+  border: '1px solid #e5e7eb',
+  borderRadius: '0.5rem',
+  padding: '1rem',
+  marginBottom: '1rem'
+}}>
+  <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#6b7280' }}>
+    Improved version (editable):
+  </p>
+  <textarea
+    value={copilotSuggestions.correctedText}
+    onChange={(e) => setCopilotSuggestions(prev => ({
+      ...prev,
+      correctedText: e.target.value
+    }))}
+    style={{
+      width: '100%',
+      minHeight: '120px',
+      padding: '0.75rem',
+      border: '1px solid #d1d5db',
+      borderRadius: '0.375rem',
+      fontSize: '0.875rem',
+      lineHeight: '1.5',
+      color: '#374151',
+      resize: 'vertical',
+      outline: 'none',
+      fontFamily: 'inherit'
+    }}
+    onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+  />
+</div>
 
             <div style={{
               display: 'flex',
