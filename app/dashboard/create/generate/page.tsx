@@ -137,7 +137,7 @@ const loadUserData = async () => {
       
       return {
         platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-        content: platformContent?.content.text || `🌟 ${userData.story}\n\n${getPlatformOptimizedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+        content: platformContent?.content.text || `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
         qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
         tips: platformContent?.content.platformTips ? [platformContent.content.platformTips] : getPlatformTips(platform),
         optimalTime: platformContent?.content.optimalTiming || getOptimalPostingTime(platform)
@@ -145,7 +145,7 @@ const loadUserData = async () => {
     })
   }
 
-  const getPlatformOptimizedContent = (platform: string, userData: UserData) => {
+  const getPlatformOptimisedContent = (platform: string, userData: UserData) => {
     const audience = userData.audience || 'cultural-explorer'
     const baseContent = userData.story || 'Incredible cultural experience'
     
@@ -157,7 +157,7 @@ const loadUserData = async () => {
       case 'twitter':
         return `Cultural discovery at its finest! #AuthenticTravel #${audience.replace('-', '')}`
       case 'linkedin':
-        return `Professional insight: Cultural tourism creates meaningful connections between travelers and local communities. Worth experiencing! 🤝`
+        return `Professional insight: Cultural tourism creates meaningful connections between travellers and local communities. Worth experiencing! 🤝`
       default:
         return baseContent
     }
@@ -174,7 +174,7 @@ const loadUserData = async () => {
       case 'linkedin':
         return ['Professional tone', 'Industry insights', 'Network engagement', 'Share business value']
       default:
-        return ['Optimize for your audience', 'Use platform best practices', 'Engage authentically']
+        return ['Optimise for your audience', 'Use platform best practices', 'Engage authentically']
     }
   }
 
@@ -333,7 +333,7 @@ const loadUserData = async () => {
           }}></div>
           <h2 style={{ color: '#333', marginBottom: '1rem' }}>Creating Your Cultural Content</h2>
           <p style={{ color: '#666', marginBottom: '1rem' }}>
-            Our AI is crafting personalized content that honors local culture and resonates with your target audience...
+            Our AI is crafting personalised content that honours local culture and resonates with your target audience...
           </p>
           <div style={{
             backgroundColor: '#f0f9ff',
