@@ -16,9 +16,10 @@ const storyPrompts = [
   "The more you share, the more AI can personalise your story"
 ]
 
-// Simple spelling/grammar corrections
-const getSpellingCorrections = (text: string) => {
-  const corrections = [
+// Enhanced spelling/grammar corrections with Māori cultural accuracy
+const getSpellingCorrections = (text: string): {correctedText: string, suggestions: {original: string, corrected: string}[]} => {
+  // Common English spelling corrections
+  const englishCorrections = [
     { original: 'recieve', corrected: 'receive' },
     { original: 'seperate', corrected: 'separate' },
     { original: 'occured', corrected: 'occurred' },
@@ -30,6 +31,75 @@ const getSpellingCorrections = (text: string) => {
     { original: 'independant', corrected: 'independent' },
     { original: 'wierd', corrected: 'weird' }
   ]
+
+  // Māori word corrections with proper macrons (tohutō)
+  const maoriCorrections = [
+    // Core cultural concepts
+    { original: 'Matauranga', corrected: 'Mātauranga' },
+    { original: 'matauranga', corrected: 'mātauranga' },
+    { original: 'Maori', corrected: 'Māori' },
+    { original: 'maori', corrected: 'māori' },
+    
+    // Place names and cultural sites
+    { original: 'Te Pa Tu', corrected: 'Te Pā Tū' },
+    { original: 'Te pa tu', corrected: 'Te Pā Tū' },
+    { original: 'Rotorua', corrected: 'Rotorua' }, // No macron needed
+    { original: 'Aotearoa', corrected: 'Aotearoa' }, // No macron needed
+    
+    // Cultural practices and concepts
+    { original: 'Manaakitanga', corrected: 'Manaakitanga' }, // No macron needed
+    { original: 'manaakitanga', corrected: 'manaakitanga' },
+    { original: 'Kaitiakitanga', corrected: 'Kaitiakitanga' }, // No macron needed
+    { original: 'kaitiakitanga', corrected: 'kaitiakitanga' },
+    { original: 'Whakapapa', corrected: 'Whakapapa' }, // No macron needed
+    { original: 'whakapapa', corrected: 'whakapapa' },
+    
+    // Traditional structures and places
+    { original: 'marae', corrected: 'marae' }, // No macron needed
+    { original: 'Marae', corrected: 'Marae' },
+    { original: 'Pa ', corrected: 'Pā ' }, // Space after to catch "Pa sites"
+    { original: 'pa ', corrected: 'pā ' },
+    
+    // People and groups
+    { original: 'Iwi', corrected: 'Iwi' }, // No macron needed
+    { original: 'iwi', corrected: 'iwi' },
+    { original: 'hapu', corrected: 'hapū' },
+    { original: 'Hapu', corrected: 'Hapū' },
+    
+    // Worldview and knowledge
+    { original: 'Te Ao Maori', corrected: 'Te Ao Māori' },
+    { original: 'Te ao maori', corrected: 'Te ao māori' },
+    { original: 'Te ao Maori', corrected: 'Te ao Māori' },
+    
+    // Common greetings and expressions
+    { original: 'Kia ora', corrected: 'Kia ora' }, // No macron needed
+    { original: 'Kia Ora', corrected: 'Kia Ora' },
+    { original: 'kia kaha', corrected: 'kia kaha' }, // No macron needed
+    { original: 'Kia Kaha', corrected: 'Kia Kaha' }
+  ]
+  
+  // Combine all corrections
+  const allCorrections = [...englishCorrections, ...maoriCorrections]
+  
+  let correctedText = text
+  const suggestions: {original: string, corrected: string}[] = []
+  
+  allCorrections.forEach(({ original, corrected }) => {
+    const regex = new RegExp(`\\b${original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g')
+    if (regex.test(text)) {
+      suggestions.push({ original, corrected })
+      correctedText = correctedText.replace(regex, corrected)
+    }
+  })
+  
+  // Basic grammar improvements (preserve Māori text)
+  correctedText = correctedText
+    .replace(/\bi\b/g, 'I') // Capitalize standalone 'i'
+    .replace(/\.\s+([a-z])/g, (match, p1) => '. ' + p1.toUpperCase()) // Capitalize after periods
+    .replace(/^\s*([a-z])/g, (match, p1) => match.replace(p1, p1.toUpperCase())) // Capitalize first letter
+  
+  return { correctedText, suggestions }
+}
   
   let correctedText = text
   const suggestions: {original: string, corrected: string}[] = []
