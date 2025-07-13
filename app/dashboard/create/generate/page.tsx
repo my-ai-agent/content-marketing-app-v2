@@ -23,42 +23,83 @@ export default function QRDistributionHub() {
 
   useEffect(() => {
     // Load user data from localStorage
-    const loadUserData = () => {
-      try {
-        const photo = localStorage.getItem('userPhoto')
-        const story = localStorage.getItem('userStory')
-        const audience = localStorage.getItem('selectedAudience')
-        const interests = localStorage.getItem('selectedInterests')
-        const platforms = localStorage.getItem('selectedPlatforms')
-        const formats = localStorage.getItem('selectedFormats')
-        const profile = localStorage.getItem('userProfile')
+    // Add this IndexedDB helper function before useEffect (around line 23):
 
-        if (!photo || !story || !audience || !platforms) {
-          setError('Missing required content data. Please complete all steps.')
-          setIsGenerating(false)
-          return
-        }
-
-        const parsedProfile = profile ? JSON.parse(profile) : {}
-        const userData: UserData = {
-          photo,
-          story,
-          persona: parsedProfile.profile?.role || 'cultural',
-          audience,
-          interests: interests || 'cultural-exploration',
-          platforms: platforms ? JSON.parse(platforms) : ['instagram'],
-          formats: formats ? JSON.parse(formats) : ['social-post']
-        }
-
-        setUserData(userData)
-        generateContent(userData)
-      } catch (err) {
-        console.error('Error loading user data:', err)
-        setError('Failed to load your content data.')
-        setIsGenerating(false)
+const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('PhotoAppDB', 1)
+    req.onerror = () => reject(req.error)
+    req.onsuccess = () => {
+      const db = req.result
+      const tx = db.transaction('photos', 'readonly')
+      const store = tx.objectStore('photos')
+      const getReq = store.get(key)
+      
+      getReq.onsuccess = () => {
+        db.close()
+        resolve(getReq.result || null)
+      }
+      getReq.onerror = () => {
+        db.close()
+        reject(getReq.error)
       }
     }
+  })
+}
 
+// REPLACE lines 26-61 with this corrected loadUserData function:
+
+const loadUserData = async () => {
+  try {
+    // Load data using the ACTUAL localStorage keys from each step
+    const story = localStorage.getItem('userStoryContext') // NOT 'userStory'
+    const audienceData = localStorage.getItem('selectedDemographics') // NOT 'selectedAudience'
+    const interests = localStorage.getItem('selectedInterests') // Correct
+    const platforms = localStorage.getItem('selectedPlatforms') // Correct
+    const formats = localStorage.getItem('selectedFormats') // Correct
+    const profile = localStorage.getItem('userProfile')
+
+    // Load photo from IndexedDB (not localStorage)
+    let photoData = null
+    try {
+      photoData = await getImageFromIndexedDB('selectedPhoto')
+    } catch (photoErr) {
+      console.log('No photo found in IndexedDB, continuing without photo')
+    }
+
+    // Check required data (photo is optional)
+    if (!story || !audienceData || !platforms) {
+      setError('Missing required content data. Please complete all steps.')
+      setIsGenerating(false)
+      return
+    }
+
+    // Parse JSON data properly
+    const parsedProfile = profile ? JSON.parse(profile) : {}
+    const parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
+    const parsedInterests = interests ? JSON.parse(interests) : ['cultural']
+    const parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
+    const parsedFormats = formats ? JSON.parse(formats) : ['social-post']
+
+    const userData: UserData = {
+      photo: photoData || 'No photo provided', // Handle optional photo
+      story,
+      persona: parsedProfile.profile?.role || 'cultural',
+      audience: parsedAudience[0] || 'millennials', // Take first item from array
+      interests: parsedInterests[0] || 'cultural', // Take first item from array
+      platforms: parsedPlatforms,
+      formats: parsedFormats
+    }
+
+    console.log('Loaded user data:', userData) // Debug log
+    setUserData(userData)
+    generateContent(userData)
+  } catch (err) {
+    console.error('Error loading user data:', err)
+    setError('Failed to load your content data.')
+    setIsGenerating(false)
+  }
+}
     loadUserData()
   }, [])
 
