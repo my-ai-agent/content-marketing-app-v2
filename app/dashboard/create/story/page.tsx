@@ -73,7 +73,10 @@ export default function TellYourStory() {
   // Voice recording states
   const [inputMethod, setInputMethod] = useState<'write' | 'speak'>('write')
   const [recording, setRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
   const recognitionRef = useRef<any>(null)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const maxRecordingTime = 90 // 90 seconds maximum
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -93,7 +96,13 @@ export default function TellYourStory() {
       setCurrentPromptIndex((prev) => (prev + 1) % storyPrompts.length)
     }, 3000)
 
-    return () => clearInterval(interval)
+    // Cleanup function
+    return () => {
+      clearInterval(interval)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
   }, [])
 
   // Voice recording functions
@@ -101,18 +110,54 @@ export default function TellYourStory() {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new (window as any).webkitSpeechRecognition()
       recognition.lang = 'en-NZ' // New Zealand English - critical for correct vocabulary
-      recognition.continuous = false
-      recognition.interimResults = false
+      recognition.continuous = true // Allow longer recording
+      recognition.interimResults = true // Show live transcription
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
+        let transcript = ''
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript
+        }
         setStory(transcript)
         localStorage.setItem('userStoryContext', transcript)
-        setRecording(false)
       }
-      recognition.onerror = () => setRecording(false)
+      recognition.onerror = () => {
+        setRecording(false)
+        setRecordingTime(0)
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+        }
+      }
+      recognition.onend = () => {
+        setRecording(false)
+        setRecordingTime(0)
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+        }
+        // Show completion message if recording reached time limit
+        if (recordingTime >= maxRecordingTime - 1) {
+          setTimeout(() => {
+            alert('Recording completed! Perfect length for Claude AI to create your story.')
+          }, 500)
+        }
+      }
+      
       recognitionRef.current = recognition
       recognition.start()
       setRecording(true)
+      setRecordingTime(0)
+      
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          const newTime = prev + 1
+          if (newTime >= maxRecordingTime) {
+            stopRecording()
+            return maxRecordingTime
+          }
+          return newTime
+        })
+      }, 1000)
+      
     } else {
       alert('Speech recognition not supported in this browser.')
     }
@@ -121,6 +166,17 @@ export default function TellYourStory() {
   const stopRecording = () => {
     recognitionRef.current?.stop()
     setRecording(false)
+    setRecordingTime(0)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   const handleCopilotCheck = () => {
@@ -449,6 +505,22 @@ export default function TellYourStory() {
               }}>
                 {recording ? '🎙️' : '🎤'}
               </div>
+
+              {recording && recordingTime >= 80 && (
+                <div style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#f59e0b',
+                  marginBottom: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #f59e0b',
+                  borderRadius: '0.5rem',
+                  animation: 'pulse 1s infinite'
+                }}>
+                  ⏰ Recording ends in {maxRecordingTime - recordingTime} seconds! Perfect length for your story.
+                </div>
+              )}
               
               <button
                 onClick={recording ? stopRecording : startRecording}
@@ -477,9 +549,13 @@ export default function TellYourStory() {
               <p style={{
                 fontSize: '0.875rem',
                 color: '#6b7280',
-                margin: 0
+                margin: 0,
+                maxWidth: '400px',
+                lineHeight: '1.4'
               }}>
-                {recording ? 'Listening... Speak clearly about your experience' : 'Press and speak your story. We recognise New Zealand English vocabulary automatically.'}
+                {recording 
+                  ? 'Share your experience naturally... Claude AI will create your full LinkedIn story from this!' 
+                  : 'Record up to 90 seconds about your experience. Claude AI will transform it into a compelling LinkedIn story.'}
               </p>
 
               {story && (
@@ -498,7 +574,7 @@ export default function TellYourStory() {
                     color: '#374151',
                     margin: '0 0 0.5rem 0'
                   }}>
-                    Transcribed text:
+                    Live transcription:
                   </p>
                   <p style={{
                     fontSize: '0.875rem',
