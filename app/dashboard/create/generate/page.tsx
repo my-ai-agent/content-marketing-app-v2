@@ -82,7 +82,7 @@ const loadUserData = async () => {
     const parsedFormats = formats ? JSON.parse(formats) : ['social-post']
 
     const userData: UserData = {
-      photo: photoData || 'No photo provided', // Handle optional photo
+      photo: photoData ? URL.createObjectURL(photoData) : 'No photo provided', // Convert Blob to data URL
       story,
       persona: parsedProfile.profile?.role || 'cultural',
       audience: parsedAudience[0] || 'millennials', // Take first item from array
