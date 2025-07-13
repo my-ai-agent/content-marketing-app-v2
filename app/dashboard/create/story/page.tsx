@@ -17,8 +17,7 @@ const storyPrompts = [
   "The more you share, the more AI can personalise your story"
 ]
 
-// Replace the getSpellingCorrections function with this enhanced version:
-
+// Simple spelling/grammar corrections using kupu dictionary
 const getSpellingCorrections = (text: string): {correctedText: string, suggestions: {original: string, corrected: string}[]} => {
   // Common English spelling corrections
   const englishCorrections = [
@@ -58,49 +57,6 @@ const getSpellingCorrections = (text: string): {correctedText: string, suggestio
   correctedText = correctedText
     .replace(/\bi\b/g, 'I') // Capitalize standalone 'i'
     .replace(/\.\s+([a-z])/g, (match, p1) => '. ' + p1.toUpperCase()) // Capitalize after periods
-    .replace(/^\s*([a-z])/g, (match, p1) => match.replace(p1, p1.toUpperCase())) // Capitalize first letter
-  
-  return { correctedText, suggestions }
-}
-  
-  // Combine all corrections
-  const allCorrections = [...englishCorrections, ...maoriCorrections]
-  
-  let correctedText = text
-  const suggestions: {original: string, corrected: string}[] = []
-  
-  allCorrections.forEach(({ original, corrected }) => {
-    const regex = new RegExp(`\\b${original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g')
-    if (regex.test(text)) {
-      suggestions.push({ original, corrected })
-      correctedText = correctedText.replace(regex, corrected)
-    }
-  })
-  
-  // Basic grammar improvements (preserve Māori text)
-  correctedText = correctedText
-    .replace(/\bi\b/g, 'I') // Capitalize standalone 'i'
-    .replace(/\.\s+([a-z])/g, (match, p1) => '. ' + p1.toUpperCase()) // Capitalize after periods
-    .replace(/^\s*([a-z])/g, (match, p1) => match.replace(p1, p1.toUpperCase())) // Capitalize first letter
-  
-  return { correctedText, suggestions }
-}
-  
-  let correctedText = text
-  const suggestions: {original: string, corrected: string}[] = []
-  
-  corrections.forEach(({ original, corrected }) => {
-    const regex = new RegExp(`\\b${original}\\b`, 'gi')
-    if (regex.test(text)) {
-      suggestions.push({ original, corrected })
-      correctedText = correctedText.replace(regex, corrected)
-    }
-  })
-  
-  // Basic grammar improvements
-  correctedText = correctedText
-    .replace(/\bi\b/g, 'I') // Capitalize standalone 'i'
-    .replace(/\.\s+([a-z])/g, '. $1'.toUpperCase()) // Capitalize after periods
     .replace(/^\s*([a-z])/g, (match, p1) => match.replace(p1, p1.toUpperCase())) // Capitalize first letter
   
   return { correctedText, suggestions }
