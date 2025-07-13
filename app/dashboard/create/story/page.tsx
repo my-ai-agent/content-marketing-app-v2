@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getMacronCorrections } from '../../../utils/kupu'
 
 const BRAND_PURPLE = '#6B2EFF'
@@ -69,6 +69,11 @@ export default function TellYourStory() {
   const [showCopilotSuggestions, setShowCopilotSuggestions] = useState(false)
   const [copilotSuggestions, setCopilotSuggestions] = useState<{correctedText: string, suggestions: any[]}>({correctedText: '', suggestions: []})
   const [isCheckingSpelling, setIsCheckingSpelling] = useState(false)
+  
+  // Voice recording states
+  const [inputMethod, setInputMethod] = useState<'write' | 'speak'>('write')
+  const [recording, setRecording] = useState(false)
+  const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -91,6 +96,33 @@ export default function TellYourStory() {
     return () => clearInterval(interval)
   }, [])
 
+  // Voice recording functions
+  const startRecording = () => {
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new (window as any).webkitSpeechRecognition()
+      recognition.lang = 'en-NZ' // New Zealand English - critical for correct vocabulary
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript
+        setStory(transcript)
+        localStorage.setItem('userStoryContext', transcript)
+        setRecording(false)
+      }
+      recognition.onerror = () => setRecording(false)
+      recognitionRef.current = recognition
+      recognition.start()
+      setRecording(true)
+    } else {
+      alert('Speech recognition not supported in this browser.')
+    }
+  }
+
+  const stopRecording = () => {
+    recognitionRef.current?.stop()
+    setRecording(false)
+  }
+
   const handleCopilotCheck = () => {
     if (!story.trim()) {
       alert('Please write your story first before checking spelling and grammar.')
@@ -110,6 +142,7 @@ export default function TellYourStory() {
 
   const acceptCopilotSuggestions = () => {
     setStory(copilotSuggestions.correctedText)
+    localStorage.setItem('userStoryContext', copilotSuggestions.correctedText)
     setShowCopilotSuggestions(false)
     setCopilotSuggestions({correctedText: '', suggestions: []})
   }
@@ -286,7 +319,7 @@ export default function TellYourStory() {
           </div>
         )}
 
-        {/* Story Input with Carousel Prompts */}
+        {/* Story Input with Voice/Text Toggle */}
         <div style={{ 
           marginBottom: '2rem',
           maxWidth: '600px',
@@ -326,73 +359,207 @@ export default function TellYourStory() {
               💡 {storyPrompts[currentPromptIndex]}
             </p>
           </div>
-          
-          <textarea
-            value={story}
-            onChange={(e) => setStory(e.target.value)}
-            placeholder="Share your experience... What made this moment special? What happened here? How did this place make you feel?"
-            style={{
-              width: '100%',
-              minHeight: '200px',
-              padding: '1rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '1rem',
-              fontSize: '1rem',
-              lineHeight: '1.5',
-              resize: 'vertical',
-              outline: 'none',
-              transition: 'border-color 0.2s',
-              fontFamily: 'inherit'
-            }}
-            onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-          />
 
-          {/* Optional Copilot Assistant */}
+          {/* Input Method Toggle */}
           <div style={{
-            marginTop: '1rem',
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '0.75rem'
+            gap: '0.5rem',
+            marginBottom: '1rem'
           }}>
             <button
-              onClick={handleCopilotCheck}
-              disabled={!story.trim() || isCheckingSpelling}
+              onClick={() => setInputMethod('write')}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
+                flex: 1,
+                padding: '0.75rem',
+                borderRadius: '0.75rem',
                 fontSize: '0.875rem',
-                fontWeight: '500',
-                backgroundColor: story.trim() ? '#f8fafc' : '#f3f4f6',
-                color: story.trim() ? BRAND_PURPLE : '#9ca3af',
-                border: `1px solid ${story.trim() ? '#e2e8f0' : '#e5e7eb'}`,
-                borderRadius: '0.5rem',
-                cursor: story.trim() ? 'pointer' : 'not-allowed',
+                fontWeight: '600',
+                backgroundColor: inputMethod === 'write' ? BRAND_PURPLE : '#f3f4f6',
+                color: inputMethod === 'write' ? 'white' : '#6b7280',
+                border: 'none',
+                cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => {
-                if (story.trim()) {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9'
-                  e.currentTarget.style.borderColor = BRAND_PURPLE
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (story.trim()) {
-                  e.currentTarget.style.backgroundColor = '#f8fafc'
-                  e.currentTarget.style.borderColor = '#e2e8f0'
-                }
+            >
+              ✍️ Write Your Story
+            </button>
+            <button
+              onClick={() => setInputMethod('speak')}
+              style={{
+                flex: 1,
+                padding: '0.75rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                backgroundColor: inputMethod === 'speak' ? BRAND_PURPLE : '#f3f4f6',
+                color: inputMethod === 'speak' ? 'white' : '#6b7280',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
               }}
             >
-              {isCheckingSpelling ? (
-                <>⏳ Checking...</>
-              ) : (
-                <>✨ Check Spelling & Grammar</>
-              )}
+              🎤 Record Your Story
             </button>
           </div>
+
+          {/* Text Input */}
+          {inputMethod === 'write' && (
+            <textarea
+              value={story}
+              onChange={(e) => {
+                setStory(e.target.value)
+                localStorage.setItem('userStoryContext', e.target.value)
+              }}
+              placeholder="Share your experience... What made this moment special? What happened here? How did this place make you feel?"
+              style={{
+                width: '100%',
+                minHeight: '200px',
+                padding: '1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '1rem',
+                fontSize: '1rem',
+                lineHeight: '1.5',
+                resize: 'vertical',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+                fontFamily: 'inherit'
+              }}
+              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+          )}
+
+          {/* Voice Recording */}
+          {inputMethod === 'speak' && (
+            <div style={{
+              border: '2px solid #e5e7eb',
+              borderRadius: '1rem',
+              padding: '2rem',
+              textAlign: 'center',
+              minHeight: '200px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
+              <div style={{
+                fontSize: '3rem',
+                marginBottom: '1rem'
+              }}>
+                {recording ? '🎙️' : '🎤'}
+              </div>
+              
+              <button
+                onClick={recording ? stopRecording : startRecording}
+                style={{
+                  padding: '1rem 2rem',
+                  borderRadius: '1rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  backgroundColor: recording ? '#ef4444' : BRAND_PURPLE,
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: recording ? '0 4px 15px rgba(239, 68, 68, 0.3)' : `0 4px 15px rgba(107, 46, 255, 0.3)`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                {recording ? '🛑 Stop Recording' : '🎤 Start Recording'}
+              </button>
+              
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                margin: 0
+              }}>
+                {recording ? 'Listening... Speak clearly about your experience' : 'Press and speak your story. We recognise New Zealand English vocabulary automatically.'}
+              </p>
+
+              {story && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '0.5rem',
+                  width: '100%',
+                  textAlign: 'left'
+                }}>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: '#374151',
+                    margin: '0 0 0.5rem 0'
+                  }}>
+                    Transcribed text:
+                  </p>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    {story}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Optional Copilot Assistant */}
+          {story && (
+            <div style={{
+              marginTop: '1rem',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              <button
+                onClick={handleCopilotCheck}
+                disabled={!story.trim() || isCheckingSpelling}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  backgroundColor: story.trim() ? '#f8fafc' : '#f3f4f6',
+                  color: story.trim() ? BRAND_PURPLE : '#9ca3af',
+                  border: `1px solid ${story.trim() ? '#e2e8f0' : '#e5e7eb'}`,
+                  borderRadius: '0.5rem',
+                  cursor: story.trim() ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (story.trim()) {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9'
+                    e.currentTarget.style.borderColor = BRAND_PURPLE
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (story.trim()) {
+                    e.currentTarget.style.backgroundColor = '#f8fafc'
+                    e.currentTarget.style.borderColor = '#e2e8f0'
+                  }
+                }}
+              >
+                {isCheckingSpelling ? (
+                  <>⏳ Checking...</>
+                ) : (
+                  <>✨ Check Spelling & Grammar</>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Copilot Suggestions Panel */}
@@ -442,41 +609,39 @@ export default function TellYourStory() {
               </p>
             )}
 
-            // In your story page, replace the non-editable improved version section with this:
-
-<div style={{
-  backgroundColor: 'white',
-  border: '1px solid #e5e7eb',
-  borderRadius: '0.5rem',
-  padding: '1rem',
-  marginBottom: '1rem'
-}}>
-  <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#6b7280' }}>
-    Improved version (editable):
-  </p>
-  <textarea
-    value={copilotSuggestions.correctedText}
-    onChange={(e) => setCopilotSuggestions(prev => ({
-      ...prev,
-      correctedText: e.target.value
-    }))}
-    style={{
-      width: '100%',
-      minHeight: '120px',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '0.375rem',
-      fontSize: '0.875rem',
-      lineHeight: '1.5',
-      color: '#374151',
-      resize: 'vertical',
-      outline: 'none',
-      fontFamily: 'inherit'
-    }}
-    onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-  />
-</div>
+            <div style={{
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#6b7280' }}>
+                Improved version (editable):
+              </p>
+              <textarea
+                value={copilotSuggestions.correctedText}
+                onChange={(e) => setCopilotSuggestions(prev => ({
+                  ...prev,
+                  correctedText: e.target.value
+                }))}
+                style={{
+                  width: '100%',
+                  minHeight: '120px',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.5',
+                  color: '#374151',
+                  resize: 'vertical',
+                  outline: 'none',
+                  fontFamily: 'inherit'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
 
             <div style={{
               display: 'flex',
