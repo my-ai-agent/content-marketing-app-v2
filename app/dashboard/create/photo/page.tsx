@@ -54,11 +54,12 @@ const OUTPUT_QUALITY = 0.80
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
+  const [uploadMethod, setUploadMethod] = useState<'camera' | 'gallery' | 'upload'>('gallery')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
 
   // Compress image using pica, loaded dynamically
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
@@ -106,6 +107,7 @@ export default function PhotoUpload() {
     if (selectedPhoto) {
       try {
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
+        localStorage.setItem('photoType', uploadMethod) // Store the photo type
         window.location.href = '/dashboard/create/story'
       } catch {
         setError('Failed to save photo. Storage quota may be exceeded.')
@@ -122,6 +124,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
+    localStorage.removeItem('photoType')
     await removeImageFromIndexedDB('selectedPhoto')
     window.location.href = '/dashboard/create/story'
   }
@@ -131,6 +134,7 @@ export default function PhotoUpload() {
     setPhotoFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
+    if (uploadInputRef.current) uploadInputRef.current.value = ''
     await removeImageFromIndexedDB('selectedPhoto')
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
@@ -199,6 +203,7 @@ export default function PhotoUpload() {
           // Save file metadata
           localStorage.setItem('photoFileName', processedFile.name);
           localStorage.setItem('photoFileSize', processedFile.size.toString());
+          localStorage.setItem('photoType', uploadMethod);
           
           setError(null);
         } catch (err) {
@@ -335,7 +340,7 @@ export default function PhotoUpload() {
         width: '100%',
         padding: '2rem 1rem'
       }}>
-        {/* Upload Method Toggle */}
+        {/* Upload Method Toggle - 3 buttons */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
           <div style={{
             display: 'inline-flex',
@@ -345,32 +350,11 @@ export default function PhotoUpload() {
           }}>
             <button
               type="button"
-              onClick={() => setUploadMethod('upload')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: uploadMethod === 'upload' ? 'white' : 'transparent',
-                color: uploadMethod === 'upload' ? '#1f2937' : '#6b7280',
-                boxShadow: uploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-              }}
-            >
-              <span style={{ marginRight: '0.5rem' }}>📂</span>
-              Upload
-            </button>
-            <button
-              type="button"
               onClick={() => setUploadMethod('camera')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0.75rem 1.5rem',
+                padding: '0.75rem 1rem',
                 borderRadius: '0.75rem',
                 fontWeight: '600',
                 border: 'none',
@@ -384,6 +368,48 @@ export default function PhotoUpload() {
             >
               <span style={{ marginRight: '0.5rem' }}>📷</span>
               Camera
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('gallery')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'gallery' ? 'white' : 'transparent',
+                color: uploadMethod === 'gallery' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'gallery' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📱</span>
+              Gallery
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('upload')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'upload' ? 'white' : 'transparent',
+                color: uploadMethod === 'upload' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>🌐</span>
+              Upload
             </button>
           </div>
         </div>
@@ -407,10 +433,12 @@ export default function PhotoUpload() {
               transition: 'all 0.2s'
             }}
               onClick={() => {
-                if (uploadMethod === 'upload') {
+                if (uploadMethod === 'camera') {
+                  cameraInputRef.current?.click()
+                } else if (uploadMethod === 'gallery') {
                   fileInputRef.current?.click()
                 } else {
-                  cameraInputRef.current?.click()
+                  uploadInputRef.current?.click()
                 }
               }}
               onMouseEnter={(e) => {
@@ -423,7 +451,7 @@ export default function PhotoUpload() {
               }}
             >
               <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
-                {uploadMethod === 'upload' ? '📂' : '📷'}
+                {uploadMethod === 'camera' ? '📷' : uploadMethod === 'gallery' ? '📂' : '🌐'}
               </div>
               <h3 style={{
                 fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
@@ -432,7 +460,7 @@ export default function PhotoUpload() {
                 marginBottom: '0.5rem',
                 margin: '0 0 0.5rem 0'
               }}>
-                {uploadMethod === 'upload' ? 'Upload a Photo' : 'Take a Photo'}
+                {uploadMethod === 'camera' ? 'Take a Photo' : uploadMethod === 'gallery' ? 'Upload a Photo' : 'Upload Website Image'}
               </h3>
               <p style={{
                 fontSize: 'clamp(0.875rem, 2vw, 1rem)',
@@ -440,9 +468,11 @@ export default function PhotoUpload() {
                 marginBottom: '1rem',
                 padding: '0 1rem'
               }}>
-                {uploadMethod === 'upload'
+                {uploadMethod === 'camera'
+                  ? 'Click to open camera and capture a moment'
+                  : uploadMethod === 'gallery'
                   ? 'Click to browse your files or drag and drop'
-                  : 'Click to open camera and capture a moment'
+                  : 'Click to upload website or social media content'
                 }
               </p>
               <div style={{
@@ -464,6 +494,13 @@ export default function PhotoUpload() {
                 type="file"
                 accept="image/*"
                 capture="environment"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={uploadInputRef}
+                type="file"
+                accept="image/*"
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
               />
