@@ -94,19 +94,18 @@ export default function PhotoUploadPage() {
     }
   }
 
-  const handleCropComplete = async (croppedImageBlob: Blob) => {
+  const handleCropComplete = async (croppedImageUrl: string) => {
     try {
+      // Convert data URL to Blob for IndexedDB storage
+      const response = await fetch(croppedImageUrl)
+      const croppedImageBlob = await response.blob()
+      
       // Save to IndexedDB
       await saveToIndexedDB('userPhoto', croppedImageBlob)
       
       // Save to localStorage for immediate access
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64 = reader.result as string
-        localStorage.setItem('userPhoto', base64)
-        localStorage.setItem('photoType', photoType || 'experience')
-      }
-      reader.readAsDataURL(croppedImageBlob)
+      localStorage.setItem('userPhoto', croppedImageUrl)
+      localStorage.setItem('photoType', photoType || 'experience')
       
       // Continue to next step
       // Note: This would typically route to the next step in your flow
