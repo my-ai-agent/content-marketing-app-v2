@@ -1,227 +1,396 @@
+'use client'
 import Link from 'next/link'
+import { useState } from 'react'
 
-export default function Analytics() {
-  // Sample analytics data (in real app, this would come from analytics service)
-  const analytics = {
-    totalViews: 15750,
-    totalShares: 1240,
-    totalRevenue: 8950,
-    conversionRate: 12.5,
-    topStories: [
-      { title: "Pacific Navigation Stories", views: 5200, formats: 12, revenue: 3800 },
-      { title: "The Legend of Tangaroa", views: 4100, formats: 8, revenue: 2900 },
-      { title: "Māori Weaving Traditions", views: 3450, formats: 10, revenue: 1850 },
-      { title: "Haka Cultural Significance", views: 3000, formats: 7, revenue: 400 }
-    ],
-    formatPerformance: [
-      { format: "Blog Posts", views: 4200, engagement: 85, revenue: 1200 },
-      { format: "Social Media", views: 3800, engagement: 92, revenue: 800 },
-      { format: "Educational Videos", views: 2900, engagement: 78, revenue: 2100 },
-      { format: "Podcasts", views: 2100, engagement: 88, revenue: 1800 },
-      { format: "Workshops", views: 1500, engagement: 95, revenue: 2400 },
-      { format: "Digital Experiences", views: 1250, engagement: 82, revenue: 650 }
-    ],
-    monthlyTrends: [
-      { month: "Jan", views: 2100, revenue: 1200 },
-      { month: "Feb", views: 2800, revenue: 1650 },
-      { month: "Mar", views: 3200, revenue: 1900 },
-      { month: "Apr", views: 2900, revenue: 1700 },
-      { month: "May", views: 4650, revenue: 2500 }
-    ]
-  };
+const BRAND_PURPLE = '#6B2EFF'
+const BRAND_ORANGE = '#FF7B1C'
+const BRAND_BLUE = '#11B3FF'
+
+export default function BusinessIntelligenceDashboard() {
+  const [selectedAnalytics, setSelectedAnalytics] = useState<'platform' | 'user' | 'messaging'>('platform')
+
+  // Sample analytics data
+  const analyticsData = {
+    platform: {
+      title: 'Platform Analytics',
+      metrics: [
+        { label: 'Content Distribution', value: 'LinkedIn 45% | Instagram 30% | Facebook 25%', icon: '📊' },
+        { label: 'Engagement Rates', value: 'LinkedIn 8.5% | Instagram 12.3% | Facebook 6.7%', icon: '💫' },
+        { label: 'Photo Type Performance', value: 'Experience 60% | Gallery 25% | Website 15%', icon: '📸' },
+        { label: 'Format Preferences', value: 'Blog Article 40% | Social Post 35% | Video Script 25%', icon: '📝' },
+        { label: 'Platform ROI', value: 'LinkedIn $2.80 | Instagram $1.95 | Facebook $1.45 per $1 spent', icon: '💰' }
+      ]
+    },
+    user: {
+      title: 'User Analytics',
+      metrics: [
+        { label: 'Total Active Users', value: '1,247 tourism professionals', icon: '👥' },
+        { label: 'Regional Distribution', value: 'New Zealand 68% | International 32%', icon: '🌏' },
+        { label: 'User Types', value: 'Tourism Business 45% | Marketing Team 30% | Content Creators 25%', icon: '🏢' },
+        { label: 'Cultural Engagement', value: '89% use cultural intelligence features actively', icon: '🌿' },
+        { label: 'Premium Adoption', value: '34% upgrade to paid plans within 30 days', icon: '⭐' }
+      ]
+    },
+    messaging: {
+      title: 'Messaging Analytics',
+      metrics: [
+        { label: 'Cultural Authenticity Score', value: '94% average across all generated content', icon: '🎯' },
+        { label: 'Iwi Acknowledgment Rate', value: '78% of content includes proper acknowledgments', icon: '🪶' },
+        { label: 'NZ English Compliance', value: '96% authentic New Zealand vocabulary usage', icon: '🇳🇿' },
+        { label: 'Deployment Efficiency', value: '98% successful content deployment rate', icon: '🚀' },
+        { label: 'Content Quality Improvement', value: '73% increase in engagement vs original content', icon: '📈' },
+        { label: 'Time Savings', value: '85% reduction in content creation time', icon: '⏰' }
+      ]
+    }
+  }
+
+  const currentData = analyticsData[selectedAnalytics]
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: 'white'
+    }}>
       {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Content Analytics</h1>
-            <div className="flex space-x-4">
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Home
-              </Link>
-              <Link
-                href="/dashboard"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
+      }}>
+        {/* Navigation */}
+        <div style={{
+          position: 'absolute',
+          top: '1rem',
+          right: '1rem',
+          display: 'flex',
+          gap: '1rem'
+        }}>
+          <Link
+            href="/dashboard"
+            style={{
+              color: '#6b7280',
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/dashboard/analytics"
+            style={{
+              color: '#6b7280',
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
+          >
+            Analytics
+          </Link>
         </div>
+
+        {/* Title */}
+        <h1 style={{
+          fontSize: 'clamp(2rem, 6vw, 4rem)',
+          fontWeight: '700',
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Business Intelligence
+        </h1>
+        <p style={{
+          fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+          color: '#6b7280',
+          textAlign: 'center',
+          margin: '0'
+        }}>
+          AI Coaching Analytics for Tourism Businesses
+        </p>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{analytics.totalViews.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">Total Views</div>
-              </div>
-              <div className="text-green-500 text-sm">↗ +15%</div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{analytics.totalShares.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">Total Shares</div>
-              </div>
-              <div className="text-green-500 text-sm">↗ +28%</div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-gray-900">${analytics.totalRevenue.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">Total Revenue</div>
-              </div>
-              <div className="text-green-500 text-sm">↗ +22%</div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{analytics.conversionRate}%</div>
-                <div className="text-sm text-gray-600">Conversion Rate</div>
-              </div>
-              <div className="text-green-500 text-sm">↗ +5%</div>
-            </div>
+      <div style={{
+        flex: '1',
+        maxWidth: '800px',
+        margin: '0 auto',
+        width: '100%',
+        padding: '2rem 1rem'
+      }}>
+        {/* Analytics Method Toggle - 3 buttons */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '1rem',
+            padding: '0.5rem'
+          }}>
+            <button
+              type="button"
+              onClick={() => setSelectedAnalytics('platform')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: selectedAnalytics === 'platform' ? 'white' : 'transparent',
+                color: selectedAnalytics === 'platform' ? '#1f2937' : '#6b7280',
+                boxShadow: selectedAnalytics === 'platform' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📊</span>
+              Platform Analytics
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedAnalytics('user')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: selectedAnalytics === 'user' ? 'white' : 'transparent',
+                color: selectedAnalytics === 'user' ? '#1f2937' : '#6b7280',
+                boxShadow: selectedAnalytics === 'user' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>👥</span>
+              User Analytics
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedAnalytics('messaging')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: selectedAnalytics === 'messaging' ? 'white' : 'transparent',
+                color: selectedAnalytics === 'messaging' ? '#1f2937' : '#6b7280',
+                boxShadow: selectedAnalytics === 'messaging' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>💬</span>
+              Messaging Analytics
+            </button>
           </div>
         </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Monthly Trends */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
-            <div className="space-y-4">
-              {analytics.monthlyTrends.map((month) => (
-                <div key={month.month} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 text-sm font-medium text-gray-600">{month.month}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="text-sm font-medium text-gray-900">{month.views.toLocaleString()} views</div>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${(month.views / 5000) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
+        {/* Analytics Display Area */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '600px',
+            border: '2px solid #e5e7eb',
+            borderRadius: '1.5rem',
+            backgroundColor: '#fafafa',
+            margin: '0 auto',
+            padding: '2rem',
+            minHeight: '400px'
+          }}>
+            {/* Category Header */}
+            <div style={{ marginBottom: '2rem' }}>
+              <h2 style={{
+                fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+                fontWeight: '700',
+                color: '#1f2937',
+                margin: '0 0 0.5rem 0'
+              }}>
+                {currentData.title}
+              </h2>
+              <div style={{
+                width: '60px',
+                height: '4px',
+                backgroundColor: selectedAnalytics === 'platform' ? BRAND_PURPLE : 
+                                selectedAnalytics === 'user' ? BRAND_ORANGE : BRAND_BLUE,
+                borderRadius: '2px',
+                margin: '0 auto'
+              }}></div>
+            </div>
+
+            {/* Metrics Grid */}
+            <div style={{
+              display: 'grid',
+              gap: '1.5rem',
+              gridTemplateColumns: '1fr'
+            }}>
+              {currentData.metrics.map((metric, index) => (
+                <div key={index} style={{
+                  backgroundColor: 'white',
+                  padding: '1.5rem',
+                  borderRadius: '1rem',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  textAlign: 'left',
+                  border: '1px solid #f3f4f6'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1rem'
+                  }}>
+                    <div style={{
+                      fontSize: '1.5rem',
+                      flexShrink: 0
+                    }}>
+                      {metric.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                        fontWeight: '600',
+                        color: '#1f2937',
+                        margin: '0 0 0.5rem 0'
+                      }}>
+                        {metric.label}
+                      </h3>
+                      <p style={{
+                        fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                        color: '#6b7280',
+                        margin: '0',
+                        lineHeight: '1.4'
+                      }}>
+                        {metric.value}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-green-600">${month.revenue.toLocaleString()}</div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Top Stories */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Stories</h3>
-            <div className="space-y-4">
-              {analytics.topStories.map((story, index) => (
-                <div key={story.title} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-sm font-bold text-gray-500">#{index + 1}</div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{story.title}</div>
-                      <div className="text-xs text-gray-500">{story.views.toLocaleString()} views • {story.formats} formats</div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-green-600">${story.revenue.toLocaleString()}</div>
-                </div>
-              ))}
+            {/* Insights Footer */}
+            <div style={{
+              marginTop: '2rem',
+              padding: '1rem',
+              backgroundColor: selectedAnalytics === 'platform' ? '#f3f4f6' : 
+                               selectedAnalytics === 'user' ? '#fff7ed' : '#eff6ff',
+              borderRadius: '0.75rem',
+              border: `1px solid ${selectedAnalytics === 'platform' ? '#e5e7eb' : 
+                                   selectedAnalytics === 'user' ? '#fed7aa' : '#dbeafe'}`
+            }}>
+              <p style={{
+                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
+                color: selectedAnalytics === 'platform' ? '#6b7280' : 
+                       selectedAnalytics === 'user' ? '#c2410c' : '#1e40af',
+                margin: '0',
+                fontWeight: '500'
+              }}>
+                {selectedAnalytics === 'platform' && '📈 Platform performance shows strong LinkedIn engagement for B2B tourism content'}
+                {selectedAnalytics === 'user' && '🎯 User growth concentrated in premium tourism operators seeking cultural authenticity'}
+                {selectedAnalytics === 'messaging' && '✨ Cultural intelligence features driving 73% better content performance'}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Format Performance */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Format Performance</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Format</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Views</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Engagement</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Revenue</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Performance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.formatPerformance.map((format) => (
-                  <tr key={format.format} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{format.format}</td>
-                    <td className="py-3 px-4 text-gray-600">{format.views.toLocaleString()}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-gray-600">{format.engagement}%</span>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${format.engagement}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-green-600">${format.revenue.toLocaleString()}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        format.engagement >= 90 ? 'bg-green-100 text-green-800' :
-                        format.engagement >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {format.engagement >= 90 ? 'Excellent' :
-                         format.engagement >= 80 ? 'Good' : 'Needs Work'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Cultural Impact Metrics */}
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Cultural Impact & Reach</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">47</div>
-              <div className="text-sm text-gray-600">Countries Reached</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">12</div>
-              <div className="text-sm text-gray-600">Languages Translated</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">89%</div>
-              <div className="text-sm text-gray-600">Cultural Accuracy Score</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Export Options */}
-        <div className="mt-8 flex justify-end space-x-4">
-          <button className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-            Export CSV
+        {/* Action Buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '1rem',
+          width: '100%',
+          marginBottom: '1rem'
+        }}>
+          <button
+            style={{
+              background: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+              fontWeight: '600',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Export Report
           </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-            Generate Report
+          <button
+            style={{
+              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+              color: 'white',
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+              fontWeight: '900',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              transition: 'all 0.2s'
+            }}
+          >
+            View Details →
           </button>
+        </div>
+
+        {/* Logo - Brand Reinforcement */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '1rem',
+          paddingTop: '0'
+        }}>
+          <div style={{
+            color: BRAND_PURPLE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline'
+          }}>click</div>
+          <div style={{
+            color: BRAND_ORANGE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>speak</div>
+          <div style={{
+            color: BRAND_BLUE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>send</div>
         </div>
       </div>
-    </main>
+
+      {/* Bottom Navigation */}
+      <div style={{
+        padding: '1.5rem',
+        textAlign: 'center',
+        borderTop: '1px solid #f3f4f6'
+      }}>
+        <Link
+          href="/dashboard"
+          style={{
+            color: '#6b7280',
+            textDecoration: 'none',
+            fontWeight: '600',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+          }}
+        >
+          ← Back to Dashboard
+        </Link>
+      </div>
+    </div>
   )
 }
