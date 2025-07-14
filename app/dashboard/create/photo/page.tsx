@@ -1,34 +1,43 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
-import dynamic from 'next/dynamic'
-import { Camera, Globe, ImageIcon } from 'lucide-react'
 
-// Dynamically import CropTool in case it uses browser APIs at the module level
-const CropTool = dynamic(() => import('./CropTool'), { ssr: false })
-
-// Simple IndexedDB helper
-const saveToIndexedDB = async (key: string, data: any) => {
+// Simple IndexedDB helper (inline, no 3rd party dependency)
+const DB_NAME = 'PhotoAppDB'
+const STORE_NAME = 'photos'
+function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('ClickSpeakSendDB', 1)
-    
-    request.onerror = () => reject(request.error)
-    
-    request.onsuccess = () => {
-      const db = request.result
-      const transaction = db.transaction(['photos'], 'readwrite')
-      const store = transaction.objectStore('photos')
-      store.put({ id: key, data })
-      
-      transaction.oncomplete = () => resolve(true)
-      transaction.onerror = () => reject(transaction.error)
+    const req = indexedDB.open(DB_NAME, 1)
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore(STORE_NAME)
     }
-    
-    request.onupgradeneeded = () => {
-      const db = request.result
-      if (!db.objectStoreNames.contains('photos')) {
-        db.createObjectStore('photos', { keyPath: 'id' })
+    req.onerror = () => reject(req.error)
+    req.onsuccess = () => {
+      const db = req.result
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      tx.objectStore(STORE_NAME).put(data, key)
+      tx.oncomplete = () => {
+        db.close()
+        resolve()
       }
+      tx.onerror = () => reject(tx.error)
+    }
+  })
+}
+
+function removeImageFromIndexedDB(key: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1)
+    req.onerror = () => reject(req.error)
+    req.onsuccess = () => {
+      const db = req.result
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      tx.objectStore(STORE_NAME).delete(key)
+      tx.oncomplete = () => {
+        db.close()
+        resolve()
+      }
+      tx.onerror = () => reject(tx.error)
     }
   })
 }
@@ -37,313 +46,592 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-export type PhotoType = 'experience' | 'business' | 'reference'
+// Compression config for mobile-optimized, localStorage/IndexedDB safe
+const MAX_WIDTH = 1280
+const MAX_HEIGHT = 1280
+const OUTPUT_QUALITY = 0.80
 
-export default function PhotoUploadPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [showCrop, setShowCrop] = useState(false)
-  const [photoType, setPhotoType] = useState<PhotoType | null>(null)
-  const [showTypeSelection, setShowTypeSelection] = useState(true)
+export default function PhotoUpload() {
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  const photoTypeOptions = [
-    {
-      type: 'experience' as PhotoType,
-      icon: Camera,
-      title: 'Experience Photo',
-      description: 'Your personal travel or tourism experience photo',
-      aiHelp: 'Claude will analyse your experience and create authentic, engaging content that captures your personal journey and cultural encounters.'
-    },
-    {
-      type: 'business' as PhotoType,
-      icon: Globe,
-      title: 'Business Website Image',
-      description: 'Landing page, hero image, or marketing material from your business website',
-      aiHelp: 'Claude will analyse your brand visual elements and create content that maintains brand consistency while adding cultural intelligence and authentic storytelling.'
-    },
-    {
-      type: 'reference' as PhotoType,
-      icon: ImageIcon,
-      title: 'Reference/Inspiration Image',
-      description: 'Social media post, competitor content, or inspirational material to guide content style',
-      aiHelp: 'Claude will analyse the visual style and messaging approach, then create original content inspired by successful patterns while maintaining your unique voice.'
-    }
-  ]
-
-  const handlePhotoTypeSelection = (type: PhotoType) => {
-    setPhotoType(type)
-    setShowTypeSelection(false)
-    // Store photo type for later Claude prompt enhancement
-    localStorage.setItem('photoType', type)
-  }
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
-      setShowCrop(true)
-    }
-  }
-
-  const handleCameraCapture = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click()
-    }
-  }
-
-  const handleCropComplete = async (croppedImageUrl: string) => {
+  // Compress image using pica, loaded dynamically
+  const compressWithPica = async (imgSrc: string): Promise<Blob> => {
+    setIsProcessing(true)
+    setError(null)
     try {
-      // Convert data URL to Blob for IndexedDB storage
-      const response = await fetch(croppedImageUrl)
-      const croppedImageBlob = await response.blob()
-      
-      // Save to IndexedDB
-      await saveToIndexedDB('userPhoto', croppedImageBlob)
-      
-      // Save to localStorage for immediate access
-      localStorage.setItem('userPhoto', croppedImageUrl)
-      localStorage.setItem('photoType', photoType || 'experience')
-      
-      // Continue to next step
-      // Note: This would typically route to the next step in your flow
-      console.log('Photo saved successfully with type:', photoType)
-      
-    } catch (error) {
-      console.error('Error saving photo:', error)
-      alert('Error saving photo. Please try again.')
+      const picaModule = await import('pica')
+      const picaInstance = picaModule.default()
+      const img = document.createElement('img')
+      img.src = imgSrc
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = (err) => reject(new Error('Image load failed'))
+      })
+
+      if (!img.naturalWidth || !img.naturalHeight) {
+        throw new Error('Image has invalid dimensions')
+      }
+
+      let { width, height } = img
+      let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
+      let newW = Math.round(width * scale)
+      let newH = Math.round(height * scale)
+      const inputCanvas = document.createElement('canvas')
+      inputCanvas.width = width
+      inputCanvas.height = height
+      const inputCtx = inputCanvas.getContext('2d')
+      if (!inputCtx) throw new Error('Could not get canvas context')
+      inputCtx.drawImage(img, 0, 0)
+      const outputCanvas = document.createElement('canvas')
+      outputCanvas.width = newW
+      outputCanvas.height = newH
+      await picaInstance.resize(inputCanvas, outputCanvas)
+      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
+      URL.revokeObjectURL(img.src)
+      return blob
+    } finally {
+      setIsProcessing(false)
     }
   }
 
-  const changePhotoType = () => {
-    setShowTypeSelection(true)
-    setPhotoType(null)
-    setSelectedFile(null)
-    setPreviewUrl(null)
-    setShowCrop(false)
+  const handleNext = async () => {
+    setError(null)
+    if (selectedPhoto) {
+      try {
+        localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
+        window.location.href = '/dashboard/create/story'
+      } catch {
+        setError('Failed to save photo. Storage quota may be exceeded.')
+      }
+    } else {
+      alert('Please select a photo before continuing.')
+    }
   }
 
-  if (showTypeSelection) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center space-x-2 mb-4">
-              {[1,2,3,4,5,6].map((step) => (
-                <div
-                  key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    step === 1 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {step}
-                </div>
-              ))}
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">Choose Your Photo Type</h1>
-            <p className="text-gray-600 mt-2">Select the type of image you'd like to share for optimal AI content creation</p>
-          </div>
-
-          {/* Photo Type Options */}
-          <div className="space-y-4">
-            {photoTypeOptions.map((option) => {
-              const IconComponent = option.icon
-              return (
-                <button
-                  key={option.type}
-                  onClick={() => handlePhotoTypeSelection(option.type)}
-                  className="w-full p-6 bg-white rounded-xl shadow-sm border-2 border-gray-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 text-left"
-                >
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <IconComponent className="w-6 h-6 text-purple-600" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-800 mb-2">{option.title}</h3>
-                      <p className="text-sm text-gray-600 mb-3">{option.description}</p>
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-xs text-blue-700">
-                          <strong>AI Enhancement:</strong> {option.aiHelp}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Navigation */}
-          <div className="flex justify-between mt-8">
-            <Link 
-              href="/dashboard"
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-            >
-              ← Back
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+  const handleSkip = async () => {
+    setError(null)
+    setSelectedPhoto(null)
+    setPhotoFile(null)
+    localStorage.removeItem('selectedPhotoIndex')
+    localStorage.removeItem('photoFileName')
+    localStorage.removeItem('photoFileSize')
+    await removeImageFromIndexedDB('selectedPhoto')
+    window.location.href = '/dashboard/create/story'
   }
 
-  if (showCrop && selectedFile && previewUrl) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="flex justify-center space-x-2 mb-4">
-              {[1,2,3,4,5,6].map((step) => (
-                <div
-                  key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    step === 1 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {step}
-                </div>
-              ))}
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">Crop Your {photoType === 'experience' ? 'Experience' : photoType === 'business' ? 'Business' : 'Reference'} Photo</h1>
-            <button 
-              onClick={changePhotoType}
-              className="text-purple-600 text-sm mt-2 hover:underline"
-            >
-              Change photo type
-            </button>
-          </div>
-
-          {/* Crop Tool */}
-          <CropTool
-            imageUrl={previewUrl}
-            onCropComplete={handleCropComplete}
-            onCancel={() => {
-              setShowCrop(false)
-              setSelectedFile(null)
-              setPreviewUrl(null)
-            }}
-          />
-        </div>
-      </div>
-    )
+  const handleRemovePhoto = async () => {
+    setSelectedPhoto(null)
+    setPhotoFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (cameraInputRef.current) cameraInputRef.current.value = ''
+    await removeImageFromIndexedDB('selectedPhoto')
+    localStorage.removeItem('selectedPhotoIndex')
+    localStorage.removeItem('photoFileName')
+    localStorage.removeItem('photoFileSize')
   }
+
+  // Simplified file select handler - direct to compression and save
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // File size limit (10MB)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File too large. Please use images under 10MB.');
+      return;
+    }
+
+    let processedFile = file;
+
+    // Handle HEIC/HEIF conversion with dynamic import
+    if (
+      file.type === "image/heic" || file.type === "image/heif" ||
+      file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")
+    ) {
+      try {
+        setError("Converting iPhone photo, please wait...");
+        const heic2any = (await import("heic2any")).default;
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality: 0.8
+        }) as Blob;
+
+        processedFile = new File([convertedBlob],
+          file.name.replace(/\.heic$/i, ".jpg"),
+          { type: "image/jpeg" }
+        );
+        setError(null);
+      } catch (err) {
+        setError("Failed to convert iPhone photo. Please try a different file.");
+        return;
+      }
+    }
+
+    // Check supported formats (after conversion, processedFile.type may have changed)
+    if (!/image\/(jpeg|png|webp)/.test(processedFile.type)) {
+      setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.');
+      return;
+    }
+
+    setPhotoFile(processedFile);
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === 'string') {
+        try {
+          // Compress and save directly - no crop step
+          setError("Processing image...");
+          const compressedBlob = await compressWithPica(result);
+          await saveImageToIndexedDB('selectedPhoto', compressedBlob);
+          setSelectedPhoto(result);
+          
+          // Save file metadata
+          localStorage.setItem('photoFileName', processedFile.name);
+          localStorage.setItem('photoFileSize', processedFile.size.toString());
+          
+          setError(null);
+        } catch (err) {
+          setError('Failed to process image. Please try a smaller file or different format.');
+          setSelectedPhoto(null);
+        }
+      } else {
+        setError('Failed to read file');
+      }
+    };
+
+    reader.onerror = () => setError('Failed to read file');
+    reader.readAsDataURL(processedFile);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center space-x-2 mb-4">
-            {[1,2,3,4,5,6].map((step) => (
-              <div
-                key={step}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  step === 1 
-                    ? 'bg-purple-600 text-white' 
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                {step}
-              </div>
-            ))}
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Upload Your {photoType === 'experience' ? 'Experience' : photoType === 'business' ? 'Business' : 'Reference'} Photo
-          </h1>
-          <button 
-            onClick={changePhotoType}
-            className="text-purple-600 text-sm mt-2 hover:underline"
-          >
-            Change photo type
-          </button>
-        </div>
-
-        {/* Photo Type Context */}
-        <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-          {photoType === 'experience' && (
-            <div className="flex items-center space-x-3">
-              <Camera className="w-6 h-6 text-purple-600" />
-              <div>
-                <h3 className="font-semibold text-gray-800">Experience Photo Selected</h3>
-                <p className="text-sm text-gray-600">Claude will create authentic content from your personal travel experience</p>
-              </div>
-            </div>
-          )}
-          {photoType === 'business' && (
-            <div className="flex items-center space-x-3">
-              <Globe className="w-6 h-6 text-purple-600" />
-              <div>
-                <h3 className="font-semibold text-gray-800">Business Content Selected</h3>
-                <p className="text-sm text-gray-600">Claude will maintain brand consistency while adding cultural intelligence</p>
-              </div>
-            </div>
-          )}
-          {photoType === 'reference' && (
-            <div className="flex items-center space-x-3">
-              <ImageIcon className="w-6 h-6 text-purple-600" />
-              <div>
-                <h3 className="font-semibold text-gray-800">Reference Content Selected</h3>
-                <p className="text-sm text-gray-600">Claude will create original content inspired by successful patterns</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Upload Options */}
-        <div className="space-y-4">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture={photoType === 'experience' ? 'environment' : undefined}
-            onChange={handleFileSelect}
-            className="hidden"
-          />
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: 'white'
+    }}>
+      {/* Header with Step Tracker Only */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem 1rem',
+        borderBottom: '1px solid #f3f4f6'
+      }}>
+        {/* Step Tracker - Updated to 6 steps */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>1</div>
           
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#1f2937',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>2</div>
+          
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>3</div>
+          
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>4</div>
+          
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>5</div>
+          
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            backgroundColor: '#e5e7eb',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>6</div>
+        </div>
+        {/* Title */}
+        <h1 style={{
+          fontSize: 'clamp(2rem, 6vw, 4rem)',
+          fontWeight: '700',
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Add Your Photo
+        </h1>
+      </div>
+      <div style={{
+        flex: '1',
+        maxWidth: '800px',
+        margin: '0 auto',
+        width: '100%',
+        padding: '2rem 1rem'
+      }}>
+        {/* Upload Method Toggle */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '1rem',
+            padding: '0.5rem'
+          }}>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('upload')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'upload' ? 'white' : 'transparent',
+                color: uploadMethod === 'upload' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📂</span>
+              Upload
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMethod('camera')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: uploadMethod === 'camera' ? 'white' : 'transparent',
+                color: uploadMethod === 'camera' ? '#1f2937' : '#6b7280',
+                boxShadow: uploadMethod === 'camera' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>📷</span>
+              Camera
+            </button>
+          </div>
+        </div>
+        {/* Photo Upload Area */}
+        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
+          {!selectedPhoto ? (
+            <div style={{
+              width: '100%',
+              maxWidth: '500px',
+              height: '300px',
+              border: '2px dashed #d1d5db',
+              borderRadius: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#fafafa',
+              margin: '0 auto',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+              onClick={() => {
+                if (uploadMethod === 'upload') {
+                  fileInputRef.current?.click()
+                } else {
+                  cameraInputRef.current?.click()
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#9ca3af'
+                e.currentTarget.style.backgroundColor = '#f5f5f5'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db'
+                e.currentTarget.style.backgroundColor = '#fafafa'
+              }}
+            >
+              <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
+                {uploadMethod === 'upload' ? '📂' : '📷'}
+              </div>
+              <h3 style={{
+                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '0.5rem',
+                margin: '0 0 0.5rem 0'
+              }}>
+                {uploadMethod === 'upload' ? 'Upload a Photo' : 'Take a Photo'}
+              </h3>
+              <p style={{
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                color: '#6b7280',
+                marginBottom: '1rem',
+                padding: '0 1rem'
+              }}>
+                {uploadMethod === 'upload'
+                  ? 'Click to browse your files or drag and drop'
+                  : 'Click to open camera and capture a moment'
+                }
+              </p>
+              <div style={{
+                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
+                color: '#9ca3af'
+              }}>
+                Supports: JPG, PNG, HEIC, WebP
+              </div>
+              {/* Hidden file inputs */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+            </div>
+          ) : (
+            <div style={{
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto',
+              position: 'relative'
+            }}>
+              <div style={{
+                width: '100%',
+                maxHeight: '70vh',
+                borderRadius: '1.5rem',
+                overflow: 'hidden',
+                position: 'relative',
+                backgroundColor: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <img
+                  src={selectedPhoto}
+                  alt="Selected photo"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '70vh',
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    borderRadius: '1.5rem'
+                  }}
+                />
+                <button
+                  onClick={handleRemovePhoto}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{
+                marginTop: '1rem',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                color: '#6b7280'
+              }}>
+                {photoFile?.name && `📁 ${photoFile.name}`}
+              </div>
+            </div>
+          )}
+          {isProcessing && (
+            <div style={{ marginTop: '1rem', color: BRAND_PURPLE, fontWeight: 600 }}>
+              Processing image, please wait...
+            </div>
+          )}
+          {error && (
+            <div style={{ marginTop: '1rem', color: 'red', fontWeight: 600 }}>
+              {error}
+            </div>
+          )}
+        </div>
+        {/* Action Buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '1rem',
+          width: '100%',
+          marginBottom: '1rem'
+        }}>
           <button
-            onClick={handleCameraCapture}
-            className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            onClick={handleSkip}
+            style={{
+              background: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+              fontWeight: '600',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
           >
-            📸 {photoType === 'experience' ? 'Take Photo' : 'Upload Photo'}
+            Skip for now
           </button>
-
           <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full py-4 bg-white text-gray-700 rounded-xl font-medium border-2 border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200"
+            onClick={handleNext}
+            disabled={!selectedPhoto || isProcessing}
+            style={{
+              background: selectedPhoto
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : '#e5e7eb',
+              color: selectedPhoto ? 'white' : '#9ca3af',
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+              fontWeight: '900',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedPhoto ? 'pointer' : 'not-allowed',
+              boxShadow: selectedPhoto ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
+              transition: 'all 0.2s'
+            }}
           >
-            📁 Choose from Gallery
+            Continue →
           </button>
         </div>
-
-        {/* AI Enhancement Preview */}
-        <div className="mt-6 bg-blue-50 rounded-xl p-4">
-          <h3 className="font-semibold text-blue-800 mb-2">🤖 AI Enhancement Preview</h3>
-          <p className="text-sm text-blue-700">
-            {photoType === 'experience' && "Your experience photo will be analysed for location, activities, and cultural elements to create compelling, authentic travel content."}
-            {photoType === 'business' && "Your business image will be analysed for brand colours, style, and messaging to create content that aligns with your existing marketing materials."}
-            {photoType === 'reference' && "Your reference image will be analysed for successful patterns, style elements, and engagement tactics to inspire original content creation."}
-          </p>
+        {/* Logo - Brand Reinforcement */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '1rem',
+          paddingTop: '0'
+        }}>
+          <div style={{
+            color: BRAND_PURPLE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline'
+          }}>click</div>
+          <div style={{
+            color: BRAND_ORANGE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>speak</div>
+          <div style={{
+            color: BRAND_BLUE,
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontWeight: '900',
+            display: 'inline',
+            marginLeft: '0.25rem'
+          }}>send</div>
         </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between mt-8">
-          <button 
-            onClick={changePhotoType}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-          >
-            ← Change Type
-          </button>
-        </div>
+      </div>
+      {/* Bottom Navigation */}
+      <div style={{
+        padding: '1.5rem',
+        textAlign: 'center',
+        borderTop: '1px solid #f3f4f6'
+      }}>
+        <Link
+          href="/"
+          style={{
+            color: '#6b7280',
+            textDecoration: 'none',
+            fontWeight: '600',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+          }}
+        >
+          ← Back to Home
+        </Link>
       </div>
     </div>
   )
