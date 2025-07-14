@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef } from 'react'
+import { Camera, Globe, ImageIcon } from 'lucide-react'
 
 // Simple IndexedDB helper (inline, no 3rd party dependency)
 const DB_NAME = 'PhotoAppDB'
@@ -51,14 +52,58 @@ const MAX_WIDTH = 1280
 const MAX_HEIGHT = 1280
 const OUTPUT_QUALITY = 0.80
 
+export type PhotoType = 'experience' | 'business' | 'reference'
+
 export default function PhotoUpload() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [uploadMethod, setUploadMethod] = useState<'upload' | 'camera'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [photoType, setPhotoType] = useState<PhotoType | null>(null)
+  const [showTypeSelection, setShowTypeSelection] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  const photoTypeOptions = [
+    {
+      type: 'experience' as PhotoType,
+      icon: Camera,
+      title: 'Experience Photo',
+      description: 'Your personal travel or tourism experience photo',
+      aiHelp: 'Claude will analyse your experience and create authentic, engaging content that captures your personal journey and cultural encounters.'
+    },
+    {
+      type: 'business' as PhotoType,
+      icon: Globe,
+      title: 'Business Website Image',
+      description: 'Landing page, hero image, or marketing material from your business website',
+      aiHelp: 'Claude will analyse your brand visual elements and create content that maintains brand consistency while adding cultural intelligence and authentic storytelling.'
+    },
+    {
+      type: 'reference' as PhotoType,
+      icon: ImageIcon,
+      title: 'Reference/Inspiration Image',
+      description: 'Social media post, competitor content, or inspirational material to guide content style',
+      aiHelp: 'Claude will analyse the visual style and messaging approach, then create original content inspired by successful patterns while maintaining your unique voice.'
+    }
+  ]
+
+  const handlePhotoTypeSelection = (type: PhotoType) => {
+    setPhotoType(type)
+    setShowTypeSelection(false)
+    // Store photo type for later Claude prompt enhancement
+    localStorage.setItem('photoType', type)
+  }
+
+  const changePhotoType = () => {
+    setShowTypeSelection(true)
+    setPhotoType(null)
+    setSelectedPhoto(null)
+    setPhotoFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (cameraInputRef.current) cameraInputRef.current.value = ''
+  }
 
   // Compress image using pica, loaded dynamically
   const compressWithPica = async (imgSrc: string): Promise<Blob> => {
@@ -106,6 +151,7 @@ export default function PhotoUpload() {
     if (selectedPhoto) {
       try {
         localStorage.setItem('selectedPhotoIndex', 'selectedPhoto')
+        localStorage.setItem('photoType', photoType || 'experience')
         window.location.href = '/dashboard/create/story'
       } catch {
         setError('Failed to save photo. Storage quota may be exceeded.')
@@ -122,6 +168,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('selectedPhotoIndex')
     localStorage.removeItem('photoFileName')
     localStorage.removeItem('photoFileSize')
+    localStorage.removeItem('photoType')
     await removeImageFromIndexedDB('selectedPhoto')
     window.location.href = '/dashboard/create/story'
   }
@@ -199,6 +246,7 @@ export default function PhotoUpload() {
           // Save file metadata
           localStorage.setItem('photoFileName', processedFile.name);
           localStorage.setItem('photoFileSize', processedFile.size.toString());
+          localStorage.setItem('photoType', photoType || 'experience');
           
           setError(null);
         } catch (err) {
@@ -214,6 +262,267 @@ export default function PhotoUpload() {
     reader.readAsDataURL(processedFile);
   };
 
+  // Photo Type Selection Screen
+  if (showTypeSelection) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: 'white'
+      }}>
+        {/* Header with Step Tracker */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '2rem 1rem',
+          borderBottom: '1px solid #f3f4f6'
+        }}>
+          {/* Step Tracker */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#10b981',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>1</div>
+            
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#e5e7eb',
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>2</div>
+            
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#e5e7eb',
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>3</div>
+            
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#e5e7eb',
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>4</div>
+            
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#e5e7eb',
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>5</div>
+            
+            <div style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              backgroundColor: '#e5e7eb',
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>6</div>
+          </div>
+          
+          <h1 style={{
+            fontSize: 'clamp(2rem, 6vw, 4rem)',
+            fontWeight: '700',
+            color: '#1f2937',
+            lineHeight: '1.2',
+            marginBottom: '0.5rem',
+            textAlign: 'center'
+          }}>
+            Choose Your Photo Type
+          </h1>
+          <p style={{
+            fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+            color: '#6b7280',
+            textAlign: 'center',
+            margin: '0'
+          }}>
+            Select the type of image you'd like to share for optimal AI content creation
+          </p>
+        </div>
+
+        <div style={{
+          flex: '1',
+          maxWidth: '800px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '2rem 1rem'
+        }}>
+          {/* Photo Type Options */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem' }}>
+            {photoTypeOptions.map((option) => {
+              const IconComponent = option.icon
+              return (
+                <button
+                  key={option.type}
+                  onClick={() => handlePhotoTypeSelection(option.type)}
+                  style={{
+                    width: '100%',
+                    padding: '2rem',
+                    backgroundColor: 'white',
+                    borderRadius: '1.5rem',
+                    border: '2px solid #f3f4f6',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = BRAND_PURPLE
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#f3f4f6'
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
+                    <div style={{
+                      width: '3rem',
+                      height: '3rem',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <IconComponent style={{ width: '1.5rem', height: '1.5rem', color: BRAND_PURPLE }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
+                        fontWeight: '700',
+                        color: '#1f2937',
+                        marginBottom: '0.5rem',
+                        margin: '0 0 0.5rem 0'
+                      }}>
+                        {option.title}
+                      </h3>
+                      <p style={{
+                        fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                        color: '#6b7280',
+                        marginBottom: '1rem',
+                        margin: '0 0 1rem 0'
+                      }}>
+                        {option.description}
+                      </p>
+                      <div style={{
+                        backgroundColor: '#f0f9ff',
+                        padding: '1rem',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #e0f2fe'
+                      }}>
+                        <p style={{
+                          fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                          color: '#0c4a6e',
+                          fontWeight: '600',
+                          margin: '0'
+                        }}>
+                          🤖 AI Enhancement: {option.aiHelp}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{
+              color: BRAND_PURPLE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+              fontWeight: '900',
+              display: 'inline'
+            }}>click</div>
+            <div style={{
+              color: BRAND_ORANGE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>speak</div>
+            <div style={{
+              color: BRAND_BLUE,
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </div>
+        </div>
+
+        {/* Bottom Navigation */}
+        <div style={{
+          padding: '1.5rem',
+          textAlign: 'center',
+          borderTop: '1px solid #f3f4f6'
+        }}>
+          <Link
+            href="/"
+            style={{
+              color: '#6b7280',
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+            }}
+          >
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Main Photo Upload Screen (after type selection)
   return (
     <div style={{
       display: 'flex',
@@ -221,7 +530,7 @@ export default function PhotoUpload() {
       minHeight: '100vh',
       backgroundColor: 'white'
     }}>
-      {/* Header with Step Tracker Only */}
+      {/* Header with Step Tracker */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -230,7 +539,7 @@ export default function PhotoUpload() {
         padding: '2rem 1rem',
         borderBottom: '1px solid #f3f4f6'
       }}>
-        {/* Step Tracker - Updated to 6 steps */}
+        {/* Step Tracker */}
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -316,7 +625,8 @@ export default function PhotoUpload() {
             fontWeight: '600'
           }}>6</div>
         </div>
-        {/* Title */}
+
+        {/* Title with Photo Type Context */}
         <h1 style={{
           fontSize: 'clamp(2rem, 6vw, 4rem)',
           fontWeight: '700',
@@ -325,9 +635,24 @@ export default function PhotoUpload() {
           marginBottom: '0.5rem',
           textAlign: 'center'
         }}>
-          Add Your Photo
+          Add Your {photoType === 'experience' ? 'Experience' : photoType === 'business' ? 'Business' : 'Reference'} Photo
         </h1>
+        <button 
+          onClick={changePhotoType}
+          style={{
+            color: BRAND_PURPLE,
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            fontWeight: '600',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'underline'
+          }}
+        >
+          Change photo type
+        </button>
       </div>
+
       <div style={{
         flex: '1',
         maxWidth: '800px',
@@ -335,6 +660,42 @@ export default function PhotoUpload() {
         width: '100%',
         padding: '2rem 1rem'
       }}>
+        {/* Photo Type Context Banner */}
+        <div style={{
+          backgroundColor: '#f0f9ff',
+          padding: '1.5rem',
+          borderRadius: '1rem',
+          marginBottom: '2rem',
+          border: '1px solid #e0f2fe'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {photoType === 'experience' && <Camera style={{ width: '1.5rem', height: '1.5rem', color: BRAND_PURPLE }} />}
+            {photoType === 'business' && <Globe style={{ width: '1.5rem', height: '1.5rem', color: BRAND_PURPLE }} />}
+            {photoType === 'reference' && <ImageIcon style={{ width: '1.5rem', height: '1.5rem', color: BRAND_PURPLE }} />}
+            <div>
+              <h3 style={{
+                fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
+                fontWeight: '700',
+                color: '#0c4a6e',
+                margin: '0 0 0.25rem 0'
+              }}>
+                {photoType === 'experience' && 'Experience Photo Selected'}
+                {photoType === 'business' && 'Business Content Selected'}  
+                {photoType === 'reference' && 'Reference Content Selected'}
+              </h3>
+              <p style={{
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                color: '#0c4a6e',
+                margin: '0'
+              }}>
+                {photoType === 'experience' && 'Claude will create authentic content from your personal travel experience'}
+                {photoType === 'business' && 'Claude will maintain brand consistency while adding cultural intelligence'}
+                {photoType === 'reference' && 'Claude will create original content inspired by successful patterns'}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Upload Method Toggle */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
           <div style={{
@@ -387,6 +748,7 @@ export default function PhotoUpload() {
             </button>
           </div>
         </div>
+
         {/* Photo Upload Area */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
           {!selectedPhoto ? (
@@ -541,6 +903,7 @@ export default function PhotoUpload() {
             </div>
           )}
         </div>
+
         {/* Action Buttons */}
         <div style={{
           display: 'flex',
@@ -587,6 +950,7 @@ export default function PhotoUpload() {
             Continue →
           </button>
         </div>
+
         {/* Logo - Brand Reinforcement */}
         <div style={{
           textAlign: 'center',
@@ -615,23 +979,27 @@ export default function PhotoUpload() {
           }}>send</div>
         </div>
       </div>
+
       {/* Bottom Navigation */}
       <div style={{
         padding: '1.5rem',
         textAlign: 'center',
         borderTop: '1px solid #f3f4f6'
       }}>
-        <Link
-          href="/"
+        <button 
+          onClick={changePhotoType}
           style={{
             color: '#6b7280',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
             textDecoration: 'none',
             fontWeight: '600',
             fontSize: 'clamp(0.875rem, 2vw, 1rem)'
           }}
         >
-          ← Back to Home
-        </Link>
+          ← Change Photo Type
+        </button>
       </div>
     </div>
   )
