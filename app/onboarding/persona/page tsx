@@ -1,6 +1,6 @@
-// Create new file: /app/onboarding/persona/page.tsx
+// Update file: /app/onboarding/persona/page.tsx
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const BRAND_PURPLE = '#6B2EFF'
@@ -15,41 +15,103 @@ interface PersonaOption {
   traits: string[]
   emoji: string
   example: string
+  userTypes: string[] // 'business' | 'personal' | 'both'
 }
 
-const personaOptions: PersonaOption[] = [
+const allPersonaOptions: PersonaOption[] = [
+  // Business-focused personas
   {
     id: 'professional',
-    title: 'Professional',
-    subtitle: 'Business Owner/Manager',
-    description: 'Authoritative, business-focused content that builds credibility and drives results',
+    title: 'Business Professional',
+    subtitle: 'Authoritative Business Voice',
+    description: 'Professional, business-focused content that builds credibility and drives direct bookings',
     traits: ['Authoritative tone', 'Industry expertise', 'Business-focused', 'Call-to-action oriented'],
     emoji: '🏢',
-    example: '"This authentic cultural experience demonstrates New Zealand\'s commitment to preserving indigenous heritage while creating meaningful tourism opportunities for discerning travelers."'
+    example: '"This authentic cultural experience demonstrates our commitment to preserving indigenous heritage while creating meaningful opportunities for discerning travellers."',
+    userTypes: ['business']
   },
+  
+  // Personal & business personas
   {
-    id: 'casual',
-    title: 'Influencer',
-    subtitle: 'Content Creator/Travel Blogger',
+    id: 'influencer',
+    title: 'Content Creator',
+    subtitle: 'Social Media & Blog Creator',
     description: 'Engaging, personal storytelling that builds community and inspires followers',
     traits: ['Authentic & relatable', 'Personal stories', 'Community building', 'Engagement focused'],
     emoji: '📱',
-    example: '"Guys, I\'m still getting goosebumps! The way the warriors moved during the haka - you could feel the spiritual energy in the room. This is why I love sharing these hidden gems with you all!"'
+    example: '"Guys, I\'m still getting goosebumps! The way the warriors moved during the haka - you could feel the spiritual energy in the room. This is why I love sharing these hidden gems with you all!"',
+    userTypes: ['personal', 'business']
   },
+  
   {
-    id: 'impulsive',
+    id: 'adventure',
     title: 'Adventure Seeker',
-    subtitle: 'Spontaneous Traveler',
-    description: 'Excited, energetic content that captures the thrill of discovery',
+    subtitle: 'Active & Outdoor Focused',
+    description: 'Excited, energetic content that captures the thrill of discovery and adventure',
     traits: ['High energy & excitement', 'Spontaneous discoveries', 'Emotional reactions', 'FOMO-inducing'],
     emoji: '🌟',
-    example: '"OMG YOU GUYS!!! Just had my mind BLOWN at the Auckland War Memorial Museum! This Māori performance was absolutely INCREDIBLE - like nothing I\'ve ever experienced! WHO ELSE NEEDS TO ADD THIS TO THEIR BUCKET LIST?!"'
+    example: '"OMG YOU GUYS!!! Just had my mind BLOWN at the Auckland War Memorial Museum! This Māori performance was absolutely INCREDIBLE - like nothing I\'ve ever experienced! WHO ELSE NEEDS TO ADD THIS TO THEIR BUCKET LIST?!"',
+    userTypes: ['personal', 'business']
+  },
+  
+  // Personal-focused personas
+  {
+    id: 'cultural',
+    title: 'Cultural Explorer',
+    subtitle: 'Heritage & Tradition Focused',
+    description: 'Respectful, educational content that shares cultural learning and authentic experiences',
+    traits: ['Respectful engagement', 'Cultural learning', 'Educational focus', 'Authentic sharing'],
+    emoji: '🪶',
+    example: '"Learning about the significance of this sacred site from local iwi members was humbling. Understanding the protocols and stories behind these traditions deepened my appreciation for Māori culture immensely."',
+    userTypes: ['personal']
+  },
+  
+  {
+    id: 'family',
+    title: 'Family Storyteller',
+    subtitle: 'Multi-generational Experiences',
+    description: 'Inclusive, family-friendly content that appeals to multiple generations and creates lasting memories',
+    traits: ['Multi-generational appeal', 'Inclusive experiences', 'Safety-conscious', 'Memory-making focus'],
+    emoji: '👨‍👩‍👧‍👦',
+    example: '"The kids were amazed by the thermal pools, and even grandma enjoyed the cultural performance. Finding experiences that work for everyone from 5 to 75 isn\'t easy, but this place nailed it!"',
+    userTypes: ['personal']
+  },
+  
+  {
+    id: 'independent',
+    title: 'Individual Traveller',
+    subtitle: 'Personal Experience Sharer',
+    description: 'Authentic, personal travel storytelling that inspires others through genuine experiences',
+    traits: ['Personal reflection', 'Authentic experiences', 'Solo travel insights', 'Genuine storytelling'],
+    emoji: '🎒',
+    example: '"Travelling solo to this remote part of New Zealand taught me so much about myself. Sometimes the best discoveries happen when you venture off the beaten track alone."',
+    userTypes: ['personal']
   }
 ]
 
 export default function PersonaSelection() {
   const [selectedPersona, setSelectedPersona] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [userType, setUserType] = useState<string>('personal')
+  const [availablePersonas, setAvailablePersonas] = useState<PersonaOption[]>([])
+
+  useEffect(() => {
+    // Get user type from previous selection
+    const storedUserType = localStorage.getItem('userType') || 'personal'
+    setUserType(storedUserType)
+    
+    // Filter personas based on user type
+    const filtered = allPersonaOptions.filter(persona => 
+      persona.userTypes.includes(storedUserType) || persona.userTypes.includes('both')
+    )
+    setAvailablePersonas(filtered)
+    
+    // Get any existing persona selection
+    const existingPersona = localStorage.getItem('userPersona')
+    if (existingPersona && filtered.some(p => p.id === existingPersona)) {
+      setSelectedPersona(existingPersona)
+    }
+  }, [])
 
   const handlePersonaSelect = (personaId: string) => {
     setSelectedPersona(personaId)
@@ -61,14 +123,14 @@ export default function PersonaSelection() {
     setIsSubmitting(true)
     
     try {
-      // Store persona in localStorage for now (later: user profile)
+      // Store persona in localStorage
       localStorage.setItem('userPersona', selectedPersona)
       
       // Get selected persona details
-      const persona = personaOptions.find(p => p.id === selectedPersona)
+      const persona = availablePersonas.find(p => p.id === selectedPersona)
       localStorage.setItem('userPersonaDetails', JSON.stringify(persona))
       
-      // Redirect to dashboard or next step
+      // Redirect to dashboard
       window.location.href = '/dashboard'
       
     } catch (error) {
@@ -76,6 +138,21 @@ export default function PersonaSelection() {
       setIsSubmitting(false)
     }
   }
+
+  const getHeaderText = () => {
+    if (userType === 'business') {
+      return {
+        title: '🎭 Choose Your Business Voice',
+        subtitle: 'How does your business communicate with customers? This helps us create content that matches your brand personality.'
+      }
+    }
+    return {
+      title: '🎭 Choose Your Voice',
+      subtitle: 'How do you like to share your travel experiences? This helps us create content that matches your unique style.'
+    }
+  }
+
+  const headerText = getHeaderText()
 
   return (
     <div style={{
@@ -96,16 +173,27 @@ export default function PersonaSelection() {
           marginBottom: '1rem',
           lineHeight: '1.2'
         }}>
-          🎭 Choose Your Voice
+          {headerText.title}
         </h1>
         <p style={{
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
           opacity: 0.9,
-          maxWidth: '600px',
+          maxWidth: '700px',
           margin: '0 auto'
         }}>
-          How do you like to share your travel experiences? This helps us create content that matches your unique style.
+          {headerText.subtitle}
         </p>
+        {userType === 'business' && (
+          <p style={{
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            opacity: 0.7,
+            maxWidth: '600px',
+            margin: '0.5rem auto 0 auto',
+            fontStyle: 'italic'
+          }}>
+            This applies to all content created for your business
+          </p>
+        )}
       </div>
 
       {/* Persona Options */}
@@ -120,11 +208,11 @@ export default function PersonaSelection() {
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '2rem',
-          maxWidth: '1200px',
+          maxWidth: userType === 'business' ? '800px' : '1400px',
           width: '100%',
           marginBottom: '3rem'
         }}>
-          {personaOptions.map((persona) => (
+          {availablePersonas.map((persona) => (
             <div
               key={persona.id}
               onClick={() => handlePersonaSelect(persona.id)}
@@ -263,6 +351,25 @@ export default function PersonaSelection() {
           }}
         >
           Skip for now
+        </Link>
+      </div>
+
+      {/* Back Navigation */}
+      <div style={{ 
+        padding: '1rem', 
+        textAlign: 'center',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <Link 
+          href={userType === 'business' ? '/onboarding/business' : '/onboarding/user-type'}
+          style={{ 
+            color: 'rgba(255,255,255,0.7)', 
+            textDecoration: 'none',
+            fontWeight: '600',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+          }}
+        >
+          ← Back to {userType === 'business' ? 'Business Type' : 'User Type'}
         </Link>
       </div>
 
