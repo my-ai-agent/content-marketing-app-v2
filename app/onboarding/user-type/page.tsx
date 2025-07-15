@@ -113,7 +113,7 @@ export default function UserTypeSelection() {
           marginBottom: '0.5rem',
           textAlign: 'center'
         }}>
-          🎯 What Type of Content Creator Are You?
+          Select User Type
         </h1>
         <p style={{ 
           color: '#6b7280', 
