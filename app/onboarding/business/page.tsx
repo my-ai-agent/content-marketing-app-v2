@@ -224,8 +224,8 @@ export default function BusinessTypeSelection() {
       const businessType = businessTypes.find(bt => bt.id === selectedBusinessType)
       localStorage.setItem('userBusinessTypeDetails', JSON.stringify(businessType))
       
-      // Redirect to persona selection
-      window.location.href = '/onboarding/persona'
+      // Redirect to dashboard selection
+      window.location.href = '/dashboard'
       
     } catch (error) {
       console.error('Failed to save business type:', error)
