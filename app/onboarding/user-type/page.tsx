@@ -49,7 +49,7 @@ const userTypes: UserType[] = [
     ],
     emoji: '👤',
     examples: ['Travel bloggers', 'Social media influencers', 'Individual travellers', 'Cultural explorers', 'Adventure seekers'],
-    nextStep: '/onboarding/persona'
+    nextStep: '/onboarding/personal'
   }
 ]
 
