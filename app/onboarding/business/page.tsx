@@ -1,4 +1,4 @@
-// Create new file: /app/onboarding/business/page.tsx
+// Update file: /app/onboarding/business/page.tsx
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -146,12 +146,60 @@ const businessTypes: BusinessType[] = [
   }
 ]
 
+// Group business types into categories
+interface BusinessCategory {
+  id: string
+  title: string
+  subtitle: string
+  emoji: string
+  businessTypes: BusinessType[]
+}
+
+const businessCategories: BusinessCategory[] = [
+  {
+    id: 'tourism',
+    title: 'Tourism Business',
+    subtitle: 'Travel, accommodation, attractions, experiences',
+    emoji: '🏨',
+    businessTypes: businessTypes.filter(bt => 
+      ['accommodation', 'attraction', 'tours', 'transport', 'cultural', 'wellness', 'cruise'].includes(bt.id)
+    )
+  },
+  {
+    id: 'smallbusiness',
+    title: 'Small Business',
+    subtitle: 'Local commerce, food, retail, entertainment',
+    emoji: '🏪',
+    businessTypes: businessTypes.filter(bt => 
+      ['food', 'retail', 'entertainment'].includes(bt.id)
+    )
+  },
+  {
+    id: 'community',
+    title: 'Community Service',
+    subtitle: 'Information, conservation, events, specialized services',
+    emoji: '🏛️',
+    businessTypes: businessTypes.filter(bt => 
+      ['information', 'conservation', 'events', 'other'].includes(bt.id)
+    )
+  }
+]
+
 export default function BusinessTypeSelection() {
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedBusinessType, setSelectedBusinessType] = useState<string>('')
+  const [showTooltip, setShowTooltip] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleCategorySelect = (categoryId: string) => {
+    setSelectedCategory(categoryId)
+    setSelectedBusinessType('') // Reset business type when category changes
+    setShowTooltip('')
+  }
 
   const handleBusinessTypeSelect = (businessTypeId: string) => {
     setSelectedBusinessType(businessTypeId)
+    setShowTooltip('')
   }
 
   const handleSubmit = async () => {
@@ -160,7 +208,7 @@ export default function BusinessTypeSelection() {
     setIsSubmitting(true)
     
     try {
-      // Store business type in localStorage for now (later: user profile)
+      // Store business type in localStorage (same structure as before)
       localStorage.setItem('userBusinessType', selectedBusinessType)
       
       // Get selected business type details
@@ -176,218 +224,496 @@ export default function BusinessTypeSelection() {
     }
   }
 
+  const selectedCategoryData = businessCategories.find(cat => cat.id === selectedCategory)
+  const selectedBusinessTypeData = businessTypes.find(bt => bt.id === selectedBusinessType)
+
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      background: `linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_PURPLE} 100%)`,
-      color: 'white'
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: 'white'
     }}>
-      {/* Header */}
-      <div style={{
+      
+      {/* Header - matches Steps 1-6 pattern */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
         padding: '2rem 1rem',
-        textAlign: 'center'
+        borderBottom: '1px solid #f3f4f6'
       }}>
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+        <h1 style={{ 
+          fontSize: 'clamp(2rem, 6vw, 4rem)', 
           fontWeight: '700',
-          marginBottom: '1rem',
-          lineHeight: '1.2'
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
         }}>
-          🏢 What's Your Tourism Business?
+          Select Business Type
         </h1>
-        <p style={{
+        <p style={{ 
+          color: '#6b7280', 
+          textAlign: 'center', 
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          opacity: 0.9,
           maxWidth: '600px',
           margin: '0 auto'
         }}>
-          Tell us about your business so we can create content that perfectly matches your industry and audience.
+          Choose your business category to get targeted content strategies
         </p>
       </div>
 
-      {/* Business Type Options */}
-      <div style={{
-        flex: 1,
-        padding: '2rem 1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '900px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
       }}>
+
+        {/* Step 1: Business Category Selection */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.5rem',
-          maxWidth: '1400px',
-          width: '100%',
-          marginBottom: '3rem'
+          backgroundColor: '#f8fafc',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
-          {businessTypes.map((businessType) => (
-            <div
-              key={businessType.id}
-              onClick={() => handleBusinessTypeSelect(businessType.id)}
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#374151',
+            marginBottom: '1rem'
+          }}>
+            🏢 Select Your Business Category
+          </h3>
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            marginBottom: '1rem'
+          }}>
+            Choose the category that best describes your business type.
+          </p>
+          
+          {/* Category Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowTooltip(showTooltip === 'category' ? '' : 'category')}
               style={{
-                background: selectedBusinessType === businessType.id 
-                  ? 'rgba(255,255,255,0.25)' 
-                  : 'rgba(255,255,255,0.1)',
-                borderRadius: '16px',
-                padding: '1.5rem',
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '1rem',
+                backgroundColor: 'white',
+                color: selectedCategory ? '#374151' : '#9ca3af',
+                outline: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                border: selectedBusinessType === businessType.id 
-                  ? '2px solid white' 
-                  : '2px solid transparent',
-                backdropFilter: 'blur(10px)',
-                transform: selectedBusinessType === businessType.id ? 'scale(1.02)' : 'scale(1)'
-              }}
-              onMouseEnter={(e) => {
-                if (selectedBusinessType !== businessType.id) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedBusinessType !== businessType.id) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-                }
-              }}
-            >
-              <div style={{
+                transition: 'border-color 0.2s',
+                textAlign: 'left',
                 display: 'flex',
-                alignItems: 'center',
-                marginBottom: '1rem'
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+              onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <span>
+                {selectedCategory 
+                  ? `${selectedCategoryData?.emoji} ${selectedCategoryData?.title}`
+                  : 'Select your business category...'
+                }
+              </span>
+              <span style={{ 
+                fontSize: '0.75rem', 
+                transform: showTooltip === 'category' ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
               }}>
-                <div style={{
-                  fontSize: '2rem',
-                  marginRight: '0.75rem'
-                }}>
-                  {businessType.emoji}
-                </div>
-                <div>
-                  <h3 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '700',
-                    margin: '0 0 0.25rem 0'
-                  }}>
-                    {businessType.title}
-                  </h3>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    opacity: 0.8,
-                    margin: '0'
-                  }}>
-                    {businessType.subtitle}
-                  </p>
-                </div>
-              </div>
-              
-              <p style={{
-                fontSize: '0.875rem',
-                marginBottom: '1rem',
-                lineHeight: '1.4',
-                opacity: 0.9
+                ▼
+              </span>
+            </button>
+
+            {/* Category Dropdown Options */}
+            {showTooltip === 'category' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '0',
+                right: '0',
+                backgroundColor: 'white',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                marginTop: '0.25rem',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                zIndex: 10,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
               }}>
-                {businessType.description}
-              </p>
-              
-              <div style={{ marginBottom: '1rem' }}>
-                <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  opacity: 0.8
-                }}>
-                  Content Focus:
-                </div>
-                {businessType.contentFocus.slice(0, 3).map((focus, index) => (
-                  <div key={index} style={{
-                    fontSize: '0.75rem',
-                    marginBottom: '0.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    opacity: 0.9
-                  }}>
-                    <span style={{ marginRight: '0.5rem', fontSize: '0.6rem' }}>✓</span>
-                    {focus}
+                {businessCategories.map((category, index) => (
+                  <div
+                    key={category.id}
+                    onClick={() => {
+                      handleCategorySelect(category.id)
+                      setShowTooltip('')
+                    }}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      borderBottom: index < businessCategories.length - 1 ? '1px solid #f3f4f6' : 'none',
+                      backgroundColor: selectedCategory === category.id ? '#f0f9ff' : 'white',
+                      color: '#374151',
+                      fontSize: '0.95rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedCategory !== category.id) {
+                        e.currentTarget.style.backgroundColor = '#f9fafb'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedCategory !== category.id) {
+                        e.currentTarget.style.backgroundColor = 'white'
+                      }
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>{category.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '500' }}>{category.title}</div>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        {category.subtitle}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-              
-              <div style={{
-                fontSize: '0.75rem',
-                opacity: 0.7,
-                fontStyle: 'italic'
-              }}>
-                Examples: {businessType.examples.slice(0, 2).join(', ')}
-              </div>
-              
-              {selectedBusinessType === businessType.id && (
-                <div style={{
-                  marginTop: '1rem',
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  color: 'white',
-                  fontSize: '0.875rem'
+            )}
+          </div>
+        </div>
+
+        {/* Step 2: Specific Business Type Selection */}
+        {selectedCategory && (
+          <div style={{
+            backgroundColor: '#f8fafc',
+            borderRadius: '1rem',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
+          }}>
+            <h3 style={{
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '1rem'
+            }}>
+              🎯 Select Your Specific Business Type
+            </h3>
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#6b7280',
+              marginBottom: '1rem'
+            }}>
+              Choose the specific type that best matches your business.
+            </p>
+            
+            {/* Business Type Dropdown */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowTooltip(showTooltip === 'business' ? '' : 'business')}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.75rem',
+                  fontSize: '1rem',
+                  backgroundColor: 'white',
+                  color: selectedBusinessType ? '#374151' : '#9ca3af',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s',
+                  textAlign: 'left',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              >
+                <span>
+                  {selectedBusinessType 
+                    ? `${selectedBusinessTypeData?.emoji} ${selectedBusinessTypeData?.title}`
+                    : 'Select your business type...'
+                  }
+                </span>
+                <span style={{ 
+                  fontSize: '0.75rem', 
+                  transform: showTooltip === 'business' ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
                 }}>
-                  ✓ Selected
+                  ▼
+                </span>
+              </button>
+
+              {/* Business Type Dropdown Options */}
+              {showTooltip === 'business' && selectedCategoryData && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '0',
+                  right: '0',
+                  backgroundColor: 'white',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.75rem',
+                  marginTop: '0.25rem',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  zIndex: 10,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                }}>
+                  {selectedCategoryData.businessTypes.map((businessType, index) => (
+                    <div
+                      key={businessType.id}
+                      onClick={() => {
+                        handleBusinessTypeSelect(businessType.id)
+                        setShowTooltip('')
+                      }}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        cursor: 'pointer',
+                        borderBottom: index < selectedCategoryData.businessTypes.length - 1 ? '1px solid #f3f4f6' : 'none',
+                        backgroundColor: selectedBusinessType === businessType.id ? '#f0f9ff' : 'white',
+                        color: '#374151',
+                        fontSize: '0.95rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedBusinessType !== businessType.id) {
+                          e.currentTarget.style.backgroundColor = '#f9fafb'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedBusinessType !== businessType.id) {
+                          e.currentTarget.style.backgroundColor = 'white'
+                        }
+                      }}
+                    >
+                      <span style={{ fontSize: '1.25rem' }}>{businessType.emoji}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '500' }}>{businessType.title}</div>
+                        <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                          {businessType.subtitle}
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowTooltip(showTooltip === businessType.id ? '' : businessType.id)
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: BRAND_PURPLE,
+                          fontSize: '1rem',
+                          cursor: 'pointer',
+                          padding: '0.25rem',
+                          borderRadius: '50%'
+                        }}
+                      >
+                        ℹ️
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
-        {/* Continue Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedBusinessType || isSubmitting}
-          style={{
-            background: selectedBusinessType 
-              ? `linear-gradient(45deg, ${BRAND_ORANGE} 0%, ${BRAND_PURPLE} 100%)`
-              : '#e5e7eb',
-            color: selectedBusinessType ? 'white' : '#9ca3af',
-            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-            fontWeight: '900',
-            padding: '1rem 3rem',
-            borderRadius: '1rem',
-            border: 'none',
-            cursor: selectedBusinessType ? 'pointer' : 'not-allowed',
-            boxShadow: selectedBusinessType ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-            transition: 'all 0.2s',
-            transform: selectedBusinessType ? 'scale(1)' : 'scale(0.95)'
-          }}
-        >
-          {isSubmitting ? 'Setting up your business profile...' : 'Continue to Voice Selection →'}
-        </button>
+        {/* Selected Business Type Description */}
+        {selectedBusinessType && selectedBusinessTypeData && (
+          <div style={{
+            marginBottom: '2rem',
+            padding: '1rem',
+            backgroundColor: '#dcfce7',
+            border: '1px solid #bbf7d0',
+            borderRadius: '0.75rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
+          }}>
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#15803d',
+              margin: '0 0 0.5rem 0',
+              fontWeight: '500'
+            }}>
+              <strong>{selectedBusinessTypeData.emoji} {selectedBusinessTypeData.title}:</strong> {selectedBusinessTypeData.subtitle}
+            </p>
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#15803d',
+              margin: '0'
+            }}>
+              {selectedBusinessTypeData.description}
+            </p>
+          </div>
+        )}
 
-        {/* Skip Option */}
-        <Link 
-          href="/onboarding/persona" 
-          style={{
-            color: 'rgba(255,255,255,0.7)',
-            textDecoration: 'none',
-            fontSize: '1rem',
-            marginTop: '1rem'
-          }}
-        >
-          Skip for now
-        </Link>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        textAlign: 'center',
-        padding: '2rem',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem'
+        {/* Navigation Buttons */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          gap: '1rem',
+          marginBottom: '2rem',
+          flexWrap: 'wrap',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
-          <span style={{ color: BRAND_PURPLE, fontSize: '1.25rem', fontWeight: '900' }}>click</span>
-          <span style={{ color: BRAND_ORANGE, fontSize: '1.25rem', fontWeight: '900' }}>speak</span>
-          <span style={{ color: BRAND_BLUE, fontSize: '1.25rem', fontWeight: '900' }}>send</span>
+          <Link
+            href="/onboarding/user-type"
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              backgroundColor: 'transparent',
+              color: '#6b7280',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              textDecoration: 'none',
+              transition: 'all 0.2s'
+            }}
+          >
+            ← Back
+          </Link>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!selectedBusinessType || isSubmitting}
+            style={{
+              background: selectedBusinessType 
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : '#e5e7eb',
+              color: selectedBusinessType ? 'white' : '#9ca3af',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedBusinessType ? 'pointer' : 'not-allowed',
+              boxShadow: selectedBusinessType ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (selectedBusinessType) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedBusinessType) {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
+              }
+            }}
+          >
+            {isSubmitting ? 'Setting up your business...' : 'Continue →'}
+          </button>
         </div>
+
+        {/* Logo */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{ 
+              color: BRAND_PURPLE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline'
+            }}>click</div>
+            <div style={{ 
+              color: BRAND_ORANGE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>speak</div>
+            <div style={{ 
+              color: BRAND_BLUE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </Link>
+        </div>
+
+        {/* Business Type Detail Tooltip */}
+        {showTooltip && showTooltip !== 'category' && showTooltip !== 'business' && (
+          <>
+            <div
+              onClick={() => setShowTooltip('')}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.25)',
+                zIndex: 50
+              }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%,-50%)',
+                background: '#1f2937',
+                color: 'white',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontSize: '1rem',
+                zIndex: 60,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+                maxWidth: '90vw',
+                width: '320px',
+                textAlign: 'center'
+              }}
+            >
+              {(() => {
+                const businessType = businessTypes.find(bt => bt.id === showTooltip)
+                return businessType ? (
+                  <>
+                    <div style={{ marginBottom: '0.75rem', fontWeight: 'bold', fontSize: '1.1em' }}>
+                      {businessType.emoji} {businessType.title}
+                    </div>
+                    <div style={{ marginBottom: '1rem', lineHeight: '1.4' }}>
+                      {businessType.description}
+                    </div>
+                    <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Content Focus:</div>
+                      {businessType.contentFocus.slice(0, 3).map((focus, index) => (
+                        <div key={index} style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                          • {focus}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ color: '#fbbf24', fontSize: '0.875em' }}>
+                      Tap anywhere to close
+                    </div>
+                  </>
+                ) : null
+              })()}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
