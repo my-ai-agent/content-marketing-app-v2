@@ -101,7 +101,7 @@ export default function PersonaSelection() {
     setUserType(storedUserType)
     
     // Filter personas based on user type
-    const filtered = allPersonaOptions.filter(persona => 
+    const filtered = allPersonalOptions.filter(persona => 
       persona.userTypes.includes(storedUserType) || persona.userTypes.includes('both')
     )
     setAvailablePersonas(filtered)
