@@ -1,4 +1,4 @@
-// Update file: /app/onboarding/persona/page.tsx
+// Update file: /app/onboarding/personal/page.tsx
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-interface PersonaOption {
+interface PersonalOption {
   id: string
   title: string
   subtitle: string
@@ -18,7 +18,7 @@ interface PersonaOption {
   userTypes: string[] // 'business' | 'personal' | 'both'
 } 
 
-const allPersonaOptions: PersonaOption[] = [
+const allPersonalOptions: PersonalOption[] = [
   // Business-focused personas
   {
     id: 'professional',
