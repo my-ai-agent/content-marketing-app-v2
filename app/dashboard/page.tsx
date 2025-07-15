@@ -29,69 +29,132 @@ export default function Dashboard() {
   const planBadgeColor = getPlanBadgeColor(userPlan);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
-                Home
-              </Link>
-              <div className="flex items-center space-x-2">
-                <span 
-                  className={`${planBadgeColor} text-white text-xs font-bold px-3 py-1 rounded-full cursor-default`}
-                  aria-label="Current Plan"
-                >
-                  {planDisplayName} PLAN
-                </span>
-                {isTrialActive && (
-                  <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    TRIAL
-                  </span>
-                )}
-              </div>
-            </div>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: '#f9fafb'
+    }}>
+      
+      {/* Main Content Container - 600px Mobile-First */}
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '600px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '1rem' 
+      }}>
+
+        {/* Header Navigation - Inside 600px container */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          padding: '1rem',
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <Link href="/" style={{
+            color: '#6b7280',
+            textDecoration: 'none',
+            fontWeight: '500'
+          }}>
+            Home
+          </Link>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{
+              backgroundColor: planBadgeColor.includes('blue') ? '#2563eb' : 
+                             planBadgeColor.includes('green') ? '#16a34a' : '#9333ea',
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: '700',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px'
+            }}>
+              {planDisplayName} PLAN
+            </span>
+            {isTrialActive && (
+              <span style={{
+                backgroundColor: '#eab308',
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: '700',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '9999px'
+              }}>
+                TRIAL
+              </span>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Trial Banner */}
-      {isTrialActive && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex">
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  <strong>7-day free trial active!</strong> You're currently on the {currentPlan?.name} plan. 
-                  No credit card required during trial.
-                </p>
-              </div>
+        {/* Trial Banner - Same width as content */}
+        {isTrialActive && (
+          <div style={{
+            backgroundColor: '#fefce8',
+            borderLeft: '4px solid #facc15',
+            padding: '1rem',
+            marginBottom: '1rem',
+            borderRadius: '0.75rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            <div>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#a16207',
+                margin: '0'
+              }}>
+                <strong>7-day free trial active!</strong> You're currently on the {currentPlan?.name} plan. 
+                No credit card required during trial.
+              </p>
             </div>
-            <div className="flex-shrink-0">
-              <Link 
-                href="/dashboard/billing"
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-medium px-3 py-2 rounded-md transition-colors"
-              >
-                Choose Plan
-              </Link>
-            </div>
+            <Link 
+              href="/dashboard/billing"
+              style={{
+                backgroundColor: '#d97706',
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '0.375rem',
+                textDecoration: 'none',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              Choose Plan
+            </Link>
           </div>
-        </div>
-      )}
-
-      {/* Main Dashboard Content */}
-      <div className="max-w-[600px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        )}
         
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back!</h2>
-          <p className="text-gray-600">
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 6vw, 3rem)',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '0.5rem',
+            textAlign: 'center'
+          }}>
+            Welcome back!
+          </h2>
+          <p style={{
+            color: '#6b7280',
+            textAlign: 'center',
+            fontSize: 'clamp(1rem, 2.5vw, 1.125rem)'
+          }}>
             Ready to create and multiply your stories? 
             {currentPlan && (
-              <span className="ml-1">
+              <span style={{ marginLeft: '0.25rem' }}>
                 Create up to <strong>{currentPlan.limits.storiesPerWeek === -1 ? 'unlimited' : currentPlan.limits.storiesPerWeek}</strong> stories per week.
               </span>
             )}
@@ -99,139 +162,420 @@ export default function Dashboard() {
         </div>
 
         {/* Plan Overview Card */}
-        <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold">{currentPlan?.name} Plan</h3>
-              <p className="text-blue-100 mt-1">Create authentic and personalised content for your target audience</p>
-              <div className="mt-3 flex items-center space-x-4 text-sm">
+        <div style={{
+          background: 'linear-gradient(45deg, #3b82f6 0%, #10b981 100%)',
+          borderRadius: '0.75rem',
+          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+          color: 'white'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            <div style={{ flex: '1', minWidth: '200px' }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                marginBottom: '0.25rem'
+              }}>
+                {currentPlan?.name} Plan
+              </h3>
+              <p style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '0.95rem',
+                marginBottom: '0.75rem'
+              }}>
+                Create authentic and personalised content for your target audience
+              </p>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                fontSize: '0.875rem'
+              }}>
                 <span>📖 {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : currentPlan?.limits.storiesPerWeek} stories/week</span>
                 <span>📱 Universal QR distribution</span>
                 {currentPlan?.limits.schedulingFeatures && <span>📅 Scheduling enabled</span>}
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">${currentPlan?.limits.price}/mo</div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: '700'
+              }}>
+                ${currentPlan?.limits.price}/mo
+              </div>
               {isTrialActive && (
-  <div className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full font-semibold mt-2">
-    Free during trial
-  </div>
-)}
-              {!isTrialActive && (
-                <Link 
-                  href="/dashboard/billing"
-                  className="mt-2 bg-white text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 transition-colors inline-block"
-                >
-                  Manage Plan
-                </Link>
+                <div style={{
+                  fontSize: '0.875rem',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontWeight: '600',
+                  marginTop: '0.5rem'
+                }}>
+                  Free during trial
+                </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        {/* Quick Actions - Back to single column for better mobile experience */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '1rem',
+          marginBottom: '2rem'
+        }}>
           
           {/* Create New Story */}
-          <Link href="/dashboard/create/photo" className="block">
-            <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300">
-              <div className="flex items-center mb-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href="/dashboard/create/photo" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              border: '1px solid #e5e7eb',
+              transition: 'all 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#3b82f6'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#e5e7eb'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  backgroundColor: '#dbeafe',
+                  padding: '0.75rem',
+                  borderRadius: '50%',
+                  marginRight: '0.75rem'
+                }}>
+                  <svg style={{ width: '1.5rem', height: '1.5rem', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 ml-3">Create New Story</h3>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: '0'
+                }}>
+                  Create New Story
+                </h3>
               </div>
-              <p className="text-gray-600">Start with your story and multiply it across multiple platforms and formats.</p>
-              <div className="mt-3 text-sm text-blue-600 font-medium">
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '0.75rem',
+                lineHeight: '1.5'
+              }}>
+                Start with your story and multiply it across multiple platforms and formats.
+              </p>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#3b82f6',
+                fontWeight: '500'
+              }}>
                 Generate QR codes for universal distribution →
               </div>
             </div>
           </Link>
 
           {/* View Stories */}
-          <Link href="/dashboard/stories" className="block">
-            <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 hover:border-green-300">
-              <div className="flex items-center mb-4">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href="/dashboard/stories" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              border: '1px solid #e5e7eb',
+              transition: 'all 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#10b981'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#e5e7eb'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  backgroundColor: '#d1fae5',
+                  padding: '0.75rem',
+                  borderRadius: '50%',
+                  marginRight: '0.75rem'
+                }}>
+                  <svg style={{ width: '1.5rem', height: '1.5rem', color: '#10b981' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 ml-3">My Stories</h3>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: '0'
+                }}>
+                  My Stories
+                </h3>
               </div>
-              <p className="text-gray-600">View, edit, and manage all your stories in one place.</p>
-              <div className="mt-3 text-sm text-green-600 font-medium">
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '0.75rem',
+                lineHeight: '1.5'
+              }}>
+                View, edit, and manage all your stories in one place.
+              </p>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#10b981',
+                fontWeight: '500'
+              }}>
                 Access your QR codes and analytics →
               </div>
             </div>
           </Link>
 
           {/* Analytics */}
-          <Link href="/dashboard/analytics" className="block">
-            <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 hover:border-purple-300">
-              <div className="flex items-center mb-4">
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href="/dashboard/analytics" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              border: '1px solid #e5e7eb',
+              transition: 'all 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#8b5cf6'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = '#e5e7eb'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  backgroundColor: '#ede9fe',
+                  padding: '0.75rem',
+                  borderRadius: '50%',
+                  marginRight: '0.75rem'
+                }}>
+                  <svg style={{ width: '1.5rem', height: '1.5rem', color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 ml-3">Analytics</h3>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: '0'
+                }}>
+                  Analytics
+                </h3>
               </div>
-              <p className="text-gray-600">Track QR code scans, engagement, and story performance.</p>
-              <div className="mt-3 text-sm text-purple-600 font-medium">
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '0.75rem',
+                lineHeight: '1.5'
+              }}>
+                Track QR code scans, engagement, and story performance.
+              </p>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#8b5cf6',
+                fontWeight: '500'
+              }}>
                 {currentPlan?.limits.analyticsLevel} analytics available →
               </div>
             </div>
           </Link>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="text-2xl font-bold text-gray-900">0</div>
-            <div className="text-sm text-gray-600">Total Stories</div>
-            <div className="text-xs text-gray-400 mt-1">
+        {/* Stats Overview - 2x2 grid for mobile */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: '#111827'
+            }}>0</div>
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>Total Stories</div>
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#9ca3af',
+              marginTop: '0.25rem'
+            }}>
               Limit: {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : `${currentPlan?.limits.storiesPerWeek}/week`}
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-gray-600">Active QR Codes</div>
-            <div className="text-xs text-gray-400 mt-1">
+          <div style={{
+            backgroundColor: 'white',
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: '#3b82f6'
+            }}>0</div>
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>Active QR Codes</div>
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#9ca3af',
+              marginTop: '0.25rem'
+            }}>
               Limit: {currentPlan?.limits.qrCodesActive === -1 ? 'Unlimited' : currentPlan?.limits.qrCodesActive}
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-gray-600">QR Code Scans</div>
-            <div className="text-xs text-gray-400 mt-1">This week</div>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: '#10b981'
+            }}>0</div>
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>QR Code Scans</div>
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#9ca3af',
+              marginTop: '0.25rem'
+            }}>This week</div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="text-2xl font-bold text-purple-600">0</div>
-            <div className="text-sm text-gray-600">Total Engagement</div>
-            <div className="text-xs text-gray-400 mt-1">All time</div>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: '#8b5cf6'
+            }}>0</div>
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>Total Engagement</div>
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#9ca3af',
+              marginTop: '0.25rem'
+            }}>All time</div>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            padding: '1.5rem 1.5rem 0 1.5rem',
+            borderBottom: '1px solid #e5e7eb'
+          }}>
+            <h3 style={{
+              fontSize: '1.125rem',
+              fontWeight: '500',
+              color: '#111827',
+              margin: '0 0 1.5rem 0'
+            }}>Recent Activity</h3>
           </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-4">No stories created yet</div>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+          <div style={{ padding: '1.5rem' }}>
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 0'
+            }}>
+              <div style={{
+                color: '#9ca3af',
+                fontSize: '1.125rem',
+                marginBottom: '1rem'
+              }}>No stories created yet</div>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1.5rem',
+                maxWidth: '400px',
+                margin: '0 auto 1.5rem auto',
+                lineHeight: '1.5'
+              }}>
                 Create your first story and generate QR codes for universal distribution to all platforms. 
                 Perfect for tourism businesses to share experiences instantly!
               </p>
               <Link 
                 href="/dashboard/create/photo"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors inline-flex items-center space-x-2"
+                style={{
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  fontWeight: '500',
+                  padding: '0.75rem 2rem',
+                  borderRadius: '0.5rem',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#2563eb'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#3b82f6'
+                }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 <span>Create Your First Story</span>
@@ -240,7 +584,37 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Footer Logo */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{ 
+              color: '#6B2EFF', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline'
+            }}>click</div>
+            <div style={{ 
+              color: '#FF7B1C', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>speak</div>
+            <div style={{ 
+              color: '#11B3FF', 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </Link>
+        </div>
+
       </div>
-    </main>
+    </div>
   )
 }
