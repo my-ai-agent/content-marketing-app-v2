@@ -101,6 +101,7 @@ export const businessTypeMap: { [key: string]: string } = {
   'cultural': 'Cultural Experience - respectful traditions, authentic engagement, living culture, educational focus',
   'wellness': 'Wellness & Spa - relaxation benefits, natural healing, wellness journeys, therapeutic experiences',
   'information': 'Visitor Information - local expertise, travel planning, regional highlights, visitor guidance',
+  'government': 'Government Tourism - destination marketing, industry support, official information, economic development',
   'conservation': 'DOC & Conservation - environmental education, conservation efforts, natural heritage, sustainable tourism',
   'events': 'Event Organiser - event excitement, attendee experiences, cultural celebrations, community engagement',
   'entertainment': 'Entertainment & Gaming - entertainment value, responsible messaging, venue atmosphere, special events',
