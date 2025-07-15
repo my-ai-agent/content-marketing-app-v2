@@ -16,7 +16,7 @@ interface PersonaOption {
   emoji: string
   example: string
   userTypes: string[] // 'business' | 'personal' | 'both'
-}
+} 
 
 const allPersonaOptions: PersonaOption[] = [
   // Business-focused personas
