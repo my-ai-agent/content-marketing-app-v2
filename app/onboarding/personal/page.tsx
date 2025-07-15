@@ -93,7 +93,7 @@ export default function PersonaSelection() {
   const [selectedPersona, setSelectedPersona] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [userType, setUserType] = useState<string>('personal')
-  const [availablePersonas, setAvailablePersonas] = useState<PersonaOption[]>([])
+  const [availablePersonas, setAvailablePersonas] = useState<PersonalOption[]>([])
 
   useEffect(() => {
     // Get user type from previous selection
