@@ -143,6 +143,15 @@ const businessTypes: BusinessType[] = [
     contentFocus: ['Specialized services', 'Unique value proposition', 'Target audience focus', 'Custom messaging'],
     emoji: '🎯',
     examples: ['Photography services', 'Equipment rental', 'Specialized tours', 'Consulting services']
+  },
+  {
+    id: 'government',
+    title: 'Government Tourism',
+    subtitle: 'Local, Regional, National Tourism Marketing',
+    description: 'Official tourism promotion content that showcases destinations and supports industry development',
+    contentFocus: ['Destination marketing', 'Industry support', 'Official information', 'Economic development'],
+    emoji: '🏛️',
+    examples: ['Tourism NZ', 'Regional tourism boards', 'City councils', 'Destination marketing orgs']
   }
 ]
 
