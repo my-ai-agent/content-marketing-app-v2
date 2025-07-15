@@ -83,7 +83,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Dashboard Content */}
-      <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[600px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
         {/* Welcome Section */}
         <div className="mb-8">
@@ -130,7 +130,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 gap-3 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           
           {/* Create New Story */}
           <Link href="/dashboard/create/photo" className="block">
