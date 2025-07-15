@@ -1,4 +1,4 @@
-// Create new file: /app/onboarding/user-type/page.tsx
+// Update file: /app/onboarding/user-type/page.tsx
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -55,10 +55,12 @@ const userTypes: UserType[] = [
 
 export default function UserTypeSelection() {
   const [selectedUserType, setSelectedUserType] = useState<string>('')
+  const [showTooltip, setShowTooltip] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleUserTypeSelect = (userTypeId: string) => {
     setSelectedUserType(userTypeId)
+    setShowTooltip('') // Close tooltip on selection
   }
 
   const handleSubmit = async () => {
@@ -85,220 +87,326 @@ export default function UserTypeSelection() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      background: `linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_PURPLE} 100%)`,
-      color: 'white'
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: 'white'
     }}>
-      {/* Header */}
-      <div style={{
+      
+      {/* Header - matches Steps 1-6 pattern */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
         padding: '2rem 1rem',
-        textAlign: 'center'
+        borderBottom: '1px solid #f3f4f6'
       }}>
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+
+        {/* Title */}
+        <h1 style={{ 
+          fontSize: 'clamp(2rem, 6vw, 4rem)', 
           fontWeight: '700',
-          marginBottom: '1rem',
-          lineHeight: '1.2'
+          color: '#1f2937',
+          lineHeight: '1.2',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
         }}>
           🎯 What Type of Content Creator Are You?
         </h1>
-        <p style={{
+        <p style={{ 
+          color: '#6b7280', 
+          textAlign: 'center', 
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          opacity: 0.9,
-          maxWidth: '700px',
+          maxWidth: '600px',
           margin: '0 auto'
         }}>
-          Choose your path to get content perfectly tailored to your goals and audience.
+          Choose your path to get content perfectly tailored to your goals
         </p>
       </div>
 
-      {/* User Type Options */}
-      <div style={{
-        flex: 1,
-        padding: '2rem 1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
+      <div style={{ 
+        flex: '1', 
+        maxWidth: '900px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '2rem 1rem' 
       }}>
+
+        {/* User Type Selection - Mobile Optimized */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '2rem',
-          maxWidth: '1000px',
-          width: '100%',
-          marginBottom: '3rem'
+          backgroundColor: '#f8fafc',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
-          {userTypes.map((userType) => (
-            <div
-              key={userType.id}
-              onClick={() => handleUserTypeSelect(userType.id)}
-              style={{
-                background: selectedUserType === userType.id 
-                  ? 'rgba(255,255,255,0.25)' 
-                  : 'rgba(255,255,255,0.1)',
-                borderRadius: '20px',
-                padding: '2rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                border: selectedUserType === userType.id 
-                  ? '3px solid white' 
-                  : '3px solid transparent',
-                backdropFilter: 'blur(10px)',
-                transform: selectedUserType === userType.id ? 'scale(1.02)' : 'scale(1)'
-              }}
-              onMouseEnter={(e) => {
-                if (selectedUserType !== userType.id) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedUserType !== userType.id) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-                }
-              }}
-            >
-              <div style={{
-                fontSize: '3rem',
-                textAlign: 'center',
-                marginBottom: '1rem'
-              }}>
-                {userType.emoji}
-              </div>
-              
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
-                marginBottom: '0.5rem',
-                textAlign: 'center'
-              }}>
-                {userType.title}
-              </h3>
-              
-              <p style={{
-                fontSize: '1rem',
-                opacity: 0.8,
-                marginBottom: '1rem',
-                textAlign: 'center',
-                fontWeight: '600'
-              }}>
-                {userType.subtitle}
-              </p>
-              
-              <p style={{
-                fontSize: '0.95rem',
-                marginBottom: '1.5rem',
-                textAlign: 'center',
-                lineHeight: '1.5'
-              }}>
-                {userType.description}
-              </p>
-              
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  marginBottom: '0.75rem',
-                  textAlign: 'center'
-                }}>
-                  ✨ What You Get:
-                </div>
-                {userType.benefits.map((benefit, index) => (
-                  <div key={index} style={{
-                    fontSize: '0.875rem',
-                    marginBottom: '0.5rem',
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#374151',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            Select Your Creator Type
+          </h3>
+          
+          {/* Top Window - User Type Selection */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            {userTypes.map((userType) => (
+              <div
+                key={userType.id}
+                style={{
+                  position: 'relative',
+                  marginBottom: '1rem'
+                }}
+              >
+                <div
+                  onClick={() => handleUserTypeSelect(userType.id)}
+                  style={{
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    padding: '1rem',
+                    border: selectedUserType === userType.id ? `2px solid ${BRAND_PURPLE}` : '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    backgroundColor: selectedUserType === userType.id ? '#f0f9ff' : 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedUserType !== userType.id) {
+                      e.currentTarget.style.borderColor = '#9ca3af'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedUserType !== userType.id) {
+                      e.currentTarget.style.borderColor = '#e5e7eb'
+                    }
+                  }}
+                >
+                  {/* Checkbox */}
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid #d1d5db',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: selectedUserType === userType.id ? BRAND_PURPLE : 'white',
+                    borderColor: selectedUserType === userType.id ? BRAND_PURPLE : '#d1d5db',
+                    marginRight: '1rem',
+                    flexShrink: 0
                   }}>
-                    <span style={{ marginRight: '0.5rem' }}>✓</span>
-                    {benefit}
+                    {selectedUserType === userType.id && (
+                      <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                    )}
                   </div>
-                ))}
-              </div>
-              
-              <div style={{
-                background: 'rgba(0,0,0,0.2)',
-                borderRadius: '10px',
-                padding: '1rem',
-                fontSize: '0.875rem',
-                fontStyle: 'italic',
-                lineHeight: '1.4'
-              }}>
-                <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>
-                  Perfect For:
+
+                  {/* Content */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '0.25rem'
+                    }}>
+                      <span style={{ fontSize: '1.25rem', marginRight: '0.5rem' }}>
+                        {userType.emoji}
+                      </span>
+                      <span style={{ 
+                        fontWeight: '600', 
+                        color: '#374151',
+                        fontSize: '1rem'
+                      }}>
+                        {userType.title}
+                      </span>
+                    </div>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                      margin: '0'
+                    }}>
+                      {userType.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Info Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowTooltip(showTooltip === userType.id ? '' : userType.id)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: BRAND_PURPLE,
+                      fontSize: '1.25rem',
+                      cursor: 'pointer',
+                      padding: '0.25rem',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '32px',
+                      height: '32px'
+                    }}
+                  >
+                    ℹ️
+                  </button>
                 </div>
-                {userType.examples.slice(0, 3).join(', ')}
-                {userType.examples.length > 3 && '...'}
+
+                {/* Tooltip/Details */}
+                {showTooltip === userType.id && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    zIndex: 10,
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    marginTop: '0.5rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                  }}>
+                    <h4 style={{
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '0.5rem',
+                      fontSize: '0.95rem'
+                    }}>
+                      What You Get:
+                    </h4>
+                    <div style={{ marginBottom: '1rem' }}>
+                      {userType.benefits.slice(0, 3).map((benefit, index) => (
+                        <div key={index} style={{
+                          fontSize: '0.875rem',
+                          color: '#6b7280',
+                          marginBottom: '0.25rem',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}>
+                          <span style={{ color: '#10b981', marginRight: '0.5rem' }}>✓</span>
+                          {benefit}
+                        </div>
+                      ))}
+                    </div>
+                    <h4 style={{
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '0.5rem',
+                      fontSize: '0.95rem'
+                    }}>
+                      Perfect For:
+                    </h4>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                      margin: '0',
+                      fontStyle: 'italic'
+                    }}>
+                      {userType.examples.slice(0, 3).join(', ')}...
+                    </p>
+                  </div>
+                )}
               </div>
-              
-              {selectedUserType === userType.id && (
-                <div style={{
-                  marginTop: '1rem',
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  color: 'white',
-                  fontSize: '1rem'
-                }}>
-                  ✓ Selected
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Continue Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedUserType || isSubmitting}
-          style={{
-            background: selectedUserType 
-              ? `linear-gradient(45deg, ${BRAND_ORANGE} 0%, ${BRAND_PURPLE} 100%)`
-              : '#e5e7eb',
-            color: selectedUserType ? 'white' : '#9ca3af',
-            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-            fontWeight: '900',
-            padding: '1rem 3rem',
-            borderRadius: '1rem',
-            border: 'none',
-            cursor: selectedUserType ? 'pointer' : 'not-allowed',
-            boxShadow: selectedUserType ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-            transition: 'all 0.2s',
-            transform: selectedUserType ? 'scale(1)' : 'scale(0.95)'
-          }}
-        >
-          {isSubmitting ? 'Setting up your journey...' : 'Continue to Setup →'}
-        </button>
-
-        {/* Skip Option */}
-        <Link 
-          href="/onboarding/business" 
-          style={{
-            color: 'rgba(255,255,255,0.7)',
-            textDecoration: 'none',
-            fontSize: '1rem',
-            marginTop: '1rem'
-          }}
-        >
-          Skip - I'll choose later
-        </Link>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        textAlign: 'center',
-        padding: '2rem',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem'
+        {/* Navigation Buttons */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          gap: '1rem',
+          marginBottom: '2rem',
+          flexWrap: 'wrap',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
         }}>
-          <span style={{ color: BRAND_PURPLE, fontSize: '1.25rem', fontWeight: '900' }}>click</span>
-          <span style={{ color: BRAND_ORANGE, fontSize: '1.25rem', fontWeight: '900' }}>speak</span>
-          <span style={{ color: BRAND_BLUE, fontSize: '1.25rem', fontWeight: '900' }}>send</span>
+          <Link
+            href="/dashboard"
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              backgroundColor: 'transparent',
+              color: '#6b7280',
+              border: '2px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              textDecoration: 'none',
+              transition: 'all 0.2s'
+            }}
+          >
+            Skip for now
+          </Link>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!selectedUserType || isSubmitting}
+            style={{
+              background: selectedUserType 
+                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                : '#e5e7eb',
+              color: selectedUserType ? 'white' : '#9ca3af',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              padding: '1rem 2rem',
+              borderRadius: '1rem',
+              border: 'none',
+              cursor: selectedUserType ? 'pointer' : 'not-allowed',
+              boxShadow: selectedUserType ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (selectedUserType) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedUserType) {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
+              }
+            }}
+          >
+            {isSubmitting ? 'Setting up your journey...' : 'Continue →'}
+          </button>
+        </div>
+
+        {/* Logo */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{ 
+              color: BRAND_PURPLE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline'
+            }}>click</div>
+            <div style={{ 
+              color: BRAND_ORANGE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>speak</div>
+            <div style={{ 
+              color: BRAND_BLUE, 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              fontWeight: '900',
+              display: 'inline',
+              marginLeft: '0.25rem'
+            }}>send</div>
+          </Link>
         </div>
       </div>
     </div>
