@@ -136,15 +136,6 @@ const businessTypes: BusinessType[] = [
     examples: ['Cruise operators', 'Marine tour companies', 'Harbour cruises', 'Yacht charters']
   },
   {
-    id: 'other',
-    title: 'Other Tourism Business',
-    subtitle: 'Specialized Services, Unique Experiences',
-    description: 'Customized content approach for unique or specialized tourism businesses',
-    contentFocus: ['Specialized services', 'Unique value proposition', 'Target audience focus', 'Custom messaging'],
-    emoji: '🎯',
-    examples: ['Photography services', 'Equipment rental', 'Specialized tours', 'Consulting services']
-  },
-  {
     id: 'government',
     title: 'Government Tourism',
     subtitle: 'Local, Regional, National Tourism Marketing',
@@ -152,6 +143,15 @@ const businessTypes: BusinessType[] = [
     contentFocus: ['Destination marketing', 'Industry support', 'Official information', 'Economic development'],
     emoji: '🏛️',
     examples: ['Tourism NZ', 'Regional tourism boards', 'City councils', 'Destination marketing orgs']
+  },
+  {
+    id: 'other',
+    title: 'Other Tourism Business',
+    subtitle: 'Specialized Services, Unique Experiences',
+    description: 'Customized content approach for unique or specialized tourism businesses',
+    contentFocus: ['Specialized services', 'Unique value proposition', 'Target audience focus', 'Custom messaging'],
+    emoji: '🎯',
+    examples: ['Photography services', 'Equipment rental', 'Specialized tours', 'Consulting services']
   }
 ]
 
@@ -189,7 +189,7 @@ const businessCategories: BusinessCategory[] = [
     subtitle: 'Information, conservation, events, specialized services',
     emoji: '🏛️',
     businessTypes: businessTypes.filter(bt => 
-      ['information', 'conservation', 'events', 'other'].includes(bt.id)
+      ['information', 'conservation', 'events', 'government', 'other'].includes(bt.id)
     )
   }
 ]
