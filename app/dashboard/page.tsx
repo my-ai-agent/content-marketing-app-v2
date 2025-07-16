@@ -114,8 +114,7 @@ export default function Dashboard() {
                 color: '#a16207',
                 margin: '0'
               }}>
-                <strong>7-day free trial active!</strong> You're currently on the {currentPlan?.name} plan. 
-                No credit card required during trial.
+                <strong>7-day Free trial active!</strong> No credit card required during trial.
               </p>
             </div>
             <Link 
@@ -136,8 +135,14 @@ export default function Dashboard() {
           </div>
         )}
         
-        {/* Welcome Section */}
-        <div style={{ marginBottom: '2rem' }}>
+        {/* Welcome + Stats Combined Section */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}>
           <h2 style={{
             fontSize: 'clamp(2rem, 6vw, 3rem)',
             fontWeight: '700',
@@ -150,7 +155,8 @@ export default function Dashboard() {
           <p style={{
             color: '#6b7280',
             textAlign: 'center',
-            fontSize: 'clamp(1rem, 2.5vw, 1.125rem)'
+            fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+            marginBottom: '2rem'
           }}>
             Ready to create and multiply your stories? 
             {currentPlan && (
@@ -159,140 +165,103 @@ export default function Dashboard() {
               </span>
             )}
           </p>
-        </div>
 
-        {/* Plan Overview Card */}
-        <div style={{
-          background: 'linear-gradient(45deg, #3b82f6 0%, #10b981 100%)',
-          borderRadius: '0.75rem',
-          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          color: 'white'
-        }}>
+          {/* Stats Grid */}
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '1rem'
           }}>
-            <div style={{ flex: '1', minWidth: '200px' }}>
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: '700',
-                marginBottom: '0.25rem'
-              }}>
-                {currentPlan?.name} Plan
-              </h3>
-              <p style={{
-                color: 'rgba(255,255,255,0.9)',
-                fontSize: '0.95rem',
-                marginBottom: '0.75rem'
-              }}>
-                Create authentic and personalised content for your target audience
-              </p>
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                fontSize: '0.875rem'
-              }}>
-                <span>📖 {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : currentPlan?.limits.storiesPerWeek} stories/week</span>
-                <span>📱 Universal QR distribution</span>
-                {currentPlan?.limits.schedulingFeatures && <span>📅 Scheduling enabled</span>}
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
+            <div style={{
+              backgroundColor: '#f9fafb',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              textAlign: 'center'
+            }}>
               <div style={{
                 fontSize: '2rem',
-                fontWeight: '700'
+                fontWeight: '700',
+                color: '#111827'
+              }}>0</div>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>Total Stories</div>
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                marginTop: '0.25rem'
               }}>
-                ${currentPlan?.limits.price}/mo
+                Limit: {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : `${currentPlan?.limits.storiesPerWeek}/week`}
               </div>
-              {isTrialActive && (
-                <div style={{
-                  fontSize: '0.875rem',
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '9999px',
-                  fontWeight: '600',
-                  marginTop: '0.5rem'
-                }}>
-                  Free during trial
-                </div>
-              )}
+            </div>
+            <div style={{
+              backgroundColor: '#f9fafb',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#3b82f6'
+              }}>0</div>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>Active QR Codes</div>
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                marginTop: '0.25rem'
+              }}>
+                Limit: {currentPlan?.limits.qrCodesActive === -1 ? 'Unlimited' : currentPlan?.limits.qrCodesActive}
+              </div>
+            </div>
+            <div style={{
+              backgroundColor: '#f9fafb',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#10b981'
+              }}>0</div>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>QR Code Scans</div>
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                marginTop: '0.25rem'
+              }}>This week</div>
+            </div>
+            <div style={{
+              backgroundColor: '#f9fafb',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#8b5cf6'
+              }}>0</div>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>Total Engagement</div>
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                marginTop: '0.25rem'
+              }}>All time</div>
             </div>
           </div>
         </div>
-
-        {/* Quick Actions - Back to single column for better mobile experience */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gap: '1rem',
-          marginBottom: '2rem'
-        }}>
-          
-          {/* Create New Story */}
-          <Link href="/dashboard/create/photo" style={{ textDecoration: 'none' }}>
-            <div style={{
-              backgroundColor: 'white',
-              padding: '1.5rem',
-              borderRadius: '0.75rem',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              border: '1px solid #e5e7eb',
-              transition: 'all 0.2s',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
-              e.currentTarget.style.borderColor = '#3b82f6'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
-              e.currentTarget.style.borderColor = '#e5e7eb'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: '1rem'
-              }}>
-                <div style={{
-                  backgroundColor: '#dbeafe',
-                  padding: '0.75rem',
-                  borderRadius: '50%',
-                  marginRight: '0.75rem'
-                }}>
-                  <svg style={{ width: '1.5rem', height: '1.5rem', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <h3 style={{
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  color: '#111827',
-                  margin: '0'
-                }}>
-                  Create New Story
-                </h3>
-              </div>
-              <p style={{
-                color: '#6b7280',
-                marginBottom: '0.75rem',
-                lineHeight: '1.5'
-              }}>
-                Start with your story and multiply it across multiple platforms and formats.
-              </p>
-              <div style={{
-                fontSize: '0.875rem',
-                color: '#3b82f6',
-                fontWeight: '500'
-              }}>
-                Generate QR codes for universal distribution →
-              </div>
-            </div>
-          </Link>
 
           {/* View Stories */}
           <Link href="/dashboard/stories" style={{ textDecoration: 'none' }}>
@@ -415,108 +384,7 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Stats Overview - 2x2 grid for mobile */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1rem',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '0.75rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: '#111827'
-            }}>0</div>
-            <div style={{
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>Total Stories</div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              marginTop: '0.25rem'
-            }}>
-              Limit: {currentPlan?.limits.storiesPerWeek === -1 ? 'Unlimited' : `${currentPlan?.limits.storiesPerWeek}/week`}
-            </div>
-          </div>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '0.75rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: '#3b82f6'
-            }}>0</div>
-            <div style={{
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>Active QR Codes</div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              marginTop: '0.25rem'
-            }}>
-              Limit: {currentPlan?.limits.qrCodesActive === -1 ? 'Unlimited' : currentPlan?.limits.qrCodesActive}
-            </div>
-          </div>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '0.75rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: '#10b981'
-            }}>0</div>
-            <div style={{
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>QR Code Scans</div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              marginTop: '0.25rem'
-            }}>This week</div>
-          </div>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '0.75rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: '#8b5cf6'
-            }}>0</div>
-            <div style={{
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>Total Engagement</div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              marginTop: '0.25rem'
-            }}>All time</div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
+        {/* Recent Activity - Enhanced as Create New Story */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '0.75rem',
@@ -529,15 +397,29 @@ export default function Dashboard() {
           }}>
             <h3 style={{
               fontSize: '1.125rem',
-              fontWeight: '500',
+              fontWeight: '600',
               color: '#111827',
-              margin: '0 0 1.5rem 0'
-            }}>Recent Activity</h3>
+              margin: '0 0 1.5rem 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              <div style={{
+                backgroundColor: '#dbeafe',
+                padding: '0.5rem',
+                borderRadius: '50%'
+              }}>
+                <svg style={{ width: '1.25rem', height: '1.25rem', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              Create New Story
+            </h3>
           </div>
           <div style={{ padding: '1.5rem' }}>
             <div style={{
               textAlign: 'center',
-              padding: '3rem 0'
+              padding: '2rem 0'
             }}>
               <div style={{
                 color: '#9ca3af',
@@ -559,13 +441,14 @@ export default function Dashboard() {
                 style={{
                   backgroundColor: '#3b82f6',
                   color: 'white',
-                  fontWeight: '500',
-                  padding: '0.75rem 2rem',
-                  borderRadius: '0.5rem',
+                  fontWeight: '600',
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.5rem',
+                  fontSize: '1.125rem',
                   transition: 'background-color 0.2s'
                 }}
                 onMouseEnter={(e) => {
@@ -578,7 +461,7 @@ export default function Dashboard() {
                 <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span>Create Your First Story</span>
+                <span>Create New Story</span>
               </Link>
             </div>
           </div>
