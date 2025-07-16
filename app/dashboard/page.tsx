@@ -69,7 +69,7 @@ export default function Dashboard() {
             gap: '0.5rem'
           }}>
             <Link 
-              href="/dashboard/billing"
+              href="/plans"
               style={{
                 backgroundColor: planBadgeColor.includes('blue') ? '#2563eb' : 
                                planBadgeColor.includes('green') ? '#16a34a' : '#9333ea',
@@ -110,7 +110,7 @@ export default function Dashboard() {
               </p>
             </div>
             <Link 
-              href="/dashboard/billing"
+              href="/plans"
               style={{
                 backgroundColor: '#d97706',
                 color: 'white',
