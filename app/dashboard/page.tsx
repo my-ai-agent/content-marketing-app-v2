@@ -68,17 +68,21 @@ export default function Dashboard() {
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            <span style={{
-              backgroundColor: planBadgeColor.includes('blue') ? '#2563eb' : 
-                             planBadgeColor.includes('green') ? '#16a34a' : '#9333ea',
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '9999px'
-            }}>
-              {planDisplayName} PLAN
-            </span>
+            <Link 
+  href="/dashboard/billing"
+  style={{
+    backgroundColor: planBadgeColor.includes('blue') ? '#2563eb' : 
+                   planBadgeColor.includes('green') ? '#16a34a' : '#9333ea',
+    color: 'white',
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '9999px',
+    textDecoration: 'none'
+  }}
+>
+  {planDisplayName} PLAN $47/mo
+</Link>
             {isTrialActive && (
               <span style={{
                 backgroundColor: '#eab308',
@@ -263,7 +267,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-          {/* View Stories */}
+          {/* My Stories and Analytics */}
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  gap: '1rem',
+  marginBottom: '2rem'
+}}>
+        {/* View Stories */}
           <Link href="/dashboard/stories" style={{ textDecoration: 'none' }}>
             <div style={{
               backgroundColor: 'white',
@@ -322,6 +333,7 @@ export default function Dashboard() {
               </div>
             </div>
           </Link>
+          </div> {/* End My Stories and Analytics grid */}
 
           {/* Analytics */}
           <Link href="/dashboard/analytics" style={{ textDecoration: 'none' }}>
