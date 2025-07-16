@@ -44,7 +44,7 @@ function PlatformCarousel() {
   return (
     <div style={{
       display: 'flex',
-      gap: '2rem',
+      gap: '1.5rem',
       flexWrap: 'wrap',
       justifyContent: 'center',
       alignItems: 'center',
@@ -62,14 +62,14 @@ function PlatformCarousel() {
           }}
         >
           <div style={{ 
-            fontSize: '2.5rem',
+            fontSize: '2rem',
             marginBottom: '0.25rem',
             color: platform.color
           }}>
             {platform.icon}
           </div>
           <div style={{ 
-            fontSize: '0.8rem', 
+            fontSize: '0.75rem', 
             color: '#4A5568', 
             fontWeight: '600',
             whiteSpace: 'nowrap'
@@ -231,14 +231,14 @@ export default function AuthenticatedHome() {
   }, [])
 
   const handleSignIn = () => {
-    window.location.href = '/auth/register'
+    window.location.href = '/onboarding/user-type'
   }
 
   const handleStart = () => {
     if (isAuthenticated) {
       window.location.href = '/dashboard/create/photo'
     } else {
-      window.location.href = '/auth/register'
+      window.location.href = '/onboarding/user-type'
     }
   }
 
@@ -267,140 +267,154 @@ export default function AuthenticatedHome() {
       flexDirection: 'column',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Header Navigation */}
-      <header style={{
+      
+      {/* 600px Mobile-First Container */}
+      <div style={{
+        maxWidth: '600px',
+        margin: '0 auto',
         width: '100%',
-        padding: '1rem 2rem',
         display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+        flexDirection: 'column',
+        minHeight: '100vh'
       }}>
-        {isAuthenticated ? (
-          <UserMenu 
-            userName={(userProfile as any)?.profile?.name || 'User'} 
-            userProfile={userProfile as any} 
-          />
-        ) : (
+
+        {/* Header Navigation - Inside 600px container */}
+        <header style={{
+          padding: '1rem',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+          borderRadius: '0 0 0.75rem 0.75rem'
+        }}>
+          {isAuthenticated ? (
+            <UserMenu 
+              userName={(userProfile as any)?.profile?.name || 'User'} 
+              userProfile={userProfile as any} 
+            />
+          ) : (
+            <button
+              onClick={handleSignIn}
+              style={{
+                background: `linear-gradient(45deg, ${BRAND_BLUE}, ${BRAND_PURPLE})`,
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '25px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)'
+              }}
+            >
+              Sign In
+            </button>
+          )}
+        </header>
+
+        {/* Main Content */}
+        <main style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem 1rem',
+          textAlign: 'center'
+        }}>
+          {/* Brand Logo */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h1 style={{
+              fontSize: 'clamp(2rem, 8vw, 3.5rem)',
+              fontWeight: '900',
+              margin: '0 0 1rem 0',
+              lineHeight: '0.9'
+            }}>
+              <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
+              <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
+              <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
+            </h1>
+          </div>
+
+          {/* Value Proposition */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{
+              fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
+              fontWeight: '700',
+              color: '#2D3748',
+              margin: '0 0 1rem 0',
+              lineHeight: '1.3'
+            }}>
+              {isAuthenticated 
+                ? 'Create Your Next Story + Photo into Global Platforms!'
+                : 'Transform Your Single Story + Photo into Global Platforms Instantly!'
+              }
+            </h2>
+          </div>
+
+          {/* START Button */}
           <button
-            onClick={handleSignIn}
+            onClick={handleStart}
             style={{
-              background: `linear-gradient(45deg, ${BRAND_BLUE}, ${BRAND_PURPLE})`,
+              background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
               color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '25px',
-              fontSize: '1rem',
-              fontWeight: '600',
+              padding: '1.25rem 2.5rem',
+              borderRadius: '50px',
+              fontSize: '1.25rem',
+              fontWeight: '700',
               border: 'none',
               cursor: 'pointer',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              marginBottom: '3rem'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'
+              e.currentTarget.style.transform = 'translateY(-5px)'
+              e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.3)'
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)'
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'
             }}
           >
-            Sign In
+            START
           </button>
-        )}
-      </header>
 
-      {/* Main Content */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center'
-      }}>
-        {/* Brand Logo */}
-        <div style={{ marginBottom: '3rem' }}>
-          <h1 style={{
-            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-            fontWeight: '900',
-            margin: '0 0 1rem 0',
-            lineHeight: '0.9'
-          }}>
-            <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
-            <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
-            <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
-          </h1>
-        </div>
+          {/* Platform Carousel */}
+          <PlatformCarousel />
+        </main>
 
-        {/* Value Proposition */}
-        <div style={{ marginBottom: '3rem', maxWidth: '800px' }}>
-          <h2 style={{
-            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-            fontWeight: '700',
-            color: '#2D3748',
-            margin: '0 0 1rem 0',
-            lineHeight: '1.2'
-          }}>
-            {isAuthenticated 
-              ? 'Create Your Next Story + Photo into Global Platforms!'
-              : 'Transform Your Single Story + Photo into Global Platforms Instantly!'
-            }
-          </h2>
-        </div>
-
-        {/* START Button */}
-        <button
-          onClick={handleStart}
-          style={{
-            background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-            color: 'white',
-            padding: '1.5rem 3rem',
-            borderRadius: '50px',
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-            transition: 'all 0.3s ease',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            marginBottom: '4rem'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-5px)'
-            e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.3)'
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'
-          }}
-        >
-          START
-        </button>
-
-        {/* Platform Carousel */}
-        <PlatformCarousel />
-      </main>
-
-      {/* Footer */}
-      <footer style={{
-        padding: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-        background: 'rgba(255, 255, 255, 0.5)'
-      }}>
-        <p style={{
-          color: '#718096',
-          fontSize: '0.9rem',
-          margin: 0
+        {/* Footer */}
+        <footer style={{
+          padding: '1.5rem 1rem',
+          textAlign: 'center',
+          borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+          background: 'rgba(255, 255, 255, 0.5)',
+          borderRadius: '0.75rem 0.75rem 0 0'
         }}>
-          The world's first culturally-intelligent content creation platform
-        </p>
-      </footer>
+          <p style={{
+            color: '#718096',
+            fontSize: '0.875rem',
+            margin: 0
+          }}>
+            The world's first culturally-intelligent content creation platform
+          </p>
+        </footer>
+
+      </div>
     </div>
   )
 }
