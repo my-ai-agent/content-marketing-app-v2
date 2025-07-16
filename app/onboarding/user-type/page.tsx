@@ -68,7 +68,8 @@ export default function UnifiedOnboarding() {
   // Personal Selection (Window 3b)
   const [personalPersona, setPersonalPersona] = useState('')
   
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // Privacy consent
+  const [privacyConsent, setPrivacyConsent] = useState(false)
 
   const handleSubmit = async () => {
     if (!name || !email || !location || !userType) return
@@ -111,7 +112,7 @@ export default function UnifiedOnboarding() {
     }
   }
 
-  const canSubmit = name && email && location && userType && 
+  const canSubmit = name && email && location && userType && privacyConsent &&
     ((userType === 'business' && businessCategory && businessType) ||
      (userType === 'personal' && personalPersona))
 
@@ -529,8 +530,52 @@ export default function UnifiedOnboarding() {
           </div>
         )}
 
-        {/* Submit Button */}
+        {/* Privacy Consent & Submit */}
         <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+          {/* Privacy Consent Checkbox */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            marginBottom: '1.5rem',
+            padding: '1rem',
+            backgroundColor: '#f9fafb',
+            borderRadius: '0.75rem',
+            border: '1px solid #e5e7eb'
+          }}>
+            <input
+              type="checkbox"
+              id="privacy-consent"
+              checked={privacyConsent}
+              onChange={(e) => setPrivacyConsent(e.target.checked)}
+              style={{
+                width: '18px',
+                height: '18px',
+                marginTop: '2px',
+                cursor: 'pointer'
+              }}
+            />
+            <label 
+              htmlFor="privacy-consent"
+              style={{
+                fontSize: '0.875rem',
+                color: '#374151',
+                lineHeight: '1.4',
+                cursor: 'pointer'
+              }}
+            >
+              I consent to my story/photo being used for AI content generation, and understand that this will be deleted from AI's memory after processing. I accept the{' '}
+              <a 
+                href="/terms" 
+                style={{ color: BRAND_PURPLE, textDecoration: 'underline' }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Terms & Conditions
+              </a>.
+            </label>
+          </div>
+
           <button
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
@@ -550,7 +595,7 @@ export default function UnifiedOnboarding() {
               transition: 'all 0.2s'
             }}
           >
-            {isSubmitting ? 'Setting up your account...' : 'Complete Setup & Start Creating →'}
+            {isSubmitting ? 'Setting up your account...' : 'Start Creating →'}
           </button>
           
           {/* Skip Option */}
