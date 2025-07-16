@@ -70,6 +70,7 @@ export default function UnifiedOnboarding() {
   
   // Privacy consent
   const [privacyConsent, setPrivacyConsent] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
     if (!name || !email || !location || !userType) return
