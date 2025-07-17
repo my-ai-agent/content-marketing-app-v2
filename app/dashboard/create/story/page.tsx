@@ -589,51 +589,83 @@ export default function TellYourStory() {
             </div>
           )}
 
-          {/* Optional Copilot Assistant */}
-          {story && (
+          {/* Spell Check Section with Enhanced Instructions */}
+          {story && inputMethod === 'write' && (
             <div style={{
               marginTop: '1rem',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.75rem'
+              padding: '1rem',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #e0f2fe',
+              borderRadius: '0.75rem'
             }}>
-              <button
-                onClick={handleCopilotCheck}
-                disabled={!story.trim() || isCheckingSpelling}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  backgroundColor: story.trim() ? '#f8fafc' : '#f3f4f6',
-                  color: story.trim() ? BRAND_PURPLE : '#9ca3af',
-                  border: `1px solid ${story.trim() ? '#e2e8f0' : '#e5e7eb'}`,
-                  borderRadius: '0.5rem',
-                  cursor: story.trim() ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (story.trim()) {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9'
-                    e.currentTarget.style.borderColor = BRAND_PURPLE
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (story.trim()) {
-                    e.currentTarget.style.backgroundColor = '#f8fafc'
-                    e.currentTarget.style.borderColor = '#e2e8f0'
-                  }
-                }}
-              >
-                {isCheckingSpelling ? (
-                  <>⏳ Checking...</>
-                ) : (
-                  <>✨ Check Spelling & Grammar</>
-                )}
-              </button>
+              {/* Instruction Text */}
+              <div style={{
+                marginBottom: '0.75rem',
+                fontSize: '0.875rem',
+                color: '#1e40af',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <span>💡</span>
+                <span style={{ fontWeight: '500' }}>
+                  Tip: Highlight or select text above to check spelling & grammar
+                </span>
+              </div>
+              
+              {/* Spell Check Button */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={handleCopilotCheck}
+                  disabled={!story.trim() || isCheckingSpelling}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    backgroundColor: story.trim() ? BRAND_PURPLE : '#e5e7eb',
+                    color: story.trim() ? 'white' : '#9ca3af',
+                    border: 'none',
+                    borderRadius: '0.75rem',
+                    cursor: story.trim() ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s',
+                    boxShadow: story.trim() ? '0 2px 8px rgba(107, 46, 255, 0.2)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (story.trim()) {
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(107, 46, 255, 0.3)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (story.trim()) {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(107, 46, 255, 0.2)'
+                    }
+                  }}
+                >
+                  {isCheckingSpelling ? (
+                    <>
+                      <span style={{ 
+                        display: 'inline-block', 
+                        animation: 'spin 1s linear infinite',
+                        fontSize: '1rem'
+                      }}>⏳</span>
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <span>✨</span>
+                      Check Spelling & Grammar
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -843,6 +875,7 @@ export default function TellYourStory() {
             Continue →
           </button>
         </div>
+        
         {/* Logo */}
         <div style={{ 
           textAlign: 'center', 
@@ -892,6 +925,14 @@ export default function TellYourStory() {
           ← Back to Photo
         </Link>
       </div>
+
+      {/* CSS Animation for loading spinner */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
