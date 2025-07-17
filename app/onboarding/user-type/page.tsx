@@ -71,6 +71,9 @@ export default function UnifiedOnboarding() {
   // Privacy consent
   const [privacyConsent, setPrivacyConsent] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Terms modal
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const handleSubmit = async () => {
     if (!name || !email || !location || !userType) return
@@ -117,6 +120,152 @@ export default function UnifiedOnboarding() {
     ((userType === 'business' && businessCategory && businessType) ||
      (userType === 'personal' && personalPersona))
 
+  // Terms & Conditions Modal Component
+  const TermsModal = () => (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '1rem'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '1rem',
+        padding: '2rem',
+        maxWidth: '600px',
+        maxHeight: '80vh',
+        overflow: 'auto',
+        width: '100%',
+        position: 'relative'
+      }}>
+        {/* Close Button */}
+        <button
+          onClick={() => setShowTermsModal(false)}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: '#6b7280',
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          ×
+        </button>
+
+        {/* Terms Content */}
+        <h2 style={{
+          fontSize: '1.5rem',
+          fontWeight: '700',
+          color: '#111827',
+          marginBottom: '1.5rem',
+          paddingRight: '2rem'
+        }}>
+          Terms & Conditions
+        </h2>
+
+        <div style={{
+          fontSize: '0.875rem',
+          lineHeight: '1.6',
+          color: '#374151',
+          marginBottom: '2rem'
+        }}>
+          
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            1. Service Description
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            Click Speak Send is an AI-powered content creation platform that generates culturally-intelligent tourism content using your photos and stories.
+          </p>
+
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            2. Content and Privacy
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            • Your photos and stories are processed by AI to generate content<br/>
+            • All data is deleted from AI memory after processing<br/>
+            • We respect cultural protocols and Mātauranga Māori<br/>
+            • Generated content remains your intellectual property
+          </p>
+
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            3. Cultural Responsibility
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            We are committed to protecting indigenous knowledge and cultural heritage. Our AI is designed to respect Te Tiriti o Waitangi principles and Māori cultural protocols.
+          </p>
+
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            4. User Responsibilities
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            • Ensure you have rights to photos you upload<br/>
+            • Use generated content respectfully<br/>
+            • Respect cultural significance of places and people<br/>
+            • Follow platform-specific guidelines when sharing
+          </p>
+
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            5. Service Availability
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            We provide this service "as is" and reserve the right to modify or discontinue features. Your subscription includes access to AI content generation as described in your plan.
+          </p>
+
+          <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+            6. Contact
+          </h3>
+          <p style={{ marginBottom: '1rem' }}>
+            Questions about these terms? Contact us at support@clickspeaksend.com
+          </p>
+
+          <p style={{ 
+            fontSize: '0.75rem', 
+            color: '#6b7280', 
+            fontStyle: 'italic',
+            marginTop: '1.5rem' 
+          }}>
+            Last updated: July 2025
+          </p>
+        </div>
+
+        {/* Accept Button */}
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => setShowTermsModal(false)}
+            style={{
+              background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: '600',
+              padding: '0.75rem 2rem',
+              borderRadius: '0.75rem',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div style={{ 
       display: 'flex', 
@@ -124,6 +273,9 @@ export default function UnifiedOnboarding() {
       minHeight: '100vh', 
       backgroundColor: '#f9fafb'
     }}>
+      
+      {/* Terms Modal */}
+      {showTermsModal && <TermsModal />}
       
       {/* 600px Mobile-First Container */}
       <div style={{ 
@@ -566,14 +718,20 @@ export default function UnifiedOnboarding() {
               }}
             >
               I consent to my story/photo being used for AI content generation, and understand that this will be deleted from AI's memory after processing. I accept the{' '}
-              <a 
-                href="/terms" 
-                style={{ color: BRAND_PURPLE, textDecoration: 'underline' }}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setShowTermsModal(true)}
+                style={{
+                  color: BRAND_PURPLE,
+                  textDecoration: 'underline',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  padding: 0
+                }}
               >
                 Terms & Conditions
-              </a>.
+              </button>.
             </label>
           </div>
 
