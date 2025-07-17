@@ -114,11 +114,14 @@ export default function PhotoUpload() {
         // Load each photo from IndexedDB
         for (const [type, data] of Object.entries(metadata)) {
           const blob = await getImageFromIndexedDB(`photo_${type}`)
-          if (blob) {
+          if (blob && typeof data === 'object' && data !== null) {
             loadedPhotos[type as keyof typeof photos] = {
-              ...data,
               blob,
-              url: URL.createObjectURL(blob)
+              url: URL.createObjectURL(blob),
+              fileName: (data as any).fileName || 'Unknown',
+              fileSize: (data as any).fileSize || 0,
+              uploadMethod: (data as any).uploadMethod || type as 'camera' | 'gallery' | 'upload',
+              timestamp: (data as any).timestamp || Date.now()
             }
           }
         }
