@@ -6,6 +6,20 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+// Beta access codes
+const BETA_CODES = [
+  'CULTURAL2025',
+  'MAORI2025', 
+  'TOURISM2025',
+  'KAITIAKI2025',
+  'AOTEAROA2025',
+  'WELLNESS2025',
+  'HERITAGE2025',
+  'ADVENTURE2025',
+  'DISCOVER2025',
+  'AUTHENTIC2025'
+]
+
 // Business types for business users
 const businessTypes = {
   'Tourism Business': [
@@ -52,6 +66,12 @@ const nzLocations = [
 ]
 
 export default function UnifiedOnboarding() {
+  // Beta access state
+  const [betaCode, setBetaCode] = useState('')
+  const [isBetaValidated, setIsBetaValidated] = useState(false)
+  const [betaCodeError, setBetaCodeError] = useState('')
+  const [showWaitlist, setShowWaitlist] = useState(false)
+
   // Account Setup (Window 1)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -74,6 +94,21 @@ export default function UnifiedOnboarding() {
   
   // Terms modal
   const [showTermsModal, setShowTermsModal] = useState(false)
+
+  // Beta code validation
+  const validateBetaCode = () => {
+    const code = betaCode.toUpperCase().trim()
+    if (BETA_CODES.includes(code)) {
+      setIsBetaValidated(true)
+      setBetaCodeError('')
+      localStorage.setItem('betaAccess', 'validated')
+    } else {
+      setBetaCodeError('Invalid access code. Please check and try again.')
+      setTimeout(() => {
+        setShowWaitlist(true)
+      }, 2000)
+    }
+  }
 
   const handleSubmit = async () => {
     if (!name || !email || !location || !userType) return
@@ -99,6 +134,7 @@ export default function UnifiedOnboarding() {
         personal: userType === 'personal' ? {
           persona: personalPersona
         } : null,
+        betaAccess: true,
         completedAt: new Date().toISOString()
       }
       
@@ -119,6 +155,101 @@ export default function UnifiedOnboarding() {
   const canSubmit = name && email && location && userType && privacyConsent &&
     ((userType === 'business' && businessCategory && businessType) ||
      (userType === 'personal' && personalPersona))
+
+  // Waitlist Component
+  const WaitlistPage = () => (
+    <div style={{ 
+      textAlign: 'center', 
+      padding: '3rem 1rem',
+      maxWidth: '500px',
+      margin: '0 auto'
+    }}>
+      <div style={{
+        fontSize: '4rem',
+        marginBottom: '1.5rem'
+      }}>🌟</div>
+      
+      <h1 style={{
+        fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: '1rem'
+      }}>
+        Join the Waitlist
+      </h1>
+      
+      <p style={{
+        fontSize: '1.125rem',
+        color: '#6b7280',
+        marginBottom: '2rem',
+        lineHeight: '1.6'
+      }}>
+        Click Speak Send is currently in private beta. Join our waitlist to be notified when we launch publicly!
+      </p>
+      
+      <div style={{
+        backgroundColor: '#f0f9ff',
+        border: '1px solid #bae6fd',
+        borderRadius: '0.75rem',
+        padding: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <h3 style={{
+          fontSize: '1.125rem',
+          fontWeight: '600',
+          color: '#0c4a6e',
+          marginBottom: '0.75rem'
+        }}>
+          🚀 What's Coming?
+        </h3>
+        <ul style={{
+          textAlign: 'left',
+          color: '#0c4a6e',
+          fontSize: '0.875rem',
+          lineHeight: '1.5',
+          paddingLeft: '1rem'
+        }}>
+          <li>AI-powered cultural content generation</li>
+          <li>Multi-platform story optimization</li>
+          <li>Māori cultural intelligence integration</li>
+          <li>QR code sharing system</li>
+        </ul>
+      </div>
+      
+      <button
+        onClick={() => {
+          alert('Thank you for your interest! We\'ll notify you when Click Speak Send launches.')
+          window.location.href = '/'
+        }}
+        style={{
+          background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+          color: 'white',
+          fontSize: '1.125rem',
+          fontWeight: '600',
+          padding: '1rem 2rem',
+          borderRadius: '0.75rem',
+          border: 'none',
+          cursor: 'pointer',
+          marginBottom: '1rem'
+        }}
+      >
+        Join Waitlist
+      </button>
+      
+      <div style={{ marginTop: '2rem' }}>
+        <Link 
+          href="/"
+          style={{
+            color: '#6b7280',
+            textDecoration: 'none',
+            fontSize: '0.875rem'
+          }}
+        >
+          ← Back to home
+        </Link>
+      </div>
+    </div>
+  )
 
   // Terms & Conditions Modal Component
   const TermsModal = () => (
@@ -266,215 +397,121 @@ export default function UnifiedOnboarding() {
     </div>
   )
 
-  return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb'
-    }}>
-      
-      {/* Terms Modal */}
-      {showTermsModal && <TermsModal />}
-      
-      {/* 600px Mobile-First Container */}
+  // Show waitlist if user failed beta validation
+  if (showWaitlist) {
+    return (
       <div style={{ 
-        maxWidth: '600px', 
-        margin: '0 auto', 
-        width: '100%', 
-        padding: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh'
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh', 
+        backgroundColor: '#f9fafb'
       }}>
-
-        {/* Header */}
         <div style={{ 
-          textAlign: 'center', 
-          padding: '2rem 0',
-          borderBottom: '1px solid #e5e7eb',
-          marginBottom: '2rem'
+          maxWidth: '600px', 
+          margin: '0 auto', 
+          width: '100%', 
+          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          justifyContent: 'center'
         }}>
-          <h1 style={{ 
-            fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', 
-            fontWeight: '700',
-            color: '#111827',
-            marginBottom: '0.5rem'
-          }}>
-            Welcome to Click Speak Send
-          </h1>
-          <p style={{ 
-            color: '#6b7280', 
-            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-            margin: '0'
-          }}>
-            Set up your account to create culturally-intelligent content
-          </p>
+          <WaitlistPage />
         </div>
+      </div>
+    )
+  }
 
-        {/* Window 1: Account Setup */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '1.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+  // Show beta access code entry if not validated
+  if (!isBetaValidated) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh', 
+        backgroundColor: '#f9fafb'
+      }}>
+        
+        {/* 600px Mobile-First Container */}
+        <div style={{ 
+          maxWidth: '600px', 
+          margin: '0 auto', 
+          width: '100%', 
+          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          justifyContent: 'center'
         }}>
-          <h2 style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
-            color: '#111827',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
+
+          {/* Beta Access Code Entry */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '1rem',
+            padding: '2rem',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            textAlign: 'center'
           }}>
-            <span>👤</span> Set Up Your Account
-          </h2>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                Full Name *
-              </label>
+            
+            <div style={{
+              fontSize: '3rem',
+              marginBottom: '1.5rem'
+            }}>🔑</div>
+            
+            <h1 style={{
+              fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
+              fontWeight: '700',
+              color: '#111827',
+              marginBottom: '1rem'
+            }}>
+              Beta Access Required
+            </h1>
+            
+            <p style={{
+              color: '#6b7280',
+              fontSize: '1.125rem',
+              marginBottom: '2rem',
+              lineHeight: '1.6'
+            }}>
+              Click Speak Send is currently in private beta testing.<br/>
+              Enter your access code to continue.
+            </p>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              marginBottom: '1.5rem'
+            }}>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your full name"
+                value={betaCode}
+                onChange={(e) => {
+                  setBetaCode(e.target.value)
+                  setBetaCodeError('')
+                }}
+                placeholder="Enter your beta access code"
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
+                  padding: '1rem',
+                  border: betaCodeError ? '2px solid #ef4444' : '2px solid #d1d5db',
+                  borderRadius: '0.75rem',
+                  fontSize: '1.125rem',
+                  textAlign: 'center',
                   outline: 'none',
-                  transition: 'border-color 0.2s'
+                  transition: 'border-color 0.2s',
+                  textTransform: 'uppercase'
                 }}
-                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = betaCodeError ? '#ef4444' : BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = betaCodeError ? '#ef4444' : '#d1d5db'}
+                onKeyPress={(e) => e.key === 'Enter' && validateBetaCode()}
               />
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                Email Address *
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-              />
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                Location *
-              </label>
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  cursor: 'pointer'
-                }}
-                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-              >
-                <option value="">Select your location...</option>
-                {nzLocations.map((loc) => (
-                  <option key={loc.value} value={loc.value}>{loc.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                Cultural Connection (Optional)
-              </label>
-              <input
-                type="text"
-                value={culturalConnection}
-                onChange={(e) => setCulturalConnection(e.target.value)}
-                placeholder="Share your cultural background or connections"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Window 2: User Type Selection */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '1.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
-            color: '#111827',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <span>🎯</span> Select Your Creator Type
-          </h2>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Business Option */}
-            <div
-              onClick={() => setUserType('business')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '1rem',
-                border: userType === 'business' ? `2px solid ${BRAND_PURPLE}` : '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                backgroundColor: userType === 'business' ? '#f0f9ff' : 'white',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              <div style={{
-                width: '20px',
-                height: '20px',
-                border: '2px solid #d1d5db',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: userType === 'business' ? BRAND_PURPLE : 'white',
+              
+              {betaCodeError && (
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '0.875rem',
+                  backgroundColor: userType === 'business' ? BRAND_PURPLE : 'white',
                 borderColor: userType === 'business' ? BRAND_PURPLE : '#d1d5db',
                 marginRight: '1rem'
               }}>
@@ -805,4 +842,307 @@ export default function UnifiedOnboarding() {
       </div>
     </div>
   )
-}
+} '#fef2f2',
+                  padding: '0.75rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #fecaca'
+                }}>
+                  {betaCodeError}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={validateBetaCode}
+              disabled={!betaCode.trim()}
+              style={{
+                width: '100%',
+                background: betaCode.trim() 
+                  ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+                  : '#e5e7eb',
+                color: betaCode.trim() ? 'white' : '#9ca3af',
+                fontSize: '1.125rem',
+                fontWeight: '700',
+                padding: '1rem 2rem',
+                borderRadius: '0.75rem',
+                border: 'none',
+                cursor: betaCode.trim() ? 'pointer' : 'not-allowed',
+                boxShadow: betaCode.trim() ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
+                transition: 'all 0.2s',
+                marginBottom: '1.5rem'
+              }}
+            >
+              Access Beta Platform
+            </button>
+
+            <div style={{
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '0.75rem',
+              padding: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#0c4a6e',
+                margin: '0'
+              }}>
+                <strong>Beta Testers:</strong> You should have received your access code via email or invitation.
+              </p>
+            </div>
+
+            <Link 
+              href="/"
+              style={{
+                color: '#6b7280',
+                textDecoration: 'none',
+                fontSize: '0.875rem'
+              }}
+            >
+              ← Back to home
+            </Link>
+          </div>
+
+          {/* Footer Logo */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '2rem',
+            paddingTop: '2rem'
+          }}>
+            <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+              <div style={{ 
+                color: BRAND_PURPLE, 
+                fontSize: '1rem', 
+                fontWeight: '900',
+                display: 'inline'
+              }}>click</div>
+              <div style={{ 
+                color: BRAND_ORANGE, 
+                fontSize: '1rem', 
+                fontWeight: '900',
+                display: 'inline',
+                marginLeft: '0.25rem'
+              }}>speak</div>
+              <div style={{ 
+                color: BRAND_BLUE, 
+                fontSize: '1rem', 
+                fontWeight: '900',
+                display: 'inline',
+                marginLeft: '0.25rem'
+              }}>send</div>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      backgroundColor: '#f9fafb'
+    }}>
+      
+      {/* Terms Modal */}
+      {showTermsModal && <TermsModal />}
+      
+      {/* 600px Mobile-First Container */}
+      <div style={{ 
+        maxWidth: '600px', 
+        margin: '0 auto', 
+        width: '100%', 
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh'
+      }}>
+
+        {/* Header */}
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2rem 0',
+          borderBottom: '1px solid #e5e7eb',
+          marginBottom: '2rem'
+        }}>
+          <h1 style={{ 
+            fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', 
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '0.5rem'
+          }}>
+            Welcome to Click Speak Send
+          </h1>
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+            margin: '0'
+          }}>
+            Set up your account to create culturally-intelligent content
+          </p>
+        </div>
+
+        {/* Window 1: Account Setup */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span>👤</span> Set Up Your Account
+          </h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                Full Name *
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                Location *
+              </label>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              >
+                <option value="">Select your location...</option>
+                {nzLocations.map((loc) => (
+                  <option key={loc.value} value={loc.value}>{loc.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                Cultural Connection (Optional)
+              </label>
+              <input
+                type="text"
+                value={culturalConnection}
+                onChange={(e) => setCulturalConnection(e.target.value)}
+                placeholder="Share your cultural background or connections"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Window 2: User Type Selection */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span>🎯</span> Select Your Creator Type
+          </h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Business Option */}
+            <div
+              onClick={() => setUserType('business')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '1rem',
+                border: userType === 'business' ? `2px solid ${BRAND_PURPLE}` : '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                backgroundColor: userType === 'business' ? '#f0f9ff' : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <div style={{
+                width: '20px',
+                height: '20px',
+                border: '2px solid #d1d5db',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor:
