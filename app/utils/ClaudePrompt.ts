@@ -349,3 +349,9 @@ export async function generateClaudeContent(userData: UserData): Promise<{ [plat
 export function generateContentWithBrandContext(userData: UserData) {
   return generateClaudeContent(userData)
 }
+
+// Backward compatibility - export the original function name
+export const generateClaudePrompt = generateEnhancedClaudePrompt
+
+// Also export for any legacy imports
+export { generateEnhancedClaudePrompt as generateClaudePrompt }
