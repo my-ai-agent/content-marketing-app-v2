@@ -35,7 +35,7 @@ function getCachedScrapeData(url: string): ScrapedBrandData | null {
     const normalizedUrl = normalizeUrl(url)
     
     if (parsed[normalizedUrl]) {
-      const cached = parsed[normalizedUrl]
+      const cached: ScrapedBrandData = parsed[normalizedUrl]
       const age = Date.now() - new Date(cached.scrapeTimestamp).getTime()
       
       // Return cached data if less than 30 days old
