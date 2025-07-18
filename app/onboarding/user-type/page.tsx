@@ -61,6 +61,7 @@ export default function UnifiedOnboarding() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [location, setLocation] = useState('')
+  const [websiteUrl, setWebsiteUrl] = useState('')
   const [culturalConnection, setCulturalConnection] = useState('')
   const [userType, setUserType] = useState('')
   const [businessCategory, setBusinessCategory] = useState('')
@@ -91,7 +92,7 @@ export default function UnifiedOnboarding() {
     
     try {
       const userProfile = {
-        profile: { name, email, location, culturalConnection, userType },
+        profile: { name, email, location, websiteUrl, culturalConnection, userType },
         business: userType === 'business' ? { category: businessCategory, type: businessType } : null,
         personal: userType === 'personal' ? { persona: personalPersona } : null,
         betaAccess: true,
@@ -168,13 +169,47 @@ export default function UnifiedOnboarding() {
         <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>👤 Set Up Your Account</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem' }} />
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email address" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem' }} />
-            <select value={location} onChange={(e) => setLocation(e.target.value)} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: 'white' }}>
-              <option value="">Select your location...</option>
-              {nzLocations.map((loc) => <option key={loc.value} value={loc.value}>{loc.label}</option>)}
-            </select>
-            <input type="text" value={culturalConnection} onChange={(e) => setCulturalConnection(e.target.value)} placeholder="Share your cultural background or connections (optional)" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem' }} />
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Full Name *</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', outline: 'none' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Email Address *</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email address" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', outline: 'none' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Location *</label>
+              <select value={location} onChange={(e) => setLocation(e.target.value)} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: 'white', cursor: 'pointer' }}>
+                <option value="">Select your location...</option>
+                {nzLocations.map((loc) => <option key={loc.value} value={loc.value}>{loc.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                Website URL <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>(Recommended for businesses)</span>
+              </label>
+              <input 
+                type="url" 
+                value={websiteUrl} 
+                onChange={(e) => setWebsiteUrl(e.target.value)} 
+                placeholder="https://yourwebsite.com" 
+                style={{ 
+                  width: '100%', 
+                  padding: '0.75rem', 
+                  border: '1px solid #d1d5db', 
+                  borderRadius: '0.5rem', 
+                  fontSize: '1rem',
+                  outline: 'none'
+                }} 
+              />
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                💡 We'll analyze your website to create more authentic, on-brand content
+              </div>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Cultural Connection (Optional)</label>
+              <input type="text" value={culturalConnection} onChange={(e) => setCulturalConnection(e.target.value)} placeholder="Share your cultural background or connections" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', outline: 'none' }} />
+            </div>
           </div>
         </div>
 
