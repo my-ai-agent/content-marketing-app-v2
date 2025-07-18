@@ -125,8 +125,9 @@ const personalPersonaPrompts = {
   }
 }
 
-// Main function to generate enhanced Claude prompt
-export async function generateEnhancedClaudePrompt(userData: UserData): Promise<string> {
+// Main function to generate enhanced Claude prompt (with backward compatibility)
+export async function generateEnhancedClaudePrompt(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<string> {
+  // privacySettings parameter maintained for backward compatibility but not used in new implementation
   let enhancedData: EnhancedPromptData = { ...userData }
 
   // Scrape website if URL is provided and user is business type
@@ -314,10 +315,10 @@ export function generateMockContent(userData: UserData): { [platform: string]: a
 }
 
 // Enhanced content generation with real Claude API (placeholder for integration)
-export async function generateClaudeContent(userData: UserData): Promise<{ [platform: string]: any }> {
+export async function generateClaudeContent(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<{ [platform: string]: any }> {
   try {
     // Generate enhanced prompt with brand context
-    const enhancedPrompt = await generateEnhancedClaudePrompt(userData)
+    const enhancedPrompt = await generateEnhancedClaudePrompt(userData, privacySettings)
     
     console.log('Generated enhanced prompt:', enhancedPrompt)
     
