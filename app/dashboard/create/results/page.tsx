@@ -7,6 +7,20 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+// ADD MISSING TYPESCRIPT INTERFACES
+interface PlatformMockContent {
+  name: string
+  content: {
+    text: string
+    platformTips?: string
+    optimalTiming?: string
+  }
+}
+
+interface MockResult {
+  platforms: PlatformMockContent[]
+}
+
 interface GeneratedContent {
   platform: string
   content: string
@@ -21,84 +35,81 @@ export default function QRDistributionHub() {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Add this IndexedDB helper function before useEffect (around line 23):
-
-const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('PhotoAppDB', 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction('photos', 'readonly')
-      const store = tx.objectStore('photos')
-      const getReq = store.get(key)
-      
-      getReq.onsuccess = () => {
-        db.close()
-        resolve(getReq.result || null)
+  // Helper for IndexedDB image loading
+  const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('PhotoAppDB', 1)
+      req.onerror = () => reject(req.error)
+      req.onsuccess = () => {
+        const db = req.result
+        const tx = db.transaction('photos', 'readonly')
+        const store = tx.objectStore('photos')
+        const getReq = store.get(key)
+        
+        getReq.onsuccess = () => {
+          db.close()
+          resolve(getReq.result || null)
+        }
+        getReq.onerror = () => {
+          db.close()
+          reject(getReq.error)
+        }
       }
-      getReq.onerror = () => {
-        db.close()
-        reject(getReq.error)
-      }
-    }
-  })
-}
-
-// REPLACE lines 26-61 with this corrected loadUserData function:
-
-const loadUserData = async () => {
-  try {
-    // Load data using the ACTUAL localStorage keys from each step
-    const story = localStorage.getItem('userStoryContext') // NOT 'userStory'
-    const audienceData = localStorage.getItem('selectedDemographics') // NOT 'selectedAudience'
-    const interests = localStorage.getItem('selectedInterests') // Correct
-    const platforms = localStorage.getItem('selectedPlatforms') // Correct
-    const formats = localStorage.getItem('selectedFormats') // Correct
-    const profile = localStorage.getItem('userProfile')
-
-    // Load photo from IndexedDB (not localStorage)
-    let photoData = null
-    try {
-      photoData = await getImageFromIndexedDB('selectedPhoto')
-    } catch (photoErr) {
-      console.log('No photo found in IndexedDB, continuing without photo')
-    }
-
-    // Check required data (photo is optional)
-    if (!story || !audienceData || !platforms) {
-      setError('Missing required content data. Please complete all steps.')
-      setIsGenerating(false)
-      return
-    }
-
-    // Parse JSON data properly
-    const parsedProfile = profile ? JSON.parse(profile) : {}
-    const parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
-    const parsedInterests = interests ? JSON.parse(interests) : ['cultural']
-    const parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
-    const parsedFormats = formats ? JSON.parse(formats) : ['social-post']
-
-    const userData: UserData = {
-      photo: photoData ? URL.createObjectURL(photoData) : 'No photo provided', // Convert Blob to data URL
-      story,
-      persona: parsedProfile.profile?.role || 'cultural',
-      audience: parsedAudience[0] || 'millennials', // Take first item from array
-      interests: parsedInterests[0] || 'cultural', // Take first item from array
-      platforms: parsedPlatforms,
-      formats: parsedFormats
-    }
-
-    console.log('Loaded user data:', userData) // Debug log
-    setUserData(userData)
-    generateContent(userData)
-  } catch (err) {
-    console.error('Error loading user data:', err)
-    setError('Failed to load your content data.')
-    setIsGenerating(false)
+    })
   }
-}
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        // Load data using the ACTUAL localStorage keys from each step
+        const story = localStorage.getItem('userStoryContext') // NOT 'userStory'
+        const audienceData = localStorage.getItem('selectedDemographics') // NOT 'selectedAudience'
+        const interests = localStorage.getItem('selectedInterests') // Correct
+        const platforms = localStorage.getItem('selectedPlatforms') // Correct
+        const formats = localStorage.getItem('selectedFormats') // Correct
+        const profile = localStorage.getItem('userProfile')
+
+        // Load photo from IndexedDB (not localStorage)
+        let photoData: Blob | null = null
+        try {
+          photoData = await getImageFromIndexedDB('selectedPhoto')
+        } catch (photoErr) {
+          console.log('No photo found in IndexedDB, continuing without photo')
+        }
+
+        // Check required data (photo is optional)
+        if (!story || !audienceData || !platforms) {
+          setError('Missing required content data. Please complete all steps.')
+          setIsGenerating(false)
+          return
+        }
+
+        // Parse JSON data properly
+        const parsedProfile = profile ? JSON.parse(profile) : {}
+        const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
+        const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
+        const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
+        const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+
+        const userData: UserData = {
+          photo: photoData ? URL.createObjectURL(photoData) : undefined, // Convert Blob to data URL
+          story,
+          persona: parsedProfile.profile?.role || 'cultural',
+          audience: parsedAudience[0] || 'millennials', // Take first item from array
+          interests: parsedInterests[0] || 'cultural', // Take first item from array
+          platforms: parsedPlatforms,
+          formats: parsedFormats
+        }
+
+        console.log('Loaded user data:', userData) // Debug log
+        setUserData(userData)
+        generateContent(userData)
+      } catch (err) {
+        console.error('Error loading user data:', err)
+        setError('Failed to load your content data.')
+        setIsGenerating(false)
+      }
+    }
     loadUserData()
   }, [])
 
@@ -107,8 +118,8 @@ const loadUserData = async () => {
       setIsGenerating(true)
       
       // Generate Claude prompt with proper privacy settings
-      const prompt = generateClaudePrompt(userData, defaultPrivacySettings)
-      console.log('Generated prompt:', prompt)
+      await generateClaudePrompt(userData, defaultPrivacySettings)
+      console.log('Generated prompt for user data')
 
       // Use your existing generateMockContent function
       const mockContent = await mockGenerateContentWrapper(userData)
@@ -126,13 +137,14 @@ const loadUserData = async () => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000))
 
-    // Use your existing generateMockContent function
-    const mockResult = generateMockContent(userData)
+    // Use your existing generateMockContent function with proper typing
+    const mockResult = generateMockContent(userData) as MockResult
     
     const platforms = userData.platforms || ['instagram']
     
-    return platforms.map(platform => {
-      const platformContent = mockResult.platforms.find(p => p.name.toLowerCase() === platform.toLowerCase())
+    return platforms.map((platform: string) => {
+      // FIX: Add explicit typing for the callback parameter
+      const platformContent = mockResult.platforms.find((p: PlatformMockContent) => p.name.toLowerCase() === platform.toLowerCase())
       
       return {
         platform: platform.charAt(0).toUpperCase() + platform.slice(1),
@@ -283,83 +295,20 @@ const loadUserData = async () => {
             gap: '0.5rem',
             marginBottom: '1.5rem'
           }}>
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>1</div>
-            
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>2</div>
-            
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>3</div>
-            
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>4</div>
-            
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>5</div>
-
-            <div style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.875rem',
-              fontWeight: '600'
-            }}>6</div>
+            {[1, 2, 3, 4, 5, 6].map((step) => (
+              <div key={step} style={{
+                width: '2rem',
+                height: '2rem',
+                borderRadius: '50%',
+                backgroundColor: '#10b981',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.875rem',
+                fontWeight: '600'
+              }}>{step}</div>
+            ))}
           </div>
 
           {/* Header Buttons */}
