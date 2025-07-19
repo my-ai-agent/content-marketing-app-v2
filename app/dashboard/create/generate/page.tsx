@@ -7,6 +7,19 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+interface PlatformMockContent {
+  name: string
+  content: {
+    text: string
+    platformTips?: string
+    optimalTiming?: string
+  }
+}
+
+interface MockResult {
+  platforms: PlatformMockContent[]
+}
+
 interface GeneratedContent {
   platform: string
   content: string
@@ -21,100 +34,92 @@ export default function QRDistributionHub() {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Load user data from localStorage
-    // Add this IndexedDB helper function before useEffect (around line 23):
-
-const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('PhotoAppDB', 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction('photos', 'readonly')
-      const store = tx.objectStore('photos')
-      const getReq = store.get(key)
-      
-      getReq.onsuccess = () => {
-        db.close()
-        resolve(getReq.result || null)
+  // Helper for IndexedDB image loading
+  const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('PhotoAppDB', 1)
+      req.onerror = () => reject(req.error)
+      req.onsuccess = () => {
+        const db = req.result
+        const tx = db.transaction('photos', 'readonly')
+        const store = tx.objectStore('photos')
+        const getReq = store.get(key)
+        getReq.onsuccess = () => {
+          db.close()
+          resolve(getReq.result || null)
+        }
+        getReq.onerror = () => {
+          db.close()
+          reject(getReq.error)
+        }
       }
-      getReq.onerror = () => {
-        db.close()
-        reject(getReq.error)
-      }
-    }
-  })
-}
-
-// REPLACE lines 26-61 with this corrected loadUserData function:
-
-const loadUserData = async () => {
-  try {
-    // Load data using the ACTUAL localStorage keys from each step
-    const story = localStorage.getItem('userStoryContext') // NOT 'userStory'
-    const audienceData = localStorage.getItem('selectedDemographics') // NOT 'selectedAudience'
-    const interests = localStorage.getItem('selectedInterests') // Correct
-    const platforms = localStorage.getItem('selectedPlatforms') // Correct
-    const formats = localStorage.getItem('selectedFormats') // Correct
-    const profile = localStorage.getItem('userProfile')
-
-    // Load photo from IndexedDB (not localStorage)
-    let photoData = null
-    try {
-      photoData = await getImageFromIndexedDB('selectedPhoto')
-    } catch (photoErr) {
-      console.log('No photo found in IndexedDB, continuing without photo')
-    }
-
-    // Check required data (photo is optional)
-    if (!story || !audienceData || !platforms) {
-      setError('Missing required content data. Please complete all steps.')
-      setIsGenerating(false)
-      return
-    }
-
-    // Parse JSON data properly
-    const parsedProfile = profile ? JSON.parse(profile) : {}
-    const parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
-    const parsedInterests = interests ? JSON.parse(interests) : ['cultural']
-    const parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
-    const parsedFormats = formats ? JSON.parse(formats) : ['social-post']
-
-    const userData: UserData = {
-      photo: photoData ? URL.createObjectURL(photoData) : 'No photo provided', // Convert Blob to data URL
-      story,
-      persona: parsedProfile.profile?.role || 'cultural',
-      audience: parsedAudience[0] || 'millennials', // Take first item from array
-      interests: parsedInterests[0] || 'cultural', // Take first item from array
-      platforms: parsedPlatforms,
-      formats: parsedFormats
-    }
-
-    console.log('Loaded user data:', userData) // Debug log
-    setUserData(userData)
-    generateContent(userData)
-  } catch (err) {
-    console.error('Error loading user data:', err)
-    setError('Failed to load your content data.')
-    setIsGenerating(false)
+    })
   }
-}
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        // Load data using the ACTUAL localStorage keys from each step
+        const story = localStorage.getItem('userStoryContext') // NOT 'userStory'
+        const audienceData = localStorage.getItem('selectedDemographics') // NOT 'selectedAudience'
+        const interests = localStorage.getItem('selectedInterests') // Correct
+        const platforms = localStorage.getItem('selectedPlatforms') // Correct
+        const formats = localStorage.getItem('selectedFormats') // Correct
+        const profile = localStorage.getItem('userProfile')
+
+        // Load photo from IndexedDB (not localStorage)
+        let photoData: Blob | null = null
+        try {
+          photoData = await getImageFromIndexedDB('selectedPhoto')
+        } catch (photoErr) {
+          console.log('No photo found in IndexedDB, continuing without photo')
+        }
+
+        // Check required data (photo is optional)
+        if (!story || !audienceData || !platforms) {
+          setError('Missing required content data. Please complete all steps.')
+          setIsGenerating(false)
+          return
+        }
+
+        // Parse JSON data properly
+        const parsedProfile = profile ? JSON.parse(profile) : {}
+        const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
+        const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
+        const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
+        const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+
+        const userData: UserData = {
+          photo: photoData ? URL.createObjectURL(photoData) : undefined, // Convert Blob to data URL, photo is optional
+          story,
+          persona: parsedProfile.profile?.role || 'cultural',
+          audience: parsedAudience[0] || 'millennials', // Take first item from array
+          interests: parsedInterests[0] || 'cultural', // Take first item from array
+          platforms: parsedPlatforms,
+          formats: parsedFormats
+        }
+
+        console.log('Loaded user data:', userData) // Debug log
+        setUserData(userData)
+        generateContent(userData)
+      } catch (err) {
+        console.error('Error loading user data:', err)
+        setError('Failed to load your content data.')
+        setIsGenerating(false)
+      }
+    }
     loadUserData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const generateContent = async (userData: UserData) => {
     try {
       setIsGenerating(true)
-      
       // Generate Claude prompt with proper privacy settings
-      const prompt = generateClaudePrompt(userData, defaultPrivacySettings)
-      console.log('Generated prompt:', prompt)
-
+      await generateClaudePrompt(userData, defaultPrivacySettings)
       // Use your existing generateMockContent function
       const mockContent = await mockGenerateContentWrapper(userData)
       setGeneratedContent(mockContent)
-      
       setIsGenerating(false)
     } catch (err) {
       console.error('Content generation error:', err)
@@ -126,20 +131,21 @@ const loadUserData = async () => {
   const mockGenerateContentWrapper = async (userData: UserData): Promise<GeneratedContent[]> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000))
-
     // Use your existing generateMockContent function
-    const mockResult = generateMockContent(userData)
-    
+    const mockResult = generateMockContent(userData) as MockResult
     const platforms = userData.platforms || ['instagram']
-    
-    return platforms.map(platform => {
-      const platformContent = mockResult.platforms.find(p => p.name.toLowerCase() === platform.toLowerCase())
-      
+    return platforms.map((platform: string) => {
+      const platformContent = mockResult.platforms.find(
+        (p: PlatformMockContent) => p.name.toLowerCase() === platform.toLowerCase()
+      )
       return {
         platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-        content: platformContent?.content.text || `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+        content: platformContent?.content.text ||
+          `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
         qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-        tips: platformContent?.content.platformTips ? [platformContent.content.platformTips] : getPlatformTips(platform),
+        tips: platformContent?.content.platformTips
+          ? [platformContent.content.platformTips]
+          : getPlatformTips(platform),
         optimalTime: platformContent?.content.optimalTiming || getOptimalPostingTime(platform)
       }
     })
@@ -148,7 +154,6 @@ const loadUserData = async () => {
   const getPlatformOptimisedContent = (platform: string, userData: UserData) => {
     const audience = userData.audience || 'cultural-explorer'
     const baseContent = userData.story || 'Incredible cultural experience'
-    
     switch (platform) {
       case 'instagram':
         return `Experience the authentic beauty of this moment. Perfect for ${audience} seeking meaningful cultural connections. 📸✨`
