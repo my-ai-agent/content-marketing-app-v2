@@ -580,8 +580,8 @@ function generateOverallBrandProfile(data: MultiPlatformBrandData): BrandProfile
   }
 
   // Remove duplicates
-  profile.primaryPersonality = [...new Set(profile.primaryPersonality)]
-  profile.coreThemes = [...new Set(profile.coreThemes)]
+  profile.primaryPersonality = Array.from(new Set(profile.primaryPersonality))
+  profile.coreThemes = Array.from(new Set(profile.coreThemes))
 
   return profile
 }
