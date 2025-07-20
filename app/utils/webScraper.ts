@@ -497,8 +497,9 @@ function analyzeConsistency(data: MultiPlatformBrandData): ConsistencyAnalysis {
 
   // Analyze brand voice consistency
   const brandVoices = platforms
-    .filter(p => 'brandVoice' in p && p.success)
-    .map(p => (p as ScrapedBrandData).brandVoice)
+    .filter((p): p is ScrapedBrandData => p != null && 'brandVoice' in p && p.success)
+    .map(p => p.brandVoice)
+    .filter((voice): voice is NonNullable<typeof voice> => voice != null)
 
   if (brandVoices.length > 1) {
     const uniqueVoices = new Set(brandVoices)
