@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { generateMockContent, UserData } from '../../../utils/claudePrompt'
+import { generateMockContent, UserData } from '@/app/utils/claudePrompt'
 
 export default function GeneratePage() {
   const router = useRouter()
