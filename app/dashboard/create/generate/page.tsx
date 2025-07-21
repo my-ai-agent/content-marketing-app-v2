@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { generateclaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '../../../utils/claudePrompt'
+import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '../../../utils/claudePrompt'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -116,7 +116,7 @@ export default function QRDistributionHub() {
     try {
       setIsGenerating(true)
       // Generate Claude prompt with proper privacy settings
-      await generateclaudePrompt(userData, defaultPrivacySettings)
+      await generateClaudePrompt(userData, defaultPrivacySettings)
       // Use your existing generateMockContent function
       const mockContent = await mockGenerateContentWrapper(userData)
       setGeneratedContent(mockContent)
