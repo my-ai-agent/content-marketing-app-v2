@@ -1,16 +1,11 @@
 // /app/utils/claudePrompt.ts
-// Enhanced Claude prompt generation with multi-platform web scraping integration
+// Simplified Claude prompt generation - deployment ready
 
+// Import only essential functions to avoid circular dependencies
 import { 
   scrapeWebsiteBasic, 
   generateBrandContext, 
-  ScrapedBrandData,
-  scrapeMultiPlatformBrand,
-  generateMultiPlatformContext,
-  generatePlatformOptimization,
-  addCulturalContext,
-  MultiPlatformBrandData,
-  analyzeBrandPersonality
+  ScrapedBrandData
 } from './webScraper'
 
 export interface UserData {
@@ -33,10 +28,7 @@ export interface UserData {
 
 export interface EnhancedPromptData extends UserData {
   brandContext?: string
-  multiPlatformContext?: string
   scrapedData?: ScrapedBrandData
-  multiPlatformData?: MultiPlatformBrandData
-  platformOptimization?: { [platform: string]: string }
 }
 
 // Privacy settings remain the same
@@ -202,62 +194,24 @@ const personalPersonaPrompts = {
   }
 }
 
-// Main function to generate enhanced Claude prompt with multi-platform intelligence
+// Simplified main function with basic web scraping
 export async function generateEnhancedClaudePrompt(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<string> {
   let enhancedData: EnhancedPromptData = { ...userData }
 
-  // Enhanced multi-platform scraping for business users
-  if (userData.businessType && (userData.websiteUrl || userData.linkedInUrl || userData.facebookUrl || userData.instagramUrl)) {
+  // Basic web scraping for business users with website URL
+  if (userData.businessType && userData.websiteUrl) {
     try {
-      console.log('🔍 Initiating multi-platform brand intelligence scraping...')
+      console.log('🔍 Attempting website scraping...')
       
-      const multiPlatformData = await scrapeMultiPlatformBrand(
-        userData.websiteUrl,
-        userData.linkedInUrl,
-        userData.facebookUrl,
-        userData.instagramUrl
-      )
-      
-      if (multiPlatformData) {
-        // Generate comprehensive multi-platform context
-        enhancedData.multiPlatformContext = generateMultiPlatformContext(multiPlatformData)
-        enhancedData.multiPlatformData = multiPlatformData
-        
-        // Add cultural context for New Zealand businesses
-        if (userData.location) {
-          multiPlatformData.overallBrandProfile = addCulturalContext(
-            multiPlatformData.overallBrandProfile, 
-            userData.location
-          )
-        }
-        
-        // Generate platform-specific optimizations
-        enhancedData.platformOptimization = {}
-        const platforms = userData.platforms || ['instagram', 'facebook', 'linkedin']
-        
-        for (const platform of platforms) {
-          enhancedData.platformOptimization[platform] = generatePlatformOptimization(multiPlatformData, platform)
-        }
-        
-        console.log('✅ Multi-platform brand intelligence successfully generated')
-        console.log(`📊 Brand consistency score: ${multiPlatformData.consistency.crossPlatformScore}%`)
+      const websiteData = await scrapeWebsiteBasic(userData.websiteUrl)
+      if (websiteData.success) {
+        enhancedData.brandContext = generateBrandContext(websiteData)
+        enhancedData.scrapedData = websiteData
+        console.log('✅ Website scraping successful')
       }
     } catch (error) {
-      console.warn('⚠️ Multi-platform scraping error, proceeding with fallback:', error)
-      
-      // Fallback to single website scraping
-      if (userData.websiteUrl) {
-        try {
-          const websiteData = await scrapeWebsiteBasic(userData.websiteUrl)
-          if (websiteData.success) {
-            enhancedData.brandContext = generateBrandContext(websiteData)
-            enhancedData.scrapedData = websiteData
-            console.log('✅ Fallback website scraping successful')
-          }
-        } catch (fallbackError) {
-          console.warn('⚠️ Fallback website scraping also failed:', fallbackError)
-        }
-      }
+      console.warn('⚠️ Website scraping failed, proceeding without brand context:', error)
+      // Continue without scraping - don't break the generation process
     }
   }
 
@@ -272,15 +226,14 @@ export async function generateEnhancedClaudePrompt(userData: UserData, privacySe
   return JSON.stringify(prompts, null, 2)
 }
 
-// Enhanced platform-specific prompt with multi-platform brand intelligence
+// Platform-specific prompt generation
 async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform: string): Promise<string> {
   const platformConfig = platformOptimization[platform as keyof typeof platformOptimization]
   const isBusinessUser = !!data.businessType
-  const hasMultiPlatformData = !!data.multiPlatformData
   
-  let prompt = `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist with multi-platform brand intelligence' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content\n\n`
+  let prompt = `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content\n\n`
 
-  // Enhanced cultural intelligence framework
+  // Cultural intelligence framework
   prompt += `🌿 CULTURAL INTELLIGENCE FRAMEWORK:
 - ALWAYS respect Te Tiriti o Waitangi principles and Māori cultural protocols
 - Use appropriate cultural terminology and iwi acknowledgments for specific locations
@@ -289,13 +242,12 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
 - Include proper place name pronunciations and cultural context
 - Honor kaitiakitanga (environmental guardianship) principles in all content\n\n`
 
-  // Add comprehensive user context
+  // Add user context
   if (data.name) {
     prompt += `👤 CONTENT CREATOR: ${data.name}\n`
   }
   
   if (data.location) {
-    // Enhanced location context with iwi acknowledgment
     const locationContext = getLocationContext(data.location)
     prompt += `📍 LOCATION: ${data.location}${locationContext ? ` (${locationContext})` : ''}\n`
   }
@@ -304,7 +256,7 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
     prompt += `🌱 CULTURAL CONNECTION: ${data.culturalConnection}\n`
   }
 
-  // Enhanced business context with multi-platform intelligence
+  // Business context
   if (isBusinessUser && data.businessType) {
     const businessContext = businessTypePrompts[data.businessType as keyof typeof businessTypePrompts]
     if (businessContext) {
@@ -316,21 +268,13 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
 - Cultural Responsibility: ${businessContext.culturalNote}\n`
     }
 
-    // Add multi-platform brand intelligence if available
-    if (hasMultiPlatformData && data.multiPlatformContext) {
-      prompt += `\n${data.multiPlatformContext}`
-    } else if (data.brandContext) {
-      // Fallback to single-platform brand context
+    // Add brand context if available
+    if (data.brandContext) {
       prompt += `\n${data.brandContext}`
     }
 
-    // Add platform-specific optimization guidance
-    if (data.platformOptimization && data.platformOptimization[platform]) {
-      prompt += `\n${data.platformOptimization[platform]}`
-    }
-
   } else if (data.persona) {
-    // Enhanced personal context
+    // Personal context
     const personaContext = personalPersonaPrompts[data.persona as keyof typeof personalPersonaPrompts]
     if (personaContext) {
       prompt += `\n🎭 PERSONAL CONTEXT:
@@ -340,7 +284,7 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
     }
   }
 
-  // Enhanced platform optimization with multi-platform insights
+  // Platform optimization
   if (platformConfig) {
     prompt += `\n📱 ${platform.toUpperCase()} PLATFORM OPTIMIZATION:
 - Content Style: ${platformConfig.style}
@@ -360,7 +304,7 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
     prompt += `\n- Call to Action: ${platformConfig.callToAction}\n`
   }
 
-  // Enhanced content requirements with cultural intelligence
+  // Content requirements
   prompt += `\n📝 CONTENT REQUIREMENTS:
 - Transform the story into engaging, culturally-intelligent ${platform} content
 - Maintain authentic voice while optimizing for ${platform} algorithms
@@ -370,7 +314,7 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
 - Use New Zealand English spelling and terminology (colour, realise, centre, etc.)
 - Include specific location details with proper Māori place names where appropriate\n`
 
-  // Add demographic and interest targeting
+  // Add targeting info
   if (data.audience) {
     prompt += `\n🎯 PRIMARY TARGET AUDIENCE: ${data.audience}\n`
   }
@@ -379,17 +323,17 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
     prompt += `🎨 AUDIENCE INTERESTS: ${data.interests}\n`
   }
 
-  // Story transformation context
+  // Story context
   if (data.story) {
     prompt += `\n📖 ORIGINAL STORY TO TRANSFORM:\n"${data.story}"\n`
   }
 
-  // Visual context integration
+  // Visual context
   if (data.photo) {
     prompt += `\n📸 VISUAL CONTEXT: Photo(s) provided showing the experience/location - use visual elements to enhance storytelling\n`
   }
 
-  // Final enhanced instructions with brand consistency
+  // Final instructions
   prompt += `\n🎯 FINAL CONTENT GENERATION INSTRUCTIONS:
 - Generate authentic, culturally-intelligent content that resonates with ${platform} users
 - Ensure ALL cultural references respect Māori protocols and traditional knowledge
@@ -399,17 +343,12 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
 - Include relevant hashtags and calls-to-action appropriate for ${platform} culture
 - Use inclusive language that welcomes international visitors while respecting local culture`
 
-  // Add brand consistency requirements for business users with multi-platform data
-  if (isBusinessUser && hasMultiPlatformData) {
-    const consistency = data.multiPlatformData!.consistency.crossPlatformScore
-    prompt += `\n- 🌟 CRITICAL: Maintain ${consistency}% brand consistency with established multi-platform voice and messaging
-- Match the ${data.multiPlatformData!.overallBrandProfile.dominantVoice} brand voice identified across digital touchpoints
-- Align with ${data.multiPlatformData!.overallBrandProfile.recommendedContentStyle} content style`
-  } else if (isBusinessUser && data.scrapedData?.success) {
+  // Add brand consistency if available
+  if (isBusinessUser && data.scrapedData?.success) {
     prompt += `\n- 🌟 CRITICAL: Match the established ${data.scrapedData.brandVoice} brand voice identified from website analysis`
   }
 
-  // Add cultural context specific to location
+  // Add location-specific cultural guidance
   if (data.location && isBusinessUser) {
     const culturalGuidance = getCulturalGuidance(data.location)
     if (culturalGuidance) {
@@ -420,7 +359,7 @@ async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform
   return prompt
 }
 
-// Get location-specific cultural context
+// Helper functions remain the same
 function getLocationContext(location: string): string {
   const locationLower = location.toLowerCase()
   
@@ -439,7 +378,6 @@ function getLocationContext(location: string): string {
   return ''
 }
 
-// Get cultural guidance for specific locations
 function getCulturalGuidance(location: string): string {
   const locationLower = location.toLowerCase()
   
@@ -466,7 +404,7 @@ function getCulturalGuidance(location: string): string {
 - Respect local cultural protocols and traditional knowledge`
 }
 
-// Enhanced mock content generation with multi-platform brand intelligence
+// Simplified mock content generation
 export function generateMockContent(userData: UserData): { [platform: string]: any } {
   const platforms = userData.platforms || ['instagram', 'facebook']
   const mockContent: { [platform: string]: any } = {}
@@ -504,15 +442,13 @@ export function generateMockContent(userData: UserData): { [platform: string]: a
   return mockContent
 }
 
-// Enhanced content generation with real Claude API integration (ready for production)
+// Simplified content generation with error handling
 export async function generateClaudeContent(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<{ [platform: string]: any }> {
   try {
-    console.log('🚀 Generating enhanced Claude content with multi-platform brand intelligence...')
+    console.log('🚀 Generating Claude content with cultural intelligence...')
     
-    // Generate enhanced prompt with multi-platform brand context
     const enhancedPrompt = await generateEnhancedClaudePrompt(userData, privacySettings)
-    
-    console.log('📝 Enhanced prompt generated with cultural intelligence and brand context')
+    console.log('📝 Enhanced prompt generated with cultural intelligence')
     
     // TODO: Replace with actual Claude API call
     // const response = await fetch('/api/claude', {
@@ -522,25 +458,19 @@ export async function generateClaudeContent(userData: UserData, privacySettings?
     // })
     // const result = await response.json()
     
-    // For now, return enhanced mock content with brand intelligence indicators
+    // Return enhanced mock content for now
     const mockContent = generateMockContent(userData)
     
-    // Add multi-platform brand analysis indicators
-    const hasMultiPlatformUrls = !!(userData.websiteUrl || userData.linkedInUrl || userData.facebookUrl || userData.instagramUrl)
-    
-    if (hasMultiPlatformUrls && userData.businessType) {
+    // Add brand intelligence indicators for business users
+    if (userData.websiteUrl && userData.businessType) {
       Object.keys(mockContent).forEach(platform => {
-        mockContent[platform].multiPlatformAnalysis = true
         mockContent[platform].brandIntelligence = {
-          websiteAnalyzed: !!userData.websiteUrl,
-          linkedInAnalyzed: !!userData.linkedInUrl,
-          facebookAnalyzed: !!userData.facebookUrl,
-          instagramAnalyzed: !!userData.instagramUrl,
-          crossPlatformConsistency: '87%',
+          websiteAnalyzed: true,
+          brandVoiceDetected: true,
           culturalIntelligence: 'Enhanced with Te Tiriti o Waitangi principles'
         }
         mockContent[platform].enhancedFeatures = [
-          'Multi-platform brand voice analysis',
+          'Brand voice analysis',
           'Cultural intelligence integration',
           'Platform-specific optimization',
           'Iwi acknowledgment guidance',
@@ -552,17 +482,17 @@ export async function generateClaudeContent(userData: UserData, privacySettings?
     return mockContent
     
   } catch (error) {
-    console.error('❌ Error generating enhanced Claude content:', error)
+    console.error('❌ Error generating Claude content:', error)
     
     // Fallback to regular mock content
     return generateMockContent(userData)
   }
 }
 
-// Function to be called from results page
+// Export functions with consistent naming
 export function generateContentWithBrandContext(userData: UserData) {
   return generateClaudeContent(userData)
 }
 
-// Backward compatibility - export the original function name
+// Backward compatibility
 export const generateClaudePrompt = generateEnhancedClaudePrompt
