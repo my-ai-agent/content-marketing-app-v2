@@ -7,19 +7,6 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-interface PlatformMockContent {
-  name: string
-  content: {
-    text: string
-    platformTips?: string
-    optimalTiming?: string
-  }
-}
-
-interface MockResult {
-  platforms: PlatformMockContent[]
-}
-
 interface GeneratedContent {
   platform: string
   content: string
@@ -82,21 +69,51 @@ export default function QRDistributionHub() {
           return
         }
 
-        // Parse JSON data properly
-        const parsedProfile = profile ? JSON.parse(profile) : {}
-        const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
-        const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
-        const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
-        const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+        // Parse JSON data properly with error handling
+        let parsedProfile = {}
+        let parsedAudience: string[] = ['millennials']
+        let parsedInterests: string[] = ['cultural']
+        let parsedPlatforms: string[] = ['instagram']
+        let parsedFormats: string[] = ['social-post']
+
+        try {
+          parsedProfile = profile ? JSON.parse(profile) : {}
+        } catch (e) {
+          console.warn('Error parsing profile:', e)
+        }
+
+        try {
+          parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
+        } catch (e) {
+          console.warn('Error parsing audience:', e)
+        }
+
+        try {
+          parsedInterests = interests ? JSON.parse(interests) : ['cultural']
+        } catch (e) {
+          console.warn('Error parsing interests:', e)
+        }
+
+        try {
+          parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
+        } catch (e) {
+          console.warn('Error parsing platforms:', e)
+        }
+
+        try {
+          parsedFormats = formats ? JSON.parse(formats) : ['social-post']
+        } catch (e) {
+          console.warn('Error parsing formats:', e)
+        }
 
         const userData: UserData = {
           photo: photoData ? URL.createObjectURL(photoData) : undefined, // Convert Blob to data URL, photo is optional
           story,
-          persona: parsedProfile.profile?.role || 'cultural',
-          audience: parsedAudience[0] || 'millennials', // Take first item from array
-          interests: parsedInterests[0] || 'cultural', // Take first item from array
-          platforms: parsedPlatforms,
-          formats: parsedFormats
+          persona: (parsedProfile as any)?.profile?.role || 'cultural-explorer',
+          audience: Array.isArray(parsedAudience) ? parsedAudience[0] : 'millennials',
+          interests: Array.isArray(parsedInterests) ? parsedInterests[0] : 'cultural',
+          platforms: Array.isArray(parsedPlatforms) ? parsedPlatforms : ['instagram'],
+          formats: Array.isArray(parsedFormats) ? parsedFormats : ['social-post']
         }
 
         console.log('Loaded user data:', userData) // Debug log
@@ -131,22 +148,24 @@ export default function QRDistributionHub() {
   const mockGenerateContentWrapper = async (userData: UserData): Promise<GeneratedContent[]> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000))
-    // Use your existing generateMockContent function
-    const mockResult = generateMockContent(userData) as MockResult
+    
+    // FIXED: Use the correct generateMockContent structure
+    const mockResult = generateMockContent(userData)
     const platforms = userData.platforms || ['instagram']
+    
+    console.log('Mock result structure:', mockResult) // Debug log
+    
     return platforms.map((platform: string) => {
-      const platformContent = mockResult.platforms.find(
-        (p: PlatformMockContent) => p.name.toLowerCase() === platform.toLowerCase()
-      )
+      // FIXED: mockResult is an object with platform keys, not an array
+      const platformContent = mockResult[platform]
+      
       return {
         platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-        content: platformContent?.content.text ||
+        content: platformContent?.content || 
           `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
         qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-        tips: platformContent?.content.platformTips
-          ? [platformContent.content.platformTips]
-          : getPlatformTips(platform),
-        optimalTime: platformContent?.content.optimalTiming || getOptimalPostingTime(platform)
+        tips: platformContent?.tips ? [platformContent.tips] : getPlatformTips(platform),
+        optimalTime: platformContent?.suggestedPostTime || getOptimalPostingTime(platform)
       }
     })
   }
