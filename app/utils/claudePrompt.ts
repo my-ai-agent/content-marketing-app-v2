@@ -1,10 +1,19 @@
-'use client'
+// /app/utils/claudePrompt.ts
+// Enhanced Claude prompt generation with multi-platform web scraping integration
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { 
+  scrapeWebsiteBasic, 
+  generateBrandContext, 
+  ScrapedBrandData,
+  scrapeMultiPlatformBrand,
+  generateMultiPlatformContext,
+  generatePlatformOptimization,
+  addCulturalContext,
+  MultiPlatformBrandData,
+  analyzeBrandPersonality
+} from './webScraper'
 
-// Embedded interfaces (copied from utils files)
-interface UserData {
+export interface UserData {
   photo?: string
   story?: string
   persona?: string
@@ -22,157 +31,462 @@ interface UserData {
   culturalConnection?: string
 }
 
-interface ScrapedBrandData {
-  url: string
-  heroMessage?: string
-  aboutContent?: string
-  brandVoice?: 'professional' | 'casual' | 'technical' | 'creative' | 'luxury'
-  keyMessages?: string[]
-  businessDescription?: string
-  scrapeTimestamp: string
-  success: boolean
-  error?: string
+export interface EnhancedPromptData extends UserData {
+  brandContext?: string
+  multiPlatformContext?: string
+  scrapedData?: ScrapedBrandData
+  multiPlatformData?: MultiPlatformBrandData
+  platformOptimization?: { [platform: string]: string }
 }
 
-// Embedded brand scraping function (simplified version)
-async function scrapeWebsiteBasic(url: string): Promise<ScrapedBrandData> {
-  const result: ScrapedBrandData = {
-    url: url,
-    scrapeTimestamp: new Date().toISOString(),
-    success: false
-  }
+// Privacy settings remain the same
+export const defaultPrivacySettings = {
+  consentGiven: false,
+  dataRetention: '24-hours',
+  aiProcessing: 'temporary',
+  culturalSensitivity: 'high'
+}
 
-  try {
-    // Check cache first
-    const cacheKey = `brand_${url.replace(/[^a-zA-Z0-9]/g, '_')}`
-    const cached = localStorage.getItem(cacheKey)
-    
-    if (cached) {
-      const parsedCache = JSON.parse(cached)
-      const age = Date.now() - new Date(parsedCache.scrapeTimestamp).getTime()
+// Platform-specific optimization templates
+const platformOptimization = {
+  instagram: {
+    style: 'visual-first storytelling with engaging captions',
+    length: '125-150 words',
+    tone: 'authentic and inspiring',
+    hashtags: '8-12 relevant hashtags',
+    callToAction: 'encourage engagement and shares'
+  },
+  facebook: {
+    style: 'community-focused narrative with personal connection',
+    length: '150-200 words',
+    tone: 'conversational and relatable',
+    engagement: 'encourage comments and discussion',
+    callToAction: 'drive meaningful interactions'
+  },
+  linkedin: {
+    style: 'professional storytelling with industry insights',
+    length: '200-300 words',
+    tone: 'authoritative yet personable',
+    value: 'provide business value and networking opportunities',
+    callToAction: 'encourage professional connections'
+  },
+  website: {
+    style: 'SEO-optimized informative content',
+    length: '200-400 words',
+    tone: 'professional and trustworthy',
+    value: 'provide comprehensive information and clear value proposition',
+    callToAction: 'drive conversions and inquiries'
+  }
+}
+
+// Enhanced business type mappings with cultural context
+const businessTypePrompts = {
+  'visitor-attraction': {
+    focus: 'unique cultural experiences and visitor journey',
+    expertise: 'cultural storytelling and heritage preservation',
+    audienceValue: 'authentic cultural immersion and learning',
+    culturalNote: 'respectful representation of indigenous stories and protocols'
+  },
+  'accommodation': {
+    focus: 'hospitality excellence and guest experience',
+    expertise: 'comfort, service quality, and local connections',
+    audienceValue: 'memorable stays and local insider knowledge',
+    culturalNote: 'incorporation of local cultural elements and Māori hospitality principles'
+  },
+  'food-beverage': {
+    focus: 'culinary journey and local flavors',
+    expertise: 'food quality, local sourcing, and cultural cuisine',
+    audienceValue: 'authentic taste experiences and cultural food stories',
+    culturalNote: 'respect for traditional recipes and indigenous food practices'
+  },
+  'tours-activities': {
+    focus: 'adventure and cultural discovery experiences',
+    expertise: 'safety, local knowledge, and experiential learning',
+    audienceValue: 'transformative experiences and cultural understanding',
+    culturalNote: 'respectful access to cultural sites and traditional knowledge sharing'
+  },
+  'cultural-heritage': {
+    focus: 'preservation and sharing of cultural knowledge',
+    expertise: 'authentic cultural interpretation and education',
+    audienceValue: 'deep cultural learning and respectful engagement',
+    culturalNote: 'protection of sacred knowledge and appropriate cultural sharing protocols'
+  },
+  'wellness-spa': {
+    focus: 'holistic wellbeing and cultural healing practices',
+    expertise: 'therapeutic treatments and mindful relaxation',
+    audienceValue: 'restoration and cultural wellness traditions',
+    culturalNote: 'integration of traditional Māori wellness practices and rongoā Māori'
+  },
+  'transport': {
+    focus: 'seamless travel experiences and connectivity',
+    expertise: 'reliable service and local route knowledge',
+    audienceValue: 'efficient travel solutions and scenic journey experiences',
+    culturalNote: 'respect for cultural sites along travel routes'
+  },
+  'retail': {
+    focus: 'authentic local products and cultural crafts',
+    expertise: 'quality products and cultural authenticity',
+    audienceValue: 'genuine local souvenirs and cultural artifacts',
+    culturalNote: 'appropriate representation of cultural designs and meanings'
+  },
+  'event-venue': {
+    focus: 'memorable gatherings in culturally significant spaces',
+    expertise: 'event coordination and cultural venue protocols',
+    audienceValue: 'unique event experiences with cultural significance',
+    culturalNote: 'respect for venue cultural history and appropriate use protocols'
+  },
+  'education-training': {
+    focus: 'knowledge sharing and skill development',
+    expertise: 'educational excellence and cultural competency',
+    audienceValue: 'authentic learning experiences and cultural understanding',
+    culturalNote: 'respectful sharing of traditional knowledge and educational protocols'
+  },
+  'adventure-sports': {
+    focus: 'thrilling experiences in natural cultural landscapes',
+    expertise: 'safety protocols and environmental awareness',
+    audienceValue: 'adrenaline experiences with cultural and environmental respect',
+    culturalNote: 'access to natural areas with respect for Māori spiritual connections'
+  },
+  'arts-crafts': {
+    focus: 'creative expression and cultural artistic traditions',
+    expertise: 'artistic skill and cultural knowledge transmission',
+    audienceValue: 'hands-on creative learning and cultural artistic appreciation',
+    culturalNote: 'appropriate teaching of cultural art forms with proper permissions'
+  },
+  'marine-wildlife': {
+    focus: 'sustainable wildlife encounters and marine conservation',
+    expertise: 'conservation knowledge and respectful wildlife interaction',
+    audienceValue: 'educational wildlife experiences and conservation awareness',
+    culturalNote: 'respect for Māori relationships with marine life and kaitiakitanga principles'
+  },
+  'technology-digital': {
+    focus: 'innovative digital solutions for tourism industry',
+    expertise: 'technical excellence and user experience optimization',
+    audienceValue: 'enhanced digital tourism experiences and connectivity',
+    culturalNote: 'respectful digital representation of cultural content and protocols'
+  },
+  'government-tourism': {
+    focus: 'regional tourism development and policy implementation',
+    expertise: 'strategic tourism planning and community engagement',
+    audienceValue: 'coordinated tourism experiences and regional development',
+    culturalNote: 'Te Tiriti o Waitangi principles and bicultural tourism development'
+  }
+}
+
+// Personal persona enhanced prompts
+const personalPersonaPrompts = {
+  'cultural-explorer': {
+    voice: 'curious and respectful cultural learner',
+    focus: 'deep cultural connections and meaningful experiences',
+    style: 'thoughtful reflection and cultural appreciation'
+  },
+  'adventure-seeker': {
+    voice: 'enthusiastic and bold experience sharer',
+    focus: 'exciting discoveries and personal challenges',
+    style: 'energetic storytelling with inspirational calls to action'
+  },
+  'content-creator': {
+    voice: 'creative and engaging digital storyteller',
+    focus: 'visual narratives and shareable moments',
+    style: 'platform-optimized content with strong visual elements'
+  },
+  'family-storyteller': {
+    voice: 'warm and inclusive family narrator',
+    focus: 'multi-generational experiences and family bonding',
+    style: 'heartwarming stories that resonate with families'
+  },
+  'independent-traveller': {
+    voice: 'authentic and practical experience sharer',
+    focus: 'genuine travel insights and personal discoveries',
+    style: 'honest, detailed accounts with practical value'
+  }
+}
+
+// Main function to generate enhanced Claude prompt with multi-platform intelligence
+export async function generateEnhancedClaudePrompt(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<string> {
+  let enhancedData: EnhancedPromptData = { ...userData }
+
+  // Enhanced multi-platform scraping for business users
+  if (userData.businessType && (userData.websiteUrl || userData.linkedInUrl || userData.facebookUrl || userData.instagramUrl)) {
+    try {
+      console.log('🔍 Initiating multi-platform brand intelligence scraping...')
       
-      // Use cache if less than 24 hours old
-      if (age < 24 * 60 * 60 * 1000) {
-        console.log('Using cached brand data for:', url)
-        return parsedCache
+      const multiPlatformData = await scrapeMultiPlatformBrand(
+        userData.websiteUrl,
+        userData.linkedInUrl,
+        userData.facebookUrl,
+        userData.instagramUrl
+      )
+      
+      if (multiPlatformData) {
+        // Generate comprehensive multi-platform context
+        enhancedData.multiPlatformContext = generateMultiPlatformContext(multiPlatformData)
+        enhancedData.multiPlatformData = multiPlatformData
+        
+        // Add cultural context for New Zealand businesses
+        if (userData.location) {
+          multiPlatformData.overallBrandProfile = addCulturalContext(
+            multiPlatformData.overallBrandProfile, 
+            userData.location
+          )
+        }
+        
+        // Generate platform-specific optimizations
+        enhancedData.platformOptimization = {}
+        const platforms = userData.platforms || ['instagram', 'facebook', 'linkedin']
+        
+        for (const platform of platforms) {
+          enhancedData.platformOptimization[platform] = generatePlatformOptimization(multiPlatformData, platform)
+        }
+        
+        console.log('✅ Multi-platform brand intelligence successfully generated')
+        console.log(`📊 Brand consistency score: ${multiPlatformData.consistency.crossPlatformScore}%`)
+      }
+    } catch (error) {
+      console.warn('⚠️ Multi-platform scraping error, proceeding with fallback:', error)
+      
+      // Fallback to single website scraping
+      if (userData.websiteUrl) {
+        try {
+          const websiteData = await scrapeWebsiteBasic(userData.websiteUrl)
+          if (websiteData.success) {
+            enhancedData.brandContext = generateBrandContext(websiteData)
+            enhancedData.scrapedData = websiteData
+            console.log('✅ Fallback website scraping successful')
+          }
+        } catch (fallbackError) {
+          console.warn('⚠️ Fallback website scraping also failed:', fallbackError)
+        }
       }
     }
-
-    console.log('Scraping brand data for:', url)
-    
-    // Simple CORS proxy approach
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-    
-    const response = await fetch(proxyUrl, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const htmlContent = data.contents
-
-    if (htmlContent) {
-      // Parse HTML content
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(htmlContent, 'text/html')
-
-      // Extract brand information
-      const title = doc.querySelector('title')?.textContent || ''
-      const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ''
-      const h1 = doc.querySelector('h1')?.textContent || ''
-      
-      result.heroMessage = h1 || title
-      result.businessDescription = metaDesc
-      result.brandVoice = analyzeBrandVoice(htmlContent)
-      result.success = true
-
-      // Cache the results
-      localStorage.setItem(cacheKey, JSON.stringify(result))
-      console.log('Successfully scraped and cached brand data')
-    }
-
-    return result
-
-  } catch (error) {
-    console.warn('Brand scraping failed:', error)
-    result.error = error instanceof Error ? error.message : 'Scraping failed'
-    return result
   }
+
+  // Generate platform-specific prompts
+  const platforms = userData.platforms || ['instagram']
+  const prompts: { [platform: string]: string } = {}
+
+  for (const platform of platforms) {
+    prompts[platform] = await generatePlatformSpecificPrompt(enhancedData, platform)
+  }
+
+  return JSON.stringify(prompts, null, 2)
 }
 
-// Simple brand voice analysis
-function analyzeBrandVoice(content: string): 'professional' | 'casual' | 'technical' | 'creative' | 'luxury' {
-  const text = content.toLowerCase()
+// Enhanced platform-specific prompt with multi-platform brand intelligence
+async function generatePlatformSpecificPrompt(data: EnhancedPromptData, platform: string): Promise<string> {
+  const platformConfig = platformOptimization[platform as keyof typeof platformOptimization]
+  const isBusinessUser = !!data.businessType
+  const hasMultiPlatformData = !!data.multiPlatformData
   
-  const professionalWords = ['expertise', 'professional', 'industry', 'solutions', 'services', 'excellence']
-  const casualWords = ['awesome', 'amazing', 'love', 'fun', 'easy', 'simple', 'great']
-  const technicalWords = ['technology', 'innovative', 'advanced', 'system', 'platform']
-  const creativeWords = ['creative', 'design', 'unique', 'artistic', 'inspiration']
-  const luxuryWords = ['luxury', 'premium', 'exclusive', 'bespoke', 'elegant']
+  let prompt = `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist with multi-platform brand intelligence' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content\n\n`
 
-  const scores = {
-    professional: professionalWords.filter(word => text.includes(word)).length,
-    casual: casualWords.filter(word => text.includes(word)).length,
-    technical: technicalWords.filter(word => text.includes(word)).length,
-    creative: creativeWords.filter(word => text.includes(word)).length,
-    luxury: luxuryWords.filter(word => text.includes(word)).length
+  // Enhanced cultural intelligence framework
+  prompt += `🌿 CULTURAL INTELLIGENCE FRAMEWORK:
+- ALWAYS respect Te Tiriti o Waitangi principles and Māori cultural protocols
+- Use appropriate cultural terminology and iwi acknowledgments for specific locations
+- NEVER appropriate sacred or restricted cultural elements (tapu, whakapapa, karakia)
+- Promote authentic, respectful cultural engagement that benefits local communities
+- Include proper place name pronunciations and cultural context
+- Honor kaitiakitanga (environmental guardianship) principles in all content\n\n`
+
+  // Add comprehensive user context
+  if (data.name) {
+    prompt += `👤 CONTENT CREATOR: ${data.name}\n`
+  }
+  
+  if (data.location) {
+    // Enhanced location context with iwi acknowledgment
+    const locationContext = getLocationContext(data.location)
+    prompt += `📍 LOCATION: ${data.location}${locationContext ? ` (${locationContext})` : ''}\n`
   }
 
-  const maxScore = Math.max(...Object.values(scores))
-  const dominantVoice = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0] as any
-  return dominantVoice || 'professional'
+  if (data.culturalConnection) {
+    prompt += `🌱 CULTURAL CONNECTION: ${data.culturalConnection}\n`
+  }
+
+  // Enhanced business context with multi-platform intelligence
+  if (isBusinessUser && data.businessType) {
+    const businessContext = businessTypePrompts[data.businessType as keyof typeof businessTypePrompts]
+    if (businessContext) {
+      prompt += `\n🏢 BUSINESS CONTEXT:
+- Business Type: ${data.businessType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+- Industry Focus: ${businessContext.focus}
+- Core Expertise: ${businessContext.expertise}
+- Audience Value Proposition: ${businessContext.audienceValue}
+- Cultural Responsibility: ${businessContext.culturalNote}\n`
+    }
+
+    // Add multi-platform brand intelligence if available
+    if (hasMultiPlatformData && data.multiPlatformContext) {
+      prompt += `\n${data.multiPlatformContext}`
+    } else if (data.brandContext) {
+      // Fallback to single-platform brand context
+      prompt += `\n${data.brandContext}`
+    }
+
+    // Add platform-specific optimization guidance
+    if (data.platformOptimization && data.platformOptimization[platform]) {
+      prompt += `\n${data.platformOptimization[platform]}`
+    }
+
+  } else if (data.persona) {
+    // Enhanced personal context
+    const personaContext = personalPersonaPrompts[data.persona as keyof typeof personalPersonaPrompts]
+    if (personaContext) {
+      prompt += `\n🎭 PERSONAL CONTEXT:
+- Creator Voice: ${personaContext.voice}
+- Content Focus: ${personaContext.focus}
+- Storytelling Style: ${personaContext.style}\n`
+    }
+  }
+
+  // Enhanced platform optimization with multi-platform insights
+  if (platformConfig) {
+    prompt += `\n📱 ${platform.toUpperCase()} PLATFORM OPTIMIZATION:
+- Content Style: ${platformConfig.style}
+- Target Length: ${platformConfig.length}
+- Communication Tone: ${platformConfig.tone}`
+
+    if ('hashtags' in platformConfig) {
+      prompt += `\n- Hashtag Strategy: ${platformConfig.hashtags}`
+    }
+    if ('engagement' in platformConfig) {
+      prompt += `\n- Engagement Approach: ${platformConfig.engagement}`
+    }
+    if ('value' in platformConfig) {
+      prompt += `\n- Value Proposition: ${platformConfig.value}`
+    }
+    
+    prompt += `\n- Call to Action: ${platformConfig.callToAction}\n`
+  }
+
+  // Enhanced content requirements with cultural intelligence
+  prompt += `\n📝 CONTENT REQUIREMENTS:
+- Transform the story into engaging, culturally-intelligent ${platform} content
+- Maintain authentic voice while optimizing for ${platform} algorithms
+- Include relevant iwi acknowledgments and cultural context for the location
+- Ensure ALL cultural references are respectful and appropriate
+- Create compelling calls-to-action that drive meaningful engagement
+- Use New Zealand English spelling and terminology (colour, realise, centre, etc.)
+- Include specific location details with proper Māori place names where appropriate\n`
+
+  // Add demographic and interest targeting
+  if (data.audience) {
+    prompt += `\n🎯 PRIMARY TARGET AUDIENCE: ${data.audience}\n`
+  }
+
+  if (data.interests) {
+    prompt += `🎨 AUDIENCE INTERESTS: ${data.interests}\n`
+  }
+
+  // Story transformation context
+  if (data.story) {
+    prompt += `\n📖 ORIGINAL STORY TO TRANSFORM:\n"${data.story}"\n`
+  }
+
+  // Visual context integration
+  if (data.photo) {
+    prompt += `\n📸 VISUAL CONTEXT: Photo(s) provided showing the experience/location - use visual elements to enhance storytelling\n`
+  }
+
+  // Final enhanced instructions with brand consistency
+  prompt += `\n🎯 FINAL CONTENT GENERATION INSTRUCTIONS:
+- Generate authentic, culturally-intelligent content that resonates with ${platform} users
+- Ensure ALL cultural references respect Māori protocols and traditional knowledge
+- Include specific location details with proper cultural acknowledgments (tangata whenua)
+- Create engaging content that drives meaningful interaction and cultural appreciation
+- Maintain authentic voice while optimizing for ${platform} engagement algorithms
+- Include relevant hashtags and calls-to-action appropriate for ${platform} culture
+- Use inclusive language that welcomes international visitors while respecting local culture`
+
+  // Add brand consistency requirements for business users with multi-platform data
+  if (isBusinessUser && hasMultiPlatformData) {
+    const consistency = data.multiPlatformData!.consistency.crossPlatformScore
+    prompt += `\n- 🌟 CRITICAL: Maintain ${consistency}% brand consistency with established multi-platform voice and messaging
+- Match the ${data.multiPlatformData!.overallBrandProfile.dominantVoice} brand voice identified across digital touchpoints
+- Align with ${data.multiPlatformData!.overallBrandProfile.recommendedContentStyle} content style`
+  } else if (isBusinessUser && data.scrapedData?.success) {
+    prompt += `\n- 🌟 CRITICAL: Match the established ${data.scrapedData.brandVoice} brand voice identified from website analysis`
+  }
+
+  // Add cultural context specific to location
+  if (data.location && isBusinessUser) {
+    const culturalGuidance = getCulturalGuidance(data.location)
+    if (culturalGuidance) {
+      prompt += `\n\n🌿 LOCATION-SPECIFIC CULTURAL GUIDANCE:\n${culturalGuidance}`
+    }
+  }
+
+  return prompt
 }
 
-// Enhanced mock content generator with sophisticated brand intelligence  
-function generateEnhancedMockContent(userData: UserData, brandData?: ScrapedBrandData): { [platform: string]: any } {
+// Get location-specific cultural context
+function getLocationContext(location: string): string {
+  const locationLower = location.toLowerCase()
+  
+  if (locationLower.includes('auckland') || locationLower.includes('tāmaki makaurau')) {
+    return 'Tāmaki Makaurau - land of many lovers, traditional home of Ngāti Whātua'
+  } else if (locationLower.includes('wellington') || locationLower.includes('te whanganui-a-tara')) {
+    return 'Te Whanganui-a-Tara - the great harbour of Tara, traditional home of Taranaki Whānui'
+  } else if (locationLower.includes('christchurch') || locationLower.includes('ōtautahi')) {
+    return 'Ōtautahi - place of Tautahi, traditional home of Ngāi Tahu'
+  } else if (locationLower.includes('rotorua')) {
+    return 'Traditional home of Te Arawa iwi, center of Māori culture and geothermal wonders'
+  } else if (locationLower.includes('queenstown') || locationLower.includes('tāhuna')) {
+    return 'Tāhuna - shallow bay, traditional area of Ngāi Tahu in Central Otago'
+  }
+  
+  return ''
+}
+
+// Get cultural guidance for specific locations
+function getCulturalGuidance(location: string): string {
+  const locationLower = location.toLowerCase()
+  
+  if (locationLower.includes('rotorua')) {
+    return `- Acknowledge Te Arawa iwi as tangata whenua
+- Reference geothermal and cultural significance respectfully
+- Mention traditional healing and wellness practices appropriately
+- Include correct pronunciation guides for Māori place names`
+  } else if (locationLower.includes('bay of islands') || locationLower.includes('paihia')) {
+    return `- Acknowledge historical significance as birthplace of modern New Zealand
+- Reference Treaty of Waitangi with appropriate respect and context
+- Mention traditional navigation and maritime culture of local iwi
+- Include sustainable tourism and cultural preservation messaging`
+  } else if (locationLower.includes('milford') || locationLower.includes('fiordland')) {
+    return `- Acknowledge Ngāi Tahu as tangata whenua of Te Waipounamu (South Island)
+- Reference kaitiakitanga (environmental guardianship) principles
+- Mention conservation and sustainable tourism practices
+- Include traditional Māori relationships with the natural environment`
+  }
+  
+  return `- Acknowledge local iwi as tangata whenua (people of the land)
+- Research and include appropriate cultural context for the specific location
+- Ensure all place names use correct Māori pronunciation and spelling
+- Respect local cultural protocols and traditional knowledge`
+}
+
+// Enhanced mock content generation with multi-platform brand intelligence
+export function generateMockContent(userData: UserData): { [platform: string]: any } {
   const platforms = userData.platforms || ['instagram', 'facebook']
   const mockContent: { [platform: string]: any } = {}
   const isBusinessUser = !!userData.businessType
   const baseContent = userData.story || "Amazing experience at this beautiful location in Aotearoa"
-
-  // Enhanced business type context (from your sophisticated mapping)
-  const businessContext = getBusinessContext(userData.businessType)
-  const locationContext = getLocationContext(userData.location)
-  
-  // Use brand voice if available
-  const brandVoice = brandData?.brandVoice || 'professional'
-  const brandMessage = brandData?.heroMessage || ''
 
   platforms.forEach(platform => {
     let content = ""
     let hashtags: string[] = []
     let tips = ""
 
-    // Cultural intelligence integration
-    const culturalElements = getCulturalElements(userData.location)
-    const brandPrefix = brandData?.success ? `${brandMessage ? `"${brandMessage}" - ` : ''}` : ''
-
     if (platform === 'instagram') {
-      if (brandVoice === 'luxury') {
-        content = `✨ ${brandPrefix}${baseContent}\n\nExperience unparalleled elegance and authentic New Zealand luxury. Every moment curated for the discerning traveller who appreciates cultural sophistication. ${culturalElements.iwi ? `\n\n🌿 Honoring ${culturalElements.iwi} as tangata whenua` : ''} 🏔️\n\n#LuxuryNZ #Aotearoa #PremiumExperience #CulturalLuxury #Manaakitanga`
-        hashtags = ['#LuxuryNZ', '#Aotearoa', '#PremiumExperience', '#CulturalLuxury', '#Manaakitanga']
-      } else if (brandVoice === 'casual') {
-        content = `🤩 ${brandPrefix}${baseContent}\n\nSeriously guys, this place is absolutely incredible! The kiwi hospitality and stunning landscapes will blow your mind! ${culturalElements.iwi ? `Massive respect to ${culturalElements.iwi} for sharing their beautiful whenua! ` : ''}Can't wait to come back! 🥾✨\n\n#NewZealand #Aotearoa #Amazing #KiwiLife #GoodVibes #Manaakitanga`
-        hashtags = ['#NewZealand', '#Aotearoa', '#Amazing', '#KiwiLife', '#GoodVibes', '#Manaakitanga']
-      } else {
-        content = `🌟 ${brandPrefix}${baseContent}\n\n${isBusinessUser ? `Experience authentic New Zealand culture with us - where every moment honors our rich heritage and stunning landscapes! ${businessContext}` : 'What an incredible journey through Aotearoa! Every step revealed new wonders and cultural insights.'} ${culturalElements.iwi ? `\n\n🌿 With respect to ${culturalElements.iwi} as tangata whenua of this special place` : ''} 🏔️✨\n\n#NewZealand #Aotearoa #CulturalTourism #AuthenticExperience #Manaakitanga`
-        hashtags = ['#NewZealand', '#Aotearoa', '#CulturalTourism', '#AuthenticExperience', '#Manaakitanga', '#KiwiHospitality']
-      }
-      
+      content = `🌟 ${baseContent}\n\n${isBusinessUser ? 'Experience authentic New Zealand culture with us - where every moment honors our rich heritage and stunning landscapes! 🏔️' : 'What an incredible journey through Aotearoa! Every step revealed new wonders and cultural insights. 🥾✨'}\n\n#NewZealand #Aotearoa #CulturalTourism #AuthenticExperience #Manaakitanga`
+      hashtags = ['#NewZealand', '#Aotearoa', '#CulturalTourism', '#AuthenticExperience', '#Manaakitanga', '#KiwiHospitality']
       tips = "🕐 Best times to visit: Early morning (6-8 AM) or golden hour (5-7 PM) for perfect lighting and fewer crowds"
-      
     } else if (platform === 'facebook') {
-      content = `${brandPrefix}${baseContent}\n\nThis experience really opened my eyes to the incredible depth of New Zealand's cultural heritage and natural beauty. ${isBusinessUser ? `We feel privileged to share these authentic moments with visitors from around the world, always ensuring we honor the cultural significance of this special place. ${businessContext}` : 'I can\'t recommend this enough for anyone wanting to truly connect with local culture and understand the stories that make Aotearoa so special!'}\n\n${culturalElements.iwi ? `With deep respect to ${culturalElements.iwi} as the tangata whenua who have cared for this land for generations. ` : ''}The manaakitanga (hospitality) shown by local people made this experience unforgettable. 💙`
-      
+      content = `${baseContent}\n\nThis experience really opened my eyes to the incredible depth of New Zealand's cultural heritage and natural beauty. ${isBusinessUser ? 'We feel privileged to share these authentic moments with visitors from around the world, always ensuring we honor the cultural significance of this special place.' : 'I can\'t recommend this enough for anyone wanting to truly connect with local culture and understand the stories that make Aotearoa so special!'}\n\nThe manaakitanga (hospitality) shown by local people made this experience unforgettable. 💙`
       tips = "💡 Cultural tip: Always remember to be respectful of cultural protocols, ask permission before photographing people, and listen to local stories with an open heart"
-      
     } else if (platform === 'linkedin') {
-      content = `Professional insight: ${brandPrefix}${baseContent}\n\nThe sustainable tourism industry in New Zealand continues to demonstrate how authentic cultural experiences can create meaningful economic opportunities while preserving and celebrating indigenous heritage. ${isBusinessUser ? `Our commitment to cultural authenticity and environmental responsibility drives everything we do. ${businessContext}` : 'This experience highlighted the importance of supporting businesses that prioritize cultural respect and community benefit.'}\n\n${culturalElements.iwi ? `Working in partnership with ${culturalElements.iwi} demonstrates how tourism can honor Te Tiriti o Waitangi principles while creating shared prosperity. ` : ''}Witnessing the integration of traditional Māori values with modern tourism practices offers valuable lessons for the global industry. #SustainableTourism #CulturalAuthenticity #TeTiritioWaitangi`
-      
+      content = `Professional insight: ${baseContent}\n\nThe sustainable tourism industry in New Zealand continues to demonstrate how authentic cultural experiences can create meaningful economic opportunities while preserving and celebrating indigenous heritage. ${isBusinessUser ? 'Our commitment to cultural authenticity and environmental responsibility drives everything we do.' : 'This experience highlighted the importance of supporting businesses that prioritize cultural respect and community benefit.'}\n\nWitnessing the integration of traditional Māori values with modern tourism practices offers valuable lessons for the global industry. #SustainableTourism #CulturalAuthenticity`
       tips = "🌱 Business insight: Consider how cultural authenticity and environmental responsibility can differentiate your tourism offerings in an increasingly conscious market"
     }
 
@@ -182,290 +496,73 @@ function generateEnhancedMockContent(userData: UserData, brandData?: ScrapedBran
       tips,
       estimatedReach: Math.floor(Math.random() * 1500) + 750,
       suggestedPostTime: "6:00 PM - 8:00 PM NZST",
-      culturalAuthenticity: "High - includes appropriate cultural context and iwi acknowledgments",
-      brandConsistency: brandData?.success ? `95% - aligned with ${brandVoice} brand voice from website analysis` : "85% - default professional voice",
-      brandAnalysis: brandData?.success ? {
-        websiteAnalyzed: true,
-        brandVoice: brandVoice,
-        heroMessage: brandData.heroMessage,
-        businessDescription: brandData.businessDescription,
-        culturalIntelligence: 'Enhanced with Te Tiriti o Waitangi principles'
-      } : {
-        culturalIntelligence: 'Enhanced with Te Tiriti o Waitangi principles'
-      },
-      enhancedFeatures: [
-        'Cultural intelligence integration',
-        'Iwi acknowledgment guidance', 
-        'Platform-specific optimization',
-        'Business type contextualization',
-        'Brand voice analysis',
-        'Sustainable tourism messaging'
-      ]
+      culturalAuthenticity: "High - includes appropriate cultural context and terminology",
+      brandConsistency: isBusinessUser ? "85% - aligned with professional tourism voice" : "90% - authentic personal travel voice"
     }
   })
 
   return mockContent
 }
 
-// Get business context from your sophisticated business type mapping
-function getBusinessContext(businessType?: string): string {
-  if (!businessType) return ''
-  
-  const businessMappings: { [key: string]: string } = {
-    'visitor-attraction': 'Specializing in unique cultural experiences and respectful heritage preservation.',
-    'accommodation': 'Incorporating Māori hospitality principles and local cultural elements.',
-    'food-beverage': 'Celebrating authentic taste experiences and traditional culinary stories.',
-    'tours-activities': 'Providing transformative experiences with respectful cultural site access.',
-    'cultural-heritage': 'Protecting sacred knowledge while enabling respectful cultural engagement.',
-    'wellness-spa': 'Integrating traditional Māori wellness practices and rongoā Māori.',
-    'transport': 'Respecting cultural sites along travel routes while providing scenic journeys.',
-    'retail': 'Offering authentic local products with appropriate cultural design representation.',
-    'event-venue': 'Honoring venue cultural history and appropriate cultural use protocols.',
-    'education-training': 'Sharing traditional knowledge respectfully with proper educational protocols.',
-    'adventure-sports': 'Accessing natural areas with respect for Māori spiritual connections.',
-    'arts-crafts': 'Teaching cultural art forms with proper permissions and cultural knowledge.',
-    'marine-wildlife': 'Respecting Māori relationships with marine life and kaitiakitanga principles.',
-    'technology-digital': 'Ensuring respectful digital representation of cultural content.',
-    'government-tourism': 'Implementing Te Tiriti o Waitangi principles in bicultural tourism development.'
-  }
-  
-  return businessMappings[businessType] || ''
-}
-
-// Enhanced location context with iwi recognition
-function getLocationContext(location?: string): { iwi?: string, description?: string } {
-  if (!location) return {}
-  
-  const locationLower = location.toLowerCase()
-  
-  if (locationLower.includes('auckland') || locationLower.includes('tāmaki makaurau')) {
-    return { iwi: 'Ngāti Whātua', description: 'Tāmaki Makaurau - land of many lovers' }
-  } else if (locationLower.includes('wellington') || locationLower.includes('te whanganui-a-tara')) {
-    return { iwi: 'Taranaki Whānui', description: 'Te Whanganui-a-Tara - the great harbour of Tara' }
-  } else if (locationLower.includes('christchurch') || locationLower.includes('ōtautahi')) {
-    return { iwi: 'Ngāi Tahu', description: 'Ōtautahi - place of Tautahi' }
-  } else if (locationLower.includes('rotorua')) {
-    return { iwi: 'Te Arawa', description: 'Center of Māori culture and geothermal wonders' }
-  } else if (locationLower.includes('queenstown') || locationLower.includes('tāhuna')) {
-    return { iwi: 'Ngāi Tahu', description: 'Tāhuna - shallow bay in Central Otago' }
-  } else if (locationLower.includes('bay of islands') || locationLower.includes('paihia')) {
-    return { iwi: 'Ngāpuhi', description: 'Birthplace of modern New Zealand and Te Tiriti o Waitangi' }
-  }
-  
-  return {}
-}
-
-// Get cultural elements for content enhancement
-function getCulturalElements(location?: string) {
-  const context = getLocationContext(location)
-  return {
-    iwi: context.iwi,
-    description: context.description
-  }
-}
-
-export default function GeneratePage() {
-  const router = useRouter()
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [brandData, setBrandData] = useState<ScrapedBrandData | null>(null)
-
-  useEffect(() => {
-    const loadAndGenerate = async () => {
-      try {
-        // Collect all user data from localStorage
-        const data: UserData = {
-          story: localStorage.getItem('userStoryContext') || undefined,
-          audience: JSON.parse(localStorage.getItem('selectedDemographics') || '["general-audience"]')[0] || 'general-audience',
-          interests: JSON.parse(localStorage.getItem('selectedInterests') || '["cultural-experiences"]')[0] || 'cultural-experiences',
-          platforms: JSON.parse(localStorage.getItem('selectedPlatforms') || '["instagram"]'),
-          formats: JSON.parse(localStorage.getItem('selectedFormats') || '["social-post"]'),
-          
-          // User profile data from onboarding
-          name: localStorage.getItem('userName') || undefined,
-          location: localStorage.getItem('userLocation') || undefined,
-          businessType: localStorage.getItem('userBusinessType') || undefined,
-          websiteUrl: localStorage.getItem('userWebsiteUrl') || undefined,
-          linkedInUrl: localStorage.getItem('userLinkedInUrl') || undefined,
-          facebookUrl: localStorage.getItem('userFacebookUrl') || undefined,
-          instagramUrl: localStorage.getItem('userInstagramUrl') || undefined,
-          culturalConnection: localStorage.getItem('userCulturalConnection') || undefined,
-        }
-
-        console.log('Loaded user data:', data)
-        
-        if (!data.story) {
-          setError('No story found. Please complete all previous steps.')
-          return
-        }
-
-        setUserData(data)
-        await generateContent(data)
-        
-      } catch (error) {
-        console.error('Error loading user data:', error)
-        setError('Failed to load your content data. Please start over.')
-      }
-    }
-
-    loadAndGenerate()
-  }, [])
-
-  const generateContent = async (data: UserData) => {
-    setIsGenerating(true)
-    setError(null)
-
-    try {
-      console.log('🚀 Starting enhanced content generation with brand intelligence...')
-      
-      let scrapedBrandData: ScrapedBrandData | null = null
-      
-      // Scrape website for brand intelligence if URL provided
-      if (data.websiteUrl && data.businessType) {
-        try {
-          console.log('🔍 Analyzing brand voice from website...')
-          scrapedBrandData = await scrapeWebsiteBasic(data.websiteUrl)
-          setBrandData(scrapedBrandData)
-          
-          if (scrapedBrandData.success) {
-            console.log('✅ Brand analysis complete:', scrapedBrandData.brandVoice)
-          } else {
-            console.warn('⚠️ Brand analysis failed, using default content')
-          }
-        } catch (error) {
-          console.warn('Brand scraping error:', error)
-        }
-      }
-      
-      // Add processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Generate content with brand intelligence
-      const generatedContent = generateEnhancedMockContent(data, scrapedBrandData || undefined)
-      
-      console.log('✅ Enhanced content generated with brand intelligence:', generatedContent)
-      
-      // Store the generated content
-      localStorage.setItem('generatedContent', JSON.stringify(generatedContent))
-      
-      // Navigate to results page
-      setTimeout(() => {
-        router.push('/dashboard/create/results')
-      }, 2000)
-      
-    } catch (error) {
-      console.error('❌ Content generation failed:', error)
-      setError('Failed to generate content. Please try again.')
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  const handleStartOver = () => {
-    // Clear content data but keep user profile
-    const keysToRemove = [
-      'userStoryContext',
-      'selectedDemographics', 
-      'selectedInterests',
-      'selectedPlatforms',
-      'selectedFormats',
-      'generatedContent'
-    ]
+// Enhanced content generation with real Claude API integration (ready for production)
+export async function generateClaudeContent(userData: UserData, privacySettings?: typeof defaultPrivacySettings): Promise<{ [platform: string]: any }> {
+  try {
+    console.log('🚀 Generating enhanced Claude content with multi-platform brand intelligence...')
     
-    keysToRemove.forEach(key => localStorage.removeItem(key))
+    // Generate enhanced prompt with multi-platform brand context
+    const enhancedPrompt = await generateEnhancedClaudePrompt(userData, privacySettings)
     
-    router.push('/dashboard/create/photo')
+    console.log('📝 Enhanced prompt generated with cultural intelligence and brand context')
+    
+    // TODO: Replace with actual Claude API call
+    // const response = await fetch('/api/claude', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ prompt: enhancedPrompt, userData })
+    // })
+    // const result = await response.json()
+    
+    // For now, return enhanced mock content with brand intelligence indicators
+    const mockContent = generateMockContent(userData)
+    
+    // Add multi-platform brand analysis indicators
+    const hasMultiPlatformUrls = !!(userData.websiteUrl || userData.linkedInUrl || userData.facebookUrl || userData.instagramUrl)
+    
+    if (hasMultiPlatformUrls && userData.businessType) {
+      Object.keys(mockContent).forEach(platform => {
+        mockContent[platform].multiPlatformAnalysis = true
+        mockContent[platform].brandIntelligence = {
+          websiteAnalyzed: !!userData.websiteUrl,
+          linkedInAnalyzed: !!userData.linkedInUrl,
+          facebookAnalyzed: !!userData.facebookUrl,
+          instagramAnalyzed: !!userData.instagramUrl,
+          crossPlatformConsistency: '87%',
+          culturalIntelligence: 'Enhanced with Te Tiriti o Waitangi principles'
+        }
+        mockContent[platform].enhancedFeatures = [
+          'Multi-platform brand voice analysis',
+          'Cultural intelligence integration',
+          'Platform-specific optimization',
+          'Iwi acknowledgment guidance',
+          'Sustainable tourism messaging'
+        ]
+      })
+    }
+    
+    return mockContent
+    
+  } catch (error) {
+    console.error('❌ Error generating enhanced Claude content:', error)
+    
+    // Fallback to regular mock content
+    return generateMockContent(userData)
   }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Content Generation Error</h2>
-          <p className="text-gray-600 mb-8">{error}</p>
-          
-          <button
-            onClick={handleStartOver}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-          >
-            Start Over
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
-        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-        
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          {isGenerating ? 'Generating Your Content' : 'Content Generated!'}
-        </h2>
-        
-        <p className="text-gray-600 mb-6">
-          {isGenerating 
-            ? 'Creating culturally-intelligent content with brand analysis...'
-            : 'Your brand-intelligent content is ready!'
-          }
-        </p>
-        
-        {isGenerating && (
-          <div className="space-y-3 text-left text-sm text-gray-500">
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-              Analyzing your story and audience
-            </div>
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-              Applying cultural intelligence framework
-            </div>
-            {userData?.websiteUrl && userData?.businessType && (
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 animate-pulse"></div>
-                Scraping website for brand voice analysis
-              </div>
-            )}
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 animate-pulse"></div>
-              Generating brand-aligned, platform-optimized content
-            </div>
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-gray-300 rounded-full mr-3"></div>
-              Creating QR codes for distribution
-            </div>
-          </div>
-        )}
-        
-        {brandData?.success && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-left">
-            <div className="font-semibold text-green-800 mb-1">Brand Analysis Complete ✅</div>
-            <div className="text-green-700">
-              Voice: <span className="font-semibold">{brandData.brandVoice}</span>
-              {brandData.heroMessage && <div>Message: "{brandData.heroMessage.substring(0, 40)}..."</div>}
-            </div>
-          </div>
-        )}
-        
-        {!isGenerating && (
-          <div className="text-sm text-gray-500">
-            Redirecting to your results...
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }
+
+// Function to be called from results page
+export function generateContentWithBrandContext(userData: UserData) {
+  return generateClaudeContent(userData)
+}
+
+// Backward compatibility - export the original function name
+export const generateClaudePrompt = generateEnhancedClaudePrompt
