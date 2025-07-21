@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '../../../utils/ClaudePrompt'
+// FIX: Change from ClaudePrompt to claudePrompt (lowercase c)
+import { generateClaudePrompt, defaultPrivacySettings, UserData, generateMockContent } from '../../../utils/claudePrompt'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -96,7 +97,17 @@ export default function QRDistributionHub() {
           audience: parsedAudience[0] || 'millennials', // Take first item from array
           interests: parsedInterests[0] || 'cultural', // Take first item from array
           platforms: parsedPlatforms,
-          formats: parsedFormats
+          formats: parsedFormats,
+          
+          // Add profile data for enhanced content generation
+          name: parsedProfile.name,
+          location: parsedProfile.location,
+          businessType: parsedProfile.businessType,
+          websiteUrl: parsedProfile.websiteUrl,
+          linkedInUrl: parsedProfile.linkedInUrl,
+          facebookUrl: parsedProfile.facebookUrl,
+          instagramUrl: parsedProfile.instagramUrl,
+          culturalConnection: parsedProfile.culturalConnection
         }
 
         console.log('Loaded user data:', userData) // Debug log
@@ -115,40 +126,31 @@ export default function QRDistributionHub() {
   const generateContent = async (userData: UserData) => {
     try {
       setIsGenerating(true)
-      // Generate Claude prompt with proper privacy settings
-      await generateClaudePrompt(userData, defaultPrivacySettings)
-      // Use your existing generateMockContent function
-      const mockContent = await mockGenerateContentWrapper(userData)
-      setGeneratedContent(mockContent)
+      
+      // FIX: Use the correct function from your enhanced claudePrompt.ts
+      const mockContent = generateMockContent(userData)
+      
+      // Convert the mock content to the expected format
+      const platforms = userData.platforms || ['instagram']
+      const formattedContent = platforms.map((platform: string) => {
+        const platformData = mockContent[platform] || mockContent['instagram'] || {}
+        
+        return {
+          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+          content: platformData.content || `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+          qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
+          tips: platformData.tips ? [platformData.tips] : getPlatformTips(platform),
+          optimalTime: platformData.suggestedPostTime || getOptimalPostingTime(platform)
+        }
+      })
+      
+      setGeneratedContent(formattedContent)
       setIsGenerating(false)
     } catch (err) {
       console.error('Content generation error:', err)
       setError('Failed to generate your content. Please try again.')
       setIsGenerating(false)
     }
-  }
-
-  const mockGenerateContentWrapper = async (userData: UserData): Promise<GeneratedContent[]> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    // Use your existing generateMockContent function
-    const mockResult = generateMockContent(userData) as MockResult
-    const platforms = userData.platforms || ['instagram']
-    return platforms.map((platform: string) => {
-      const platformContent = mockResult.platforms.find(
-        (p: PlatformMockContent) => p.name.toLowerCase() === platform.toLowerCase()
-      )
-      return {
-        platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-        content: platformContent?.content.text ||
-          `🌟 ${userData.story}\n\n${getPlatformOptimisedContent(platform, userData)}\n\n#CulturalTourism #${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
-        qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-        tips: platformContent?.content.platformTips
-          ? [platformContent.content.platformTips]
-          : getPlatformTips(platform),
-        optimalTime: platformContent?.content.optimalTiming || getOptimalPostingTime(platform)
-      }
-    })
   }
 
   const getPlatformOptimisedContent = (platform: string, userData: UserData) => {
@@ -186,15 +188,15 @@ export default function QRDistributionHub() {
   const getOptimalPostingTime = (platform: string): string => {
     switch (platform) {
       case 'instagram':
-        return '11 AM - 2 PM, 5 PM - 7 PM'
+        return '11 AM - 2 PM, 5 PM - 7 PM NZST'
       case 'facebook':
-        return '1 PM - 3 PM, 7 PM - 9 PM'
+        return '1 PM - 3 PM, 7 PM - 9 PM NZST'
       case 'twitter':
-        return '9 AM - 10 AM, 7 PM - 9 PM'
+        return '9 AM - 10 AM, 7 PM - 9 PM NZST'
       case 'linkedin':
-        return '8 AM - 10 AM, 12 PM - 2 PM, 5 PM - 6 PM'
+        return '8 AM - 10 AM, 12 PM - 2 PM, 5 PM - 6 PM NZST'
       default:
-        return 'Peak audience hours'
+        return 'Peak audience hours NZST'
     }
   }
 
