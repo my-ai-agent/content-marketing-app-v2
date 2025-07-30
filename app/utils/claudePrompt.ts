@@ -2,11 +2,6 @@
 // Simplified Claude prompt generation - deployment ready
 
 // Import only essential functions to avoid circular dependencies
-import { 
-  scrapeWebsiteBasic, 
-  generateBrandContext, 
-  ScrapedBrandData
-} from './webScraper'
 
 export interface UserData {
   photo?: string
@@ -24,11 +19,6 @@ export interface UserData {
   name?: string
   location?: string
   culturalConnection?: string
-}
-
-export interface EnhancedPromptData extends UserData {
-  brandContext?: string
-  scrapedData?: ScrapedBrandData
 }
 
 // Privacy settings remain the same
