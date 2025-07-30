@@ -1,19 +1,47 @@
-// /app/api/claude/route.ts
+// /app/api/claude/route.ts - COMPREHENSIVE FIX
 import { NextRequest, NextResponse } from 'next/server'
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if API key exists
+    // ENHANCED: Multiple API key sources and validation
+    const CLAUDE_API_KEY = 
+      process.env.CLAUDE_API_KEY || 
+      process.env.NEXT_PUBLIC_CLAUDE_API_KEY || 
+      process.env.ANTHROPIC_API_KEY
+
+    // ENHANCED: Comprehensive API key validation
     if (!CLAUDE_API_KEY) {
-      console.error('❌ Claude API key not found in environment variables')
+      console.error('❌ No Claude API key found in any environment variable')
+      console.log('Available env vars:', Object.keys(process.env).filter(key => 
+        key.toLowerCase().includes('claude') || key.toLowerCase().includes('anthropic')
+      ))
       return NextResponse.json(
-        { error: 'Claude API key not configured' },
+        { 
+          error: 'Claude API key not configured',
+          availableVars: Object.keys(process.env).filter(key => 
+            key.toLowerCase().includes('claude') || key.toLowerCase().includes('anthropic')
+          )
+        },
         { status: 500 }
       )
     }
+
+    // ENHANCED: API key format validation
+    if (!CLAUDE_API_KEY.startsWith('sk-ant-')) {
+      console.error('❌ Invalid Claude API key format. Should start with "sk-ant-"')
+      console.log('Current key format:', CLAUDE_API_KEY.substring(0, 10) + '...')
+      return NextResponse.json(
+        { 
+          error: 'Invalid Claude API key format',
+          keyPrefix: CLAUDE_API_KEY.substring(0, 10) + '...'
+        },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Claude API key found and validated:', CLAUDE_API_KEY.substring(0, 15) + '...')
 
     // Parse request body
     const body = await request.json()
@@ -27,9 +55,21 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🚀 Server: Generating ${platform} content with Claude API...`)
-    console.log(`📝 Using user story: "${userData?.story?.substring(0, 50)}..."`)
+    console.log(`📝 User story: "${userData?.story?.substring(0, 50) || 'No story'}..."`)
+    console.log(`🔑 API Key length: ${CLAUDE_API_KEY.length} characters`)
 
-    // Call Claude API from server-side (no CORS issues)
+    // ENHANCED: Claude API call with better error handling
+    const claudeRequestBody = {
+      model: 'claude-3-sonnet-20240229',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: prompt
+      }]
+    }
+
+    console.log('📤 Sending request to Claude API...')
+
     const response = await fetch(CLAUDE_API_URL, {
       method: 'POST',
       headers: {
@@ -37,21 +77,58 @@ export async function POST(request: NextRequest) {
         'Authorization': `Bearer ${CLAUDE_API_KEY}`,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
-      })
+      body: JSON.stringify(claudeRequestBody)
     })
+
+    console.log(`📥 Claude API response status: ${response.status}`)
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`❌ Claude API error: ${response.status} - ${errorText}`)
+      console.error(`❌ Claude API error: ${response.status}`)
+      console.error(`❌ Error details: ${errorText}`)
       
-      // Return specific error information
+      // ENHANCED: Specific error handling
+      if (response.status === 401) {
+        console.error('❌ Authentication failed - Check your Claude API key')
+        return NextResponse.json(
+          { 
+            error: 'Claude API authentication failed',
+            status: 401,
+            details: 'Invalid API key or insufficient permissions',
+            keyPrefix: CLAUDE_API_KEY.substring(0, 15) + '...',
+            fallback: true
+          },
+          { status: 401 }
+        )
+      }
+
+      if (response.status === 429) {
+        console.error('❌ Rate limited - Too many requests')
+        return NextResponse.json(
+          { 
+            error: 'Claude API rate limit exceeded',
+            status: 429,
+            details: 'Please try again in a moment',
+            fallback: true
+          },
+          { status: 429 }
+        )
+      }
+
+      if (response.status === 400) {
+        console.error('❌ Bad request - Check prompt format')
+        return NextResponse.json(
+          { 
+            error: 'Claude API bad request',
+            status: 400,
+            details: errorText,
+            fallback: true
+          },
+          { status: 400 }
+        )
+      }
+
+      // Generic error fallback
       return NextResponse.json(
         { 
           error: `Claude API error: ${response.status}`,
@@ -63,31 +140,46 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
+    console.log('📦 Claude API response structure:', Object.keys(data))
+
     const generatedContent = data.content?.[0]?.text
 
     if (!generatedContent) {
       console.error('❌ No content returned from Claude API')
+      console.log('📦 Full response data:', JSON.stringify(data, null, 2))
       return NextResponse.json(
-        { error: 'No content generated', fallback: true },
+        { 
+          error: 'No content generated by Claude',
+          responseData: data,
+          fallback: true
+        },
         { status: 500 }
       )
     }
 
-    console.log(`✅ Successfully generated ${platform} content (${generatedContent.length} characters)`)
+    console.log(`✅ SUCCESS! Generated ${platform} content (${generatedContent.length} characters)`)
+    console.log(`📝 Content preview: "${generatedContent.substring(0, 100)}..."`)
 
     return NextResponse.json({
       content: generatedContent,
       platform,
-      success: true
+      success: true,
+      metadata: {
+        contentLength: generatedContent.length,
+        model: 'claude-3-sonnet-20240229',
+        timestamp: new Date().toISOString()
+      }
     })
 
   } catch (error) {
-    console.error('❌ Server error in Claude API endpoint:', error)
+    console.error('❌ CRITICAL SERVER ERROR:', error)
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     
     return NextResponse.json(
       { 
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.constructor.name : 'Unknown',
         fallback: true
       },
       { status: 500 }
