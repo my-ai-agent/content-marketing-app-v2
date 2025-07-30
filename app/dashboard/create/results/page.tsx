@@ -6,10 +6,6 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
-// CLAUDE API CONFIGURATION
-const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
-const CLAUDE_API_KEY = process.env.NEXT_PUBLIC_CLAUDE_API_KEY || 'your-claude-api-key-here'
-
 interface UserData {
   photo?: string
   story?: string
@@ -33,13 +29,6 @@ interface GeneratedContent {
   optimalTime: string
   culturalAuthenticity?: string
   brandConsistency?: string
-}
-
-interface ClaudeResponse {
-  content: Array<{
-    type: string
-    text: string
-  }>
 }
 
 export default function QRDistributionHub() {
@@ -71,7 +60,7 @@ export default function QRDistributionHub() {
     })
   }
 
-  // LIVE CLAUDE API CONTENT GENERATION
+  // IMPROVED CLAUDE API CONTENT GENERATION - SERVER-SIDE
   const generateClaudeContent = async (userData: UserData, platform: string): Promise<string> => {
     const isBusinessUser = !!userData.businessType
     
@@ -115,33 +104,42 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
 🎯 GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
 
     try {
-      const response = await fetch(CLAUDE_API_URL, {
+      console.log(`🚀 Generating ${platform} content with server-side Claude API...`)
+      
+      // Call our server-side API endpoint instead of direct Claude API
+      const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${CLAUDE_API_KEY}`,
-          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-sonnet-20240229',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
+          prompt,
+          platform,
+          userData: {
+            story: userData.story,
+            persona: userData.persona,
+            audience: userData.audience,
+            interests: userData.interests,
+            businessType: userData.businessType,
+            name: userData.name,
+            location: userData.location
+          }
         })
       })
 
       if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`)
+        const errorText = await response.text()
+        console.error(`Server API error: ${response.status} - ${errorText}`)
+        throw new Error(`Server API error: ${response.status}`)
       }
 
-      const data: ClaudeResponse = await response.json()
-      return data.content[0]?.text || getFallbackContent(platform, userData)
+      const data = await response.json()
+      console.log(`✅ Successfully generated ${platform} content`)
+      return data.content || getImprovedFallbackContent(platform, userData)
       
     } catch (error) {
-      console.error(`Error generating Claude content for ${platform}:`, error)
-      return getFallbackContent(platform, userData)
+      console.error(`❌ Error generating Claude content for ${platform}:`, error)
+      return getImprovedFallbackContent(platform, userData)
     }
   }
 
@@ -246,19 +244,44 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
     return lengths[platform] || '125-150 words'
   }
 
-  const getFallbackContent = (platform: string, userData: UserData): string => {
+  // IMPROVED FALLBACK CONTENT - Uses actual user story
+  const getImprovedFallbackContent = (platform: string, userData: UserData): string => {
     const isBusinessUser = !!userData.businessType
-    const baseContent = userData.story || "Amazing experience at this beautiful location in Aotearoa"
+    const userStory = userData.story || "Amazing experience in beautiful Aotearoa"
+    const location = userData.location || "New Zealand"
     
     if (platform === 'instagram') {
-      return `🌟 ${baseContent}\n\n${isBusinessUser ? 'Experience authentic New Zealand culture with us - where every moment honors our rich heritage and stunning landscapes! 🏔️' : 'What an incredible journey through Aotearoa! Every step revealed new wonders and cultural insights. 🥾✨'}\n\n#NewZealand #Aotearoa #CulturalTourism #AuthenticExperience #Manaakitanga`
+      return `🌟 ${userStory}
+
+${isBusinessUser ? 
+        'Experience authentic New Zealand culture with us - where every moment honors our rich heritage and stunning landscapes! 🏔️' : 
+        'What an incredible journey through Aotearoa! Every step revealed new wonders and cultural insights. 🥾✨'
+      }
+
+#NewZealand #Aotearoa #CulturalTourism #AuthenticExperience #Manaakitanga #${location.replace(/\s+/g, '')}`
     } else if (platform === 'facebook') {
-      return `${baseContent}\n\nThis experience really opened my eyes to the incredible depth of New Zealand's cultural heritage and natural beauty. ${isBusinessUser ? 'We feel privileged to share these authentic moments with visitors from around the world, always ensuring we honor the cultural significance of this special place.' : 'I can\'t recommend this enough for anyone wanting to truly connect with local culture and understand the stories that make Aotearoa so special!'}\n\nThe manaakitanga (hospitality) shown by local people made this experience unforgettable. 💙`
+      return `${userStory}
+
+This experience really opened my eyes to the incredible depth of New Zealand's cultural heritage and natural beauty. ${isBusinessUser ? 
+        'We feel privileged to share these authentic moments with visitors from around the world, always ensuring we honor the cultural significance of this special place.' : 
+        'I can\'t recommend this enough for anyone wanting to truly connect with local culture and understand the stories that make Aotearoa so special!'
+      }
+
+The manaakitanga (hospitality) shown by local people made this experience unforgettable. 💙`
     } else if (platform === 'linkedin') {
-      return `Professional insight: ${baseContent}\n\nThe sustainable tourism industry in New Zealand continues to demonstrate how authentic cultural experiences can create meaningful economic opportunities while preserving and celebrating indigenous heritage. ${isBusinessUser ? 'Our commitment to cultural authenticity and environmental responsibility drives everything we do.' : 'This experience highlighted the importance of supporting businesses that prioritize cultural respect and community benefit.'}\n\nWitnessing the integration of traditional Māori values with modern tourism practices offers valuable lessons for the global industry. #SustainableTourism #CulturalAuthenticity`
+      return `Professional insight: ${userStory}
+
+The sustainable tourism industry in New Zealand continues to demonstrate how authentic cultural experiences can create meaningful economic opportunities while preserving and celebrating indigenous heritage. ${isBusinessUser ? 
+        'Our commitment to cultural authenticity and environmental responsibility drives everything we do.' : 
+        'This experience highlighted the importance of supporting businesses that prioritize cultural respect and community benefit.'
+      }
+
+Witnessing the integration of traditional Māori values with modern tourism practices offers valuable lessons for the global industry. #SustainableTourism #CulturalAuthenticity`
     }
     
-    return `${baseContent}\n\nExperience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTourism`
+    return `🌟 ${userStory}
+
+Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTourism #Manaakitanga`
   }
 
   useEffect(() => {
@@ -328,7 +351,7 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
       const platforms = userData.platforms || ['instagram']
       const generatedContent: GeneratedContent[] = []
       
-      // Generate content for each platform using live Claude API
+      // Generate content for each platform using server-side Claude API
       for (const platform of platforms) {
         console.log(`🚀 Generating ${platform} content with Claude API...`)
         
@@ -567,7 +590,7 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
                 marginBottom: '1rem',
                 lineHeight: '1.5'
               }}>
-                Claude is crafting authentic content that honors Te Tiriti o Waitangi principles and respects local culture...
+                Claude is crafting authentic content based on your story that honors Te Tiriti o Waitangi principles and respects local culture...
               </p>
               <div style={{
                 backgroundColor: '#f0f9ff',
@@ -582,7 +605,7 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
                   margin: '0',
                   fontSize: '0.875rem'
                 }}>
-                  🧠 AI Cultural Intelligence: Ensuring content respects mātauranga Māori and local tikanga
+                  🧠 AI Cultural Intelligence: Ensuring content respects mātauranga Māori and uses your actual story
                 </p>
               </div>
             </div>
