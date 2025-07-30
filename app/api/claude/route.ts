@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
-const CLAUDE_API_KEY = process.env.NEXT_PUBLIC_CLAUDE_API_KEY
+const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY
 
 export async function POST(request: NextRequest) {
   try {
