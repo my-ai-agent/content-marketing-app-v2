@@ -67,7 +67,7 @@ export default function PlatformFormat() {
     if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
       localStorage.setItem('selectedPlatforms', JSON.stringify(selectedPlatforms))
       localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats))
-      window.location.href = '/dashboard/create/generate'
+      window.location.href = '/dashboard/create/results'
     } else {
       alert('Please select at least one platform and one format before continuing.')
     }
@@ -80,7 +80,7 @@ export default function PlatformFormat() {
     
     localStorage.setItem('selectedPlatforms', JSON.stringify(defaultPlatforms))
     localStorage.setItem('selectedFormats', JSON.stringify(defaultFormats))
-    window.location.href = '/dashboard/create/generate'
+    window.location.href = '/dashboard/create/results'
   }
 
   return (
