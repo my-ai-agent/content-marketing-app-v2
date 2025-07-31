@@ -6,10 +6,7 @@ const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
 export async function POST(request: NextRequest) {
   try {
     // ENHANCED: Multiple API key sources and validation
-    const CLAUDE_API_KEY = 
-      process.env.CLAUDE_API_KEY || 
-      process.env.NEXT_PUBLIC_CLAUDE_API_KEY || 
-      process.env.ANTHROPIC_API_KEY
+    const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY
 
     // ENHANCED: Comprehensive API key validation
     if (!CLAUDE_API_KEY) {
