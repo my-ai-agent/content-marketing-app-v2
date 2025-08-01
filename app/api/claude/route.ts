@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // ENHANCED: Claude API call with better error handling
     const claudeRequestBody = {
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1000,
       messages: [{
         role: 'user',
