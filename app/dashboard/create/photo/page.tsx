@@ -79,7 +79,7 @@ interface PhotoData {
   url: string
   fileName: string
   fileSize: number
-  uploadMethod: 'camera' | 'gallery' | 'upload'
+  uploadMethod: 'camera' | 'gallery'
   timestamp: number
 }
 
@@ -89,7 +89,6 @@ export default function PhotoUpload() {
   const [photos, setPhotos] = useState<{
     camera?: PhotoData
     gallery?: PhotoData
-    upload?: PhotoData
   }>({})
   
   const [currentUploadMethod, setCurrentUploadMethod] = useState<'camera' | 'gallery'>('gallery')
@@ -98,7 +97,7 @@ export default function PhotoUpload() {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  
+
   // Load existing photos on component mount
   useEffect(() => {
     loadExistingPhotos()
@@ -114,15 +113,17 @@ export default function PhotoUpload() {
         
         // Load each photo from IndexedDB
         for (const [type, data] of Object.entries(metadata)) {
-          const blob = await getImageFromIndexedDB(`photo_${type}`)
-          if (blob && typeof data === 'object' && data !== null) {
-            loadedPhotos[type as keyof typeof photos] = {
-              blob,
-              url: URL.createObjectURL(blob),
-              fileName: (data as any).fileName || 'Unknown',
-              fileSize: (data as any).fileSize || 0,
-              uploadMethod: (data as any).uploadMethod || type as 'camera' | 'gallery' | 'upload',
-              timestamp: (data as any).timestamp || Date.now()
+          if (type === 'camera' || type === 'gallery') { // Only load camera and gallery
+            const blob = await getImageFromIndexedDB(`photo_${type}`)
+            if (blob && typeof data === 'object' && data !== null) {
+              loadedPhotos[type as keyof typeof photos] = {
+                blob,
+                url: URL.createObjectURL(blob),
+                fileName: (data as any).fileName || 'Unknown',
+                fileSize: (data as any).fileSize || 0,
+                uploadMethod: (data as any).uploadMethod || type as 'camera' | 'gallery',
+                timestamp: (data as any).timestamp || Date.now()
+              }
             }
           }
         }
@@ -204,7 +205,7 @@ export default function PhotoUpload() {
         localStorage.setItem('photoCount', photoCount.toString())
         localStorage.setItem('photoTypes', Object.keys(photos).join(','))
         
-        window.location.href = '/dashboard/create/story'
+        router.push('/dashboard/create/story')
       } catch {
         setError('Failed to save photos. Storage quota may be exceeded.')
       }
@@ -216,7 +217,7 @@ export default function PhotoUpload() {
   const handleSkip = async () => {
     setError(null)
     
-    // Clear all photos
+    // Clear all photos (keep legacy 'upload' for cleanup)
     for (const type of ['camera', 'gallery', 'upload']) {
       await removeImageFromIndexedDB(`photo_${type}`)
     }
@@ -230,7 +231,7 @@ export default function PhotoUpload() {
     router.push('/dashboard/create/story')
   }
 
-  const handleRemovePhoto = async (type: 'camera' | 'gallery' | 'upload') => {
+  const handleRemovePhoto = async (type: 'camera' | 'gallery') => {
     // Remove from IndexedDB
     await removeImageFromIndexedDB(`photo_${type}`)
     
@@ -248,7 +249,6 @@ export default function PhotoUpload() {
     // Clear file inputs
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
-    
   }
 
   // Enhanced file select handler for multiple photo storage
@@ -477,7 +477,7 @@ export default function PhotoUpload() {
         width: '100%',
         padding: '2rem 1rem'
       }}>
-        {/* Upload Method Toggle - 3 buttons */}
+        {/* Upload Method Toggle - 2 buttons only */}
         <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
           <div style={{
             display: 'inline-flex',
@@ -505,7 +505,7 @@ export default function PhotoUpload() {
               }}
             >
               <span style={{ marginRight: '0.5rem' }}>📷</span>
-              Take a Photo
+              Take a photo
               {photos.camera && (
                 <div style={{
                   position: 'absolute',
@@ -543,7 +543,7 @@ export default function PhotoUpload() {
               }}
             >
               <span style={{ marginRight: '0.5rem' }}>📱</span>
-              Upload a Photo
+              Upload a photo
               {photos.gallery && (
                 <div style={{
                   position: 'absolute',
@@ -561,7 +561,6 @@ export default function PhotoUpload() {
                 }}>✓</div>
               )}
             </button>
-            
           </div>
         </div>
 
@@ -589,7 +588,7 @@ export default function PhotoUpload() {
                   cameraInputRef.current?.click()
                 } else if (currentUploadMethod === 'gallery') {
                   fileInputRef.current?.click()
-                
+                }
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#9ca3af'
@@ -601,7 +600,7 @@ export default function PhotoUpload() {
               }}
             >
               <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
-                {currentUploadMethod === 'camera' ? '📷' : currentUploadMethod === 'gallery' ? '📂' : '🌐'}
+                {currentUploadMethod === 'camera' ? '📷' : '📂'}
               </div>
               <h3 style={{
                 fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
@@ -610,7 +609,7 @@ export default function PhotoUpload() {
                 marginBottom: '0.5rem',
                 margin: '0 0 0.5rem 0'
               }}>
-                {currentUploadMethod === 'camera' ? 'Take a Photo' : currentUploadMethod === 'gallery' ? 'Upload from Gallery' : 'Upload Website Image'}
+                {currentUploadMethod === 'camera' ? 'Take a Photo' : 'Upload from Gallery'}
               </h3>
               <p style={{
                 fontSize: 'clamp(0.875rem, 2vw, 1rem)',
@@ -620,9 +619,7 @@ export default function PhotoUpload() {
               }}>
                 {currentUploadMethod === 'camera'
                   ? 'Capture your immediate experience'
-                  : currentUploadMethod === 'gallery'
-                  ? 'Personal curated travel content'
-                  : 'Business website or marketing content'
+                  : 'Personal curated travel content'
                 }
               </p>
               <div style={{
@@ -645,13 +642,6 @@ export default function PhotoUpload() {
                 type="file"
                 accept="image/*"
                 capture="environment"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
-              <input
-                ref={uploadInputRef}
-                type="file"
-                accept="image/*"
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
               />
@@ -721,9 +711,7 @@ export default function PhotoUpload() {
                 fontSize: '0.75rem',
                 color: '#9ca3af'
               }}>
-                {currentUploadMethod === 'camera' ? '📷 Immediate Experience' : 
-                 currentUploadMethod === 'gallery' ? '📱 Personal Content' : 
-                 '🌐 Business Content'} • Added {new Date(photos[currentUploadMethod]?.timestamp || 0).toLocaleTimeString()}
+                {currentUploadMethod === 'camera' ? '📷 Immediate Experience' : '📱 Personal Content'} • Added {new Date(photos[currentUploadMethod]?.timestamp || 0).toLocaleTimeString()}
               </div>
             </div>
           )}
@@ -776,7 +764,7 @@ export default function PhotoUpload() {
                   border: '1px solid #e5e7eb'
                 }}>
                   <span style={{ marginRight: '0.5rem' }}>
-                    {type === 'camera' ? '📷' : type === 'gallery' ? '📱' : '🌐'}
+                    {type === 'camera' ? '📷' : '📱'}
                   </span>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </div>
