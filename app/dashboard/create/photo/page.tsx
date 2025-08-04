@@ -92,14 +92,13 @@ export default function PhotoUpload() {
     upload?: PhotoData
   }>({})
   
-  const [currentUploadMethod, setCurrentUploadMethod] = useState<'camera' | 'gallery' | 'upload'>('gallery')
+  const [currentUploadMethod, setCurrentUploadMethod] = useState<'camera' | 'gallery'>('gallery')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  const uploadInputRef = useRef<HTMLInputElement>(null)
-
+  
   // Load existing photos on component mount
   useEffect(() => {
     loadExistingPhotos()
@@ -506,7 +505,7 @@ export default function PhotoUpload() {
               }}
             >
               <span style={{ marginRight: '0.5rem' }}>📷</span>
-              Camera
+              Take a Photo
               {photos.camera && (
                 <div style={{
                   position: 'absolute',
@@ -544,7 +543,7 @@ export default function PhotoUpload() {
               }}
             >
               <span style={{ marginRight: '0.5rem' }}>📱</span>
-              Gallery
+              Upload a Photo
               {photos.gallery && (
                 <div style={{
                   position: 'absolute',
@@ -562,44 +561,7 @@ export default function PhotoUpload() {
                 }}>✓</div>
               )}
             </button>
-            <button
-              type="button"
-              onClick={() => setCurrentUploadMethod('upload')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: currentUploadMethod === 'upload' ? 'white' : 'transparent',
-                color: currentUploadMethod === 'upload' ? '#1f2937' : '#6b7280',
-                boxShadow: currentUploadMethod === 'upload' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                position: 'relative'
-              }}
-            >
-              <span style={{ marginRight: '0.5rem' }}>🌐</span>
-              Upload
-              {photos.upload && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-0.25rem',
-                  right: '-0.25rem',
-                  width: '1rem',
-                  height: '1rem',
-                  backgroundColor: '#10b981',
-                  borderRadius: '50%',
-                  fontSize: '0.75rem',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>✓</div>
-              )}
-            </button>
+            
           </div>
         </div>
 
