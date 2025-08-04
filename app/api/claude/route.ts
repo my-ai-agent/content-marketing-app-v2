@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     console.log('📤 Request URL:', CLAUDE_API_URL)
     console.log('📤 Request headers:', {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${CLAUDE_API_KEY.substring(0, 15)}...`,
+      'x-api-key': CLAUDE_API_KEY,
       'anthropic-version': '2023-06-01'
     })
 
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CLAUDE_API_KEY}`,
+        'x-api-key': CLAUDE_API_KEY,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify(claudeRequestBody)
