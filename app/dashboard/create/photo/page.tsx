@@ -248,7 +248,7 @@ export default function PhotoUpload() {
     // Clear file inputs
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
-    if (uploadInputRef.current) uploadInputRef.current.value = ''
+    
   }
 
   // Enhanced file select handler for multiple photo storage
