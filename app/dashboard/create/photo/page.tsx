@@ -1,10 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 // Enhanced IndexedDB helper for multiple photos
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
+const router = useRouter()
 
 function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -226,7 +228,7 @@ export default function PhotoUpload() {
     localStorage.removeItem('photoTypes')
     
     setPhotos({})
-    window.location.href = '/dashboard/create/story'
+    router.push('/dashboard/create/story')
   }
 
   const handleRemovePhoto = async (type: 'camera' | 'gallery' | 'upload') => {
