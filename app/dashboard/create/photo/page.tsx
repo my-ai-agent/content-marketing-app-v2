@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 // Enhanced IndexedDB helper for multiple photos
 const DB_NAME = 'PhotoAppDB'
 const STORE_NAME = 'photos'
-const router = useRouter()
 
 function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -86,6 +85,7 @@ interface PhotoData {
 
 export default function PhotoUpload() {
   // Multiple photo storage
+  const router = useRouter()
   const [photos, setPhotos] = useState<{
     camera?: PhotoData
     gallery?: PhotoData
