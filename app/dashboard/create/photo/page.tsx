@@ -589,9 +589,7 @@ export default function PhotoUpload() {
                   cameraInputRef.current?.click()
                 } else if (currentUploadMethod === 'gallery') {
                   fileInputRef.current?.click()
-                } else {
-                  uploadInputRef.current?.click()
-                }
+                
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#9ca3af'
