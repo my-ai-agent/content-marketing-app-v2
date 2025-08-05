@@ -728,60 +728,6 @@ export default function PhotoUpload() {
           )}
         </div>
 
-        {/* Photo Gallery Overview (when user has multiple photos) */}
-        {hasPhotos && (
-          <div style={{
-            marginBottom: '2rem',
-            padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            borderRadius: '1rem',
-            border: `1px solid ${BRAND_BLUE}`
-          }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#1f2937',
-              marginBottom: '0.75rem',
-              textAlign: 'center'
-            }}>
-              📸 Your Photo Collection ({photoCount})
-            </h3>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              flexWrap: 'wrap'
-            }}>
-              {Object.entries(photos).map(([type, photoData]) => (
-                <div key={type} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.5rem 0.75rem',
-                  backgroundColor: 'white',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  color: '#374151',
-                  border: '1px solid #e5e7eb'
-                }}>
-                  <span style={{ marginRight: '0.5rem' }}>
-                    {type === 'camera' ? '📷' : '📱'}
-                  </span>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </div>
-              ))}
-            </div>
-            <p style={{
-              fontSize: '0.75rem',
-              color: '#6b7280',
-              textAlign: 'center',
-              marginTop: '0.75rem',
-              marginBottom: 0
-            }}>
-              🤖 Claude will use all photos to create richer, more contextual content
-            </p>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div style={{
           display: 'flex',
