@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { getMacronCorrections, correctTranscriptionText } from '../../../utils/kupu'
+import { getMacronCorrections, correctTranscriptionText, KUPU_CORRECTIONS } from '../../../utils/kupu'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
