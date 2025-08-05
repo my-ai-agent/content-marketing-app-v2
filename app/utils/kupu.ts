@@ -29,6 +29,118 @@ export const KUPU_CORRECTIONS: KupuCorrection[] = [
     meaning: 'the Māori world/worldview',
     category: 'cultural'
   },
+  
+  // ADD THESE TO YOUR EXISTING /app/utils/kupu.ts FILE
+// Add these entries to your KUPU_CORRECTIONS array
+
+// TRANSCRIPTION-SPECIFIC CORRECTIONS (based on actual test failures)
+{
+  incorrect: ['tipakarirua village', 'tipakarirua', 'whaka village', 'wakarewa village', 'te whaka village'],
+  correct: 'Te Whakarewarewa Village',
+  meaning: 'living Māori village in Rotorua',
+  category: 'place'
+},
+{
+  incorrect: ['two hodungi n91 people', 'tuhorangi ngati wahiao', 'tuhourangi ngati wahiao', 'two hodungi people'],
+  correct: 'Tūhourangi Ngāti Wāhiao',
+  meaning: 'iwi of Te Whakarewarewa Village',
+  category: 'cultural'
+},
+{
+  incorrect: ['rotorua village', 'roto rua village', 'rotorua cultural village'],
+  correct: 'Rotorua',
+  meaning: 'city in Bay of Plenty region',
+  category: 'place'
+},
+{
+  incorrect: ['ngati wahiao people', 'nga wahiao people', 'ngati wahiao'],
+  correct: 'Ngāti Wāhiao',
+  meaning: 'hapū (sub-tribe) of Te Arawa',
+  category: 'cultural'
+},
+{
+  incorrect: ['te arawa people', 'tearawa people', 'te arawa iwi'],
+  correct: 'Te Arawa',
+  meaning: 'confederation of Māori iwi in central North Island',
+  category: 'cultural'
+},
+
+// ADDITIONAL TRANSCRIPTION PATTERNS
+{
+  incorrect: ['maori village', 'māori village', 'maori cultural village'],
+  correct: 'Māori village',
+  meaning: 'traditional Māori settlement',
+  category: 'cultural'
+},
+{
+  incorrect: ['geothermal village', 'thermal village', 'hot springs village'],
+  correct: 'geothermal village',
+  meaning: 'village built around natural hot springs',
+  category: 'place'
+},
+
+// NEW FUNCTION: Post-transcription correction specifically for voice input
+export const correctTranscriptionText = (transcribedText: string): {
+  correctedText: string,
+  corrections: {original: string, corrected: string, confidence: number}[]
+} => {
+  let correctedText = transcribedText
+  const corrections: {original: string, corrected: string, confidence: number}[] = []
+
+  // High-confidence transcription corrections (exact matches)
+  const transcriptionCorrections = [
+    // Critical cultural terms that often get mangled
+    { find: /tipakarirua village/gi, replace: 'Te Whakarewarewa Village', confidence: 100 },
+    { find: /tipakarirua/gi, replace: 'Te Whakarewarewa', confidence: 100 },
+    { find: /two hodungi n91 people/gi, replace: 'Tūhourangi Ngāti Wāhiao people', confidence: 100 },
+    { find: /two hodungi people/gi, replace: 'Tūhourangi Ngāti Wāhiao people', confidence: 100 },
+    { find: /tuhorangi ngati wahiao/gi, replace: 'Tūhourangi Ngāti Wāhiao', confidence: 95 },
+    { find: /ngati wahiao people/gi, replace: 'Ngāti Wāhiao people', confidence: 95 },
+    { find: /te arawa people/gi, replace: 'Te Arawa people', confidence: 90 },
+    
+    // Common place name issues
+    { find: /whaka village/gi, replace: 'Whakarewarewa Village', confidence: 85 },
+    { find: /wakarewa/gi, replace: 'Whakarewarewa', confidence: 85 },
+    
+    // Cultural context improvements
+    { find: /maori village/gi, replace: 'Māori village', confidence: 100 },
+    { find: /maori people/gi, replace: 'Māori people', confidence: 100 },
+    { find: /maori culture/gi, replace: 'Māori culture', confidence: 100 }
+  ]
+
+  // Apply transcription corrections
+  transcriptionCorrections.forEach(({ find, replace, confidence }) => {
+    if (find.test(correctedText)) {
+      const matches = correctedText.match(find)
+      if (matches) {
+        matches.forEach(match => {
+          corrections.push({
+            original: match,
+            corrected: replace,
+            confidence
+          })
+        })
+        correctedText = correctedText.replace(find, replace)
+      }
+    }
+  })
+
+  // Then apply standard kupu corrections
+  const standardCorrections = getMacronCorrections()
+  standardCorrections.forEach(({ original, corrected }) => {
+    const regex = new RegExp(`\\b${original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi')
+    if (regex.test(correctedText)) {
+      corrections.push({
+        original,
+        corrected,
+        confidence: 90
+      })
+      correctedText = correctedText.replace(regex, corrected)
+    }
+  })
+
+  return { correctedText, corrections }
+}
 
   // GREETINGS & COMMON PHRASES
   {
