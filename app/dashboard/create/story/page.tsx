@@ -113,13 +113,22 @@ export default function TellYourStory() {
       recognition.continuous = true // Allow longer recording
       recognition.interimResults = true // Show live transcription
       recognition.onresult = (event: any) => {
-        let transcript = ''
-        for (let i = 0; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript
-        }
-        setStory(transcript)
-        localStorage.setItem('userStoryContext', transcript)
-      }
+  let transcript = ''
+  for (let i = 0; i < event.results.length; i++) {
+    transcript += event.results[i][0].transcript
+  }
+  
+  // Apply Te Reo transcription correction
+  const { correctedText, corrections } = correctTranscriptionText(transcript)
+  
+  setStory(correctedText)
+  localStorage.setItem('userStoryContext', correctedText)
+  
+  // Log corrections for debugging
+  if (corrections.length > 0) {
+    console.log('🔧 Applied transcription corrections:', corrections)
+  }
+}
       recognition.onerror = () => {
         setRecording(false)
         setRecordingTime(0)
