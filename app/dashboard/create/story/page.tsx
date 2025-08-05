@@ -69,6 +69,10 @@ export default function TellYourStory() {
   const [showCopilotSuggestions, setShowCopilotSuggestions] = useState(false)
   const [copilotSuggestions, setCopilotSuggestions] = useState<{correctedText: string, suggestions: any[]}>({correctedText: '', suggestions: []})
   const [isCheckingSpelling, setIsCheckingSpelling] = useState(false)
+  const [voiceTranscriptionComplete, setVoiceTranscriptionComplete] = useState(false)
+  const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number}[]>([])
+  const [potentialMaoriWords, setPotentialMaoriWords] = useState<{word: string, position: number, suggestions: {correct: string, meaning: string}[]}[]>([])
+  const [showMaoriClarification, setShowMaoriClarification] = useState(false)
   
   // Voice recording states
   const [inputMethod, setInputMethod] = useState<'write' | 'speak'>('write')
@@ -106,6 +110,103 @@ export default function TellYourStory() {
   }, [])
 
   // Voice recording functions
+  // ADD THESE HELPER FUNCTIONS BEFORE startRecording:
+
+// Enhanced function to detect potential Māori words
+const detectPotentialMaoriWords = (text: string) => {
+  const words = text.split(/\s+/)
+  const potential: typeof potentialMaoriWords = []
+  
+  words.forEach((word, index) => {
+    const cleanWord = word.toLowerCase().replace(/[^\w]/g, '')
+    
+    // Skip very short words or common English words
+    if (cleanWord.length < 3) return
+    
+    // Check if word might be Māori but not in our corrections already
+    const hasVowelClusters = /[aeiou]{2,}/.test(cleanWord)
+    const hasDoubleVowels = /(aa|ee|ii|oo|uu|ai|au|ei|ou)/.test(cleanWord)
+    const endsWithTypicalMaori = /(nga|tanga|ranga|wai|mau|tau)$/.test(cleanWord)
+    const startsWithTypicalMaori = /^(nga|wha|kai|mau|tau|tuu|wai)/.test(cleanWord)
+    
+    // Check if it's similar to known kupu but not exact match
+    const similarKupu = KUPU_CORRECTIONS.filter(kupu => {
+      return kupu.incorrect.some(incorrect => 
+        // Levenshtein distance check for similarity
+        levenshteinDistance(cleanWord, incorrect.toLowerCase()) <= 2
+      ) || levenshteinDistance(cleanWord, kupu.correct.toLowerCase()) <= 2
+    })
+    
+    if ((hasVowelClusters || hasDoubleVowels || endsWithTypicalMaori || startsWithTypicalMaori) || similarKupu.length > 0) {
+      // Get suggestions from kupu library
+      const suggestions = similarKupu.slice(0, 3).map(kupu => ({
+        correct: kupu.correct,
+        meaning: kupu.meaning
+      }))
+      
+      if (suggestions.length > 0) {
+        potential.push({
+          word: cleanWord,
+          position: index,
+          suggestions
+        })
+      }
+    }
+  })
+  
+  return potential
+}
+
+// Simple Levenshtein distance function
+const levenshteinDistance = (str1: string, str2: string): number => {
+  const matrix = []
+  
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i]
+  }
+  
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j
+  }
+  
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1]
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        )
+      }
+    }
+  }
+  
+  return matrix[str2.length][str1.length]
+}
+
+// Function to apply Māori word suggestion
+const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
+  const updatedStory = story.replace(
+    new RegExp(`\\b${originalWord}\\b`, 'gi'),
+    suggestion
+  )
+  setStory(updatedStory)
+  localStorage.setItem('userStoryContext', updatedStory)
+  
+  // Remove from potential words list
+  setPotentialMaoriWords(prev => 
+    prev.filter(item => item.word !== originalWord)
+  )
+  
+  // Close clarification if no more words
+  if (potentialMaoriWords.length <= 1) {
+    setShowMaoriClarification(false)
+  }
+}
+
+// Voice recording functions (EXISTING)
   const startRecording = () => {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new (window as any).webkitSpeechRecognition()
