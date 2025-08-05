@@ -221,30 +221,47 @@ const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
         }
         
         // Apply Te Reo transcription correction
+        // Apply Te Reo transcription correction
         const { correctedText, corrections } = correctTranscriptionText(transcript)
         
         setStory(correctedText)
         localStorage.setItem('userStoryContext', correctedText)
+        
+        // Store corrections for summary
+        setTranscriptionCorrections(corrections)
+        
+        // Detect potential Māori words for clarification
+        const potentialWords = detectPotentialMaoriWords(correctedText)
+        setPotentialMaoriWords(potentialWords)
         
         // Log corrections for debugging
         if (corrections.length > 0) {
           console.log('🔧 Applied transcription corrections:', corrections)
         }
       }
-      
-      recognition.onerror = () => {
-        setRecording(false)
-        setRecordingTime(0)
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-        }
-      }
       recognition.onend = () => {
         setRecording(false)
         setRecordingTime(0)
+        setVoiceTranscriptionComplete(true)
+        
         if (timerRef.current) {
           clearInterval(timerRef.current)
         }
+        
+        // Auto-trigger spell check after 2 seconds
+        if (story.trim()) {
+          setTimeout(() => {
+            handleCopilotCheck()
+          }, 2000)
+        }
+        
+        // Show Māori word clarification if potential words found
+        if (potentialMaoriWords.length > 0) {
+          setTimeout(() => {
+            setShowMaoriClarification(true)
+          }, 3000)
+        }
+        
         // Show completion message if recording reached time limit
         if (recordingTime >= maxRecordingTime - 1) {
           setTimeout(() => {
