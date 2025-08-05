@@ -69,10 +69,6 @@ export default function TellYourStory() {
   const [showCopilotSuggestions, setShowCopilotSuggestions] = useState(false)
   const [copilotSuggestions, setCopilotSuggestions] = useState<{correctedText: string, suggestions: any[]}>({correctedText: '', suggestions: []})
   const [isCheckingSpelling, setIsCheckingSpelling] = useState(false)
-  const [voiceTranscriptionComplete, setVoiceTranscriptionComplete] = useState(false)
-  const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number}[]>([])
-  const [potentialMaoriWords, setPotentialMaoriWords] = useState<{word: string, position: number, suggestions: {correct: string, meaning: string}[]}[]>([])
-  const [showMaoriClarification, setShowMaoriClarification] = useState(false)
   
   // Voice recording states
   const [inputMethod, setInputMethod] = useState<'write' | 'speak'>('write')
@@ -80,7 +76,13 @@ export default function TellYourStory() {
   const [recordingTime, setRecordingTime] = useState(0)
   const recognitionRef = useRef<any>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const maxRecordingTime = 180 // UPDATED: 180 seconds (3 minutes) maximum
+  const maxRecordingTime = 180 // 180 seconds (3 minutes) maximum
+
+  // Enhanced voice transcription states
+  const [voiceTranscriptionComplete, setVoiceTranscriptionComplete] = useState(false)
+  const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number}[]>([])
+  const [potentialMaoriWords, setPotentialMaoriWords] = useState<{word: string, position: number, suggestions: {correct: string, meaning: string}[]}[]>([])
+  const [showMaoriClarification, setShowMaoriClarification] = useState(false)
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -109,104 +111,101 @@ export default function TellYourStory() {
     }
   }, [])
 
-  // Voice recording functions
-  // ADD THESE HELPER FUNCTIONS BEFORE startRecording:
-
-// Enhanced function to detect potential Māori words
-const detectPotentialMaoriWords = (text: string) => {
-  const words = text.split(/\s+/)
-  const potential: typeof potentialMaoriWords = []
-  
-  words.forEach((word, index) => {
-    const cleanWord = word.toLowerCase().replace(/[^\w]/g, '')
+  // Enhanced function to detect potential Māori words
+  const detectPotentialMaoriWords = (text: string) => {
+    const words = text.split(/\s+/)
+    const potential: typeof potentialMaoriWords = []
     
-    // Skip very short words or common English words
-    if (cleanWord.length < 3) return
-    
-    // Check if word might be Māori but not in our corrections already
-    const hasVowelClusters = /[aeiou]{2,}/.test(cleanWord)
-    const hasDoubleVowels = /(aa|ee|ii|oo|uu|ai|au|ei|ou)/.test(cleanWord)
-    const endsWithTypicalMaori = /(nga|tanga|ranga|wai|mau|tau)$/.test(cleanWord)
-    const startsWithTypicalMaori = /^(nga|wha|kai|mau|tau|tuu|wai)/.test(cleanWord)
-    
-    // Check if it's similar to known kupu but not exact match
-    const similarKupu = KUPU_CORRECTIONS.filter(kupu => {
-      return kupu.incorrect.some(incorrect => 
-        // Levenshtein distance check for similarity
-        levenshteinDistance(cleanWord, incorrect.toLowerCase()) <= 2
-      ) || levenshteinDistance(cleanWord, kupu.correct.toLowerCase()) <= 2
+    words.forEach((word, index) => {
+      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '')
+      
+      // Skip very short words or common English words
+      if (cleanWord.length < 3) return
+      
+      // Check if word might be Māori but not in our corrections already
+      const hasVowelClusters = /[aeiou]{2,}/.test(cleanWord)
+      const hasDoubleVowels = /(aa|ee|ii|oo|uu|ai|au|ei|ou)/.test(cleanWord)
+      const endsWithTypicalMaori = /(nga|tanga|ranga|wai|mau|tau)$/.test(cleanWord)
+      const startsWithTypicalMaori = /^(nga|wha|kai|mau|tau|tuu|wai)/.test(cleanWord)
+      
+      // Check if it's similar to known kupu but not exact match
+      const similarKupu = KUPU_CORRECTIONS.filter(kupu => {
+        return kupu.incorrect.some(incorrect => 
+          // Levenshtein distance check for similarity
+          levenshteinDistance(cleanWord, incorrect.toLowerCase()) <= 2
+        ) || levenshteinDistance(cleanWord, kupu.correct.toLowerCase()) <= 2
+      })
+      
+      if ((hasVowelClusters || hasDoubleVowels || endsWithTypicalMaori || startsWithTypicalMaori) || similarKupu.length > 0) {
+        // Get suggestions from kupu library
+        const suggestions = similarKupu.slice(0, 3).map(kupu => ({
+          correct: kupu.correct,
+          meaning: kupu.meaning
+        }))
+        
+        if (suggestions.length > 0) {
+          potential.push({
+            word: cleanWord,
+            position: index,
+            suggestions
+          })
+        }
+      }
     })
     
-    if ((hasVowelClusters || hasDoubleVowels || endsWithTypicalMaori || startsWithTypicalMaori) || similarKupu.length > 0) {
-      // Get suggestions from kupu library
-      const suggestions = similarKupu.slice(0, 3).map(kupu => ({
-        correct: kupu.correct,
-        meaning: kupu.meaning
-      }))
-      
-      if (suggestions.length > 0) {
-        potential.push({
-          word: cleanWord,
-          position: index,
-          suggestions
-        })
+    return potential
+  }
+
+  // Simple Levenshtein distance function
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix = []
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i]
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1]
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          )
+        }
       }
     }
-  })
-  
-  return potential
-}
+    
+    return matrix[str2.length][str1.length]
+  }
 
-// Simple Levenshtein distance function
-const levenshteinDistance = (str1: string, str2: string): number => {
-  const matrix = []
-  
-  for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i]
-  }
-  
-  for (let j = 0; j <= str1.length; j++) {
-    matrix[0][j] = j
-  }
-  
-  for (let i = 1; i <= str2.length; i++) {
-    for (let j = 1; j <= str1.length; j++) {
-      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1]
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        )
-      }
+  // Function to apply Māori word suggestion
+  const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
+    const updatedStory = story.replace(
+      new RegExp(`\\b${originalWord}\\b`, 'gi'),
+      suggestion
+    )
+    setStory(updatedStory)
+    localStorage.setItem('userStoryContext', updatedStory)
+    
+    // Remove from potential words list
+    setPotentialMaoriWords(prev => 
+      prev.filter(item => item.word !== originalWord)
+    )
+    
+    // Close clarification if no more words
+    if (potentialMaoriWords.length <= 1) {
+      setShowMaoriClarification(false)
     }
   }
-  
-  return matrix[str2.length][str1.length]
-}
 
-// Function to apply Māori word suggestion
-const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
-  const updatedStory = story.replace(
-    new RegExp(`\\b${originalWord}\\b`, 'gi'),
-    suggestion
-  )
-  setStory(updatedStory)
-  localStorage.setItem('userStoryContext', updatedStory)
-  
-  // Remove from potential words list
-  setPotentialMaoriWords(prev => 
-    prev.filter(item => item.word !== originalWord)
-  )
-  
-  // Close clarification if no more words
-  if (potentialMaoriWords.length <= 1) {
-    setShowMaoriClarification(false)
-  }
-}
-
-// Voice recording functions (EXISTING)
+  // Voice recording functions
   const startRecording = () => {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new (window as any).webkitSpeechRecognition()
@@ -220,7 +219,6 @@ const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
           transcript += event.results[i][0].transcript
         }
         
-        // Apply Te Reo transcription correction
         // Apply Te Reo transcription correction
         const { correctedText, corrections } = correctTranscriptionText(transcript)
         
@@ -239,6 +237,15 @@ const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
           console.log('🔧 Applied transcription corrections:', corrections)
         }
       }
+      
+      recognition.onerror = () => {
+        setRecording(false)
+        setRecordingTime(0)
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+        }
+      }
+
       recognition.onend = () => {
         setRecording(false)
         setRecordingTime(0)
@@ -628,255 +635,6 @@ const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
               alignItems: 'center',
               gap: '1rem'
             }}>
-              {/* Voice Transcription Complete - Auto Actions */}
-        {inputMethod === 'speak' && voiceTranscriptionComplete && story && (
-          <div style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #0ea5e9',
-            borderRadius: '0.75rem'
-          }}>
-            <h4 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#0c4a6e',
-              marginBottom: '0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              🎤 Review Your Voice-to-Text Story
-            </h4>
-            
-            {/* Correction Summary */}
-            {transcriptionCorrections.length > 0 && (
-              <div style={{
-                marginBottom: '0.75rem',
-                padding: '0.5rem',
-                backgroundColor: '#dcfce7',
-                borderRadius: '0.5rem',
-                border: '1px solid #16a34a'
-              }}>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: '#15803d',
-                  margin: 0,
-                  fontWeight: '500'
-                }}>
-                  ✅ Auto-corrected {transcriptionCorrections.length} cultural term(s):
-                </p>
-                <ul style={{
-                  fontSize: '0.75rem',
-                  color: '#166534',
-                  margin: '0.25rem 0 0 1rem',
-                  padding: 0
-                }}>
-                  {transcriptionCorrections.slice(0, 3).map((correction, index) => (
-                    <li key={index}>
-                      <span style={{ textDecoration: 'line-through' }}>{correction.original}</span>
-                      {' → '}
-                      <span style={{ fontWeight: '600' }}>{correction.corrected}</span>
-                    </li>
-                  ))}
-                  {transcriptionCorrections.length > 3 && (
-                    <li style={{ fontStyle: 'italic' }}>
-                      ...and {transcriptionCorrections.length - 3} more
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-            
-            <p style={{
-              fontSize: '0.875rem',
-              color: '#0369a1',
-              marginBottom: '0.75rem'
-            }}>
-              Auto-checking spelling and grammar in 2 seconds...
-            </p>
-            
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#64748b'
-            }}>
-              💡 Your story will be automatically reviewed for any remaining errors
-            </div>
-          </div>
-        )}
-
-        {/* Māori Word Clarification Panel */}
-        {showMaoriClarification && potentialMaoriWords.length > 0 && (
-          <div style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            backgroundColor: '#fef3c7',
-            border: '2px solid #f59e0b',
-            borderRadius: '0.75rem',
-            position: 'relative'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.75rem'
-            }}>
-              <h4 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: '#92400e',
-                margin: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                🏛️ Māori Cultural Terms - Please Verify
-              </h4>
-              <button
-                onClick={() => setShowMaoriClarification(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.25rem',
-                  cursor: 'pointer',
-                  color: '#92400e'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <p style={{
-              fontSize: '0.875rem',
-              color: '#a16207',
-              marginBottom: '1rem'
-            }}>
-              We detected words that might be Māori cultural terms. Please select the correct spelling:
-            </p>
-            
-            {potentialMaoriWords.slice(0, 2).map((wordItem, index) => (
-              <div key={index} style={{
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                border: '1px solid #f59e0b'
-              }}>
-                <p style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: '#92400e',
-                  marginBottom: '0.5rem'
-                }}>
-                  Did you mean "{wordItem.word}"?
-                </p>
-                
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '0.5rem'
-                }}>
-                  {wordItem.suggestions.map((suggestion, suggestionIndex) => (
-                    <button
-                      key={suggestionIndex}
-                      onClick={() => applyMaoriSuggestion(wordItem.word, suggestion.correct)}
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        backgroundColor: '#16a34a',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        minWidth: '120px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#15803d'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#16a34a'
-                      }}
-                    >
-                      <span style={{ fontWeight: '600' }}>{suggestion.correct}</span>
-                      <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-                        {suggestion.meaning.slice(0, 20)}...
-                      </span>
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => applyMaoriSuggestion(wordItem.word, wordItem.word)}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      backgroundColor: '#6b7280',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Keep "{wordItem.word}"
-                  </button>
-                </div>
-              </div>
-            ))}
-            
-            {potentialMaoriWords.length > 2 && (
-              <p style={{
-                fontSize: '0.75rem',
-                color: '#a16207',
-                fontStyle: 'italic',
-                textAlign: 'center'
-              }}>
-                ...and {potentialMaoriWords.length - 2} more terms to review
-              </p>
-            )}
-          </div>
-        )}
-              )}
-
-        {/* ADD THE NEW UI COMPONENTS HERE - RIGHT AFTER LINE 636 */}
-        
-        {/* Voice Transcription Complete - Auto Actions */}
-        {inputMethod === 'speak' && voiceTranscriptionComplete && story && (
-          <div style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #0ea5e9',
-            borderRadius: '0.75rem'
-          }}>
-            <h4 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#0c4a6e',
-              marginBottom: '0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              🎤 Review Your Voice-to-Text Story
-            </h4>
-            
-            {/* ... rest of the first UI component */}
-          </div>
-        )}
-
-        {/* Māori Word Clarification Panel */}
-        {showMaoriClarification && potentialMaoriWords.length > 0 && (
-          <div style={{
-            /* ... Māori clarification UI */
-          }}>
-          </div>
-        )}
-
-        {/* Spell Check Section with Enhanced Instructions - EXISTING CODE CONTINUES */}
-        {story && inputMethod === 'write' && (
               <div style={{
                 fontSize: '3rem',
                 marginBottom: '1rem'
@@ -963,6 +721,217 @@ const applyMaoriSuggestion = (originalWord: string, suggestion: string) => {
                     {story}
                   </p>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Voice Transcription Complete - Auto Actions */}
+          {inputMethod === 'speak' && voiceTranscriptionComplete && story && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #0ea5e9',
+              borderRadius: '0.75rem'
+            }}>
+              <h4 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: '#0c4a6e',
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                🎤 Review Your Voice-to-Text Story
+              </h4>
+              
+              {/* Correction Summary */}
+              {transcriptionCorrections.length > 0 && (
+                <div style={{
+                  marginBottom: '0.75rem',
+                  padding: '0.5rem',
+                  backgroundColor: '#dcfce7',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #16a34a'
+                }}>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: '#15803d',
+                    margin: 0,
+                    fontWeight: '500'
+                  }}>
+                    ✅ Auto-corrected {transcriptionCorrections.length} cultural term(s):
+                  </p>
+                  <ul style={{
+                    fontSize: '0.75rem',
+                    color: '#166534',
+                    margin: '0.25rem 0 0 1rem',
+                    padding: 0
+                  }}>
+                    {transcriptionCorrections.slice(0, 3).map((correction, index) => (
+                      <li key={index}>
+                        <span style={{ textDecoration: 'line-through' }}>{correction.original}</span>
+                        {' → '}
+                        <span style={{ fontWeight: '600' }}>{correction.corrected}</span>
+                      </li>
+                    ))}
+                    {transcriptionCorrections.length > 3 && (
+                      <li style={{ fontStyle: 'italic' }}>
+                        ...and {transcriptionCorrections.length - 3} more
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+              
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#0369a1',
+                marginBottom: '0.75rem'
+              }}>
+                Auto-checking spelling and grammar in 2 seconds...
+              </p>
+              
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#64748b'
+              }}>
+                💡 Your story will be automatically reviewed for any remaining errors
+              </div>
+            </div>
+          )}
+
+          {/* Māori Word Clarification Panel */}
+          {showMaoriClarification && potentialMaoriWords.length > 0 && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#fef3c7',
+              border: '2px solid #f59e0b',
+              borderRadius: '0.75rem',
+              position: 'relative'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.75rem'
+              }}>
+                <h4 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#92400e',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  🏛️ Māori Cultural Terms - Please Verify
+                </h4>
+                <button
+                  onClick={() => setShowMaoriClarification(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.25rem',
+                    cursor: 'pointer',
+                    color: '#92400e'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#a16207',
+                marginBottom: '1rem'
+              }}>
+                We detected words that might be Māori cultural terms. Please select the correct spelling:
+              </p>
+              
+              {potentialMaoriWords.slice(0, 2).map((wordItem, index) => (
+                <div key={index} style={{
+                  marginBottom: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #f59e0b'
+                }}>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: '#92400e',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Did you mean "{wordItem.word}"?
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    {wordItem.suggestions.map((suggestion, suggestionIndex) => (
+                      <button
+                        key={suggestionIndex}
+                        onClick={() => applyMaoriSuggestion(wordItem.word, suggestion.correct)}
+                        style={{
+                          padding: '0.5rem 0.75rem',
+                          backgroundColor: '#16a34a',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          minWidth: '120px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#15803d'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#16a34a'
+                        }}
+                      >
+                        <span style={{ fontWeight: '600' }}>{suggestion.correct}</span>
+                        <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                          {suggestion.meaning.slice(0, 20)}...
+                        </span>
+                      </button>
+                    ))}
+                    
+                    <button
+                      onClick={() => applyMaoriSuggestion(wordItem.word, wordItem.word)}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '0.375rem',
+                        fontSize: '0.875rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Keep "{wordItem.word}"
+                    </button>
+                  </div>
+                </div>
+              ))}
+              
+              {potentialMaoriWords.length > 2 && (
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: '#a16207',
+                  fontStyle: 'italic',
+                  textAlign: 'center'
+                }}>
+                  ...and {potentialMaoriWords.length - 2} more terms to review
+                </p>
               )}
             </div>
           )}
