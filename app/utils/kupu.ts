@@ -77,8 +77,8 @@ export const KUPU_CORRECTIONS: KupuCorrection[] = [
   correct: 'geothermal village',
   meaning: 'village built around natural hot springs',
   category: 'place'
-},
-
+}
+]
 // NEW FUNCTION: Post-transcription correction specifically for voice input
 export const correctTranscriptionText = (transcribedText: string): {
   correctedText: string,
