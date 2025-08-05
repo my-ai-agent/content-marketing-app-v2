@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { getMacronCorrections } from '../../../utils/kupu'
+import { getMacronCorrections, correctTranscriptionText } from '../../../utils/kupu'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -76,7 +76,7 @@ export default function TellYourStory() {
   const [recordingTime, setRecordingTime] = useState(0)
   const recognitionRef = useRef<any>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const maxRecordingTime = 90 // 90 seconds maximum
+  const maxRecordingTime = 180 // UPDATED: 180 seconds (3 minutes) maximum
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -112,23 +112,25 @@ export default function TellYourStory() {
       recognition.lang = 'en-NZ' // New Zealand English - critical for correct vocabulary
       recognition.continuous = true // Allow longer recording
       recognition.interimResults = true // Show live transcription
+      
       recognition.onresult = (event: any) => {
-  let transcript = ''
-  for (let i = 0; i < event.results.length; i++) {
-    transcript += event.results[i][0].transcript
-  }
-  
-  // Apply Te Reo transcription correction
-  const { correctedText, corrections } = correctTranscriptionText(transcript)
-  
-  setStory(correctedText)
-  localStorage.setItem('userStoryContext', correctedText)
-  
-  // Log corrections for debugging
-  if (corrections.length > 0) {
-    console.log('🔧 Applied transcription corrections:', corrections)
-  }
-}
+        let transcript = ''
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript
+        }
+        
+        // Apply Te Reo transcription correction
+        const { correctedText, corrections } = correctTranscriptionText(transcript)
+        
+        setStory(correctedText)
+        localStorage.setItem('userStoryContext', correctedText)
+        
+        // Log corrections for debugging
+        if (corrections.length > 0) {
+          console.log('🔧 Applied transcription corrections:', corrections)
+        }
+      }
+      
       recognition.onerror = () => {
         setRecording(false)
         setRecordingTime(0)
@@ -515,7 +517,7 @@ export default function TellYourStory() {
                 {recording ? '🎙️' : '🎤'}
               </div>
 
-              {recording && recordingTime >= 80 && (
+              {recording && recordingTime >= 170 && (
                 <div style={{
                   fontSize: '1rem',
                   fontWeight: '600',
@@ -563,8 +565,8 @@ export default function TellYourStory() {
                 lineHeight: '1.4'
               }}>
                 {recording 
-                  ? 'Share your experience naturally... Claude AI will create your full LinkedIn story from this!' 
-                  : 'Record up to 90 seconds about your experience. Claude AI will transform it into a compelling LinkedIn story.'}
+                  ? 'Share your experience naturally... Claude AI will create your full story from this!' 
+                  : 'Record up to 3 minutes about your experience. Claude AI will transform it into compelling content.'}
               </p>
 
               {story && (
