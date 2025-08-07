@@ -1,641 +1,507 @@
+// /app/dashboard/create/photo/page.tsx - COMPLETE MOBILE-OPTIMIZED VERSION
 'use client'
-import Link from 'next/link'
-import { useState, useRef, useEffect } from 'react'
+
+import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
-// Enhanced IndexedDB helper for multiple photos
-const DB_NAME = 'PhotoAppDB'
-const STORE_NAME = 'photos'
+// Mobile-optimized constants
+const MOBILE_MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB for mobile cameras
+const DESKTOP_MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB for desktop
+const MAX_DIMENSION = 1600 // Optimal for mobile processing
+const COMPRESSION_QUALITY = 0.85 // High quality but mobile-friendly
+const STORAGE_QUOTA_BUFFER = 5 * 1024 * 1024 // 5MB buffer for storage
 
-function saveImageToIndexedDB(key: string, data: Blob): Promise<void> {
+// Unified image processing with mobile optimization
+const processImageForMobile = async (file: File): Promise<{
+  processedBlob: Blob;
+  dataUrl: string;
+  metadata: {
+    originalSize: number;
+    processedSize: number;
+    compressionRatio: number;
+    dimensions: { width: number; height: number };
+  };
+}> => {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onupgradeneeded = () => {
-      req.result.createObjectStore(STORE_NAME)
+    // Check if we're on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const maxFileSize = isMobile ? MOBILE_MAX_FILE_SIZE : DESKTOP_MAX_FILE_SIZE;
+    
+    if (file.size > maxFileSize) {
+      reject(new Error(`Image too large. Maximum size: ${Math.round(maxFileSize / 1024 / 1024)}MB`));
+      return;
     }
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      tx.objectStore(STORE_NAME).put(data, key)
-      tx.oncomplete = () => {
-        db.close()
-        resolve()
-      }
-      tx.onerror = () => reject(tx.error)
+
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Canvas not supported'));
+      return;
     }
-  })
-}
 
-function removeImageFromIndexedDB(key: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      tx.objectStore(STORE_NAME).delete(key)
-      tx.oncomplete = () => {
-        db.close()
-        resolve()
-      }
-      tx.onerror = () => reject(tx.error)
-    }
-  })
-}
-
-function getImageFromIndexedDB(key: string): Promise<Blob | null> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1)
-    req.onerror = () => reject(req.error)
-    req.onsuccess = () => {
-      const db = req.result
-      const tx = db.transaction(STORE_NAME, 'readonly')
-      const getReq = tx.objectStore(STORE_NAME).get(key)
-      
-      getReq.onsuccess = () => {
-        db.close()
-        resolve(getReq.result || null)
-      }
-      getReq.onerror = () => {
-        db.close()
-        reject(getReq.error)
-      }
-    }
-  })
-}
-
-const BRAND_PURPLE = '#6B2EFF'
-const BRAND_ORANGE = '#FF7B1C'
-const BRAND_BLUE = '#11B3FF'
-
-// Compression config for mobile-optimized, localStorage/IndexedDB safe
-const MAX_WIDTH = 1280
-const MAX_HEIGHT = 1280
-const OUTPUT_QUALITY = 0.80
-
-interface PhotoData {
-  blob: Blob
-  url: string
-  fileName: string
-  fileSize: number
-  uploadMethod: 'camera' | 'gallery'
-  timestamp: number
-}
-
-export default function PhotoUpload() {
-  // Multiple photo storage
-  const router = useRouter()
-  const [photos, setPhotos] = useState<{
-    camera?: PhotoData
-    gallery?: PhotoData
-  }>({})
-  
-  const [currentUploadMethod, setCurrentUploadMethod] = useState<'camera' | 'gallery'>('gallery')
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-
-  // Load existing photos on component mount
-  useEffect(() => {
-    loadExistingPhotos()
-  }, [])
-
-  const loadExistingPhotos = async () => {
-    try {
-      // Load photo metadata from localStorage
-      const photoMetadata = localStorage.getItem('photoMetadata')
-      if (photoMetadata) {
-        const metadata = JSON.parse(photoMetadata)
-        const loadedPhotos: typeof photos = {}
+    img.onload = () => {
+      try {
+        // Calculate optimal dimensions for mobile
+        let { width, height } = img;
+        const aspectRatio = width / height;
         
-        // Load each photo from IndexedDB
-        for (const [type, data] of Object.entries(metadata)) {
-          if (type === 'camera' || type === 'gallery') { // Only load camera and gallery
-            const blob = await getImageFromIndexedDB(`photo_${type}`)
-            if (blob && typeof data === 'object' && data !== null) {
-              loadedPhotos[type as keyof typeof photos] = {
-                blob,
-                url: URL.createObjectURL(blob),
-                fileName: (data as any).fileName || 'Unknown',
-                fileSize: (data as any).fileSize || 0,
-                uploadMethod: (data as any).uploadMethod || type as 'camera' | 'gallery',
-                timestamp: (data as any).timestamp || Date.now()
-              }
-            }
+        // Smart resizing based on device and file size
+        let targetDimension = MAX_DIMENSION;
+        if (isMobile && file.size > 10 * 1024 * 1024) {
+          targetDimension = 1200; // More aggressive for large mobile files
+        }
+        
+        if (width > targetDimension || height > targetDimension) {
+          if (width > height) {
+            width = targetDimension;
+            height = Math.round(targetDimension / aspectRatio);
+          } else {
+            height = targetDimension;
+            width = Math.round(targetDimension * aspectRatio);
           }
         }
         
-        setPhotos(loadedPhotos)
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Mobile-optimized drawing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Failed to process image'));
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = reader.result as string;
+            const compressionRatio = Math.round(((file.size - blob.size) / file.size) * 100);
+            
+            resolve({
+              processedBlob: blob,
+              dataUrl,
+              metadata: {
+                originalSize: file.size,
+                processedSize: blob.size,
+                compressionRatio,
+                dimensions: { width, height }
+              }
+            });
+          };
+          reader.onerror = () => reject(new Error('Failed to read processed image'));
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', COMPRESSION_QUALITY);
+        
+      } catch (error) {
+        reject(error);
       }
-    } catch (err) {
-      console.error('Failed to load existing photos:', err)
-    }
-  }
+    };
+    
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = URL.createObjectURL(file);
+  });
+};
 
-  // Compress image using pica, loaded dynamically
-  const compressWithPica = async (imgSrc: string): Promise<Blob> => {
-    setIsProcessing(true)
-    setError(null)
+// Enhanced IndexedDB with mobile optimization
+const DB_NAME = 'tourism-photos-v2';
+const STORE_NAME = 'photos';
+const DB_VERSION = 2;
+
+const initDB = async () => {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+};
+
+const saveToIndexedDB = async (key: string, data: Blob): Promise<void> => {
+  try {
+    // Check storage quota before saving
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      const estimate = await navigator.storage.estimate();
+      const used = estimate.usage || 0;
+      const quota = estimate.quota || 0;
+      
+      if (used + data.size + STORAGE_QUOTA_BUFFER > quota) {
+        throw new Error('Storage quota exceeded. Please free up space and try again.');
+      }
+    }
+    
+    const db = await initDB();
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    await new Promise<void>((resolve, reject) => {
+      const request = store.put(data, key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+    
+    db.close();
+  } catch (error) {
+    console.error('IndexedDB save failed:', error);
+    throw error;
+  }
+};
+
+const getFromIndexedDB = async (key: string): Promise<Blob | null> => {
+  try {
+    const db = await initDB();
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    const result = await new Promise<Blob | null>((resolve, reject) => {
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+    
+    db.close();
+    return result;
+  } catch (error) {
+    console.error('IndexedDB get failed:', error);
+    return null;
+  }
+};
+
+const deleteFromIndexedDB = async (key: string): Promise<void> => {
+  try {
+    const db = await initDB();
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    await new Promise<void>((resolve, reject) => {
+      const request = store.delete(key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+    
+    db.close();
+  } catch (error) {
+    console.error('IndexedDB delete failed:', error);
+  }
+};
+
+// Handle HEIC conversion for iPhone photos
+const convertHeicToJpeg = async (file: File): Promise<File> => {
+  try {
+    const heic2any = (await import('heic2any')).default;
+    const convertedBlob = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.9
+    }) as Blob;
+    
+    return new File([convertedBlob], file.name.replace(/\.heic$/i, '.jpg'), {
+      type: 'image/jpeg'
+    });
+  } catch (error) {
+    throw new Error('Failed to convert iPhone photo. Please try a different image.');
+  }
+};
+
+interface PhotoData {
+  blob: Blob;
+  dataUrl: string;
+  fileName: string;
+  fileSize: number;
+  uploadMethod: 'camera' | 'gallery';
+  timestamp: number;
+  metadata: {
+    originalSize: number;
+    processedSize: number;
+    compressionRatio: number;
+    dimensions: { width: number; height: number };
+  };
+}
+
+const PhotoUploadPage: React.FC = () => {
+  const router = useRouter();
+  const [photos, setPhotos] = useState<{ camera?: PhotoData; gallery?: PhotoData }>({});
+  const [currentMethod, setCurrentMethod] = useState<'camera' | 'gallery'>('gallery');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [processingStep, setProcessingStep] = useState<string>('');
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Load existing photos on mount
+  useEffect(() => {
+    loadExistingPhotos();
+  }, []);
+
+  const loadExistingPhotos = async () => {
     try {
-      const picaModule = await import('pica')
-      const picaInstance = picaModule.default()
-      const img = document.createElement('img')
-      img.src = imgSrc
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = (err) => reject(new Error('Image load failed'))
-      })
-
-      if (!img.naturalWidth || !img.naturalHeight) {
-        throw new Error('Image has invalid dimensions')
+      const photoMetadata = localStorage.getItem('photoMetadata_v2');
+      if (!photoMetadata) return;
+      
+      const metadata = JSON.parse(photoMetadata);
+      const loadedPhotos: typeof photos = {};
+      
+      for (const [type, data] of Object.entries(metadata)) {
+        if ((type === 'camera' || type === 'gallery') && data) {
+          const blob = await getFromIndexedDB(`photo_${type}`);
+          if (blob) {
+            loadedPhotos[type as keyof typeof photos] = {
+              blob,
+              dataUrl: URL.createObjectURL(blob),
+              fileName: (data as any).fileName || 'Unknown',
+              fileSize: (data as any).fileSize || 0,
+              uploadMethod: (data as any).uploadMethod || type as 'camera' | 'gallery',
+              timestamp: (data as any).timestamp || Date.now(),
+              metadata: (data as any).metadata || {
+                originalSize: 0,
+                processedSize: blob.size,
+                compressionRatio: 0,
+                dimensions: { width: 0, height: 0 }
+              }
+            };
+          }
+        }
       }
-
-      let { width, height } = img
-      let scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height, 1)
-      let newW = Math.round(width * scale)
-      let newH = Math.round(height * scale)
-      const inputCanvas = document.createElement('canvas')
-      inputCanvas.width = width
-      inputCanvas.height = height
-      const inputCtx = inputCanvas.getContext('2d')
-      if (!inputCtx) throw new Error('Could not get canvas context')
-      inputCtx.drawImage(img, 0, 0)
-      const outputCanvas = document.createElement('canvas')
-      outputCanvas.width = newW
-      outputCanvas.height = newH
-      await picaInstance.resize(inputCanvas, outputCanvas)
-      const blob = await picaInstance.toBlob(outputCanvas, 'image/jpeg', OUTPUT_QUALITY)
-      URL.revokeObjectURL(img.src)
-      return blob
-    } finally {
-      setIsProcessing(false)
+      
+      setPhotos(loadedPhotos);
+    } catch (error) {
+      console.error('Failed to load existing photos:', error);
     }
-  }
+  };
 
   const savePhotoMetadata = (updatedPhotos: typeof photos) => {
-    // Save metadata (without blobs) to localStorage
-    const metadata: any = {}
+    const metadata: any = {};
     Object.entries(updatedPhotos).forEach(([type, photoData]) => {
       if (photoData) {
         metadata[type] = {
           fileName: photoData.fileName,
           fileSize: photoData.fileSize,
           uploadMethod: photoData.uploadMethod,
-          timestamp: photoData.timestamp
-        }
+          timestamp: photoData.timestamp,
+          metadata: photoData.metadata
+        };
       }
-    })
-    localStorage.setItem('photoMetadata', JSON.stringify(metadata))
-  }
+    });
+    localStorage.setItem('photoMetadata_v2', JSON.stringify(metadata));
+  };
 
-  const handleNext = async () => {
-    setError(null)
-    const photoCount = Object.keys(photos).length
-    
-    if (photoCount > 0) {
-      try {
-        // Save all photos metadata for Claude integration
-        savePhotoMetadata(photos)
-        
-        // Store photo count for Claude prompt enhancement
-        localStorage.setItem('photoCount', photoCount.toString())
-        localStorage.setItem('photoTypes', Object.keys(photos).join(','))
-        
-        router.push('/dashboard/create/story')
-      } catch {
-        setError('Failed to save photos. Storage quota may be exceeded.')
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setIsProcessing(true);
+    setProcessingStep('Validating image...');
+
+    try {
+      let processedFile = file;
+
+      // Handle HEIC files from iPhone
+      if (file.type === 'image/heic' || file.type === 'image/heif' || 
+          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+        setProcessingStep('Converting iPhone photo...');
+        processedFile = await convertHeicToJpeg(file);
       }
-    } else {
-      alert('Please add at least one photo before continuing.')
-    }
-  }
 
-  const handleSkip = async () => {
-    setError(null)
-    
-    // Clear all photos (keep legacy 'upload' for cleanup)
-    for (const type of ['camera', 'gallery', 'upload']) {
-      await removeImageFromIndexedDB(`photo_${type}`)
+      // Validate file type
+      if (!processedFile.type.startsWith('image/')) {
+        throw new Error('Please select a valid image file');
+      }
+
+      // Process image for mobile optimization
+      setProcessingStep('Optimizing image for mobile...');
+      const { processedBlob, dataUrl, metadata } = await processImageForMobile(processedFile);
+
+      // Save to IndexedDB
+      setProcessingStep('Saving image...');
+      await saveToIndexedDB(`photo_${currentMethod}`, processedBlob);
+
+      // Create photo data
+      const photoData: PhotoData = {
+        blob: processedBlob,
+        dataUrl,
+        fileName: processedFile.name,
+        fileSize: processedFile.size,
+        uploadMethod: currentMethod,
+        timestamp: Date.now(),
+        metadata
+      };
+
+      // Update state
+      const updatedPhotos = { ...photos, [currentMethod]: photoData };
+      setPhotos(updatedPhotos);
+      savePhotoMetadata(updatedPhotos);
+
+      setProcessingStep('Complete!');
+      setTimeout(() => setProcessingStep(''), 2000);
+
+    } catch (error) {
+      console.error('File processing error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to process image');
+    } finally {
+      setIsProcessing(false);
+      // Clear file inputs
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
-    
-    // Clear localStorage
-    localStorage.removeItem('photoMetadata')
-    localStorage.removeItem('photoCount')
-    localStorage.removeItem('photoTypes')
-    
-    setPhotos({})
-    router.push('/dashboard/create/story')
-  }
+  };
 
   const handleRemovePhoto = async (type: 'camera' | 'gallery') => {
-    // Remove from IndexedDB
-    await removeImageFromIndexedDB(`photo_${type}`)
+    await deleteFromIndexedDB(`photo_${type}`);
     
-    // Remove from state
-    const updatedPhotos = { ...photos }
+    const updatedPhotos = { ...photos };
     if (updatedPhotos[type]) {
-      URL.revokeObjectURL(updatedPhotos[type]!.url)
-      delete updatedPhotos[type]
+      URL.revokeObjectURL(updatedPhotos[type]!.dataUrl);
+      delete updatedPhotos[type];
     }
-    setPhotos(updatedPhotos)
     
-    // Update metadata
-    savePhotoMetadata(updatedPhotos)
+    setPhotos(updatedPhotos);
+    savePhotoMetadata(updatedPhotos);
+  };
+
+  const handleContinue = () => {
+    const photoCount = Object.keys(photos).length;
+    if (photoCount === 0) {
+      setError('Please add at least one photo before continuing');
+      return;
+    }
+
+    // Save photo data for next step
+    savePhotoMetadata(photos);
+    localStorage.setItem('photoCount_v2', photoCount.toString());
+    localStorage.setItem('photoTypes_v2', Object.keys(photos).join(','));
     
-    // Clear file inputs
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    if (cameraInputRef.current) cameraInputRef.current.value = ''
-  }
+    router.push('/dashboard/create/story');
+  };
 
-  // Enhanced file select handler for multiple photo storage
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    const file = e.target.files && e.target.files[0]
-    if (!file) return
+  const handleSkip = async () => {
+    // Clean up all data
+    await deleteFromIndexedDB('photo_camera');
+    await deleteFromIndexedDB('photo_gallery');
+    localStorage.removeItem('photoMetadata_v2');
+    localStorage.removeItem('photoCount_v2');
+    localStorage.removeItem('photoTypes_v2');
+    
+    setPhotos({});
+    router.push('/dashboard/create/story');
+  };
 
-    // File size limit (10MB)
-    const MAX_FILE_SIZE = 10 * 1024 * 1024
-    if (file.size > MAX_FILE_SIZE) {
-      setError('File too large. Please use images under 10MB.')
-      return
-    }
-
-    let processedFile = file
-
-    // Handle HEIC/HEIF conversion with dynamic import
-    if (
-      file.type === "image/heic" || file.type === "image/heif" ||
-      file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")
-    ) {
-      try {
-        setError("Converting iPhone photo, please wait...")
-        const heic2any = (await import("heic2any")).default
-        const convertedBlob = await heic2any({
-          blob: file,
-          toType: "image/jpeg",
-          quality: 0.8
-        }) as Blob
-
-        processedFile = new File([convertedBlob],
-          file.name.replace(/\.heic$/i, ".jpg"),
-          { type: "image/jpeg" }
-        )
-        setError(null)
-      } catch (err) {
-        setError("Failed to convert iPhone photo. Please try a different file.")
-        return
-      }
-    }
-
-    // Check supported formats
-    if (!/image\/(jpeg|png|webp)/.test(processedFile.type)) {
-      setError('Unsupported format. Please use JPG, PNG, WebP, or iPhone photos.')
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = async (ev) => {
-      const result = ev.target?.result
-      if (typeof result === 'string') {
-        try {
-          setError("Processing image...")
-          const compressedBlob = await compressWithPica(result)
-          
-          // Save to IndexedDB with type-specific key
-          await saveImageToIndexedDB(`photo_${currentUploadMethod}`, compressedBlob)
-          
-          // Create photo data object
-          const photoData: PhotoData = {
-            blob: compressedBlob,
-            url: result,
-            fileName: processedFile.name,
-            fileSize: processedFile.size,
-            uploadMethod: currentUploadMethod,
-            timestamp: Date.now()
-          }
-          
-          // Update state with new photo
-          const updatedPhotos = {
-            ...photos,
-            [currentUploadMethod]: photoData
-          }
-          setPhotos(updatedPhotos)
-          
-          // Save metadata
-          savePhotoMetadata(updatedPhotos)
-          
-          setError(null)
-        } catch (err) {
-          setError('Failed to process image. Please try a smaller file or different format.')
-        }
-      } else {
-        setError('Failed to read file')
-      }
-    }
-
-    reader.onerror = () => setError('Failed to read file')
-    reader.readAsDataURL(processedFile)
-  }
-
-  const photoCount = Object.keys(photos).length
-  const hasPhotos = photoCount > 0
+  const photoCount = Object.keys(photos).length;
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      backgroundColor: 'white'
-    }}>
-      {/* Header with Step Tracker */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '2rem 1rem',
-        borderBottom: '1px solid #f3f4f6'
-      }}>
-        {/* Step Tracker */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>1</div>
-          
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#1f2937',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>2</div>
-          
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>3</div>
-          
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>4</div>
-          
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>5</div>
-          
-          <div style={{
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '50%',
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            fontWeight: '600'
-          }}>6</div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto px-4">
+        {/* Progress Indicator */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+            <div className="w-8 h-1 bg-gray-300"></div>
+            <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
+            {[3, 4, 5, 6].map((step) => (
+              <React.Fragment key={step}>
+                <div className="w-8 h-1 bg-gray-300"></div>
+                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">{step}</div>
+              </React.Fragment>
+            ))}
+          </div>
         </div>
-        
-        {/* Title with photo count */}
-        <h1 style={{
-          fontSize: 'clamp(2rem, 6vw, 4rem)',
-          fontWeight: '700',
-          color: '#1f2937',
-          lineHeight: '1.2',
-          marginBottom: '0.5rem',
-          textAlign: 'center'
-        }}>
-          Add Your Photo{photoCount > 1 ? 's' : ''}
-        </h1>
-        
-        {photoCount > 0 && (
-          <p style={{
-            fontSize: '1rem',
-            color: '#6b7280',
-            textAlign: 'center'
-          }}>
-            {photoCount} photo{photoCount > 1 ? 's' : ''} added • This gives Claude richer context for your content
-          </p>
-        )}
-      </div>
 
-      <div style={{
-        flex: '1',
-        maxWidth: '800px',
-        margin: '0 auto',
-        width: '100%',
-        padding: '2rem 1rem'
-      }}>
-        {/* Upload Method Toggle - 2 buttons only */}
-        <div style={{ textAlign: 'center', width: '100%', marginBottom: '2rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '1rem',
-            padding: '0.5rem'
-          }}>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Add Your Photo{photoCount > 1 ? 's' : ''}
+          </h1>
+          {photoCount > 0 && (
+            <p className="text-gray-600">
+              {photoCount} photo{photoCount > 1 ? 's' : ''} added • This gives Claude richer context
+            </p>
+          )}
+        </div>
+
+        {/* Upload Method Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-gray-100 rounded-lg p-1 flex">
             <button
-              type="button"
-              onClick={() => setCurrentUploadMethod('camera')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: currentUploadMethod === 'camera' ? 'white' : 'transparent',
-                color: currentUploadMethod === 'camera' ? '#1f2937' : '#6b7280',
-                boxShadow: currentUploadMethod === 'camera' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                position: 'relative'
-              }}
+              onClick={() => setCurrentMethod('camera')}
+              className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 relative ${
+                currentMethod === 'camera'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              <span style={{ marginRight: '0.5rem' }}>📷</span>
-              Take a photo
+              📷 Take Photo
               {photos.camera && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-0.25rem',
-                  right: '-0.25rem',
-                  width: '1rem',
-                  height: '1rem',
-                  backgroundColor: '#10b981',
-                  borderRadius: '50%',
-                  fontSize: '0.75rem',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>✓</div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
               )}
             </button>
             <button
-              type="button"
-              onClick={() => setCurrentUploadMethod('gallery')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: currentUploadMethod === 'gallery' ? 'white' : 'transparent',
-                color: currentUploadMethod === 'gallery' ? '#1f2937' : '#6b7280',
-                boxShadow: currentUploadMethod === 'gallery' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                position: 'relative'
-              }}
+              onClick={() => setCurrentMethod('gallery')}
+              className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 relative ${
+                currentMethod === 'gallery'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              <span style={{ marginRight: '0.5rem' }}>📱</span>
-              Upload a photo
+              📱 Upload Photo
               {photos.gallery && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-0.25rem',
-                  right: '-0.25rem',
-                  width: '1rem',
-                  height: '1rem',
-                  backgroundColor: '#10b981',
-                  borderRadius: '50%',
-                  fontSize: '0.75rem',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>✓</div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
               )}
             </button>
           </div>
         </div>
 
-        {/* Photo Upload Area or Gallery */}
-        <div style={{ textAlign: 'center', width: '100%', marginBottom: '3rem' }}>
-          {!photos[currentUploadMethod] ? (
-            <div style={{
-              width: '100%',
-              maxWidth: '500px',
-              height: '300px',
-              border: '2px dashed #d1d5db',
-              borderRadius: '1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              backgroundColor: '#fafafa',
-              margin: '0 auto',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
+        {/* Upload Area */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          {!photos[currentMethod] ? (
+            <div 
+              className="text-center cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-gray-400 transition-colors"
               onClick={() => {
-                if (currentUploadMethod === 'camera') {
-                  cameraInputRef.current?.click()
-                } else if (currentUploadMethod === 'gallery') {
-                  fileInputRef.current?.click()
+                if (currentMethod === 'camera') {
+                  cameraInputRef.current?.click();
+                } else {
+                  fileInputRef.current?.click();
                 }
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#9ca3af'
-                e.currentTarget.style.backgroundColor = '#f5f5f5'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db'
-                e.currentTarget.style.backgroundColor = '#fafafa'
               }}
             >
-              <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>
-                {currentUploadMethod === 'camera' ? '📷' : '📂'}
+              <div className="text-6xl mb-4">
+                {currentMethod === 'camera' ? '📷' : '📁'}
               </div>
-              <h3 style={{
-                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.5rem',
-                margin: '0 0 0.5rem 0'
-              }}>
-                {currentUploadMethod === 'camera' ? 'Take a Photo' : 'Upload from Gallery'}
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {currentMethod === 'camera' ? 'Take a Photo' : 'Upload from Gallery'}
               </h3>
-              <p style={{
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: '#6b7280',
-                marginBottom: '1rem',
-                padding: '0 1rem'
-              }}>
-                {currentUploadMethod === 'camera'
+              <p className="text-gray-600 mb-4">
+                {currentMethod === 'camera' 
                   ? 'Capture your immediate experience'
-                  : 'Personal curated travel content'
+                  : 'Choose from your photo library'
                 }
               </p>
-              <div style={{
-                fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
-                color: '#9ca3af'
-              }}>
-                💡 Tip: Add multiple photos for richer AI content
-              </div>
+              <p className="text-sm text-gray-500">
+                Supports: JPG, PNG, HEIC (iPhone), WebP • Max: 25MB
+              </p>
               
-              {/* Hidden file inputs */}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
-                style={{ display: 'none' }}
+                className="hidden"
               />
               <input
                 ref={cameraInputRef}
@@ -643,185 +509,92 @@ export default function PhotoUpload() {
                 accept="image/*"
                 capture="environment"
                 onChange={handleFileSelect}
-                style={{ display: 'none' }}
+                className="hidden"
               />
             </div>
           ) : (
-            <div style={{
-              width: '100%',
-              maxWidth: '500px',
-              margin: '0 auto',
-              position: 'relative'
-            }}>
-              <div style={{
-                width: '100%',
-                maxHeight: '70vh',
-                borderRadius: '1.5rem',
-                overflow: 'hidden',
-                position: 'relative',
-                backgroundColor: '#f3f4f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+            <div className="text-center">
+              <div className="relative inline-block">
                 <img
-                  src={photos[currentUploadMethod]?.url}
-                  alt={`${currentUploadMethod} photo`}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '70vh',
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    borderRadius: '1.5rem'
-                  }}
+                  src={photos[currentMethod]?.dataUrl}
+                  alt={`${currentMethod} photo`}
+                  className="max-w-full max-h-96 rounded-lg shadow-md"
                 />
                 <button
-                  onClick={() => handleRemovePhoto(currentUploadMethod)}
-                  style={{
-                    position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
-                    width: '2rem',
-                    height: '2rem',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 10
-                  }}
+                  onClick={() => handleRemovePhoto(currentMethod)}
+                  className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 >
                   ✕
                 </button>
               </div>
-              <div style={{
-                marginTop: '1rem',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: '#6b7280'
-              }}>
-                📁 {photos[currentUploadMethod]?.fileName}
+              <div className="mt-4 text-sm text-gray-600">
+                <p>📁 {photos[currentMethod]?.fileName}</p>
+                <p>
+                  📊 {Math.round(photos[currentMethod]?.metadata.originalSize! / 1024 / 1024 * 10) / 10}MB → {Math.round(photos[currentMethod]?.metadata.processedSize! / 1024)}KB
+                  ({photos[currentMethod]?.metadata.compressionRatio}% smaller)
+                </p>
               </div>
-              <div style={{
-                marginTop: '0.5rem',
-                fontSize: '0.75rem',
-                color: '#9ca3af'
-              }}>
-                {currentUploadMethod === 'camera' ? '📷 Immediate Experience' : '📱 Personal Content'} • Added {new Date(photos[currentUploadMethod]?.timestamp || 0).toLocaleTimeString()}
-              </div>
-            </div>
-          )}
-          
-          {isProcessing && (
-            <div style={{ marginTop: '1rem', color: BRAND_PURPLE, fontWeight: 600 }}>
-              Processing image, please wait...
-            </div>
-          )}
-          {error && (
-            <div style={{ marginTop: '1rem', color: 'red', fontWeight: 600 }}>
-              {error}
             </div>
           )}
         </div>
 
+        {/* Processing Status */}
+        {isProcessing && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+              <span className="text-blue-800 font-medium">{processingStep}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+
         {/* Action Buttons */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '1rem',
-          width: '100%',
-          marginBottom: '1rem'
-        }}>
+        <div className="flex justify-between items-center mb-8">
           <button
             onClick={handleSkip}
-            style={{
-              background: '#f3f4f6',
-              color: '#6b7280',
-              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
-              fontWeight: '600',
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
+            className="text-gray-600 hover:text-gray-800 font-medium"
           >
             Skip for now
           </button>
+
           <button
-            onClick={handleNext}
-            disabled={!hasPhotos || isProcessing}
-            style={{
-              background: hasPhotos
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : '#e5e7eb',
-              color: hasPhotos ? 'white' : '#9ca3af',
-              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-              fontWeight: '900',
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              border: 'none',
-              cursor: hasPhotos ? 'pointer' : 'not-allowed',
-              boxShadow: hasPhotos ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none',
-              transition: 'all 0.2s'
-            }}
+            onClick={handleContinue}
+            disabled={photoCount === 0 || isProcessing}
+            className={`px-8 py-3 rounded-lg font-medium transition-colors ${
+              photoCount > 0 && !isProcessing
+                ? 'bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
           >
-            Continue →
+            {isProcessing ? 'Processing...' : 'Continue →'}
           </button>
         </div>
-        
-        {/* Logo - Brand Reinforcement */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '1rem',
-          paddingTop: '0'
-        }}>
-          <div style={{
-            color: BRAND_PURPLE,
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            fontWeight: '900',
-            display: 'inline'
-          }}>click</div>
-          <div style={{
-            color: BRAND_ORANGE,
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            fontWeight: '900',
-            display: 'inline',
-            marginLeft: '0.25rem'
-          }}>speak</div>
-          <div style={{
-            color: BRAND_BLUE,
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            fontWeight: '900',
-            display: 'inline',
-            marginLeft: '0.25rem'
-          }}>send</div>
+
+        {/* Branding */}
+        <div className="text-center">
+          <div className="text-2xl font-bold">
+            <span className="text-blue-600">click</span>
+            <span className="text-orange-500"> speak</span>
+            <span className="text-blue-600"> send</span>
+          </div>
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-8">
+          <Link href="/" className="text-gray-500 hover:text-gray-700">
+            ← Back to Home
+          </Link>
         </div>
       </div>
-      
-      {/* Bottom Navigation */}
-      <div style={{
-        padding: '1.5rem',
-        textAlign: 'center',
-        borderTop: '1px solid #f3f4f6'
-      }}>
-        <Link
-          href="/"
-          style={{
-            color: '#6b7280',
-            textDecoration: 'none',
-            fontWeight: '600',
-            fontSize: 'clamp(0.875rem, 2vw, 1rem)'
-          }}
-        >
-          ← Back to Home
-        </Link>
-      </div>
     </div>
-  )
-}
+  );
+};
+
+export default PhotoUploadPage;
