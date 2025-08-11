@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { getMacronCorrections, correctTranscriptionText, KUPU_CORRECTIONS } from '../../../utils/kupu'
+import { getMacronCorrections, correctTranscriptionText, correctVoiceTranscription, KUPU_CORRECTIONS } from '../../../utils/kupu'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
@@ -80,7 +80,7 @@ export default function TellYourStory() {
 
   // Enhanced voice transcription states
   const [voiceTranscriptionComplete, setVoiceTranscriptionComplete] = useState(false)
-  const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number}[]>([])
+  const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number, reason?: string}[]>([])
   const [potentialMaoriWords, setPotentialMaoriWords] = useState<{word: string, position: number, suggestions: {correct: string, meaning: string}[]}[]>([])
   const [showMaoriClarification, setShowMaoriClarification] = useState(false)
 
@@ -214,29 +214,57 @@ export default function TellYourStory() {
       recognition.interimResults = true // Show live transcription
       
       recognition.onresult = (event: any) => {
-        let transcript = ''
-        for (let i = 0; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript
-        }
-        
-        // Apply Te Reo transcription correction
-        const { correctedText, corrections } = correctTranscriptionText(transcript)
-        
-        setStory(correctedText)
-        localStorage.setItem('userStoryContext', correctedText)
-        
-        // Store corrections for summary
-        setTranscriptionCorrections(corrections)
-        
-        // Detect potential Māori words for clarification
-        const potentialWords = detectPotentialMaoriWords(correctedText)
-        setPotentialMaoriWords(potentialWords)
-        
-        // Log corrections for debugging
-        if (corrections.length > 0) {
-          console.log('🔧 Applied transcription corrections:', corrections)
-        }
-      }
+  let transcript = ''
+  for (let i = 0; i < event.results.length; i++) {
+    transcript += event.results[i][0].transcript
+  }
+  
+  // ENHANCED: Apply advanced voice correction with cultural protection
+  const { correctedText, corrections, culturalAlerts } = correctVoiceTranscription(
+    transcript,
+    { 
+      location: 'Rotorua', 
+      previousWords: story.split(' ').slice(-5),
+      context: 'tourism'
+    }
+  )
+  
+  setStory(correctedText)
+  localStorage.setItem('userStoryContext', correctedText)
+  
+  // Enhanced correction tracking with confidence scores and reasons
+  const enhancedCorrections = corrections.map(correction => ({
+    original: correction.original,
+    corrected: correction.corrected,
+    confidence: correction.confidence,
+    reason: correction.reason || 'Voice correction'
+  }))
+  
+  setTranscriptionCorrections(enhancedCorrections)
+  
+  // Show cultural protection alerts if dangerous words prevented
+  if (culturalAlerts.length > 0) {
+    console.log('🛡️ Cultural protection alerts:', culturalAlerts)
+    // Optional: Add UI notification for cultural protection
+  }
+  
+  // Detect potential Māori words for clarification
+  const potentialWords = detectPotentialMaoriWords(correctedText)
+  setPotentialMaoriWords(potentialWords)
+  
+  // Enhanced logging for debugging and demo purposes
+  if (corrections.length > 0) {
+    console.log('🔧 Applied voice corrections:', corrections)
+    console.log('📊 Correction confidence scores:', corrections.map(c => `${c.original} → ${c.corrected} (${c.confidence}%)`))
+  }
+  
+  // Log original vs corrected for demo purposes
+  if (transcript !== correctedText) {
+    console.log('🎤 Original transcript:', transcript)
+    console.log('✅ Corrected transcript:', correctedText)
+    console.log('🎯 Total corrections applied:', corrections.length)
+  }
+}
       
       recognition.onerror = () => {
         setRecording(false)
@@ -771,10 +799,20 @@ export default function TellYourStory() {
                   }}>
                     {transcriptionCorrections.slice(0, 3).map((correction, index) => (
                       <li key={index}>
-                        <span style={{ textDecoration: 'line-through' }}>{correction.original}</span>
-                        {' → '}
-                        <span style={{ fontWeight: '600' }}>{correction.corrected}</span>
-                      </li>
+  <span style={{ textDecoration: 'line-through' }}>{correction.original}</span>
+  {' → '}
+  <span style={{ fontWeight: '600' }}>{correction.corrected}</span>
+  <span style={{ 
+    fontSize: '0.625rem', 
+    color: '#059669', 
+    marginLeft: '0.25rem',
+    backgroundColor: '#d1fae5',
+    padding: '0.125rem 0.25rem',
+    borderRadius: '0.25rem'
+  }}>
+    {correction.confidence}%{correction.reason && ` • ${correction.reason}`}
+  </span>
+</li>
                     ))}
                     {transcriptionCorrections.length > 3 && (
                       <li style={{ fontStyle: 'italic' }}>
