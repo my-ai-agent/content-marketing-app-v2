@@ -100,6 +100,11 @@ export default function TellYourStory() {
   const [transcriptionCorrections, setTranscriptionCorrections] = useState<{original: string, corrected: string, confidence: number, reason?: string}[]>([])
   const [potentialMaoriWords, setPotentialMaoriWords] = useState<{word: string, position: number, suggestions: {correct: string, meaning: string}[]}[]>([])
   const [showMaoriClarification, setShowMaoriClarification] = useState(false)
+  
+  // Cultural Confidence Editing States
+const [showTranscriptEdit, setShowTranscriptEdit] = useState(false)
+const [editableTranscript, setEditableTranscript] = useState('')
+const [transcriptEditComplete, setTranscriptEditComplete] = useState(false)
 
   // Progressive Enhancement States
   const [culturalEnhancement, setCulturalEnhancement] = useState<CulturalEnhancementState>({
@@ -191,6 +196,32 @@ export default function TellYourStory() {
     }))
     setShowEnhancementBanner(false)
   }
+
+  // Cultural Confidence Editing Functions
+const handleTranscriptEdit = () => {
+  setEditableTranscript(story)
+  setShowTranscriptEdit(true)
+}
+
+const handleSaveTranscript = () => {
+  setStory(editableTranscript)
+  localStorage.setItem('userStoryContext', editableTranscript)
+  setShowTranscriptEdit(false)
+  setTranscriptEditComplete(true)
+  
+  // Re-run cultural detection on edited content
+  const culturalCheck = detectCulturalContent(editableTranscript, [])
+  if (culturalCheck.detected) {
+    triggerCulturalEnhancement(culturalCheck.correctionCount)
+  }
+  
+  console.log('🎯 Transcript edited and saved by user')
+}
+
+const handleCancelTranscriptEdit = () => {
+  setEditableTranscript('')
+  setShowTranscriptEdit(false)
+}
 
   useEffect(() => {
     // Get the uploaded photo to display as reference
@@ -422,6 +453,8 @@ export default function TellYourStory() {
         setRecording(false)
         setRecordingTime(0)
         setVoiceTranscriptionComplete(true)
+        setShowTranscriptEdit(true) // Immediately show edit option
+setEditableTranscript(story) // Pre-populate with current story
         
         if (timerRef.current) {
           clearInterval(timerRef.current)
@@ -1195,8 +1228,175 @@ export default function TellYourStory() {
             </div>
           )}
 
+          {/* Cultural Confidence Editing Interface */}
+          {inputMethod === 'speak' && showTranscriptEdit && editableTranscript && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1.5rem',
+              backgroundColor: culturalEnhancement.isActive ? '#f0fdf4' : '#fef3c7',
+              border: culturalEnhancement.isActive ? '2px solid #16a34a' : '2px solid #f59e0b',
+              borderRadius: '1rem'
+            }}>
+              <h4 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: culturalEnhancement.isActive ? '#15803d' : '#92400e',
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                {culturalEnhancement.isActive ? '🏛️' : '📝'} Review & Edit Your Story Before Creating Content
+                {culturalEnhancement.isActive && (
+                  <span style={{
+                    fontSize: '0.75rem',
+                    backgroundColor: '#dcfce7',
+                    color: '#15803d',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem'
+                  }}>
+                    Cultural Mode
+                  </span>
+                )}
+              </h4>
+              
+              <p style={{
+                fontSize: '0.875rem',
+                color: culturalEnhancement.isActive ? '#166534' : '#a16207',
+                marginBottom: '1rem',
+                lineHeight: '1.4'
+              }}>
+                {culturalEnhancement.isActive 
+                  ? 'Review the cultural corrections applied and make any adjustments before creating your content. This ensures cultural accuracy and builds your confidence.'
+                  : 'Review your voice transcription and make any adjustments before creating your content. You have full control over the final story.'}
+              </p>
+
+              {transcriptionCorrections.length > 0 && (
+                <div style={{
+                  marginBottom: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#dcfce7',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #16a34a'
+                }}>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: '#15803d',
+                    margin: '0 0 0.5rem 0',
+                    fontWeight: '500'
+                  }}>
+                    ✅ Cultural corrections applied: {transcriptionCorrections.length}
+                    {culturalEnhancement.isActive && (
+                      <span style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '0.75rem',
+                        backgroundColor: '#f0fdf4',
+                        padding: '0.125rem 0.375rem',
+                        borderRadius: '0.25rem'
+                      }}>
+                        {Math.round(transcriptionCorrections.reduce((acc, curr) => acc + curr.confidence, 0) / transcriptionCorrections.length)}% avg confidence
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+              
+              <textarea
+                value={editableTranscript}
+                onChange={(e) => setEditableTranscript(e.target.value)}
+                style={{
+                  width: '100%',
+                  minHeight: '150px',
+                  padding: '1rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.75rem',
+                  fontSize: '1rem',
+                  lineHeight: '1.5',
+                  resize: 'vertical',
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white'
+                }}
+                onFocus={(e) => e.target.style.borderColor = culturalEnhancement.isActive ? '#16a34a' : BRAND_PURPLE}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                placeholder="Review and edit your story here..."
+              />
+              
+              {culturalEnhancement.isActive && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  fontSize: '0.75rem',
+                  color: '#166534',
+                  backgroundColor: '#f0fdf4',
+                  padding: '0.5rem',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #bbf7d0'
+                }}>
+                  🛡️ Cultural protection: Any inappropriate edits will be flagged during content generation
+                </div>
+              )}
+              
+              <div style={{
+                display: 'flex',
+                gap: '0.75rem',
+                marginTop: '1rem',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={handleSaveTranscript}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: culturalEnhancement.isActive ? '#16a34a' : BRAND_PURPLE,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = culturalEnhancement.isActive ? '#15803d' : '#553C9A'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = culturalEnhancement.isActive ? '#16a34a' : BRAND_PURPLE
+                  }}
+                >
+                  <span>✅</span>
+                  Continue with Story
+                </button>
+                
+                <button
+                  onClick={handleCancelTranscriptEdit}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    backgroundColor: 'white',
+                    color: '#6b7280',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f9fafb'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Voice Transcription Complete - Enhanced Version */}
-          {inputMethod === 'speak' && voiceTranscriptionComplete && story && (
+          {inputMethod === 'speak' && voiceTranscriptionComplete && story && !showTranscriptEdit && (
             <div style={{
               marginTop: '1rem',
               padding: '1rem',
