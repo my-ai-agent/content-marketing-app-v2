@@ -9,6 +9,15 @@ export interface KupuCorrection {
   category: 'greeting' | 'family' | 'place' | 'concept' | 'nature' | 'cultural' | 'direction' | 'time' | 'action' | 'sacred' | 'grammar'
 }
 
+// Enhanced context interface for progressive enhancement
+export interface VoiceContext {
+  location?: string
+  previousWords?: string[]
+  context?: string
+  culturalMode?: boolean
+  confidenceThreshold?: number
+}
+
 export const KUPU_CORRECTIONS: KupuCorrection[] = [
   // CORE CULTURAL CONCEPTS
   {
@@ -587,10 +596,10 @@ export const correctTranscriptionText = (transcribedText: string): {
   return { correctedText, corrections }
 }
 
-// NEW ENHANCED FUNCTION: Advanced voice correction with cultural protection
+// ENHANCED FUNCTION: Advanced voice correction with cultural protection and progressive enhancement
 export const correctVoiceTranscription = (
   transcript: string, 
-  context?: {location?: string, previousWords?: string[], context?: string}
+  context?: VoiceContext
 ): {
   correctedText: string,
   corrections: {original: string, corrected: string, confidence: number, reason: string}[],
@@ -599,6 +608,17 @@ export const correctVoiceTranscription = (
   let correctedText = transcript.toLowerCase()
   const corrections: {original: string, corrected: string, confidence: number, reason: string}[] = []
   const culturalAlerts: string[] = []
+
+  // Enhanced cultural mode settings
+  const culturalMode = context?.culturalMode || false
+  const confidenceThreshold = context?.confidenceThreshold || (culturalMode ? 95 : 85)
+  const location = context?.location || ''
+  const previousWords = context?.previousWords || []
+
+  // Log enhanced mode activation
+  if (culturalMode) {
+    console.log(`🏛️ Enhanced cultural mode active - confidence threshold: ${confidenceThreshold}%`)
+  }
 
   // PRIORITY 1: FUNDAMENTAL MĀORI PHONETIC RULES
   
@@ -630,7 +650,7 @@ export const correctVoiceTranscription = (
         corrections.push({
           original: violation,
           corrected: replacement,
-          confidence: 98,
+          confidence: culturalMode ? 98 : 95,
           reason: 'Cultural protection - No Z in Māori'
         })
         
@@ -639,30 +659,30 @@ export const correctVoiceTranscription = (
     })
   }
 
-  // Rule 2: Silent 'G' patterns - 'Ng' often drops 'g' in voice recognition
+  // Rule 2: Silent 'G' patterns - Enhanced in cultural mode
   const silentGCorrections = [
     {
       pattern: /\b(nati|nāti|na ti)(\s+wahiao|\s+wāhiao|\s+people)?\b/gi,
       replacement: 'Ngāti$2',
-      confidence: 95,
+      confidence: culturalMode ? 97 : 95,
       reason: 'Silent G restoration - Ngāti'
     },
     {
       pattern: /\b(na|nar|nah)\b(?=\s|$)/gi,
       replacement: 'ngā',
-      confidence: 92,
+      confidence: culturalMode ? 94 : 92,
       reason: 'Silent G restoration - ngā'
     },
     {
-      pattern: /\b(tūhourani|tuhourani|two hourani|two hodungi)(\s+people)?\b/gi,
+      pattern: /\b(tūhourani|tuhourani|two hourani|two hodungi|2 haurangi)(\s+people)?\b/gi,
       replacement: 'Tūhourangi$2',
-      confidence: 94,
-      reason: 'Silent G restoration - Tūhourangi'
+      confidence: culturalMode ? 96 : 94,
+      reason: culturalMode ? 'Enhanced cultural correction - Tūhourangi' : 'Silent G restoration - Tūhourangi'
     },
     {
       pattern: /\b(wairao|waheo|waihao|wa hiao)\b/gi,
       replacement: 'Wāhiao',
-      confidence: 93,
+      confidence: culturalMode ? 95 : 93,
       reason: 'Silent G restoration - Wāhiao'
     }
   ]
@@ -685,7 +705,7 @@ export const correctVoiceTranscription = (
     }
   })
 
-  // PRIORITY 2: Complex place name corrections (your original specific issues)
+  // PRIORITY 2: Enhanced complex place name corrections
   const complexCorrections = [
     {
       patterns: [
@@ -696,16 +716,16 @@ export const correctVoiceTranscription = (
         /two carer(\s+village)?/gi
       ],
       replacement: 'Te Whakarewarewa$1',
-      confidence: 85,
-      reason: 'Complex place name phonetic correction'
+      confidence: culturalMode ? 90 : 85,
+      reason: culturalMode ? 'Enhanced place name correction' : 'Complex place name phonetic correction'
     },
     {
       patterns: [
-        /(two hodungi|tuhorangi)(\s+ngati|\s+nazi|\s+nati)?(\s+waheo|\s+wahiao|\s+wāhiao)?(\s+people)?/gi
+        /(two hodungi|tuhorangi|2 haurangi)(\s+ngati|\s+nazi|\s+nati)?(\s+waheo|\s+wahiao|\s+wāhiao)?(\s+people)?/gi
       ],
       replacement: 'Tūhourangi Ngāti Wāhiao$4',
-      confidence: 90,
-      reason: 'Iwi name phonetic correction'
+      confidence: culturalMode ? 95 : 90,
+      reason: culturalMode ? 'Enhanced iwi name correction' : 'Iwi name phonetic correction'
     },
     {
       patterns: [
@@ -714,8 +734,8 @@ export const correctVoiceTranscription = (
         /te whaka village/gi
       ],
       replacement: 'Te Whakarewarewa Village',
-      confidence: 88,
-      reason: 'Partial place name correction'
+      confidence: culturalMode ? 92 : 88,
+      reason: culturalMode ? 'Enhanced place name correction' : 'Partial place name correction'
     }
   ]
 
@@ -739,22 +759,26 @@ export const correctVoiceTranscription = (
     })
   })
 
-  // PRIORITY 3: Standard kupu corrections
+  // PRIORITY 3: Standard kupu corrections with enhanced confidence in cultural mode
   const { correctedText: standardCorrected, corrections: standardCorrections } = correctTranscriptionText(correctedText)
   
-  // Add standard corrections to our enhanced list
+  // Add standard corrections to our enhanced list with boosted confidence in cultural mode
   standardCorrections.forEach(correction => {
+    const enhancedConfidence = culturalMode ? 
+      Math.min((correction.confidence || 88) + 5, 98) : 
+      (correction.confidence || 88)
+    
     corrections.push({
       original: correction.original,
       corrected: correction.corrected,
-      confidence: correction.confidence || 88,
-      reason: 'Standard Māori correction'
+      confidence: enhancedConfidence,
+      reason: culturalMode ? 'Enhanced cultural correction' : 'Standard Māori correction'
     })
   })
   
   correctedText = standardCorrected
 
-  // PRIORITY 4: Capitalize proper nouns and ensure cultural respect
+  // PRIORITY 4: Enhanced capitalization and cultural respect
   correctedText = correctedText
     .replace(/\b(te whakarewarewa|rotorua|tūhourangi|ngāti wāhiao|māori|ngā)\b/gi, (match) => {
       return match.split(' ').map(word => 
@@ -762,39 +786,116 @@ export const correctVoiceTranscription = (
       ).join(' ')
     })
 
+  // Enhanced logging for cultural mode
+  if (culturalMode && corrections.length > 0) {
+    console.log(`🏛️ Cultural mode applied ${corrections.length} enhanced corrections`)
+    console.log(`📊 Average confidence: ${Math.round(corrections.reduce((acc, curr) => acc + curr.confidence, 0) / corrections.length)}%`)
+  }
+
   return { correctedText, corrections, culturalAlerts }
 }
 
-// OPTIONAL: Enhanced cultural validation function
-export const validateCulturalText = (text: string): {
+// OPTIONAL: Enhanced cultural validation function with progressive enhancement
+export const validateCulturalText = (text: string, culturalMode: boolean = false): {
   isValid: boolean,
   violations: string[],
-  suggestions: string[]
+  suggestions: string[],
+  culturalScore: number
 } => {
   const violations: string[] = []
   const suggestions: string[] = []
+  let culturalScore = 100
   
-  // Check for Z-letter violations
+  // Check for Z-letter violations with enhanced detection in cultural mode
   const zWords = text.match(/\b\w*z\w*\b/gi)
   if (zWords) {
     zWords.forEach(word => {
       violations.push(`Contains 'Z' which doesn't exist in Māori: "${word}"`)
       suggestions.push(`Check if "${word}" should be a Māori term without 'Z'`)
+      culturalScore -= culturalMode ? 15 : 10 // Higher penalty in cultural mode
     })
   }
   
-  // Check for silent G patterns
-  const silentGPatterns = text.match(/\b(nati|nāti|na ti|tuhourani|wairao)\b/gi)
+  // Check for silent G patterns with enhanced detection
+  const silentGPatterns = text.match(/\b(nati|nāti|na ti|tuhourani|wairao|2 haurangi)\b/gi)
   if (silentGPatterns) {
     silentGPatterns.forEach(pattern => {
       violations.push(`Possible silent 'G' omission: "${pattern}"`)
       suggestions.push(`Consider if "${pattern}" should include 'ng' sound`)
+      culturalScore -= culturalMode ? 8 : 5
     })
   }
   
+  // Enhanced cultural term detection
+  const culturalTermsFound = KUPU_CORRECTIONS.filter(kupu => 
+    kupu.category === 'cultural' && 
+    (kupu.correct.toLowerCase().includes(text.toLowerCase()) || 
+     kupu.incorrect.some(incorrect => text.toLowerCase().includes(incorrect.toLowerCase())))
+  )
+  
+  // Bonus points for proper cultural terms in cultural mode
+  if (culturalMode && culturalTermsFound.length > 0) {
+    culturalScore = Math.min(culturalScore + (culturalTermsFound.length * 3), 100)
+  }
+  
   return {
-    isValid: violations.length === 0,
+    isValid: violations.length === 0 && culturalScore >= (culturalMode ? 90 : 80),
     violations,
-    suggestions
+    suggestions,
+    culturalScore: Math.max(culturalScore, 0)
+  }
+}
+
+// Progressive Enhancement Helper Functions
+export const detectCulturalContent = (text: string): {
+  hasCulturalTerms: boolean,
+  culturalTermCount: number,
+  suggestEnhancement: boolean
+} => {
+  const culturalTerms = KUPU_CORRECTIONS.filter(kupu => 
+    kupu.category === 'cultural' || kupu.category === 'place' || kupu.category === 'sacred'
+  )
+  
+  let culturalTermCount = 0
+  
+  culturalTerms.forEach(kupu => {
+    // Check if text contains the correct term or incorrect variants
+    if (kupu.correct.toLowerCase().includes(text.toLowerCase()) || 
+        kupu.incorrect.some(incorrect => text.toLowerCase().includes(incorrect.toLowerCase()))) {
+      culturalTermCount++
+    }
+  })
+  
+  return {
+    hasCulturalTerms: culturalTermCount > 0,
+    culturalTermCount,
+    suggestEnhancement: culturalTermCount >= 2 // Trigger enhancement banner after 2+ cultural terms
+  }
+}
+
+// Ko Tane Demo Statistics Helper
+export const getCulturalStats = (corrections: {original: string, corrected: string, confidence: number, reason: string}[]): {
+  totalCorrections: number,
+  culturalCorrections: number,
+  averageConfidence: number,
+  highConfidenceCount: number
+} => {
+  const culturalCorrections = corrections.filter(c => 
+    c.reason.includes('cultural') || 
+    c.reason.includes('Cultural') ||
+    c.reason.includes('Silent G') ||
+    c.reason.includes('protection')
+  )
+  
+  const averageConfidence = corrections.length > 0 ? 
+    Math.round(corrections.reduce((acc, curr) => acc + curr.confidence, 0) / corrections.length) : 0
+  
+  const highConfidenceCount = corrections.filter(c => c.confidence >= 95).length
+  
+  return {
+    totalCorrections: corrections.length,
+    culturalCorrections: culturalCorrections.length,
+    averageConfidence,
+    highConfidenceCount
   }
 }
