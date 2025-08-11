@@ -6,7 +6,7 @@ export interface KupuCorrection {
   incorrect: string[]  // Common misspellings without macrons
   correct: string     // Proper spelling with macrons
   meaning: string     // English translation
-  category: 'greeting' | 'family' | 'place' | 'concept' | 'nature' | 'cultural' | 'direction' | 'time' | 'action' | 'sacred'
+  category: 'greeting' | 'family' | 'place' | 'concept' | 'nature' | 'cultural' | 'direction' | 'time' | 'action' | 'sacred' | 'grammar'
 }
 
 export const KUPU_CORRECTIONS: KupuCorrection[] = [
@@ -60,6 +60,94 @@ export const KUPU_CORRECTIONS: KupuCorrection[] = [
     correct: 'Māori village',
     meaning: 'traditional Māori settlement',
     category: 'cultural'
+  },
+
+  // ENHANCED VOICE CORRECTIONS - Based on real testing
+  {
+    incorrect: [
+      'took career village', 'took career', 'two career village', 'te career village',
+      'took carer village', 'two carer village', 'te carer village',
+      'took whaka village', 'two whaka village', 'te whaka village'
+    ],
+    correct: 'Te Whakarewarewa Village',
+    meaning: 'living Māori village in Rotorua',
+    category: 'place'
+  },
+
+  // FUNDAMENTAL RULE: NO 'Z' IN MĀORI - Any 'Z' is culturally inappropriate
+  {
+    incorrect: [
+      'nazi', 'nasi', 'natzi', 'nozi', 'nezi', 'zati', 'zāti',
+      'nazi waheo people', 'nazi wahiao people', 'nazi people',
+      'nazi waheo', 'nazi wahiao', 'nazi wāhiao'
+    ],
+    correct: 'Ngāti',
+    meaning: 'sub-tribe, people group',
+    category: 'cultural'
+  },
+
+  // SILENT 'G' PATTERNS - 'Ng' often transcribed without 'g'
+  {
+    incorrect: [
+      'nati wahiao', 'nāti wahiao', 'na ti wahiao', 'nati wāhiao',
+      'nati people', 'nāti people', 'na ti people'
+    ],
+    correct: 'Ngāti Wāhiao',
+    meaning: 'hapū (sub-tribe) of Te Arawa',
+    category: 'cultural'
+  },
+
+  {
+    incorrect: [
+      'na', 'nar', 'nah', 'n ga', 'nga people'
+    ],
+    correct: 'ngā',
+    meaning: 'the (plural)',
+    category: 'grammar'
+  },
+
+  // Silent G in place names and iwi names
+  {
+    incorrect: [
+      'tūhourani', 'tuhourani', 'two hourani', 'tūhouran',
+      'two hodungi people', 'tuhorangi people', 'two hourangi'
+    ],
+    correct: 'Tūhourangi',
+    meaning: 'iwi name - people group',
+    category: 'cultural'
+  },
+
+  {
+    incorrect: [
+      'wairao', 'waheo', 'waihao', 'wa hiao'
+    ],
+    correct: 'Wāhiao',
+    meaning: 'part of Ngāti Wāhiao hapū name',
+    category: 'cultural'
+  },
+
+  // Complex iwi name corrections (updated from previous version)
+  {
+    incorrect: [
+      'two hodungi nazi waheo people', 'two hodungi people', 
+      'two hodungi ngati wahiao', 'tuhorangi nazi waheo', 
+      'two hodungi nazi wahiao', 'two hodungi nati wahiao'
+    ],
+    correct: 'Tūhourangi Ngāti Wāhiao',
+    meaning: 'iwi of Te Whakarewarewa Village',
+    category: 'cultural'
+  },
+
+  // Enhanced Te Whakarewarewa variations
+  {
+    incorrect: [
+      'whakarewarewa village', 'wakarewa village', 'whaka village',
+      'whakarewarewa', 'wakarewa', 'whakarerawera', 'wakarewarewa',
+      'fakarewa', 'fakarewa village', 'whakarerawewa'
+    ],
+    correct: 'Te Whakarewarewa',
+    meaning: 'the place of uprising/war party',
+    category: 'place'
   },
 
   // GREETINGS & COMMON PHRASES
@@ -436,7 +524,7 @@ export const getKupuMeaning = (word: string): string | null => {
   return kupu ? kupu.meaning : null
 }
 
-// NEW FUNCTION: Post-transcription correction specifically for voice input
+// ORIGINAL FUNCTION: Post-transcription correction specifically for voice input
 export const correctTranscriptionText = (transcribedText: string): {
   correctedText: string,
   corrections: {original: string, corrected: string, confidence: number}[]
@@ -497,4 +585,216 @@ export const correctTranscriptionText = (transcribedText: string): {
   })
 
   return { correctedText, corrections }
+}
+
+// NEW ENHANCED FUNCTION: Advanced voice correction with cultural protection
+export const correctVoiceTranscription = (
+  transcript: string, 
+  context?: {location?: string, previousWords?: string[], context?: string}
+): {
+  correctedText: string,
+  corrections: {original: string, corrected: string, confidence: number, reason: string}[],
+  culturalAlerts: string[]
+} => {
+  let correctedText = transcript.toLowerCase()
+  const corrections: {original: string, corrected: string, confidence: number, reason: string}[] = []
+  const culturalAlerts: string[] = []
+
+  // PRIORITY 1: FUNDAMENTAL MĀORI PHONETIC RULES
+  
+  // Rule 1: NO 'Z' in Māori alphabet - immediate cultural violation
+  const zLetterViolations = correctedText.match(/\b\w*z\w*\b/gi)
+  if (zLetterViolations) {
+    zLetterViolations.forEach(violation => {
+      // Check if it's in cultural context
+      const culturalContext = ['wahiao', 'waheo', 'people', 'village', 'iwi', 'hapū', 'māori', 'rotorua']
+      const hasCulturalContext = culturalContext.some(ctx => 
+        correctedText.includes(ctx.toLowerCase())
+      )
+      
+      if (hasCulturalContext) {
+        let replacement = violation.toLowerCase()
+        
+        // Specific Z-letter corrections
+        if (violation.toLowerCase().includes('nazi')) {
+          replacement = 'Ngāti'
+          culturalAlerts.push(`CRITICAL: Prevented culturally inappropriate word "${violation}" → "${replacement}"`)
+        } else if (violation.toLowerCase().includes('zati')) {
+          replacement = 'āti'
+        } else {
+          // Generic Z removal for cultural terms
+          replacement = violation.replace(/z/gi, '')
+          culturalAlerts.push(`Removed inappropriate 'Z' from cultural term: ${violation} → ${replacement}`)
+        }
+        
+        corrections.push({
+          original: violation,
+          corrected: replacement,
+          confidence: 98,
+          reason: 'Cultural protection - No Z in Māori'
+        })
+        
+        correctedText = correctedText.replace(new RegExp(`\\b${violation}\\b`, 'gi'), replacement)
+      }
+    })
+  }
+
+  // Rule 2: Silent 'G' patterns - 'Ng' often drops 'g' in voice recognition
+  const silentGCorrections = [
+    {
+      pattern: /\b(nati|nāti|na ti)(\s+wahiao|\s+wāhiao|\s+people)?\b/gi,
+      replacement: 'Ngāti$2',
+      confidence: 95,
+      reason: 'Silent G restoration - Ngāti'
+    },
+    {
+      pattern: /\b(na|nar|nah)\b(?=\s|$)/gi,
+      replacement: 'ngā',
+      confidence: 92,
+      reason: 'Silent G restoration - ngā'
+    },
+    {
+      pattern: /\b(tūhourani|tuhourani|two hourani|two hodungi)(\s+people)?\b/gi,
+      replacement: 'Tūhourangi$2',
+      confidence: 94,
+      reason: 'Silent G restoration - Tūhourangi'
+    },
+    {
+      pattern: /\b(wairao|waheo|waihao|wa hiao)\b/gi,
+      replacement: 'Wāhiao',
+      confidence: 93,
+      reason: 'Silent G restoration - Wāhiao'
+    }
+  ]
+
+  silentGCorrections.forEach(correction => {
+    if (correction.pattern.test(correctedText)) {
+      const matches = correctedText.match(correction.pattern)
+      if (matches) {
+        matches.forEach(match => {
+          const correctedMatch = match.replace(correction.pattern, correction.replacement)
+          corrections.push({
+            original: match,
+            corrected: correctedMatch,
+            confidence: correction.confidence,
+            reason: correction.reason
+          })
+        })
+        correctedText = correctedText.replace(correction.pattern, correction.replacement)
+      }
+    }
+  })
+
+  // PRIORITY 2: Complex place name corrections (your original specific issues)
+  const complexCorrections = [
+    {
+      patterns: [
+        /took career(\s+village)?/gi,
+        /two career(\s+village)?/gi,
+        /te career(\s+village)?/gi,
+        /took carer(\s+village)?/gi,
+        /two carer(\s+village)?/gi
+      ],
+      replacement: 'Te Whakarewarewa$1',
+      confidence: 85,
+      reason: 'Complex place name phonetic correction'
+    },
+    {
+      patterns: [
+        /(two hodungi|tuhorangi)(\s+ngati|\s+nazi|\s+nati)?(\s+waheo|\s+wahiao|\s+wāhiao)?(\s+people)?/gi
+      ],
+      replacement: 'Tūhourangi Ngāti Wāhiao$4',
+      confidence: 90,
+      reason: 'Iwi name phonetic correction'
+    },
+    {
+      patterns: [
+        /whaka village/gi,
+        /wakarewa village/gi,
+        /te whaka village/gi
+      ],
+      replacement: 'Te Whakarewarewa Village',
+      confidence: 88,
+      reason: 'Partial place name correction'
+    }
+  ]
+
+  complexCorrections.forEach(correction => {
+    correction.patterns.forEach(pattern => {
+      if (pattern.test(correctedText)) {
+        const matches = correctedText.match(pattern)
+        if (matches) {
+          matches.forEach(match => {
+            const correctedMatch = match.replace(pattern, correction.replacement)
+            corrections.push({
+              original: match,
+              corrected: correctedMatch,
+              confidence: correction.confidence,
+              reason: correction.reason
+            })
+          })
+          correctedText = correctedText.replace(pattern, correction.replacement)
+        }
+      }
+    })
+  })
+
+  // PRIORITY 3: Standard kupu corrections
+  const { correctedText: standardCorrected, corrections: standardCorrections } = correctTranscriptionText(correctedText)
+  
+  // Add standard corrections to our enhanced list
+  standardCorrections.forEach(correction => {
+    corrections.push({
+      original: correction.original,
+      corrected: correction.corrected,
+      confidence: correction.confidence || 88,
+      reason: 'Standard Māori correction'
+    })
+  })
+  
+  correctedText = standardCorrected
+
+  // PRIORITY 4: Capitalize proper nouns and ensure cultural respect
+  correctedText = correctedText
+    .replace(/\b(te whakarewarewa|rotorua|tūhourangi|ngāti wāhiao|māori|ngā)\b/gi, (match) => {
+      return match.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ')
+    })
+
+  return { correctedText, corrections, culturalAlerts }
+}
+
+// OPTIONAL: Enhanced cultural validation function
+export const validateCulturalText = (text: string): {
+  isValid: boolean,
+  violations: string[],
+  suggestions: string[]
+} => {
+  const violations: string[] = []
+  const suggestions: string[] = []
+  
+  // Check for Z-letter violations
+  const zWords = text.match(/\b\w*z\w*\b/gi)
+  if (zWords) {
+    zWords.forEach(word => {
+      violations.push(`Contains 'Z' which doesn't exist in Māori: "${word}"`)
+      suggestions.push(`Check if "${word}" should be a Māori term without 'Z'`)
+    })
+  }
+  
+  // Check for silent G patterns
+  const silentGPatterns = text.match(/\b(nati|nāti|na ti|tuhourani|wairao)\b/gi)
+  if (silentGPatterns) {
+    silentGPatterns.forEach(pattern => {
+      violations.push(`Possible silent 'G' omission: "${pattern}"`)
+      suggestions.push(`Consider if "${pattern}" should include 'ng' sound`)
+    })
+  }
+  
+  return {
+    isValid: violations.length === 0,
+    violations,
+    suggestions
+  }
 }
