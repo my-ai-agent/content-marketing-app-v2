@@ -795,23 +795,84 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           )}
         </div>
 
-        {/* Footer Navigation */}
+        {/* Enhanced Navigation Panel */}
         <div style={{
           padding: '1.5rem',
           borderTop: '1px solid #f3f4f6',
-          textAlign: 'center'
+          backgroundColor: '#f8fafc'
         }}>
-          <Link
-            href="/dashboard/create/platforms"
-            style={{
-              color: '#6b7280',
+          <h4 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#374151',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            🎉 Content Created Successfully! What's next?
+          </h4>
+          
+          <div style={{
+            display: 'flex',
+            gap: '0.75rem',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            marginBottom: '1rem'
+          }}>
+            <Link href="/dashboard/create/photo" style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: BRAND_PURPLE,
+              color: 'white',
               textDecoration: 'none',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
               fontWeight: '600',
-              fontSize: '0.875rem'
-            }}
-          >
-            ← Back to Platform Selection
-          </Link>
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              📸 Create New Story
+            </Link>
+            
+            <Link href="/dashboard/create/platform" style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: BRAND_ORANGE,
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              ⚙️ Change Platforms
+            </Link>
+            
+            <Link href="/dashboard" style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: BRAND_BLUE,
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              🏠 Dashboard
+            </Link>
+          </div>
+          
+          <p style={{
+            fontSize: '0.75rem',
+            color: '#6b7280',
+            textAlign: 'center',
+            margin: '0'
+          }}>
+            Your culturally intelligent content is ready to share! 🏛️
+          </p>
         </div>
 
         {/* Footer Logo */}
