@@ -585,7 +585,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
               fontWeight: '700',
               zIndex: 1000,
               boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)',
-              animation: 'fadeInOut 2s ease-in-out',
+              animation: 'fadeInOut 3s ease-in-out',
               textAlign: 'center',
               border: '2px solid #ffffff'
             }}>
