@@ -36,6 +36,7 @@ export default function QRDistributionHub() {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
 
   // Helper for IndexedDB image loading
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
@@ -368,6 +369,12 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
         })
       }
       
+      // Trigger success animation
+      setShowSuccessAnimation(true)
+      setTimeout(() => {
+        setShowSuccessAnimation(false)
+      }, 2000)
+      
       setGeneratedContent(generatedContent)
       setIsGenerating(false)
       
@@ -562,6 +569,38 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
 
         {/* Content Area */}
         <div style={{ flex: '1', padding: '1rem' }}>
+
+          {/* Success Animation */}
+          {showSuccessAnimation && (
+            <div style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: '#10b981',
+              color: 'white',
+              padding: '1.5rem 2.5rem',
+              borderRadius: '1rem',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              zIndex: 1000,
+              boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)',
+              animation: 'fadeInOut 2s ease-in-out',
+              textAlign: 'center',
+              border: '2px solid #ffffff'
+            }}>
+              <div style={{ marginBottom: '0.5rem' }}>🏛️</div>
+              <div>Cultural AI Content Ready!</div>
+              <div style={{ 
+                fontSize: '0.875rem', 
+                fontWeight: '500', 
+                marginTop: '0.25rem',
+                opacity: 0.9 
+              }}>
+                Authentic • Respectful • Professional
+              </div>
+            </div>
+          )}
           
           {/* Loading State */}
           {isGenerating && (
@@ -908,11 +947,29 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
 
       {/* CSS Animation */}
       <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes fadeInOut {
+    0% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+    15% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    85% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+  }
+`}</style>
     </div>
   )
 }
