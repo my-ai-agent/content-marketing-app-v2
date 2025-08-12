@@ -5,6 +5,16 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 })
 
+// Helper function to validate and normalize image types
+function getValidImageType(fileType: string): "image/jpeg" | "image/png" | "image/gif" | "image/webp" {
+  const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const
+  if (validTypes.includes(fileType as any)) {
+    return fileType as "image/jpeg" | "image/png" | "image/gif" | "image/webp"
+  }
+  // Default fallback for unsupported types
+  return "image/jpeg"
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -18,7 +28,11 @@ export async function POST(request: NextRequest) {
 
     // Convert image to base64 if provided
     let imageBase64: string | null = null
+    let validImageType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" | null = null
+    
     if (imageFile) {
+      // Validate image type
+      validImageType = getValidImageType(imageFile.type)
       const imageArrayBuffer = await imageFile.arrayBuffer()
       imageBase64 = Buffer.from(imageArrayBuffer).toString('base64')
     }
@@ -54,7 +68,7 @@ CONFIDENCE: [0-100]%`
 
     // Test 2: Claude with Image Context (if image provided)
     let imageEnhancedResponse = null
-    if (imageBase64) {
+    if (imageBase64 && validImageType) {
       console.log('🧪 Testing Claude Cultural Enhancement + Image Context...')
       imageEnhancedResponse = await anthropic.messages.create({
         model: "claude-3-sonnet-20240229",
@@ -85,7 +99,7 @@ CONFIDENCE: [0-100]%`
               type: "image",
               source: {
                 type: "base64",
-                media_type: imageFile.type,
+                media_type: validImageType,
                 data: imageBase64
               }
             }
@@ -122,6 +136,7 @@ CONFIDENCE: [0-100]%`
       textOnlyEnhancement: textOnlyResult,
       imageEnhancedResult: imageEnhancedResult,
       analysis,
+      imageTypeUsed: validImageType,
       timestamp: new Date().toISOString()
     })
 
