@@ -10,14 +10,11 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const audioFile = formData.get('audio') as File
     const imageFile = formData.get('image') as File | null
+    const browserTranscript = formData.get('browserTranscript') as string
 
-    if (!audioFile) {
-      return NextResponse.json({ error: 'No audio file provided' }, { status: 400 })
+    if (!audioFile && !browserTranscript) {
+      return NextResponse.json({ error: 'No audio file or transcript provided' }, { status: 400 })
     }
-
-    // Convert audio to base64
-    const audioArrayBuffer = await audioFile.arrayBuffer()
-    const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64')
 
     // Convert image to base64 if provided
     let imageBase64: string | null = null
@@ -26,9 +23,9 @@ export async function POST(request: NextRequest) {
       imageBase64 = Buffer.from(imageArrayBuffer).toString('base64')
     }
 
-    // Test 1: Audio Only
-    console.log('🧪 Testing Claude Audio Only...')
-    const audioOnlyResponse = await anthropic.messages.create({
+    // Test 1: Claude Text Enhancement Only
+    console.log('🧪 Testing Claude Cultural Enhancement...')
+    const textOnlyResponse = await anthropic.messages.create({
       model: "claude-3-sonnet-20240229",
       max_tokens: 1000,
       messages: [{
@@ -36,35 +33,30 @@ export async function POST(request: NextRequest) {
         content: [
           {
             type: "text",
-            text: `Please transcribe this audio recording accurately. Pay special attention to:
-- Māori words and cultural terms
-- Place names (Ko Tāne, Te Moananui-a-Kiwa, etc.)
-- Cultural concepts (tīpuna, mana, waka, etc.)
-- Tourism and cultural context
+            text: `I have a browser speech recognition transcript about Māori cultural tourism. Please enhance it for cultural accuracy and provide corrections.
 
-Provide the transcription and rate your confidence (0-100%).
+Original transcript: "${browserTranscript}"
+
+Please:
+1. Identify and correct any Māori cultural terms that may be mispronounced or misrepresented
+2. Suggest proper spellings for place names (Ko Tāne, Te Moananui-a-Kiwa, etc.)
+3. Enhance cultural context and respectful language
+4. Rate your confidence in the cultural accuracy (0-100%)
 
 Format your response as:
-TRANSCRIPTION: [your transcription here]
+ENHANCED_TRANSCRIPT: [your enhanced version]
+CULTURAL_CORRECTIONS: [list of corrections made]
 CONFIDENCE: [0-100]%`
-          },
-          {
-            type: "audio",
-            source: {
-              type: "base64",
-              media_type: "audio/wav",
-              data: audioBase64
-            }
           }
         ]
       }]
     })
 
-    // Test 2: Audio + Image (if image provided)
-    let audioImageResponse = null
+    // Test 2: Claude with Image Context (if image provided)
+    let imageEnhancedResponse = null
     if (imageBase64) {
-      console.log('🧪 Testing Claude Audio + Image...')
-      audioImageResponse = await anthropic.messages.create({
+      console.log('🧪 Testing Claude Cultural Enhancement + Image Context...')
+      imageEnhancedResponse = await anthropic.messages.create({
         model: "claude-3-sonnet-20240229",
         max_tokens: 1000,
         messages: [{
@@ -72,20 +64,22 @@ CONFIDENCE: [0-100]%`
           content: [
             {
               type: "text",
-              text: `Please transcribe this audio recording about the image shown. The speaker is describing a cultural tourism experience in New Zealand.
+              text: `I have a browser speech recognition transcript about the Māori cultural experience shown in this image. Please enhance it for cultural accuracy using the visual context.
 
-Pay special attention to:
-- Māori place names and cultural terms in context
-- Tourism and cultural context from the image
-- Proper pronunciation interpretation
-- Cultural significance and respect
+Original transcript: "${browserTranscript}"
 
-Use the image context to enhance your understanding of cultural terms and place names.
+Please:
+1. Use the image context to better understand cultural references
+2. Correct Māori cultural terms based on visual cues
+3. Enhance place names and cultural concepts with image context
+4. Provide culturally respectful and accurate language
+5. Rate your confidence with image context (0-100%)
 
 Format your response as:
-TRANSCRIPTION: [your transcription here]
-CONFIDENCE: [0-100]%
-IMAGE_CONTEXT: [how the image helped with transcription]`
+ENHANCED_TRANSCRIPT: [your enhanced version]
+CULTURAL_CORRECTIONS: [list of corrections made]
+IMAGE_INSIGHTS: [how the image helped with accuracy]
+CONFIDENCE: [0-100]%`
             },
             {
               type: "image",
@@ -93,14 +87,6 @@ IMAGE_CONTEXT: [how the image helped with transcription]`
                 type: "base64",
                 media_type: imageFile.type,
                 data: imageBase64
-              }
-            },
-            {
-              type: "audio",
-              source: {
-                type: "base64",
-                media_type: "audio/wav",
-                data: audioBase64
               }
             }
           ]
@@ -111,82 +97,92 @@ IMAGE_CONTEXT: [how the image helped with transcription]`
     // Parse responses
     const parseResponse = (response: any) => {
       const text = response.content[0].text
-      const transcriptionMatch = text.match(/TRANSCRIPTION:\s*(.+?)(?=CONFIDENCE:|$)/s)
+      const enhancedMatch = text.match(/ENHANCED_TRANSCRIPT:\s*(.+?)(?=CULTURAL_CORRECTIONS:|$)/s)
+      const correctionsMatch = text.match(/CULTURAL_CORRECTIONS:\s*(.+?)(?=(?:IMAGE_INSIGHTS:|CONFIDENCE:)|$)/s)
       const confidenceMatch = text.match(/CONFIDENCE:\s*(\d+)%/)
-      const contextMatch = text.match(/IMAGE_CONTEXT:\s*(.+?)$/s)
+      const insightsMatch = text.match(/IMAGE_INSIGHTS:\s*(.+?)(?=CONFIDENCE:|$)/s)
       
       return {
-        transcription: transcriptionMatch?.[1]?.trim() || text,
+        enhancedTranscript: enhancedMatch?.[1]?.trim() || text,
+        culturalCorrections: correctionsMatch?.[1]?.trim() || 'None specified',
         confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : null,
-        imageContext: contextMatch?.[1]?.trim() || null,
+        imageInsights: insightsMatch?.[1]?.trim() || null,
         fullResponse: text
       }
     }
 
-    const audioOnlyResult = parseResponse(audioOnlyResponse)
-    const audioImageResult = audioImageResponse ? parseResponse(audioImageResponse) : null
+    const textOnlyResult = parseResponse(textOnlyResponse)
+    const imageEnhancedResult = imageEnhancedResponse ? parseResponse(imageEnhancedResponse) : null
 
     // Generate analysis
-    const analysis = generateAnalysis(audioOnlyResult, audioImageResult)
+    const analysis = generateAnalysis(browserTranscript, textOnlyResult, imageEnhancedResult)
 
     return NextResponse.json({
-      audioOnly: audioOnlyResult,
-      audioWithImage: audioImageResult,
+      originalTranscript: browserTranscript,
+      textOnlyEnhancement: textOnlyResult,
+      imageEnhancedResult: imageEnhancedResult,
       analysis,
       timestamp: new Date().toISOString()
     })
 
   } catch (error) {
-    console.error('Claude voice test error:', error)
+    console.error('Claude cultural enhancement error:', error)
     return NextResponse.json(
-      { error: 'Failed to process audio with Claude', details: error.message },
+      { error: 'Failed to process with Claude', details: error.message },
       { status: 500 }
     )
   }
 }
 
-function generateAnalysis(audioOnly: any, audioImage: any | null): string {
-  let analysis = `🧪 CLAUDE VOICE RECOGNITION TEST RESULTS\n\n`
+function generateAnalysis(original: string, textOnly: any, imageEnhanced: any | null): string {
+  let analysis = `🧪 CLAUDE CULTURAL ENHANCEMENT TEST RESULTS\n\n`
   
-  analysis += `📊 Audio Only Performance:\n`
-  analysis += `- Confidence: ${audioOnly.confidence || 'Not specified'}%\n`
-  analysis += `- Length: ${audioOnly.transcription?.length || 0} characters\n\n`
+  analysis += `📝 Original Browser Transcript:\n`
+  analysis += `"${original}"\n\n`
   
-  if (audioImage) {
-    analysis += `📊 Audio + Image Performance:\n`
-    analysis += `- Confidence: ${audioImage.confidence || 'Not specified'}%\n`
-    analysis += `- Length: ${audioImage.transcription?.length || 0} characters\n`
+  analysis += `🏛️ Claude Text-Only Enhancement:\n`
+  analysis += `- Confidence: ${textOnly.confidence || 'Not specified'}%\n`
+  analysis += `- Corrections: ${textOnly.culturalCorrections}\n`
+  analysis += `- Enhanced: "${textOnly.enhancedTranscript}"\n\n`
+  
+  if (imageEnhanced) {
+    analysis += `📸 Claude + Image Context Enhancement:\n`
+    analysis += `- Confidence: ${imageEnhanced.confidence || 'Not specified'}%\n`
+    analysis += `- Corrections: ${imageEnhanced.culturalCorrections}\n`
+    analysis += `- Enhanced: "${imageEnhanced.enhancedTranscript}"\n`
     
-    const improvement = audioImage.confidence && audioOnly.confidence 
-      ? audioImage.confidence - audioOnly.confidence 
+    const improvement = imageEnhanced.confidence && textOnly.confidence 
+      ? imageEnhanced.confidence - textOnly.confidence 
       : null
     
     if (improvement !== null) {
-      analysis += `- Improvement: ${improvement > 0 ? '+' : ''}${improvement}% confidence\n`
+      analysis += `- Improvement: ${improvement > 0 ? '+' : ''}${improvement}% confidence with image\n`
     }
     
-    if (audioImage.imageContext) {
-      analysis += `- Image Context Benefit: ${audioImage.imageContext}\n`
+    if (imageEnhanced.imageInsights) {
+      analysis += `- Image Insights: ${imageEnhanced.imageInsights}\n`
     }
     analysis += `\n`
   }
   
   // Māori term analysis
-  const maoriTerms = ['Ko Tāne', 'tīpuna', 'Te Moananui-a-Kiwa', 'manuhiri', 'waka', 'mana', 'taonga']
-  const detectedTerms = maoriTerms.filter(term => 
-    audioOnly.transcription?.toLowerCase().includes(term.toLowerCase()) ||
-    audioImage?.transcription?.toLowerCase().includes(term.toLowerCase())
+  const maoriTerms = ['Ko Tāne', 'tīpuna', 'Te Moananui-a-Kiwa', 'manuhiri', 'waka', 'mana', 'taonga', 'Tūhourangi']
+  const originalTerms = maoriTerms.filter(term => 
+    original?.toLowerCase().includes(term.toLowerCase())
+  )
+  const enhancedTerms = maoriTerms.filter(term => 
+    textOnly.enhancedTranscript?.toLowerCase().includes(term.toLowerCase()) ||
+    imageEnhanced?.enhancedTranscript?.toLowerCase().includes(term.toLowerCase())
   )
   
-  analysis += `🏛️ Cultural Term Recognition:\n`
-  analysis += `- Detected ${detectedTerms.length}/${maoriTerms.length} common Māori terms\n`
-  if (detectedTerms.length > 0) {
-    analysis += `- Recognized: ${detectedTerms.join(', ')}\n`
-  }
+  analysis += `🏛️ Cultural Term Enhancement:\n`
+  analysis += `- Original detected: ${originalTerms.length} terms (${originalTerms.join(', ') || 'none'})\n`
+  analysis += `- Enhanced detected: ${enhancedTerms.length} terms (${enhancedTerms.join(', ') || 'none'})\n`
+  analysis += `- Cultural improvement: ${enhancedTerms.length - originalTerms.length} additional accurate terms\n`
   
-  analysis += `\n🎯 Recommendation: ${audioImage && audioImage.confidence > audioOnly.confidence 
-    ? 'Multi-modal (audio+image) shows superior performance!' 
-    : 'Audio-only performance acceptable for implementation.'}`
+  analysis += `\n🎯 Recommendation: ${imageEnhanced && imageEnhanced.confidence > textOnly.confidence 
+    ? 'Multi-modal (text+image) shows superior cultural enhancement!' 
+    : 'Text-only cultural enhancement provides significant value.'}`
   
   return analysis
 }
