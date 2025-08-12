@@ -143,7 +143,10 @@ CONFIDENCE: [0-100]%`
   } catch (error) {
     console.error('Claude cultural enhancement error:', error)
     return NextResponse.json(
-      { error: 'Failed to process with Claude', details: error.message },
+      { 
+        error: 'Failed to process with Claude', 
+        details: error instanceof Error ? error.message : String(error) 
+      },
       { status: 500 }
     )
   }
