@@ -1,11 +1,46 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { getMacronCorrections, correctTranscriptionText, correctVoiceTranscription, KUPU_CORRECTIONS } from '../../../utils/kupu'
+import { 
+  getMacronCorrections, 
+  correctTranscriptionText, 
+  correctVoiceTranscription, 
+  KUPU_CORRECTIONS,
+  // NEW Ko Tāne imports:
+  correctVoiceTranscriptionWithNgaiTahu,
+  initializeNgaiTahuAI,
+  optimizeForKoTaneDemo,
+  getNgaiTahuStats,
+  validateCulturalSafety
+} from '../../../utils/kupu'
 
 const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
+
+// Ko Tāne Cultural Intelligence Constants
+const KO_TANE_VOCABULARY = [
+  'Ko Tāne', 'Ko Tane', 'kotane', 'waka', 'cultural experience',
+  'Ōtākaro', 'Otakaro', 'Avon River', 'avon',
+  'Ōtautahi', 'Otautahi', 'Christchurch',
+  'Ngāi Tahu', 'Ngai Tahu', 'mana whenua', 'tikanga', 'whakapapa',
+  'Whale Watch Kaikōura', 'whale watch', 'Kaikōura',
+  'Te Waipounamu', 'South Island'
+]
+
+const KO_TANE_PHONETIC_MAPPINGS = {
+  'core tani': 'Ko Tāne',
+  'core tany': 'Ko Tāne', 
+  'ko tany': 'Ko Tāne',
+  'kotany': 'Ko Tāne',
+  'or takaro': 'Ōtākaro',
+  'otakaro': 'Ōtākaro',
+  'avon river': 'Ōtākaro',
+  'or tautahi': 'Ōtautahi',
+  'christchurch': 'Ōtautahi Christchurch',
+  'nigh tahu': 'Ngāi Tahu',
+  'nga tahu': 'Ngāi Tahu'
+}
 
 // Story prompts carousel
 const storyPrompts = [
@@ -106,6 +141,11 @@ const [showTranscriptEdit, setShowTranscriptEdit] = useState(false)
 const [editableTranscript, setEditableTranscript] = useState('')
 const [transcriptEditComplete, setTranscriptEditComplete] = useState(false)
 
+  // Ngāi Tahu Cultural AI States
+const [ngaiTahuAI, setNgaiTahuAI] = useState<any>(null)
+const [koTaneStats, setKoTaneStats] = useState<any>(null)
+const [koTaneOptimized, setKoTaneOptimized] = useState(false)
+  
   // Progressive Enhancement States
   const [culturalEnhancement, setCulturalEnhancement] = useState<CulturalEnhancementState>({
     isActive: false,
