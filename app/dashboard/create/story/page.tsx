@@ -60,6 +60,10 @@ interface CulturalEnhancementState {
   userOptedIn: boolean
   bannerDismissed: boolean
   languageMode: 'standard' | 'cultural' | 'enhanced'
+  // Ko Tāne properties:
+  ngaiTahuMode?: boolean
+  koTaneOptimized?: boolean
+  iwi_rohe?: string
 }
 
 interface EnhancedVoiceSettings {
@@ -148,13 +152,17 @@ const [koTaneOptimized, setKoTaneOptimized] = useState(false)
   
   // Progressive Enhancement States
   const [culturalEnhancement, setCulturalEnhancement] = useState<CulturalEnhancementState>({
-    isActive: false,
-    detectedCulturalContent: false,
-    correctionCount: 0,
-    userOptedIn: false,
-    bannerDismissed: false,
-    languageMode: 'standard'
-  })
+  isActive: false,
+  detectedCulturalContent: false,
+  correctionCount: 0,
+  userOptedIn: false,
+  bannerDismissed: false,
+  languageMode: 'standard',
+  // Ko Tāne enhancements:
+  ngaiTahuMode: false,
+  koTaneOptimized: false,
+  iwi_rohe: 'Canterbury'
+})
 
   const [showEnhancementBanner, setShowEnhancementBanner] = useState(false)
   const [enhancedVoiceSettings, setEnhancedVoiceSettings] = useState<EnhancedVoiceSettings>({
@@ -281,6 +289,26 @@ const handleCancelTranscriptEdit = () => {
         setCulturalEnhancement(prev => ({
           ...prev,
           detectedCulturalContent: true
+
+          // Ngāi Tahu AI Initialization
+  try {
+    const ai = initializeNgaiTahuAI({
+      location: 'Canterbury',
+      userLevel: 'business',
+      demoMode: 'ko_tane',
+      confidenceThreshold: 95
+    })
+    setNgaiTahuAI(ai)
+    
+    const stats = getNgaiTahuStats()
+    setKoTaneStats(stats)
+    
+    console.log('🏛️ Ngāi Tahu Cultural AI initialized for Ko Tāne demo')
+    console.log('📊 Cultural database loaded:', stats.totalTerms, 'terms')
+    
+  } catch (error) {
+    console.error('Error initializing Ngāi Tahu AI:', error)
+  }
         }))
       }
     }
