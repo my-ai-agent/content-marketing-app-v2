@@ -289,6 +289,8 @@ const handleCancelTranscriptEdit = () => {
         setCulturalEnhancement(prev => ({
           ...prev,
           detectedCulturalContent: true
+            }))  // ← ADD THESE TWO CLOSING BRACKETS!
+    }
 
           // Ngāi Tahu AI Initialization
   try {
