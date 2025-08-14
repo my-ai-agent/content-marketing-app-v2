@@ -271,28 +271,32 @@ const handleCancelTranscriptEdit = () => {
   setShowTranscriptEdit(false)
 }
 
-  useEffect(() => {
-    // Get the uploaded photo to display as reference
-    const photoData = localStorage.getItem('uploadedPhoto')
-    if (photoData) {
-      setUploadedPhoto(photoData)
-    }
+  // COMPLETE useEffect REPLACEMENT - EXACT STRUCTURE NEEDED
+// Replace your ENTIRE useEffect (around lines 265-320) with this:
 
-    // Get any existing story
-    const existingStory = localStorage.getItem('userStoryContext')
-    if (existingStory) {
-      setStory(existingStory)
-      
-      // Check existing story for cultural content
-      const culturalCheck = detectCulturalContent(existingStory, [])
-      if (culturalCheck.detected) {
-        setCulturalEnhancement(prev => ({
-          ...prev,
-          detectedCulturalContent: true
-            }))  // ← ADD THESE TWO CLOSING BRACKETS!
-    }
+useEffect(() => {
+  // Get the uploaded photo to display as reference
+  const photoData = localStorage.getItem('uploadedPhoto')
+  if (photoData) {
+    setUploadedPhoto(photoData)
+  }
 
-          // Ngāi Tahu AI Initialization
+  // Get any existing story
+  const existingStory = localStorage.getItem('userStoryContext')
+  if (existingStory) {
+    setStory(existingStory)
+    
+    // Check existing story for cultural content
+    const culturalCheck = detectCulturalContent(existingStory, [])
+    if (culturalCheck.detected) {
+      setCulturalEnhancement(prev => ({
+        ...prev,
+        detectedCulturalContent: true
+      }))
+    }
+  }
+
+  // Ngāi Tahu AI Initialization
   try {
     const ai = initializeNgaiTahuAI({
       location: 'Canterbury',
@@ -311,23 +315,20 @@ const handleCancelTranscriptEdit = () => {
   } catch (error) {
     console.error('Error initializing Ngāi Tahu AI:', error)
   }
-        }))
-      }
-    }
 
-    // Auto-rotate prompts
-    const interval = setInterval(() => {
-      setCurrentPromptIndex((prev) => (prev + 1) % storyPrompts.length)
-    }, 3000)
+  // Auto-rotate prompts
+  const interval = setInterval(() => {
+    setCurrentPromptIndex((prev) => (prev + 1) % storyPrompts.length)
+  }, 3000)
 
-    // Cleanup function
-    return () => {
-      clearInterval(interval)
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
+  // Cleanup function
+  return () => {
+    clearInterval(interval)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
     }
-  }, [])
+  }
+}, [])
 
   // Enhanced function to detect potential Māori words
   const detectPotentialMaoriWords = (text: string) => {
