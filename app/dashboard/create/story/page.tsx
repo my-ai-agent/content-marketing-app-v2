@@ -780,16 +780,7 @@ setEditableTranscript(story) // Pre-populate with current story
           textAlign: 'center'
         }}>
           Tell Your Story
-        <h1 style={{ 
-  fontSize: 'clamp(2rem, 6vw, 4rem)', 
-  fontWeight: '700',
-  color: '#1f2937',
-  lineHeight: '1.2',
-  marginBottom: '0rem',
-  textAlign: 'center'
-}}>
-  Tell Your Story
-</h1>
+        </h1>
 
 {/* Progressive Enhancement Status Indicator */}
 {culturalEnhancement.isActive && (
