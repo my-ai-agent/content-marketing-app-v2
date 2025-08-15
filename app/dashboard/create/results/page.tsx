@@ -262,20 +262,37 @@ export default function MobileOptimizedResults() {
       
       addDebugLog(`API request body prepared: ${JSON.stringify(requestBody, null, 2)}`)
       
-      const response = await fetch('/api/claude', {
+      // 🔧 MOBILE FIX: Conditionally use AbortController (CoPilot's recommendation)
+      let fetchOptions: any = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
-      })
+      }
+      
+      // Only use AbortController on desktop to avoid mobile compatibility issues
+      if (!isMobileDevice && typeof AbortController !== 'undefined') {
+        const controller = new AbortController()
+        fetchOptions.signal = controller.signal
+        
+        // Set timeout only for desktop
+        setTimeout(() => controller.abort(), 60000)
+        addDebugLog(`Desktop: Using AbortController with 60s timeout`)
+      } else {
+        addDebugLog(`Mobile: Skipping AbortController for compatibility`)
+      }
+      
+      addDebugLog('🔥 ABOUT TO CALL FETCH - This should work on mobile now!')
+      
+      const response = await fetch('/api/claude', fetchOptions)
 
-      addDebugLog(`API response status: ${response.status} ${response.statusText}`)
+      addDebugLog(`✅ FETCH RETURNED! API response status: ${response.status} ${response.statusText}`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
       
       const data = await response.json()
-      addDebugLog(`API response data received: ${JSON.stringify(data).substring(0, 200)}...`)
+      addDebugLog(`✅ API response data received: ${JSON.stringify(data).substring(0, 200)}...`)
       
       return {
         content: data.content || getMobileFallbackContent(platform, userData),
@@ -565,6 +582,8 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         let parsedPlatforms: string[] = ['instagram']
         let parsedFormats: string[] = ['social-post']
 
+        addDebugLog('🔄 STEP 1: Starting JSON parsing...')
+
         try {
           parsedProfile = profile ? JSON.parse(profile) : {}
           addDebugLog(`✅ Profile parsed: ${Object.keys(parsedProfile).length} keys`)
@@ -572,6 +591,7 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           addDebugLog(`❌ Profile parse error: ${e}`)
         }
 
+        addDebugLog('🔄 STEP 2: Parsing audience...')
         try {
           parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
           addDebugLog(`✅ Audience parsed: ${JSON.stringify(parsedAudience)}`)
@@ -579,6 +599,7 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           addDebugLog(`❌ Audience parse error: ${e}`)
         }
 
+        addDebugLog('🔄 STEP 3: Parsing interests...')
         try {
           parsedInterests = interests ? JSON.parse(interests) : ['cultural']
           addDebugLog(`✅ Interests parsed: ${JSON.stringify(parsedInterests)}`)
@@ -586,6 +607,7 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           addDebugLog(`❌ Interests parse error: ${e}`)
         }
 
+        addDebugLog('🔄 STEP 4: Parsing platforms...')
         try {
           parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
           addDebugLog(`✅ Platforms parsed: ${JSON.stringify(parsedPlatforms)}`)
@@ -593,12 +615,15 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           addDebugLog(`❌ Platforms parse error: ${e}`)
         }
 
+        addDebugLog('🔄 STEP 5: Parsing formats...')
         try {
           parsedFormats = formats ? JSON.parse(formats) : ['social-post']
           addDebugLog(`✅ Formats parsed: ${JSON.stringify(parsedFormats)}`)
         } catch (e) {
           addDebugLog(`❌ Formats parse error: ${e}`)
         }
+
+        addDebugLog('🔄 STEP 6: Creating userData object...')
 
         const userData: UserData = {
           photo: photoData ? URL.createObjectURL(photoData) : undefined,
@@ -620,18 +645,25 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           - platforms: ${JSON.stringify(userData.platforms)}
           - location: ${userData.location}`)
 
-        addDebugLog('🔄 Setting userData state...')
+        addDebugLog('🔄 STEP 7: Setting userData state...')
         setUserData(userData)
         
+        addDebugLog('🔄 STEP 8: About to call generateContentProgressive...')
         addDebugLog('🚀 ABOUT TO CALL generateContentProgressive...')
+        
+        // Add a small delay to ensure state is set
+        await new Promise(resolve => setTimeout(resolve, 100))
+        addDebugLog('🔄 STEP 9: Delay complete, calling function...')
         
         // FORCE CALL with explicit await and error handling
         try {
           addDebugLog('🚀 CALLING generateContentProgressive NOW!')
-          await generateContentProgressive(userData)
+          const result = await generateContentProgressive(userData)
           addDebugLog('✅ generateContentProgressive completed successfully')
+          addDebugLog(`✅ Result: ${result}`)
         } catch (genError) {
           addDebugLog(`❌ generateContentProgressive ERROR: ${genError}`)
+          addDebugLog(`❌ Error stack: ${(genError as Error).stack}`)
           throw genError
         }
         
