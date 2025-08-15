@@ -529,14 +529,19 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           - formats: ${formats ? 'YES' : 'NO'}
           - profile: ${profile ? 'YES' : 'NO'}`)
 
-        // Load photo from IndexedDB (optional)
+        // MOBILE DEBUG: Skip IndexedDB photo loading to test if this is the blocker
         let photoData: Blob | null = null
-        try {
-          addDebugLog('Attempting IndexedDB photo load...')
-          photoData = await getImageFromIndexedDB('selectedPhoto')
-          addDebugLog(`IndexedDB photo: ${photoData ? 'FOUND' : 'NOT FOUND'}`)
-        } catch (photoErr) {
-          addDebugLog(`IndexedDB photo error: ${photoErr}`)
+        if (!isMobileDevice) {
+          // Only load photo on desktop to test mobile generation
+          try {
+            addDebugLog('Attempting IndexedDB photo load (DESKTOP ONLY)...')
+            photoData = await getImageFromIndexedDB('selectedPhoto')
+            addDebugLog(`IndexedDB photo: ${photoData ? 'FOUND' : 'NOT FOUND'}`)
+          } catch (photoErr) {
+            addDebugLog(`IndexedDB photo error: ${photoErr}`)
+          }
+        } else {
+          addDebugLog('🔧 MOBILE DETECTED: Skipping IndexedDB photo load to test generation')
         }
 
         // Check required data
@@ -553,16 +558,47 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
 
         addDebugLog('✅ Required data present, parsing JSON...')
 
-        // Parse JSON data properly
-        const parsedProfile = profile ? JSON.parse(profile) : {}
-        const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
-        const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
-        const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
-        const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+        // Parse JSON data properly with error handling
+        let parsedProfile = {}
+        let parsedAudience: string[] = ['millennials']
+        let parsedInterests: string[] = ['cultural']
+        let parsedPlatforms: string[] = ['instagram']
+        let parsedFormats: string[] = ['social-post']
 
-        addDebugLog(`JSON parsing complete:
-          - parsedPlatforms: ${JSON.stringify(parsedPlatforms)}
-          - parsedAudience: ${JSON.stringify(parsedAudience)}`)
+        try {
+          parsedProfile = profile ? JSON.parse(profile) : {}
+          addDebugLog(`✅ Profile parsed: ${Object.keys(parsedProfile).length} keys`)
+        } catch (e) {
+          addDebugLog(`❌ Profile parse error: ${e}`)
+        }
+
+        try {
+          parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
+          addDebugLog(`✅ Audience parsed: ${JSON.stringify(parsedAudience)}`)
+        } catch (e) {
+          addDebugLog(`❌ Audience parse error: ${e}`)
+        }
+
+        try {
+          parsedInterests = interests ? JSON.parse(interests) : ['cultural']
+          addDebugLog(`✅ Interests parsed: ${JSON.stringify(parsedInterests)}`)
+        } catch (e) {
+          addDebugLog(`❌ Interests parse error: ${e}`)
+        }
+
+        try {
+          parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
+          addDebugLog(`✅ Platforms parsed: ${JSON.stringify(parsedPlatforms)}`)
+        } catch (e) {
+          addDebugLog(`❌ Platforms parse error: ${e}`)
+        }
+
+        try {
+          parsedFormats = formats ? JSON.parse(formats) : ['social-post']
+          addDebugLog(`✅ Formats parsed: ${JSON.stringify(parsedFormats)}`)
+        } catch (e) {
+          addDebugLog(`❌ Formats parse error: ${e}`)
+        }
 
         const userData: UserData = {
           photo: photoData ? URL.createObjectURL(photoData) : undefined,
@@ -584,9 +620,20 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           - platforms: ${JSON.stringify(userData.platforms)}
           - location: ${userData.location}`)
 
+        addDebugLog('🔄 Setting userData state...')
         setUserData(userData)
-        addDebugLog('🚀 CALLING generateContentProgressive...')
-        generateContentProgressive(userData)
+        
+        addDebugLog('🚀 ABOUT TO CALL generateContentProgressive...')
+        
+        // FORCE CALL with explicit await and error handling
+        try {
+          addDebugLog('🚀 CALLING generateContentProgressive NOW!')
+          await generateContentProgressive(userData)
+          addDebugLog('✅ generateContentProgressive completed successfully')
+        } catch (genError) {
+          addDebugLog(`❌ generateContentProgressive ERROR: ${genError}`)
+          throw genError
+        }
         
       } catch (err) {
         addDebugLog(`❌ CRITICAL ERROR in loadUserData: ${err}`)
