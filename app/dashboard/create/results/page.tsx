@@ -603,16 +603,16 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         const userData: UserData = {
           photo: photoData ? URL.createObjectURL(photoData) : undefined,
           story,
-          persona: parsedProfile.profile?.role || 'cultural-explorer',
+          persona: (parsedProfile as any).profile?.role || 'cultural-explorer',
           audience: parsedAudience[0] || 'millennials',
           interests: parsedInterests[0] || 'cultural',
           platforms: parsedPlatforms,
           formats: parsedFormats,
-          businessType: parsedProfile.business?.businessType,
-          websiteUrl: parsedProfile.business?.websiteUrl,
-          name: parsedProfile.profile?.name,
-          location: parsedProfile.profile?.location,
-          culturalConnection: parsedProfile.pepeha?.culturalBackground
+          businessType: (parsedProfile as any).business?.businessType,
+          websiteUrl: (parsedProfile as any).business?.websiteUrl,
+          name: (parsedProfile as any).profile?.name,
+          location: (parsedProfile as any).profile?.location,
+          culturalConnection: (parsedProfile as any).pepeha?.culturalBackground
         }
 
         addDebugLog(`✅ UserData object created successfully:
