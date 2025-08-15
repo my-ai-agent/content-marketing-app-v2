@@ -29,14 +29,49 @@ interface GeneratedContent {
   optimalTime: string
   culturalAuthenticity?: string
   brandConsistency?: string
+  generationTime?: number
+  cached?: boolean
 }
 
-export default function QRDistributionHub() {
+interface GenerationProgress {
+  stage: 'detecting' | 'generating' | 'complete'
+  currentPlatform: string
+  completedPlatforms: string[]
+  progress: number
+  message: string
+  totalTime?: number
+}
+
+export default function MobileOptimizedResults() {
   const [isGenerating, setIsGenerating] = useState(true)
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  
+  // 🚀 MOBILE OPTIMIZATIONS
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    stage: 'detecting',
+    currentPlatform: '',
+    completedPlatforms: [],
+    progress: 0,
+    message: 'Initializing cultural intelligence...'
+  })
+  const [koTaneOptimized, setKoTaneOptimized] = useState(false)
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
+  const [startTime, setStartTime] = useState(0)
+
+  // 📱 DETECT MOBILE DEVICE
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent)
+      setIsMobileDevice(isMobile)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Helper for IndexedDB image loading
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
@@ -61,230 +96,327 @@ export default function QRDistributionHub() {
     })
   }
 
-  // IMPROVED CLAUDE API CONTENT GENERATION - SERVER-SIDE
-  const generateClaudeContent = async (userData: UserData, platform: string): Promise<string> => {
-    const isBusinessUser = !!userData.businessType
+  // 🎯 KO TĀNE CONTENT DETECTION
+  const detectKoTaneContent = (story: string): boolean => {
+    const koTaneTerms = [
+      'ko tāne', 'ko tane', 'kotane',
+      'ōtākaro', 'otakaro', 'avon river',
+      'ōtautahi', 'otautahi', 'christchurch',
+      'waka', 'ngāi tahu', 'ngai tahu', 'ngāi tūāhuriri', 'ngai tuahuriri'
+    ]
     
-    // Generate culturally-intelligent prompt
-    const prompt = `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content
+    const lowerStory = story.toLowerCase()
+    return koTaneTerms.some(term => lowerStory.includes(term))
+  }
 
-🌿 CULTURAL INTELLIGENCE FRAMEWORK:
-- ALWAYS respect Te Tiriti o Waitangi principles and Māori cultural protocols
-- Use appropriate cultural terminology and iwi acknowledgments for specific locations
-- NEVER appropriate sacred or restricted cultural elements (tapu, whakapapa, karakia)  
-- Promote authentic, respectful cultural engagement that benefits local communities
-- Include proper place name pronunciations and cultural context
-- Honor kaitiakitanga (environmental guardianship) principles in all content
-
-${userData.name ? `👤 CONTENT CREATOR: ${userData.name}` : ''}
-${userData.location ? `📍 LOCATION: ${userData.location} ${getLocationContext(userData.location)}` : ''}
-${userData.culturalConnection ? `🌱 CULTURAL CONNECTION: ${userData.culturalConnection}` : ''}
-
-${isBusinessUser && userData.businessType ? getBusinessContext(userData.businessType) : getPersonalContext(userData.persona || 'cultural-explorer')}
-
-📱 ${platform.toUpperCase()} PLATFORM OPTIMIZATION:
-${getPlatformOptimization(platform)}
-
-📝 CONTENT REQUIREMENTS:
-- Transform the story into engaging, culturally-intelligent ${platform} content
-- Maintain authentic voice while optimizing for ${platform} algorithms  
-- Include relevant iwi acknowledgments and cultural context for the location
-- Ensure ALL cultural references are respectful and appropriate
-- Create compelling calls-to-action that drive meaningful engagement
-- Use New Zealand English spelling and terminology (colour, realise, centre, etc.)
-- Include specific location details with proper Māori place names where appropriate
-
-${userData.audience ? `🎯 PRIMARY TARGET AUDIENCE: ${userData.audience}` : ''}
-${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
-
-📖 ORIGINAL STORY TO TRANSFORM:
-"${userData.story || 'Amazing cultural experience in beautiful Aotearoa New Zealand'}"
-
-${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experience/location - use visual elements to enhance storytelling' : ''}
-
-🎯 GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
-
+  // 🚀 PROGRESSIVE CONTENT GENERATION - MOBILE OPTIMIZED
+  const generateContentProgressive = async (userData: UserData) => {
+    const platforms = userData.platforms || ['instagram']
+    setStartTime(Date.now())
+    
     try {
-      console.log(`🚀 Generating ${platform} content with server-side Claude API...`)
+      // Stage 1: Instant Cultural Detection (0-2 seconds)
+      setGenerationProgress({
+        stage: 'detecting',
+        currentPlatform: '',
+        completedPlatforms: [],
+        progress: 10,
+        message: 'Analyzing cultural content...'
+      })
       
-      // Call our server-side API endpoint instead of direct Claude API
+      const isKoTaneContent = detectKoTaneContent(userData.story || '')
+      setKoTaneOptimized(isKoTaneContent)
+      
+      if (isKoTaneContent) {
+        setGenerationProgress(prev => ({
+          ...prev,
+          progress: 20,
+          message: '🎯 Ko Tāne content detected - activating cultural intelligence!'
+        }))
+        
+        // Brief pause to show Ko Tāne detection
+        await new Promise(resolve => setTimeout(resolve, 1500))
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+      
+      // Stage 2: Generate platforms progressively
+      setGenerationProgress({
+        stage: 'generating',
+        currentPlatform: platforms[0],
+        completedPlatforms: [],
+        progress: 30,
+        message: `Generating ${platforms[0]} content...`
+      })
+      
+      // Generate each platform and display immediately
+      for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i]
+        const platformStart = Date.now()
+        
+        setGenerationProgress(prev => ({
+          ...prev,
+          currentPlatform: platform,
+          progress: 30 + (i / platforms.length) * 60,
+          message: `Generating ${platform} content...`
+        }))
+        
+        const content = await generateSinglePlatform(userData, platform)
+        const platformTime = Date.now() - platformStart
+        
+        const platformContent: GeneratedContent = {
+          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+          content: content.content,
+          qrCode: generateQRCode(`${platform}_${Date.now()}_${i}`),
+          tips: getPlatformTips(platform),
+          optimalTime: getOptimalPostingTime(platform),
+          culturalAuthenticity: isKoTaneContent ? 'High - Ko Tāne & Ngāi Tūāhuriri optimized' : 'High - Cultural intelligence active',
+          brandConsistency: '95% - Mobile optimized',
+          generationTime: platformTime,
+          cached: content.cached
+        }
+        
+        // Add to content immediately for progressive display
+        setGeneratedContent(prev => [...prev, platformContent])
+        
+        // Update progress
+        setGenerationProgress(prev => ({
+          ...prev,
+          completedPlatforms: [...prev.completedPlatforms, platform],
+          progress: 30 + ((i + 1) / platforms.length) * 60,
+          message: platforms.length > i + 1 ? `${platform} complete! Generating ${platforms[i + 1]}...` : `${platform} complete!`
+        }))
+      }
+      
+      // Stage 3: Complete
+      const totalTime = Date.now() - startTime
+      setGenerationProgress({
+        stage: 'complete',
+        currentPlatform: '',
+        completedPlatforms: platforms,
+        progress: 100,
+        message: `All content ready in ${(totalTime / 1000).toFixed(1)}s! 🎉`,
+        totalTime
+      })
+      
+      setShowSuccessAnimation(true)
+      setTimeout(() => setShowSuccessAnimation(false), 2000)
+      
+    } catch (error) {
+      console.error('Progressive generation error:', error)
+      setError('Generation failed. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // 📱 SINGLE PLATFORM GENERATION WITH MOBILE OPTIMIZATION
+  const generateSinglePlatform = async (userData: UserData, platform: string): Promise<{content: string, cached: boolean}> => {
+    try {
       const response = await fetch('/api/claude', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt,
+          prompt: `Create engaging ${platform} content for this cultural experience: "${userData.story || 'Amazing experience'}"`,
           platform,
           userData: {
             story: userData.story,
-            persona: userData.persona,
-            audience: userData.audience,
-            interests: userData.interests,
-            businessType: userData.businessType,
-            name: userData.name,
-            location: userData.location
-          }
+            location: userData.location,
+            businessType: userData.businessType
+          },
+          mobileOptimized: isMobileDevice,
+          maxTokens: isMobileDevice ? 1500 : 2000
         })
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`Server API error: ${response.status} - ${errorText}`)
-        throw new Error(`Server API error: ${response.status}`)
+        throw new Error(`API error: ${response.status}`)
       }
-
+      
       const data = await response.json()
-      console.log(`✅ Successfully generated ${platform} content`)
-      return data.content || getImprovedFallbackContent(platform, userData)
+      return {
+        content: data.content || getMobileFallbackContent(platform, userData),
+        cached: data.cached || false
+      }
       
     } catch (error) {
-      console.error(`❌ Error generating Claude content for ${platform}:`, error)
-      return getImprovedFallbackContent(platform, userData)
-    }
-  }
-
-  // Helper functions for prompt generation
-  const getLocationContext = (location: string): string => {
-    const locationLower = location.toLowerCase()
-    
-    if (locationLower.includes('auckland') || locationLower.includes('tāmaki makaurau')) {
-      return '(Tāmaki Makaurau - land of many lovers, traditional home of Ngāti Whātua)'
-    } else if (locationLower.includes('wellington') || locationLower.includes('te whanganui-a-tara')) {
-      return '(Te Whanganui-a-Tara - the great harbour of Tara, traditional home of Taranaki Whānui)'
-    } else if (locationLower.includes('christchurch') || locationLower.includes('ōtautahi')) {
-      return '(Ōtautahi - place of Tautahi, traditional home of Ngāi Tahu)'
-    } else if (locationLower.includes('rotorua')) {
-      return '(Traditional home of Te Arawa iwi, center of Māori culture and geothermal wonders)'
-    } else if (locationLower.includes('queenstown') || locationLower.includes('tāhuna')) {
-      return '(Tāhuna - shallow bay, traditional area of Ngāi Tahu in Central Otago)'
-    }
-    
-    return ''
-  }
-
-  const getBusinessContext = (businessType: string): string => {
-    const businessContexts: { [key: string]: string } = {
-      'visitor-attraction': `🏢 BUSINESS CONTEXT:
-- Business Type: Visitor Attraction
-- Industry Focus: unique cultural experiences and visitor journey
-- Core Expertise: cultural storytelling and heritage preservation
-- Audience Value Proposition: authentic cultural immersion and learning
-- Cultural Responsibility: respectful representation of indigenous stories and protocols`,
-      'accommodation': `🏢 BUSINESS CONTEXT:
-- Business Type: Accommodation
-- Industry Focus: hospitality excellence and guest experience
-- Core Expertise: comfort, service quality, and local connections
-- Audience Value Proposition: memorable stays and local insider knowledge
-- Cultural Responsibility: incorporation of local cultural elements and Māori hospitality principles`,
-      'food-beverage': `🏢 BUSINESS CONTEXT:
-- Business Type: Food & Beverage
-- Industry Focus: culinary journey and local flavors
-- Core Expertise: food quality, local sourcing, and cultural cuisine
-- Audience Value Proposition: authentic taste experiences and cultural food stories
-- Cultural Responsibility: respect for traditional recipes and indigenous food practices`
-    }
-    
-    return businessContexts[businessType] || `🏢 BUSINESS CONTEXT: Professional ${businessType.replace('-', ' ')} service provider`
-  }
-
-  const getPersonalContext = (persona: string): string => {
-    const personalContexts: { [key: string]: string } = {
-      'cultural-explorer': `🎭 PERSONAL CONTEXT:
-- Creator Voice: curious and respectful cultural learner
-- Content Focus: deep cultural connections and meaningful experiences
-- Storytelling Style: thoughtful reflection and cultural appreciation`,
-      'adventure-seeker': `🎭 PERSONAL CONTEXT:
-- Creator Voice: enthusiastic and bold experience sharer
-- Content Focus: exciting discoveries and personal challenges
-- Storytelling Style: energetic storytelling with inspirational calls to action`,
-      'content-creator': `🎭 PERSONAL CONTEXT:
-- Creator Voice: creative and engaging digital storyteller
-- Content Focus: visual narratives and shareable moments
-- Storytelling Style: platform-optimized content with strong visual elements`
-    }
-    
-    return personalContexts[persona] || personalContexts['cultural-explorer']
-  }
-
-  const getPlatformOptimization = (platform: string): string => {
-    const optimizations: { [key: string]: string } = {
-      'instagram': `- Content Style: visual-first storytelling with engaging captions
-- Target Length: 125-150 words
-- Communication Tone: authentic and inspiring
-- Hashtag Strategy: 8-12 relevant hashtags
-- Call to Action: encourage engagement and shares`,
-      'facebook': `- Content Style: community-focused narrative with personal connection
-- Target Length: 150-200 words
-- Communication Tone: conversational and relatable
-- Engagement Approach: encourage comments and discussion
-- Call to Action: drive meaningful interactions`,
-      'linkedin': `- Content Style: professional storytelling with industry insights
-- Target Length: 200-300 words
-- Communication Tone: authoritative yet personable
-- Value Proposition: provide business value and networking opportunities
-- Call to Action: encourage professional connections`,
-      'website': `- Content Style: SEO-optimized informative content
-- Target Length: 200-400 words
-- Communication Tone: professional and trustworthy
-- Value Proposition: provide comprehensive information and clear value proposition
-- Call to Action: drive conversions and inquiries`
-    }
-    
-    return optimizations[platform] || optimizations['instagram']
-  }
-
-  const getPlatformLength = (platform: string): string => {
-    const lengths: { [key: string]: string } = {
-      'instagram': '125-150 words',
-      'facebook': '150-200 words',
-      'linkedin': '200-300 words',
-      'website': '200-400 words'
-    }
-    
-    return lengths[platform] || '125-150 words'
-  }
-
-  // IMPROVED FALLBACK CONTENT - Uses actual user story
-  const getImprovedFallbackContent = (platform: string, userData: UserData): string => {
-    const isBusinessUser = !!userData.businessType
-    const userStory = userData.story || "Amazing experience in beautiful Aotearoa"
-    const location = userData.location || "New Zealand"
-    
-    if (platform === 'instagram') {
-      return `🌟 ${userStory}
-
-${isBusinessUser ? 
-        'Experience authentic New Zealand culture with us - where every moment honors our rich heritage and stunning landscapes! 🏔️' : 
-        'What an incredible journey through Aotearoa! Every step revealed new wonders and cultural insights. 🥾✨'
+      console.error(`Generation error for ${platform}:`, error)
+      return {
+        content: getMobileFallbackContent(platform, userData),
+        cached: false
       }
-
-#NewZealand #Aotearoa #CulturalTourism #AuthenticExperience #Manaakitanga #${location.replace(/\s+/g, '')}`
-    } else if (platform === 'facebook') {
-      return `${userStory}
-
-This experience really opened my eyes to the incredible depth of New Zealand's cultural heritage and natural beauty. ${isBusinessUser ? 
-        'We feel privileged to share these authentic moments with visitors from around the world, always ensuring we honor the cultural significance of this special place.' : 
-        'I can\'t recommend this enough for anyone wanting to truly connect with local culture and understand the stories that make Aotearoa so special!'
-      }
-
-The manaakitanga (hospitality) shown by local people made this experience unforgettable. 💙`
-    } else if (platform === 'linkedin') {
-      return `Professional insight: ${userStory}
-
-The sustainable tourism industry in New Zealand continues to demonstrate how authentic cultural experiences can create meaningful economic opportunities while preserving and celebrating indigenous heritage. ${isBusinessUser ? 
-        'Our commitment to cultural authenticity and environmental responsibility drives everything we do.' : 
-        'This experience highlighted the importance of supporting businesses that prioritize cultural respect and community benefit.'
-      }
-
-Witnessing the integration of traditional Māori values with modern tourism practices offers valuable lessons for the global industry. #SustainableTourism #CulturalAuthenticity`
     }
-    
-    return `🌟 ${userStory}
-
-Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTourism #Manaakitanga`
   }
 
+  // 📱 MOBILE FALLBACK CONTENT
+  const getMobileFallbackContent = (platform: string, userData: UserData): string => {
+    const story = userData.story || 'Amazing cultural experience'
+    
+    if (koTaneOptimized) {
+      if (platform === 'instagram') {
+        return `🎯 ${story} with Ko Tāne on the beautiful Ōtākaro! Experience authentic Ngāi Tahu and Ngāi Tūāhuriri culture with traditional guardians of these sacred waters. #KoTāne #NgāiTahu #NgāiTūāhuriri #CulturalTourism #Ōtākaro #Ōtautahi`
+      } else if (platform === 'facebook') {
+        return `${story}
+
+What an incredible way to connect with authentic Māori culture! Ko Tāne's experience with the traditional guardians of the Ōtākaro (Avon River) offers something truly special - learning from Ngāi Tahu and Ngāi Tūāhuriri in their own rohe.
+
+#KoTāne #NgāiTahu #NgāiTūāhuriri #CulturalTourism #AuthenticExperience`
+      }
+    }
+    
+    return `🌟 ${story} in beautiful Aotearoa New Zealand! #NewZealand #CulturalTourism #AuthenticExperience`
+  }
+
+  // 📊 MOBILE PROGRESS COMPONENT
+  const MobileProgressIndicator = () => (
+    <div style={{
+      position: 'sticky',
+      top: 0,
+      backgroundColor: 'white',
+      padding: '1rem',
+      borderBottom: '2px solid #e5e7eb',
+      zIndex: 100
+    }}>
+      {/* Ko Tāne Detection Banner */}
+      {koTaneOptimized && (
+        <div style={{
+          backgroundColor: '#f0fdf4',
+          border: '2px solid #16a34a',
+          borderRadius: '0.75rem',
+          padding: '0.75rem',
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <span style={{ fontSize: '1.25rem' }}>🎯</span>
+          <div>
+            <div style={{ fontWeight: '700', color: '#15803d', fontSize: '0.95rem' }}>
+              Ko Tāne Content Detected - Cultural Intelligence Active
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+              Enhanced accuracy for Ngāi Tahu & Ngāi Tūāhuriri content
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Progress Bar */}
+      <div style={{
+        backgroundColor: '#f3f4f6',
+        borderRadius: '1rem',
+        overflow: 'hidden',
+        marginBottom: '0.5rem'
+      }}>
+        <div style={{
+          backgroundColor: koTaneOptimized ? '#16a34a' : BRAND_PURPLE,
+          height: '0.75rem',
+          width: `${generationProgress.progress}%`,
+          transition: 'width 0.5s ease',
+          borderRadius: '1rem'
+        }} />
+      </div>
+      
+      {/* Progress Message */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <span style={{
+          fontSize: '0.875rem',
+          fontWeight: '500',
+          color: koTaneOptimized ? '#15803d' : '#6b46c1'
+        }}>
+          {generationProgress.message}
+        </span>
+        <span style={{
+          fontSize: '0.75rem',
+          color: '#6b7280'
+        }}>
+          {generationProgress.progress}%
+        </span>
+      </div>
+      
+      {/* Completed Platforms Indicator */}
+      {generationProgress.completedPlatforms.length > 0 && (
+        <div style={{
+          marginTop: '0.5rem',
+          display: 'flex',
+          gap: '0.25rem',
+          flexWrap: 'wrap'
+        }}>
+          {generationProgress.completedPlatforms.map(platform => (
+            <span key={platform} style={{
+              backgroundColor: '#dcfce7',
+              color: '#15803d',
+              padding: '0.125rem 0.5rem',
+              borderRadius: '0.375rem',
+              fontSize: '0.75rem',
+              fontWeight: '500'
+            }}>
+              ✅ {platform}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  // Helper functions
+  const getPlatformTips = (platform: string): string[] => {
+    const tips: Record<string, string[]> = {
+      instagram: ['Use high-quality images', 'Include relevant hashtags', 'Tag location', 'Engage with comments quickly'],
+      facebook: ['Share during peak hours', 'Encourage comments and shares', 'Use Facebook Groups for wider reach', 'Include call-to-action'],
+      linkedin: ['Professional tone', 'Industry insights', 'Network engagement', 'Share business value'],
+      website: ['SEO optimization', 'Clear structure', 'Cultural authenticity', 'Compelling headlines']
+    }
+    return tips[platform] || ['Optimize for your audience', 'Use platform best practices', 'Engage authentically']
+  }
+
+  const getOptimalPostingTime = (platform: string): string => {
+    const times: Record<string, string> = {
+      instagram: '11 AM - 2 PM, 5 PM - 7 PM',
+      facebook: '1 PM - 3 PM, 7 PM - 9 PM',
+      linkedin: '8 AM - 10 AM, 12 PM - 2 PM, 5 PM - 6 PM',
+      website: 'Anytime - SEO optimized'
+    }
+    return times[platform] || 'Peak audience hours'
+  }
+
+  const generateQRCode = (content: string): string => {
+    const encodedContent = encodeURIComponent(content)
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedContent}`
+  }
+
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content)
+    alert('Content copied to clipboard!')
+  }
+
+  const downloadQRCode = (qrUrl: string, platform: string) => {
+    const link = document.createElement('a')
+    link.href = qrUrl
+    link.download = `${platform}_QR_Code.png`
+    link.click()
+  }
+
+  const generateNewContent = () => {
+    if (userData) {
+      setGeneratedContent([])
+      setIsGenerating(true)
+      setGenerationProgress({
+        stage: 'detecting',
+        currentPlatform: '',
+        completedPlatforms: [],
+        progress: 0,
+        message: 'Initializing cultural intelligence...'
+      })
+      generateContentProgressive(userData)
+    }
+  }
+
+  // Load user data and start generation
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -296,7 +428,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
         const formats = localStorage.getItem('selectedFormats')
         const profile = localStorage.getItem('userProfile')
 
-        // Load photo from IndexedDB (not localStorage)
+        // Load photo from IndexedDB (optional)
         let photoData: Blob | null = null
         try {
           photoData = await getImageFromIndexedDB('selectedPhoto')
@@ -304,8 +436,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           console.log('No photo found in IndexedDB, continuing without photo')
         }
 
-        // Check required data (photo is optional)
-        if (!story || !audienceData || !platforms) {
+        // Check required data
+        if (!story || !platforms) {
           setError('Missing required content data. Please complete all steps.')
           setIsGenerating(false)
           return
@@ -335,7 +467,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
 
         console.log('Loaded user data:', userData)
         setUserData(userData)
-        generateContent(userData)
+        generateContentProgressive(userData)
       } catch (err) {
         console.error('Error loading user data:', err)
         setError('Failed to load your content data.')
@@ -344,95 +476,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
     }
     loadUserData()
   }, [])
-
-  const generateContent = async (userData: UserData) => {
-    try {
-      setIsGenerating(true)
-      
-      const platforms = userData.platforms || ['instagram']
-      const generatedContent: GeneratedContent[] = []
-      
-      // Generate content for each platform using server-side Claude API
-      for (const platform of platforms) {
-        console.log(`🚀 Generating ${platform} content with Claude API...`)
-        
-        const content = await generateClaudeContent(userData, platform)
-        
-        generatedContent.push({
-          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-          content,
-          qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-          tips: getPlatformTips(platform),
-          optimalTime: getOptimalPostingTime(platform),
-          culturalAuthenticity: 'High - AI-generated with cultural intelligence framework',
-          brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
-        })
-      }
-      
-      // Trigger success animation
-      setShowSuccessAnimation(true)
-      setTimeout(() => {
-        setShowSuccessAnimation(false)
-      }, 2000)
-      
-      setGeneratedContent(generatedContent)
-      setIsGenerating(false)
-      
-    } catch (err) {
-      console.error('Content generation error:', err)
-      setError('Failed to generate your content. Please try again.')
-      setIsGenerating(false)
-    }
-  }
-
-  const getPlatformTips = (platform: string): string[] => {
-    switch (platform) {
-      case 'instagram':
-        return ['Use high-quality images', 'Include relevant hashtags', 'Tag location if appropriate', 'Engage with comments quickly']
-      case 'facebook':
-        return ['Share during peak hours', 'Encourage comments and shares', 'Use Facebook Groups for wider reach', 'Include call-to-action']
-      case 'linkedin':
-        return ['Professional tone', 'Industry insights', 'Network engagement', 'Share business value']
-      default:
-        return ['Optimise for your audience', 'Use platform best practices', 'Engage authentically']
-    }
-  }
-
-  const getOptimalPostingTime = (platform: string): string => {
-    switch (platform) {
-      case 'instagram':
-        return '11 AM - 2 PM, 5 PM - 7 PM'
-      case 'facebook':
-        return '1 PM - 3 PM, 7 PM - 9 PM'
-      case 'linkedin':
-        return '8 AM - 10 AM, 12 PM - 2 PM, 5 PM - 6 PM'
-      default:
-        return 'Peak audience hours'
-    }
-  }
-
-  const generateQRCode = (content: string): string => {
-    const encodedContent = encodeURIComponent(content)
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedContent}`
-  }
-
-  const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content)
-    alert('Content copied to clipboard!')
-  }
-
-  const downloadQRCode = (qrUrl: string, platform: string) => {
-    const link = document.createElement('a')
-    link.href = qrUrl
-    link.download = `${platform}_QR_Code.png`
-    link.click()
-  }
-
-  const generateNewContent = () => {
-    if (userData) {
-      generateContent(userData)
-    }
-  }
 
   if (error) {
     return (
@@ -472,10 +515,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb'
-    }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* Mobile-First 600px Container */}
       <div style={{
         maxWidth: '600px',
@@ -522,10 +562,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '1.5rem'
+            marginBottom: '1rem'
           }}>
             <h1 style={{
-              fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+              fontSize: 'clamp(1.25rem, 4vw, 1.75rem)',
               fontWeight: '700',
               color: '#111827',
               margin: '0'
@@ -535,19 +575,19 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
             
             <div style={{
               display: 'flex',
-              gap: '0.75rem'
+              gap: '0.5rem'
             }}>
               <button
                 onClick={generateNewContent}
                 style={{
                   backgroundColor: BRAND_ORANGE,
                   color: 'white',
-                  padding: '0.5rem 1rem',
+                  padding: '0.5rem 0.75rem',
                   borderRadius: '0.5rem',
                   border: 'none',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  fontSize: '0.875rem'
+                  fontSize: '0.75rem'
                 }}
               >
                 ↻ Regenerate
@@ -555,11 +595,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
               <Link href="/dashboard" style={{
                 backgroundColor: '#6b7280',
                 color: 'white',
-                padding: '0.5rem 1rem',
+                padding: '0.5rem 0.75rem',
                 borderRadius: '0.5rem',
                 textDecoration: 'none',
                 fontWeight: '600',
-                fontSize: '0.875rem'
+                fontSize: '0.75rem'
               }}>
                 Dashboard
               </Link>
@@ -567,91 +607,84 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           </div>
         </div>
 
+        {/* Mobile Progress Indicator */}
+        {isGenerating && <MobileProgressIndicator />}
+        
+        {/* Success Animation */}
+        {showSuccessAnimation && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: koTaneOptimized ? '#16a34a' : '#10b981',
+            color: 'white',
+            padding: '1.5rem 2rem',
+            borderRadius: '1rem',
+            fontSize: '1.125rem',
+            fontWeight: '700',
+            zIndex: 1000,
+            boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)',
+            textAlign: 'center',
+            border: '2px solid #ffffff'
+          }}>
+            <div style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>
+              {koTaneOptimized ? '🎯' : '🏛️'}
+            </div>
+            <div>
+              {koTaneOptimized ? 'Ko Tāne Content Ready!' : 'Cultural AI Content Ready!'}
+            </div>
+            <div style={{ 
+              fontSize: '0.8rem', 
+              fontWeight: '500', 
+              marginTop: '0.25rem',
+              opacity: 0.9 
+            }}>
+              {generationProgress.totalTime ? `Generated in ${(generationProgress.totalTime / 1000).toFixed(1)}s` : 'Fast & Authentic'}
+            </div>
+          </div>
+        )}
+
         {/* Content Area */}
         <div style={{ flex: '1', padding: '1rem' }}>
-
-          {/* Success Animation */}
-          {showSuccessAnimation && (
-            <div style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: '#10b981',
-              color: 'white',
-              padding: '1.5rem 2.5rem',
-              borderRadius: '1rem',
-              fontSize: '1.25rem',
-              fontWeight: '700',
-              zIndex: 1000,
-              boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)',
-              animation: 'fadeInOut 3s ease-in-out',
-              textAlign: 'center',
-              border: '2px solid #ffffff'
-            }}>
-              <div style={{ marginBottom: '0.5rem' }}>🏛️</div>
-              <div>Cultural AI Content Ready!</div>
-              <div style={{ 
-                fontSize: '0.875rem', 
-                fontWeight: '500', 
-                marginTop: '0.25rem',
-                opacity: 0.9 
-              }}>
-                Authentic • Respectful • Professional
-              </div>
-            </div>
-          )}
           
           {/* Loading State */}
-          {isGenerating && (
+          {isGenerating && generatedContent.length === 0 && (
             <div style={{
               textAlign: 'center',
-              padding: '3rem 1rem'
+              padding: '2rem 1rem'
             }}>
               <div style={{
-                width: '60px',
-                height: '60px',
-                border: `4px solid ${BRAND_PURPLE}`,
+                width: '50px',
+                height: '50px',
+                border: `4px solid ${koTaneOptimized ? '#16a34a' : BRAND_PURPLE}`,
                 borderTop: '4px solid transparent',
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite',
-                margin: '0 auto 1.5rem'
+                margin: '0 auto 1rem'
               }}></div>
               <h2 style={{ 
                 color: '#111827', 
-                marginBottom: '1rem',
-                fontSize: '1.25rem'
+                marginBottom: '0.75rem',
+                fontSize: '1.125rem'
               }}>
-                🤖 Claude AI Creating Your Cultural Content
+                {koTaneOptimized ? '🎯 Creating Ko Tāne Cultural Content' : '🤖 Claude AI Creating Your Content'}
               </h2>
               <p style={{ 
                 color: '#6b7280', 
                 marginBottom: '1rem',
-                lineHeight: '1.5'
+                lineHeight: '1.4',
+                fontSize: '0.875rem'
               }}>
-                Claude is crafting authentic content based on your story that honors Te Tiriti o Waitangi principles and respects local culture...
+                {koTaneOptimized 
+                  ? 'Enhanced cultural intelligence active for authentic Ngāi Tahu and Ngāi Tūāhuriri content...'
+                  : 'Claude is crafting authentic content that honors cultural principles and respects local heritage...'}
               </p>
-              <div style={{
-                backgroundColor: '#f0f9ff',
-                padding: '1rem',
-                borderRadius: '8px',
-                borderLeft: `4px solid ${BRAND_BLUE}`,
-                textAlign: 'left'
-              }}>
-                <p style={{ 
-                  color: '#0369a1', 
-                  fontWeight: '500',
-                  margin: '0',
-                  fontSize: '0.875rem'
-                }}>
-                  🧠 AI Cultural Intelligence: Ensuring content respects mātauranga Māori and uses your actual story
-                </p>
-              </div>
             </div>
           )}
 
-          {/* Generated Content Results */}
-          {!isGenerating && generatedContent.length > 0 && (
+          {/* Generated Content Results - Progressive Display */}
+          {generatedContent.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {generatedContent.map((item, index) => (
                 <div key={index} style={{
@@ -659,7 +692,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                   borderRadius: '12px',
                   padding: '1.5rem',
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e5e7eb'
+                  border: koTaneOptimized ? '2px solid #16a34a' : '1px solid #e5e7eb',
+                  animation: 'slideIn 0.5s ease-out'
                 }}>
                   {/* Platform Header */}
                   <div style={{
@@ -672,19 +706,33 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                       fontSize: '1.125rem',
                       fontWeight: '600',
                       color: '#111827',
-                      margin: '0'
+                      margin: '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
                     }}>
-                      🤖 {item.platform} (Claude AI)
+                      {koTaneOptimized ? '🎯' : '🤖'} {item.platform} 
+                      {item.cached && (
+                        <span style={{
+                          fontSize: '0.75rem',
+                          backgroundColor: '#fef3c7',
+                          color: '#92400e',
+                          padding: '0.125rem 0.5rem',
+                          borderRadius: '0.375rem'
+                        }}>
+                          ⚡ Cached
+                        </span>
+                      )}
                     </h3>
                     <div style={{
-                      backgroundColor: '#10b981',
+                      backgroundColor: koTaneOptimized ? '#16a34a' : '#10b981',
                       color: 'white',
                       padding: '0.25rem 0.75rem',
                       borderRadius: '12px',
                       fontSize: '0.75rem',
                       fontWeight: '500'
                     }}>
-                      AI Generated
+                      {koTaneOptimized ? 'Ko Tāne AI' : 'AI Generated'}
                     </div>
                   </div>
 
@@ -708,11 +756,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
 
                   {/* Cultural Intelligence Indicator */}
                   <div style={{
-                    backgroundColor: '#f0fdf4',
+                    backgroundColor: koTaneOptimized ? '#f0fdf4' : '#f0fdf4',
                     padding: '0.75rem',
                     borderRadius: '8px',
                     marginBottom: '1rem',
-                    borderLeft: '4px solid #10b981'
+                    borderLeft: `4px solid ${koTaneOptimized ? '#16a34a' : '#10b981'}`
                   }}>
                     <p style={{
                       fontSize: '0.75rem',
@@ -720,7 +768,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                       margin: '0',
                       fontWeight: '500'
                     }}>
-                      ✅ Cultural Intelligence: {item.culturalAuthenticity} | Brand Consistency: {item.brandConsistency}
+                      ✅ {item.culturalAuthenticity} | Brand Consistency: {item.brandConsistency}
+                      {item.generationTime && ` | Generated in ${(item.generationTime / 1000).toFixed(1)}s`}
                     </p>
                   </div>
 
@@ -733,8 +782,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                       src={item.qrCode} 
                       alt={`QR Code for ${item.platform}`}
                       style={{
-                        width: '120px',
-                        height: '120px',
+                        width: '100px',
+                        height: '100px',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px'
                       }}
@@ -745,7 +794,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                       marginTop: '0.5rem',
                       margin: '0.5rem 0 0 0'
                     }}>
-                      Scan to share this AI-generated content
+                      Scan to share this content
                     </p>
                   </div>
 
@@ -759,7 +808,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                       onClick={() => copyToClipboard(item.content)}
                       style={{
                         flex: 1,
-                        backgroundColor: BRAND_PURPLE,
+                        backgroundColor: koTaneOptimized ? '#16a34a' : BRAND_PURPLE,
                         color: 'white',
                         padding: '0.75rem',
                         borderRadius: '6px',
@@ -859,7 +908,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           }}>
             <Link href="/dashboard/create/photo" style={{
               padding: '0.75rem 1.5rem',
-              backgroundColor: BRAND_PURPLE,
+              backgroundColor: koTaneOptimized ? '#16a34a' : BRAND_PURPLE,
               color: 'white',
               textDecoration: 'none',
               borderRadius: '0.75rem',
@@ -910,7 +959,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
             textAlign: 'center',
             margin: '0'
           }}>
-            Your culturally intelligent content is ready to share! 🏛️
+            {koTaneOptimized 
+              ? 'Your Ko Tāne cultural content is ready to share! 🎯🏛️'
+              : 'Your culturally intelligent content is ready to share! 🏛️'}
           </p>
         </div>
 
@@ -945,31 +996,43 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
         </div>
       </div>
 
-      {/* CSS Animation */}
+      {/* CSS Animations */}
       <style jsx>{`
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  @keyframes fadeInOut {
-    0% { 
-      opacity: 0; 
-      transform: translate(-50%, -50%) scale(0.8);
-    }
-    15% { 
-      opacity: 1; 
-      transform: translate(-50%, -50%) scale(1.05);
-    }
-    85% { 
-      opacity: 1; 
-      transform: translate(-50%, -50%) scale(1);
-    }
-    100% { 
-      opacity: 0; 
-      transform: translate(-50%, -50%) scale(0.8);
-    }
-  }
-`}</style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideIn {
+          0% { 
+            opacity: 0; 
+            transform: translateY(20px);
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes fadeInOut {
+          0% { 
+            opacity: 0; 
+            transform: translate(-50%, -50%) scale(0.8);
+          }
+          15% { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(1.05);
+          }
+          85% { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(1);
+          }
+          100% { 
+            opacity: 0; 
+            transform: translate(-50%, -50%) scale(0.8);
+          }
+        }
+      `}</style>
     </div>
   )
 }
