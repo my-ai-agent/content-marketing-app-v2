@@ -60,12 +60,25 @@ export default function MobileOptimizedResults() {
   const [koTaneOptimized, setKoTaneOptimized] = useState(false)
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [startTime, setStartTime] = useState(0)
+  
+  // 🔍 DEBUG STATE - Critical for mobile debugging
+  const [debugLog, setDebugLog] = useState<string[]>([])
+  const [showDebug, setShowDebug] = useState(false)
+
+  // 🔍 DEBUG HELPER - Add to debug log with timestamp
+  const addDebugLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString()
+    const logEntry = `[${timestamp}] ${message}`
+    console.log(logEntry) // Also log to console
+    setDebugLog(prev => [...prev, logEntry])
+  }
 
   // 📱 DETECT MOBILE DEVICE
   useEffect(() => {
     const checkMobile = () => {
       const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent)
       setIsMobileDevice(isMobile)
+      addDebugLog(`Mobile detection: ${isMobile ? 'MOBILE' : 'DESKTOP'} (width: ${window.innerWidth})`)
     }
     
     checkMobile()
@@ -106,16 +119,23 @@ export default function MobileOptimizedResults() {
     ]
     
     const lowerStory = story.toLowerCase()
-    return koTaneTerms.some(term => lowerStory.includes(term))
+    const detected = koTaneTerms.some(term => lowerStory.includes(term))
+    addDebugLog(`Ko Tāne detection: ${detected ? 'YES' : 'NO'} for story: "${story.substring(0, 50)}..."`)
+    return detected
   }
 
-  // 🚀 PROGRESSIVE CONTENT GENERATION - MOBILE OPTIMIZED
+  // 🚀 PROGRESSIVE CONTENT GENERATION - MOBILE OPTIMIZED WITH DEBUG
   const generateContentProgressive = async (userData: UserData) => {
+    addDebugLog(`🚀 STARTING generateContentProgressive - Device: ${isMobileDevice ? 'MOBILE' : 'DESKTOP'}`)
+    
     const platforms = userData.platforms || ['instagram']
+    addDebugLog(`Platforms to generate: ${JSON.stringify(platforms)}`)
+    
     setStartTime(Date.now())
     
     try {
       // Stage 1: Instant Cultural Detection (0-2 seconds)
+      addDebugLog('STAGE 1: Starting cultural detection...')
       setGenerationProgress({
         stage: 'detecting',
         currentPlatform: '',
@@ -126,6 +146,7 @@ export default function MobileOptimizedResults() {
       
       const isKoTaneContent = detectKoTaneContent(userData.story || '')
       setKoTaneOptimized(isKoTaneContent)
+      addDebugLog(`Ko Tāne optimization: ${isKoTaneContent}`)
       
       if (isKoTaneContent) {
         setGenerationProgress(prev => ({
@@ -133,14 +154,16 @@ export default function MobileOptimizedResults() {
           progress: 20,
           message: '🎯 Ko Tāne content detected - activating cultural intelligence!'
         }))
-        
-        // Brief pause to show Ko Tāne detection
+        addDebugLog('Showing Ko Tāne detection message...')
         await new Promise(resolve => setTimeout(resolve, 1500))
+        addDebugLog('Ko Tāne detection delay completed')
       } else {
         await new Promise(resolve => setTimeout(resolve, 1000))
+        addDebugLog('Standard detection delay completed')
       }
       
       // Stage 2: Generate platforms progressively
+      addDebugLog('STAGE 2: Starting platform generation...')
       setGenerationProgress({
         stage: 'generating',
         currentPlatform: platforms[0],
@@ -153,6 +176,7 @@ export default function MobileOptimizedResults() {
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i]
         const platformStart = Date.now()
+        addDebugLog(`Generating platform ${i + 1}/${platforms.length}: ${platform}`)
         
         setGenerationProgress(prev => ({
           ...prev,
@@ -163,6 +187,7 @@ export default function MobileOptimizedResults() {
         
         const content = await generateSinglePlatform(userData, platform)
         const platformTime = Date.now() - platformStart
+        addDebugLog(`Platform ${platform} completed in ${platformTime}ms`)
         
         const platformContent: GeneratedContent = {
           platform: platform.charAt(0).toUpperCase() + platform.slice(1),
@@ -177,7 +202,11 @@ export default function MobileOptimizedResults() {
         }
         
         // Add to content immediately for progressive display
-        setGeneratedContent(prev => [...prev, platformContent])
+        setGeneratedContent(prev => {
+          const newContent = [...prev, platformContent]
+          addDebugLog(`Added platform content. Total platforms: ${newContent.length}`)
+          return newContent
+        })
         
         // Update progress
         setGenerationProgress(prev => ({
@@ -190,6 +219,8 @@ export default function MobileOptimizedResults() {
       
       // Stage 3: Complete
       const totalTime = Date.now() - startTime
+      addDebugLog(`STAGE 3: Generation complete! Total time: ${totalTime}ms`)
+      
       setGenerationProgress({
         stage: 'complete',
         currentPlatform: '',
@@ -203,43 +234,56 @@ export default function MobileOptimizedResults() {
       setTimeout(() => setShowSuccessAnimation(false), 2000)
       
     } catch (error) {
+      addDebugLog(`❌ Progressive generation ERROR: ${error}`)
       console.error('Progressive generation error:', error)
       setError('Generation failed. Please try again.')
     } finally {
+      addDebugLog('🎯 Setting isGenerating to FALSE')
       setIsGenerating(false)
     }
   }
 
-  // 📱 SINGLE PLATFORM GENERATION WITH MOBILE OPTIMIZATION
+  // 📱 SINGLE PLATFORM GENERATION WITH MOBILE OPTIMIZATION AND DEBUG
   const generateSinglePlatform = async (userData: UserData, platform: string): Promise<{content: string, cached: boolean}> => {
+    addDebugLog(`API call starting for ${platform}...`)
+    
     try {
+      const requestBody = {
+        prompt: `Create engaging ${platform} content for this cultural experience: "${userData.story || 'Amazing experience'}"`,
+        platform,
+        userData: {
+          story: userData.story,
+          location: userData.location,
+          businessType: userData.businessType
+        },
+        mobileOptimized: isMobileDevice,
+        maxTokens: isMobileDevice ? 1500 : 2000
+      }
+      
+      addDebugLog(`API request body prepared: ${JSON.stringify(requestBody, null, 2)}`)
+      
       const response = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `Create engaging ${platform} content for this cultural experience: "${userData.story || 'Amazing experience'}"`,
-          platform,
-          userData: {
-            story: userData.story,
-            location: userData.location,
-            businessType: userData.businessType
-          },
-          mobileOptimized: isMobileDevice,
-          maxTokens: isMobileDevice ? 1500 : 2000
-        })
+        body: JSON.stringify(requestBody)
       })
+
+      addDebugLog(`API response status: ${response.status} ${response.statusText}`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
       
       const data = await response.json()
+      addDebugLog(`API response data received: ${JSON.stringify(data).substring(0, 200)}...`)
+      
       return {
         content: data.content || getMobileFallbackContent(platform, userData),
         cached: data.cached || false
       }
       
     } catch (error) {
+      addDebugLog(`❌ API ERROR for ${platform}: ${error}`)
       console.error(`Generation error for ${platform}:`, error)
       return {
         content: getMobileFallbackContent(platform, userData),
@@ -277,6 +321,26 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
       borderBottom: '2px solid #e5e7eb',
       zIndex: 100
     }}>
+      {/* Debug Toggle */}
+      <button
+        onClick={() => setShowDebug(!showDebug)}
+        style={{
+          position: 'absolute',
+          top: '0.5rem',
+          right: '0.5rem',
+          backgroundColor: '#ef4444',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          padding: '0.25rem 0.5rem',
+          fontSize: '0.75rem',
+          cursor: 'pointer',
+          zIndex: 101
+        }}
+      >
+        {showDebug ? 'Hide' : 'Debug'}
+      </button>
+      
       {/* Ko Tāne Detection Banner */}
       {koTaneOptimized && (
         <div style={{
@@ -360,6 +424,30 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           ))}
         </div>
       )}
+      
+      {/* DEBUG PANEL */}
+      {showDebug && (
+        <div style={{
+          marginTop: '1rem',
+          backgroundColor: '#1f2937',
+          color: '#f9fafb',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          fontSize: '0.75rem',
+          fontFamily: 'monospace',
+          maxHeight: '200px',
+          overflowY: 'auto'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+            🔍 DEBUG LOG ({debugLog.length} entries)
+          </div>
+          {debugLog.slice(-10).map((log, index) => (
+            <div key={index} style={{ marginBottom: '0.25rem', wordBreak: 'break-word' }}>
+              {log}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 
@@ -403,6 +491,7 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
 
   const generateNewContent = () => {
     if (userData) {
+      addDebugLog('🔄 REGENERATE button clicked - resetting state...')
       setGeneratedContent([])
       setIsGenerating(true)
       setGenerationProgress({
@@ -412,15 +501,19 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         progress: 0,
         message: 'Initializing cultural intelligence...'
       })
+      setDebugLog([]) // Clear debug log
       generateContentProgressive(userData)
     }
   }
 
-  // Load user data and start generation
+  // 🔍 CRITICAL: Load user data and start generation WITH EXTENSIVE DEBUG
   useEffect(() => {
     const loadUserData = async () => {
+      addDebugLog('🔍 USEEFFECT TRIGGERED - Starting data load...')
+      
       try {
         // Load data using the ACTUAL localStorage keys from each step
+        addDebugLog('Reading localStorage keys...')
         const story = localStorage.getItem('userStoryContext')
         const audienceData = localStorage.getItem('selectedDemographics')
         const interests = localStorage.getItem('selectedInterests')
@@ -428,20 +521,37 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         const formats = localStorage.getItem('selectedFormats')
         const profile = localStorage.getItem('userProfile')
 
+        addDebugLog(`localStorage data loaded:
+          - story: ${story ? 'YES' : 'NO'} (${story?.length || 0} chars)
+          - audienceData: ${audienceData ? 'YES' : 'NO'}
+          - interests: ${interests ? 'YES' : 'NO'}
+          - platforms: ${platforms ? 'YES' : 'NO'}
+          - formats: ${formats ? 'YES' : 'NO'}
+          - profile: ${profile ? 'YES' : 'NO'}`)
+
         // Load photo from IndexedDB (optional)
         let photoData: Blob | null = null
         try {
+          addDebugLog('Attempting IndexedDB photo load...')
           photoData = await getImageFromIndexedDB('selectedPhoto')
+          addDebugLog(`IndexedDB photo: ${photoData ? 'FOUND' : 'NOT FOUND'}`)
         } catch (photoErr) {
-          console.log('No photo found in IndexedDB, continuing without photo')
+          addDebugLog(`IndexedDB photo error: ${photoErr}`)
         }
 
         // Check required data
         if (!story || !platforms) {
+          const missingData = []
+          if (!story) missingData.push('story')
+          if (!platforms) missingData.push('platforms')
+          
+          addDebugLog(`❌ MISSING REQUIRED DATA: ${missingData.join(', ')}`)
           setError('Missing required content data. Please complete all steps.')
           setIsGenerating(false)
           return
         }
+
+        addDebugLog('✅ Required data present, parsing JSON...')
 
         // Parse JSON data properly
         const parsedProfile = profile ? JSON.parse(profile) : {}
@@ -449,6 +559,10 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
         const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
         const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+
+        addDebugLog(`JSON parsing complete:
+          - parsedPlatforms: ${JSON.stringify(parsedPlatforms)}
+          - parsedAudience: ${JSON.stringify(parsedAudience)}`)
 
         const userData: UserData = {
           photo: photoData ? URL.createObjectURL(photoData) : undefined,
@@ -465,15 +579,24 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
           culturalConnection: parsedProfile.pepeha?.culturalBackground
         }
 
-        console.log('Loaded user data:', userData)
+        addDebugLog(`✅ UserData object created successfully:
+          - story: "${userData.story?.substring(0, 50)}..."
+          - platforms: ${JSON.stringify(userData.platforms)}
+          - location: ${userData.location}`)
+
         setUserData(userData)
+        addDebugLog('🚀 CALLING generateContentProgressive...')
         generateContentProgressive(userData)
+        
       } catch (err) {
+        addDebugLog(`❌ CRITICAL ERROR in loadUserData: ${err}`)
         console.error('Error loading user data:', err)
         setError('Failed to load your content data.')
         setIsGenerating(false)
       }
     }
+    
+    addDebugLog('🔄 useEffect starting loadUserData...')
     loadUserData()
   }, [])
 
@@ -498,6 +621,32 @@ What an incredible way to connect with authentic Māori culture! Ko Tāne's expe
         }}>
           <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>Content Generation Error</h2>
           <p style={{ color: '#666', marginBottom: '2rem' }}>{error}</p>
+          
+          {/* Show debug log in error state */}
+          {debugLog.length > 0 && (
+            <div style={{
+              backgroundColor: '#1f2937',
+              color: '#f9fafb',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              fontSize: '0.75rem',
+              fontFamily: 'monospace',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              marginBottom: '2rem',
+              textAlign: 'left'
+            }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                🔍 DEBUG LOG:
+              </div>
+              {debugLog.map((log, index) => (
+                <div key={index} style={{ marginBottom: '0.25rem' }}>
+                  {log}
+                </div>
+              ))}
+            </div>
+          )}
+          
           <Link href="/dashboard/create/photo" style={{
             display: 'inline-block',
             backgroundColor: BRAND_PURPLE,
