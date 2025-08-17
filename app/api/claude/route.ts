@@ -84,7 +84,6 @@ const detectKoTaneContent = (text: string): { isKoTane: boolean, experienceType:
   
   const koTaneTerms = ['ko tāne', 'ko tane', 'kotane']
   const wakaTerms = ['waka', 'ōtākaro', 'otakaro', 'avon river', 'river', 'water']
-  const culturalTerms = ['ngāi tahu', 'ngai tahu', 'ngāi tūāhuriri', 'ngai tuahuriri', 'māori', 'maori', 'cultural', 'traditional']
   
   const isKoTane = koTaneTerms.some(term => lowerText.includes(term))
   
@@ -126,9 +125,9 @@ export async function POST(request: NextRequest) {
       platforms, 
       formats, 
       userData,
-      mobileOptimized = false, // 📱 NEW: Mobile optimization flag
+      mobileOptimized = false,
       maxTokens,
-      platform: singlePlatform // 📱 NEW: For single platform generation
+      platform: singlePlatform
     } = body
 
     if (!prompt) {
@@ -161,8 +160,8 @@ export async function POST(request: NextRequest) {
             platforms: [singlePlatform],
             formats: formats || ['social-post'],
             success: true,
-            cached: true, // 📱 NEW: Indicate this was cached
-            koTaneOptimized: true, // 📱 NEW: Ko Tāne flag
+            cached: true,
+            koTaneOptimized: true,
             generationTime: 800,
             metadata: {
               contentLength: cachedTemplate.length,
@@ -221,13 +220,9 @@ Ensure each piece of content is specifically tailored for its platform AND forma
       }]
     }
 
-    // ⏱️ MOBILE TIMEOUT OPTIMIZATION
-    const timeoutMs = mobileOptimized ? 30000 : 60000 // 30s for mobile, 60s for desktop
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), timeoutMs)
-
     const startTime = Date.now()
 
+    // 🔧 MOBILE-COMPATIBLE FETCH - NO ABORTCONTROLLER
     const response = await fetch(CLAUDE_API_URL, {
       method: 'POST',
       headers: {
@@ -235,16 +230,10 @@ Ensure each piece of content is specifically tailored for its platform AND forma
         'x-api-key': CLAUDE_API_KEY,
         'anthropic-version': ANTHROPIC_VERSION
       },
-      body: JSON.stringify(claudeRequestBody),
-      signal: controller.signal
-    }).catch((err) => {
-      if (err.name === 'AbortError') {
-        throw new Error(`Request timed out after ${timeoutMs/1000}s`)
-      }
-      throw err
+      body: JSON.stringify(claudeRequestBody)
+      // NO SIGNAL PROPERTY - Mobile compatible
     })
 
-    clearTimeout(timeout)
     const generationTime = Date.now() - startTime
 
     if (!response.ok) {
