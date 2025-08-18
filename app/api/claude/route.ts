@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // MOBILE OPTIMIZATION: Simplify content for faster generation
     let optimizedMessages = body.messages
     if (isMobile && body.messages) {
-      optimizedMessages = body.messages.map(msg => {
+      optimizedMessages = body.messages.map((msg: any) => {
         if (typeof msg.content === 'string' && msg.content.length > 1000) {
           // Truncate very long content on mobile for faster processing
           return {
