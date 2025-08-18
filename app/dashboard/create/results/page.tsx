@@ -187,12 +187,33 @@ export default function StreamlinedResults() {
         mobileOptimized: true
       }
       
-      // Simple fetch - no AbortController complexity
-      const response = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      })
+      // MOBILE TIMEOUT FIX - Replace lines 189-195 with this:
+
+// Mobile detection and timeout setup
+const isMobile = typeof window !== 'undefined' && 
+  /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+console.log(`🎯 FINAL FIX: ${isMobile ? 'MOBILE' : 'DESKTOP'} generation starting...`)
+
+// Create AbortController for timeout
+const controller = new AbortController()
+const timeoutMs = isMobile ? 30000 : 60000 // 30s mobile, 60s desktop
+
+const timeoutId = setTimeout(() => {
+  console.log(`⏰ ABORTING after ${timeoutMs}ms`)
+  controller.abort(`Timeout after ${timeoutMs}ms`)
+}, timeoutMs)
+
+// The critical fetch with timeout
+const response = await fetch('/api/claude', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(requestBody),
+  signal: controller.signal // THIS IS THE CRITICAL ADDITION
+})
+
+clearTimeout(timeoutId)
+console.log(`✅ Response received: ${response.status}`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
