@@ -11,8 +11,22 @@ const DESKTOP_MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB for desktop
 const MAX_DIMENSION = 1600 // Optimal for mobile processing
 const COMPRESSION_QUALITY = 0.85 // High quality but mobile-friendly
 const STORAGE_QUOTA_BUFFER = 5 * 1024 * 1024 // 5MB buffer for storage
-// ENHANCED: Mobile device detection with capabilities
+// ENHANCED: Server-safe mobile device detection with capabilities
 const getMobileCapabilities = () => {
+  // Server-side rendering safety check
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return {
+      isMobile: false,
+      isIOS: false,
+      isAndroid: false,
+      hasCamera: false,
+      touchSupported: false,
+      supportsFileAPI: false,
+      supportsCanvas: false,
+      supportsCameraCapture: false
+    };
+  }
+
   const userAgent = navigator.userAgent;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
   const isIOS = /iPad|iPhone|iPod/.test(userAgent);
@@ -266,9 +280,9 @@ const PhotoUploadPage: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [processingStep, setProcessingStep] = useState<string>('');
-  // ENHANCED: Mobile capabilities detection
-const [mobileCapabilities, setMobileCapabilities] = useState(getMobileCapabilities());
-const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  // ENHANCED: Mobile capabilities detection with SSR safety
+const [mobileCapabilities, setMobileCapabilities] = useState(() => getMobileCapabilities());
+const [isOffline, setIsOffline] = useState(() => typeof navigator !== 'undefined' ? !navigator.onLine : false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
