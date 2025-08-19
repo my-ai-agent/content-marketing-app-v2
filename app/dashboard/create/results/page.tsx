@@ -201,7 +201,7 @@ const timeoutId = setTimeout(() => {
   controller.abort()
 }, timeoutMs)
 
-const response = await fetch('/api/claude', {
+const response = await fetch('/api/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
