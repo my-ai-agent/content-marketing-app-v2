@@ -189,12 +189,38 @@ export default function StreamlinedResults() {
       
       // MOBILE TIMEOUT FIX - Replace lines 189-195 with this:
 
-// RESTORE ORIGINAL SIMPLE FETCH (lines 192-195)
+// Mobile-aware client timeout
+const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+const timeoutMs = isMobile ? 30000 : 60000
+
+console.log(`🔍 ${isMobile ? 'MOBILE' : 'DESKTOP'} generation starting with ${timeoutMs}ms timeout`)
+
+const controller = new AbortController()
+const timeoutId = setTimeout(() => {
+  console.log(`⏰ Client timeout after ${timeoutMs}ms`)
+  controller.abort()
+}, timeoutMs)
+
 const response = await fetch('/api/claude', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(requestBody)
+  body: JSON.stringify({
+    prompt,
+    platform,
+    userData: {
+      story: userData.story,
+      persona: userData.persona,
+      audience: userData.audience,
+      interests: userData.interests,
+      businessType: userData.businessType,
+      name: userData.name,
+      location: userData.location
+    }
+  }),
+  signal: controller.signal // CRITICAL: Client timeout
 })
+
+clearTimeout(timeoutId)
 
 console.log(`✅ Response received: ${response.status}`)
 
