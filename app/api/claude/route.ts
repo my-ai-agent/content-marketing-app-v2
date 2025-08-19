@@ -110,6 +110,72 @@ Our traditional waka journey`)
   return template || ''
 }
 
+// 🎯 PLATFORM-SPECIFIC PROMPT TEMPLATES FOR TRUE DIFFERENTIATION
+const PLATFORM_PROMPT_TEMPLATES: Record<string, (story: string, location?: string, businessType?: string) => string> = {
+  twitter: (story, location, businessType) => `
+Write a Twitter/X post about this experience:
+"${story}"
+
+Instructions:
+- Max 280 characters
+- Use a friendly, casual, energetic tone
+- 2–4 relevant hashtags (mix of Māori and English if possible)
+- Mention location (${location || "New Zealand"}) if possible
+- Include a punchy, engaging hook
+- Avoid links
+
+Keep it concise and shareable for a global audience.
+`,
+
+  facebook: (story, location, businessType) => `
+Write a Facebook post about this experience:
+"${story}"
+
+Instructions:
+- Community-focused, positive, and welcoming tone
+- 120–200 words
+- Encourage comments or sharing (ask a question or invite engagement)
+- Mention location (${location || "New Zealand"})
+- 2–4 engaging hashtags
+- Family-friendly and inclusive
+- Add a call-to-action (e.g., "Would you try this? Share your thoughts!")
+
+Make it feel personal and relatable for friends & family audiences.
+`,
+
+  linkedin: (story, location, businessType) => `
+Write a LinkedIn post about this experience:
+"${story}"
+
+Instructions:
+- Professional, insightful, and reflective tone
+- 120–250 words
+- Emphasize cultural/business value, leadership, and networking
+- Mention location (${location || "New Zealand"}) and business context (${businessType || "Tourism"})
+- 2–3 relevant hashtags (focus on #CulturalTourism, #Leadership, #Business, etc.)
+- Highlight learning, impact, or cross-cultural collaboration
+- Add a subtle call-to-action (e.g., "Let’s connect to discuss cultural tourism insights.")
+
+Make it suitable for a business/professional audience.
+`,
+
+  instagram: (story, location, businessType) => `
+Write an Instagram post about this experience:
+"${story}"
+
+Instructions:
+- Storytelling, visual, and emotive tone
+- 80–150 words
+- 4–6 creative hashtags (mix of Māori and English, e.g. #KoTāne #Aotearoa #NgāiTahu)
+- Mention location (${location || "New Zealand"})
+- Use emojis to highlight key moments (but not overdone)
+- End with a call-to-action (e.g., "Double tap if you love authentic cultural experiences!")
+
+Make it highly visual and engaging for Instagram users.
+`,
+  // Add more platforms as needed
+}
+
 export async function POST(request: NextRequest) {
   try {
     const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY
@@ -177,28 +243,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 📱 MOBILE-OPTIMIZED PROMPT BUILDING
+    // === NEW PLATFORM-SPECIFIC PROMPT LOGIC ===
     let enhancedPrompt = prompt
-    
-    if (mobileOptimized && singlePlatform) {
-      // Shorter, focused prompts for mobile
-      enhancedPrompt = `Create engaging ${singlePlatform} content for this story: "${userData?.story || 'Amazing experience'}"
 
-Location: ${userData?.location || 'New Zealand'}
-Business: ${userData?.businessType || 'Tourism'}
+    if (singlePlatform && userData?.story) {
+      const lowerPlatform = singlePlatform.toLowerCase()
+      const platformPromptBuilder = PLATFORM_PROMPT_TEMPLATES[lowerPlatform]
 
-Requirements:
-- ${singlePlatform === 'instagram' ? '125-150 words' : singlePlatform === 'facebook' ? '150-200 words' : '200-300 words'}
-- Include relevant hashtags
-- Respectful cultural language
-- Engaging call-to-action
-- ${mobileOptimized ? 'Mobile-optimized format' : 'Standard format'}
-
-Focus on authentic storytelling with cultural respect.`
+      if (platformPromptBuilder) {
+        enhancedPrompt = platformPromptBuilder(
+          userData.story,
+          userData.location,
+          userData.businessType
+        )
+      } else {
+        // Fallback: general prompt
+        enhancedPrompt = `Write a social media post for ${singlePlatform} about: "${userData.story}"`
+      }
     } else {
-      // Original enhanced prompt for desktop
+      // Batch or fallback
       enhancedPrompt = `${prompt}
-
 PLATFORMS TO OPTIMIZE FOR: ${platforms?.join(', ') || singlePlatform || 'Not specified'}
 CONTENT FORMATS REQUESTED: ${formats?.join(', ') || 'Not specified'}
 
