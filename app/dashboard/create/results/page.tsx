@@ -346,85 +346,72 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
   }, [])
 
   const generateContent = async (userData: UserData) => {
-  try {
-    setIsGenerating(true)
-    
-    const platforms = userData.platforms || ['instagram']
-    
-    // SPEED OPTIMIZATION: Smart platform prioritization
-    const getPlatformPriority = (platforms: string[]) => {
-      const speedOrder = ['instagram', 'twitter', 'tiktok', 'facebook', 'email', 'linkedin', 'youtube', 'website'];
+    try {
+      setIsGenerating(true)
       
-      return platforms.sort((a, b) => {
-        const aIndex = speedOrder.indexOf(a.toLowerCase());
-        const bIndex = speedOrder.indexOf(b.toLowerCase());
-        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
-      });
-    };
-
-    const orderedPlatforms = getPlatformPriority([...platforms]);
-    console.log(`🚀 Generating content in optimized order:`, orderedPlatforms);
-    
-    // CLEAR previous content and prepare for progressive display
-    setGeneratedContent([]);
-    
-    // TRUE PROGRESSIVE DISPLAY: Start all in parallel, display each immediately when ready
-    const contentPromises = orderedPlatforms.map(async (platform) => {
-      console.log(`🚀 Starting ${platform} content generation...`);
+      const platforms = userData.platforms || ['instagram']
       
-      try {
-        const content = await generateClaudeContent(userData, platform);
+      // SPEED OPTIMIZATION: Smart platform prioritization
+      const getPlatformPriority = (platforms: string[]) => {
+        const speedOrder = ['instagram', 'twitter', 'tiktok', 'facebook', 'email', 'linkedin', 'youtube', 'website'];
         
-        const platformContent = {
-          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-          content,
-          qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-          tips: getPlatformTips(platform),
-          optimalTime: getOptimalPostingTime(platform),
-          culturalAuthenticity: 'High - AI-generated with cultural intelligence framework',
-          brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
-        };
-
-        // IMMEDIATE DISPLAY: Add this platform to the display AS SOON AS it's ready
-        setGeneratedContent(prev => {
-          const updated = [...prev, platformContent];
-          console.log(`✅ ${platform} content ready - displaying immediately (${updated.length}/${platforms.length})`);
-          return updated;
+        return platforms.sort((a, b) => {
+          const aIndex = speedOrder.indexOf(a.toLowerCase());
+          const bIndex = speedOrder.indexOf(b.toLowerCase());
+          return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
         });
+      };
 
-        return platformContent;
-      } catch (error) {
-        console.error(`❌ Error generating ${platform} content:`, error);
-        return null;
-      }
-    });
+      const orderedPlatforms = getPlatformPriority([...platforms]);
+      console.log(`🚀 Generating content in optimized order:`, orderedPlatforms);
+      
+      // CLEAR previous content and prepare for progressive display
+      setGeneratedContent([]);
+      
+      // TRUE PROGRESSIVE DISPLAY: Start all in parallel, display each immediately when ready
+      const contentPromises = orderedPlatforms.map(async (platform) => {
+        console.log(`🚀 Starting ${platform} content generation...`);
+        
+        try {
+          const content = await generateClaudeContent(userData, platform);
+          
+          const platformContent = {
+            platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+            content,
+            qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
+            tips: getPlatformTips(platform),
+            optimalTime: getOptimalPostingTime(platform),
+            culturalAuthenticity: 'High - AI-generated with cultural intelligence framework',
+            brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
+          };
 
-    // Wait for all to complete in background
-    await Promise.all(contentPromises);
-    
-    console.log(`✅ All content generation complete!`);
-    setIsGenerating(false);
-    
-  } catch (err) {
-    console.error('Content generation error:', err);
-    setError('Failed to generate your content. Please try again.');
-    setIsGenerating(false);
-  }
-// Wait for all to complete in background
-    
-    // Wait for all to complete, but display happens progressively above
-    const allContent = await Promise.all(contentPromises);
-    const successfulContent = allContent.filter(content => content !== null);
-    
-    console.log(`✅ All content generation complete! ${successfulContent.length}/${platforms.length} platforms successful`);
-    setIsGenerating(false);
-    
-  } catch (err) {
-    console.error('Content generation error:', err);
-    setError('Failed to generate your content. Please try again.');
-    setIsGenerating(false);
-  }
-};
+          // IMMEDIATE DISPLAY: Add this platform to the display AS SOON AS it's ready
+          setGeneratedContent(prev => {
+            const updated = [...prev, platformContent];
+            console.log(`✅ ${platform} content ready - displaying immediately (${updated.length}/${platforms.length})`);
+            return updated;
+          });
+
+          return platformContent;
+        } catch (error) {
+          console.error(`❌ Error generating ${platform} content:`, error);
+          return null;
+        }
+      });
+
+      // Wait for all to complete in background
+      const allContent = await Promise.all(contentPromises);
+      const successfulContent = allContent.filter(content => content !== null);
+      
+      console.log(`✅ All content generation complete! ${successfulContent.length}/${platforms.length} platforms successful`);
+      setIsGenerating(false);
+      
+    } catch (err) {
+      console.error('Content generation error:', err);
+      setError('Failed to generate your content. Please try again.');
+      setIsGenerating(false);
+    }
+  };
 
   const getPlatformTips = (platform: string): string[] => {
     switch (platform) {
@@ -540,7 +527,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
             justifyContent: 'center',
             alignItems: 'center',
             gap: '0.5rem',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            overflowX: 'auto',
+            maxWidth: '100%'
           }}>
             {[1, 2, 3, 4, 5, 6].map((step) => (
               <div key={step} style={{
@@ -553,7 +542,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '0.875rem',
-                fontWeight: '600'
+                fontWeight: '600',
+                flexShrink: 0
               }}>{step}</div>
             ))}
           </div>
@@ -563,20 +553,25 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}>
             <h1 style={{
-              fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+              fontSize: 'clamp(1.25rem, 4vw, 1.75rem)',
               fontWeight: '700',
               color: '#111827',
-              margin: '0'
+              margin: '0',
+              flex: '1',
+              minWidth: '200px'
             }}>
               Your AI-Generated Content
             </h1>
             
             <div style={{
               display: 'flex',
-              gap: '0.75rem'
+              gap: '0.75rem',
+              flexWrap: 'wrap'
             }}>
               <button
                 onClick={generateNewContent}
@@ -588,7 +583,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                   border: 'none',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  fontSize: '0.875rem'
+                  fontSize: '0.875rem',
+                  minWidth: '44px',
+                  minHeight: '44px'
                 }}
               >
                 ↻ Regenerate
@@ -600,7 +597,12 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                 borderRadius: '0.5rem',
                 textDecoration: 'none',
                 fontWeight: '600',
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
+                minWidth: '44px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
                 Dashboard
               </Link>
@@ -675,7 +677,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1rem'
+                    marginBottom: '1rem',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
                   }}>
                     <h3 style={{
                       fontSize: '1.125rem',
@@ -775,7 +779,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                         border: 'none',
                         fontSize: '0.875rem',
                         fontWeight: '500',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        minHeight: '44px'
                       }}
                     >
                       📋 Copy Content
@@ -791,7 +796,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
                         border: 'none',
                         fontSize: '0.875rem',
                         fontWeight: '500',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        minHeight: '44px'
                       }}
                     >
                       ⬇️ Download QR
@@ -841,6 +847,27 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
               ))}
             </div>
           )}
+
+          {/* Progressive Display Message */}
+          {isGenerating && generatedContent.length > 0 && (
+            <div style={{
+              backgroundColor: '#f0f9ff',
+              padding: '1rem',
+              borderRadius: '8px',
+              borderLeft: `4px solid ${BRAND_BLUE}`,
+              marginBottom: '1.5rem',
+              textAlign: 'center'
+            }}>
+              <p style={{ 
+                color: '#0369a1', 
+                fontWeight: '500',
+                margin: '0',
+                fontSize: '0.875rem'
+              }}>
+                📱 Progressive Display: {generatedContent.length} platform(s) ready, generating remaining content...
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer Navigation */}
@@ -855,7 +882,12 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
               color: '#6b7280',
               textDecoration: 'none',
               fontWeight: '600',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
+              minHeight: '44px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.5rem'
             }}
           >
             ← Back to Platform Selection
@@ -898,6 +930,18 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 600px) {
+          .step-tracker {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          
+          .step-tracker::-webkit-scrollbar {
+            display: none;
+          }
         }
       `}</style>
     </div>
