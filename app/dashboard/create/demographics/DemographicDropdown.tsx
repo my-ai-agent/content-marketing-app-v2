@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 
@@ -23,17 +23,53 @@ export default function DemographicDropdown({
 }: Props) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [tooltipDemo, setTooltipDemo] = useState<Demographic | null>(null)
+  const [touchedItem, setTouchedItem] = useState<string | null>(null)
   const [isTouch, setIsTouch] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Helper: determine if device is touch
-  const handleTouchStart = () => {
+  // 🔧 FIX: Force re-render when selectedDemographic changes
+  const [displayValue, setDisplayValue] = useState('')
+
+  useEffect(() => {
+    const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
+    setDisplayValue(selectedDemo ? selectedDemo.label : '')
+  }, [selectedDemographic, demographics])
+
+  // Mobile-optimized touch handlers
+  const handleTouchStart = (demoValue?: string) => {
     setIsTouch(true)
+    if (demoValue) {
+      setTouchedItem(demoValue)
+      setTooltipDemo(demographics.find(d => d.value === demoValue) || null)
+      // Add haptic feedback if available
+      if (navigator.vibrate) {
+        navigator.vibrate(50)
+      }
+    }
+  }
+
+  const handleTouchEnd = () => {
+    setTouchedItem(null)
   }
 
   // Hide tooltip on mobile tap outside
   const handleBackdropClick = () => {
     setTooltipDemo(null)
+  }
+
+  // 🔧 FIX: Improved selection handler
+  const handleSelectDemographic = (demoValue: string) => {
+    console.log('Selecting demographic:', demoValue) // Debug log
+    setSelectedDemographic(demoValue)
+    setIsDropdownOpen(false)
+    setTooltipDemo(null)
+    setTouchedItem(null)
+    
+    // 🔧 FIX: Immediately update display value
+    const selectedDemo = demographics.find(demo => demo.value === demoValue)
+    if (selectedDemo) {
+      setDisplayValue(selectedDemo.label)
+    }
   }
 
   const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
@@ -43,20 +79,25 @@ export default function DemographicDropdown({
       <div
         style={{ position: 'relative' }}
         ref={dropdownRef}
-        onTouchStart={handleTouchStart}
+        onTouchStart={() => handleTouchStart()}
       >
         <button
           aria-haspopup="listbox"
           aria-expanded={isDropdownOpen}
           onClick={() => setIsDropdownOpen((v) => !v)}
+          onTouchStart={() => {
+            if (navigator.vibrate) navigator.vibrate(30)
+          }}
           style={{
             width: '100%',
+            minHeight: '44px',
             padding: '0.75rem 1rem',
             border: '2px solid #e5e7eb',
             borderRadius: '0.75rem',
             fontSize: '1rem',
             backgroundColor: 'white',
-            color: selectedDemographic ? '#374151' : '#9ca3af',
+            // 🔧 FIX: Better color logic for selected state
+            color: displayValue ? '#374151' : '#9ca3af',
             outline: 'none',
             cursor: 'pointer',
             transition: 'border-color 0.2s',
@@ -64,12 +105,14 @@ export default function DemographicDropdown({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            touchAction: 'manipulation'
           }}
           onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         >
           <span>
-            {selectedDemo ? selectedDemo.label : 'Select your target audience...'}
+            {/* 🔧 FIX: Use displayValue instead of complex logic */}
+            {displayValue || 'Select your target audience...'}
           </span>
           <span
             style={{
@@ -110,29 +153,79 @@ export default function DemographicDropdown({
                 onMouseLeave={() => !isTouch && setTooltipDemo(null)}
                 onFocus={() => !isTouch && setTooltipDemo(demo)}
                 onBlur={() => !isTouch && setTooltipDemo(null)}
-                onTouchStart={() => setTooltipDemo(demo)}
-                onClick={() => {
-                  setSelectedDemographic(demo.value)
-                  setIsDropdownOpen(false)
-                  setTooltipDemo(null)
-                }}
+                onTouchStart={() => handleTouchStart(demo.value)}
+                onTouchEnd={handleTouchEnd}
+                // 🔧 FIX: Use the improved selection handler
+                onClick={() => handleSelectDemographic(demo.value)}
                 style={{
-                  padding: '0.75rem 1rem',
+                  minHeight: '44px',
+                  padding: '1rem',
                   cursor: 'pointer',
                   borderBottom: index < demographics.length - 1 ? '1px solid #f3f4f6' : 'none',
                   position: 'relative',
                   backgroundColor:
-                    selectedDemographic === demo.value
-                      ? '#f0f9ff'
-                      : tooltipDemo?.value === demo.value
-                      ? '#f9fafb'
-                      : 'white',
+                    touchedItem === demo.value ? '#e0e7ff' :
+                    selectedDemographic === demo.value ? '#f0f9ff' :
+                    tooltipDemo?.value === demo.value ? '#f9fafb' : 'white',
                   color: '#374151',
                   fontSize: '0.95rem',
                   outline: tooltipDemo?.value === demo.value ? `2px solid ${BRAND_PURPLE}` : 'none',
+                  touchAction: 'manipulation',
+                  transition: 'background-color 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
-                {demo.label}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '500', marginBottom: '2px' }}>{demo.label}</div>
+                  <div style={{ 
+                    fontSize: '0.8rem', 
+                    color: '#6b7280', 
+                    lineHeight: '1.3',
+                    display: isTouch ? 'block' : 'none'
+                  }}>
+                    {demo.description.substring(0, 50)}...
+                  </div>
+                </div>
+
+                {/* ✅ Selection indicator */}
+                {selectedDemographic === demo.value && (
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: BRAND_PURPLE,
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    marginLeft: '0.5rem',
+                    flexShrink: 0,
+                    fontWeight: 'bold'
+                  }}>
+                    ✓
+                  </div>
+                )}
+
+                {/* Info icon for mobile users (when not selected) */}
+                {isTouch && selectedDemographic !== demo.value && (
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e5e7eb',
+                    color: '#6b7280',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    marginLeft: '0.5rem',
+                    flexShrink: 0
+                  }}>
+                    ℹ
+                  </div>
+                )}
 
                 {/* Tooltip for desktop */}
                 {!isTouch && tooltipDemo?.value === demo.value && (
@@ -179,7 +272,7 @@ export default function DemographicDropdown({
         )}
       </div>
 
-      {/* Selected Audience Description */}
+      {/* Enhanced Selected Audience Description */}
       {selectedDemo && (
         <div style={{
           marginTop: '1rem',
@@ -192,14 +285,15 @@ export default function DemographicDropdown({
             fontSize: '0.875rem',
             color: '#15803d',
             margin: '0',
-            fontWeight: '500'
+            fontWeight: '500',
+            lineHeight: '1.4'
           }}>
             <strong>{selectedDemo.label}:</strong> {selectedDemo.description}
           </p>
         </div>
       )}
 
-      {/* Tooltip for mobile: show as modal overlay */}
+      {/* Improved mobile modal */}
       {isTouch && tooltipDemo && (
         <>
           <div
@@ -219,8 +313,8 @@ export default function DemographicDropdown({
               transform: 'translate(-50%,-50%)',
               background: '#1f2937',
               color: 'white',
-              padding: '1.25rem 1.5rem',
-              borderRadius: '0.75rem',
+              padding: '1.5rem',
+              borderRadius: '1rem',
               fontSize: '1rem',
               zIndex: 60,
               boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
@@ -228,20 +322,34 @@ export default function DemographicDropdown({
               width: '320px',
               textAlign: 'center',
             }}
-            onClick={handleBackdropClick}
           >
-            <div style={{ marginBottom: '0.75rem', fontWeight: 'bold', fontSize: '1.1em' }}>
+            <div style={{ marginBottom: '1rem', fontWeight: 'bold', fontSize: '1.1em' }}>
               {tooltipDemo.label}
             </div>
-            <div style={{ marginBottom: '1rem', lineHeight: '1.4' }}>
+            <div style={{ marginBottom: '1.5rem', lineHeight: '1.4' }}>
               {tooltipDemo.description}
             </div>
-            <div style={{
-              color: '#fbbf24',
-              fontSize: '0.875em',
-            }}>
-              Tap anywhere to close
-            </div>
+            <button
+              onClick={handleBackdropClick}
+              onTouchStart={() => {
+                if (navigator.vibrate) navigator.vibrate(30)
+              }}
+              style={{
+                backgroundColor: BRAND_PURPLE,
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                minHeight: '44px',
+                minWidth: '100px',
+                touchAction: 'manipulation'
+              }}
+            >
+              Got it!
+            </button>
           </div>
         </>
       )}
