@@ -1,34 +1,86 @@
-// lib/imageStorage.ts
 import { openDB } from 'idb';
 
-// Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
 
-// IndexedDB setup - only in browser
-const dbPromise = isBrowser ? openDB('tourism-crop-app', 1, {
-  upgrade(db) {
-    db.createObjectStore('images');
-  },
-}) : null;
+let dbPromise: ReturnType<typeof openDB> | null = null;
+
+// Helper to check IndexedDB support at runtime (including for private mode)
+function isIndexedDBAvailable(): boolean {
+  try {
+    return isBrowser && !!window.indexedDB;
+  } catch {
+    return false;
+  }
+}
+
+// Fallback: simple in-memory cache if IndexedDB/localStorage unavailable
+const memoryCache = new Map<string, Blob>();
+
+if (isIndexedDBAvailable()) {
+  dbPromise = openDB('tourism-crop-app', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('images')) {
+        db.createObjectStore('images');
+      }
+    },
+  }).catch((err) => {
+    console.warn('IndexedDB could not be opened:', err);
+    dbPromise = null;
+  });
+} else {
+  dbPromise = null;
+}
 
 // Save a Blob image under a key
 export async function saveImageBlob(key: string, blob: Blob) {
-  if (!isBrowser || !dbPromise) {
-    console.warn('IndexedDB not available');
-    return;
+  if (dbPromise) {
+    try {
+      const db = await dbPromise;
+      await db.put('images', blob, key);
+      return;
+    } catch (e: any) {
+      // Fallback to memoryCache on error
+      console.warn('IndexedDB save failed, falling back to memoryCache:', e);
+    }
   }
-  const db = await dbPromise;
-  await db.put('images', blob, key);
+  // Try localStorage as fallback (by base64 encoding)
+  try {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (reader.result && typeof reader.result === 'string') {
+        localStorage.setItem(`img-${key}`, reader.result);
+      }
+    };
+    reader.readAsDataURL(blob);
+  } catch (e) {
+    // Fallback to memory only
+    memoryCache.set(key, blob);
+    console.warn('All storage failed, using memory only:', e);
+  }
 }
 
 // Retrieve a Blob image by key
 export async function getImageBlob(key: string): Promise<Blob | undefined> {
-  if (!isBrowser || !dbPromise) {
-    console.warn('IndexedDB not available');
-    return undefined;
+  if (dbPromise) {
+    try {
+      const db = await dbPromise;
+      const blob = await db.get('images', key);
+      if (blob) return blob;
+    } catch (e) {
+      console.warn('IndexedDB get failed:', e);
+    }
   }
-  const db = await dbPromise;
-  return db.get('images', key);
+  // Try localStorage fallback
+  try {
+    const dataUrl = localStorage.getItem(`img-${key}`);
+    if (dataUrl) {
+      return dataURLtoBlob(dataUrl);
+    }
+  } catch (e) {
+    // Ignore
+  }
+  // Fallback to memory cache
+  return memoryCache.get(key);
 }
 
 // Convert dataURL to Blob
@@ -49,7 +101,6 @@ export async function resizeDataUrl(dataUrl: string, maxDim: number): Promise<st
       reject(new Error('Cannot resize images on server'));
       return;
     }
-    
     const img = new window.Image();
     img.onload = () => {
       let { width, height } = img;
