@@ -114,7 +114,8 @@ ${userData.photo ? '📸 VISUAL CONTEXT: Photo(s) provided showing the experienc
         },
         body: JSON.stringify({
           prompt,
-          platform,
+          platforms: [platform],
+          formats: userData.formats || ['social-post'],
           userData: {
             story: userData.story,
             persona: userData.persona,
