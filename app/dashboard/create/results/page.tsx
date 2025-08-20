@@ -411,13 +411,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
     setIsGenerating(false);
   }
 };
-      } catch (error) {
-        console.error(`❌ Error generating ${platform} content:`, error);
-        // Continue with other platforms even if one fails
-        return null;
-      }
-    });
-
+    
     // Wait for all to complete, but display happens progressively above
     const allContent = await Promise.all(contentPromises);
     const successfulContent = allContent.filter(content => content !== null);
