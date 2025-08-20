@@ -365,12 +365,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
     const orderedPlatforms = getPlatformPriority([...platforms]);
     console.log(`🚀 Generating content in optimized order:`, orderedPlatforms);
     
-    // SPEED OPTIMIZATION: Parallel processing with progressive display
-    const generatedContent: GeneratedContent[] = []
-    setGeneratedContent([]); // Clear previous content
+    // CLEAR previous content and prepare for progressive display
+    setGeneratedContent([]);
     
-    // Start all content generation in parallel
-    const contentPromises = orderedPlatforms.map(async (platform, index) => {
+    // TRUE PROGRESSIVE DISPLAY: Start all in parallel, display each immediately when ready
+    const contentPromises = orderedPlatforms.map(async (platform) => {
       console.log(`🚀 Starting ${platform} content generation...`);
       
       try {
@@ -386,13 +385,32 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
         };
 
-        // PROGRESSIVE DISPLAY: Show each platform as it completes
+        // IMMEDIATE DISPLAY: Add this platform to the display AS SOON AS it's ready
         setGeneratedContent(prev => {
           const updated = [...prev, platformContent];
-          console.log(`✅ ${platform} content ready - displaying immediately`);
+          console.log(`✅ ${platform} content ready - displaying immediately (${updated.length}/${platforms.length})`);
           return updated;
         });
 
+        return platformContent;
+      } catch (error) {
+        console.error(`❌ Error generating ${platform} content:`, error);
+        return null;
+      }
+    });
+
+    // Wait for all to complete in background
+    await Promise.all(contentPromises);
+    
+    console.log(`✅ All content generation complete!`);
+    setIsGenerating(false);
+    
+  } catch (err) {
+    console.error('Content generation error:', err);
+    setError('Failed to generate your content. Please try again.');
+    setIsGenerating(false);
+  }
+};
         return platformContent;
       } catch (error) {
         console.error(`❌ Error generating ${platform} content:`, error);
