@@ -292,6 +292,38 @@ const [isOffline, setIsOffline] = useState(() => typeof navigator !== 'undefined
     loadExistingPhotos();
   }, []);
 
+  // ENHANCED: Touch events for better mobile interaction
+  useEffect(() => {
+    if (mobileCapabilities.touchSupported) {
+      // Prevent zoom on double tap for upload areas
+      const preventDefault = (e: TouchEvent) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+      
+      document.addEventListener('touchstart', preventDefault, { passive: false });
+      
+      return () => {
+        document.removeEventListener('touchstart', preventDefault);
+      };
+    }
+  }, [mobileCapabilities.touchSupported]);
+
+  // ENHANCED: Offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const loadExistingPhotos = async () => {
     try {
       const photoMetadata = localStorage.getItem('photoMetadata_v2');
@@ -379,11 +411,11 @@ useEffect(() => {
 const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
-
+  
   // ENHANCED: Haptic feedback on mobile
-  if (mobileCapabilities.isMobile && 'vibrate' in navigator) {
-    navigator.vibrate(50); // Short vibration feedback
-  }
+if (mobileCapabilities.isMobile && 'vibrate' in navigator) {
+  navigator.vibrate(50); // Short vibration feedback
+}
 
   setError(null);
   setIsProcessing(true);
@@ -429,7 +461,7 @@ const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     await savePhotoMetadata(updatedPhotos);
 
     setProcessingStep('Complete!');
-    
+
     // ENHANCED: Success haptic feedback
     if (mobileCapabilities.isMobile && 'vibrate' in navigator) {
       navigator.vibrate([50, 50, 50]); // Success pattern
@@ -440,7 +472,7 @@ const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
   } catch (error) {
     console.error('File processing error:', error);
     setError(error instanceof Error ? error.message : 'Failed to process image');
-    
+
     // ENHANCED: Error haptic feedback
     if (mobileCapabilities.isMobile && 'vibrate' in navigator) {
       navigator.vibrate(200); // Error vibration
@@ -530,19 +562,19 @@ const renderMobileAlerts = () => (
       {renderMobileAlerts()}
       
       {/* Progress Indicator */}
-        <div className="flex justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
-            <div className="w-8 h-1 bg-gray-300"></div>
-            <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
-            {[3, 4, 5, 6].map((step) => (
-              <React.Fragment key={step}>
-                <div className="w-8 h-1 bg-gray-300"></div>
-                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">{step}</div>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+<div className="flex justify-center mb-8 overflow-x-auto">
+  <div className="flex items-center space-x-2 min-w-max px-4">
+    <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+    <div className="w-4 h-1 bg-gray-300"></div>
+    <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
+    {[3, 4, 5, 6].map((step) => (
+      <React.Fragment key={step}>
+        <div className="w-4 h-1 bg-gray-300"></div>
+        <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">{step}</div>
+      </React.Fragment>
+    ))}
+  </div>
+</div>
 
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
