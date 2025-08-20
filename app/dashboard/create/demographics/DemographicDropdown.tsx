@@ -59,7 +59,6 @@ export default function DemographicDropdown({
 
   // 🔧 FIX: Improved selection handler
   const handleSelectDemographic = (demoValue: string) => {
-    console.log('Selecting demographic:', demoValue) // Debug log
     setSelectedDemographic(demoValue)
     setIsDropdownOpen(false)
     setTooltipDemo(null)
@@ -73,6 +72,23 @@ export default function DemographicDropdown({
   }
 
   const selectedDemo = demographics.find(demo => demo.value === selectedDemographic)
+
+  // Close dropdown on outside click (mobile and desktop)
+  useEffect(() => {
+    if (!isDropdownOpen) return
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false)
+        setTooltipDemo(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isDropdownOpen])
 
   return (
     <>
@@ -111,7 +127,6 @@ export default function DemographicDropdown({
           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         >
           <span>
-            {/* 🔧 FIX: Use displayValue instead of complex logic */}
             {displayValue || 'Select your target audience...'}
           </span>
           <span
@@ -155,7 +170,6 @@ export default function DemographicDropdown({
                 onBlur={() => !isTouch && setTooltipDemo(null)}
                 onTouchStart={() => handleTouchStart(demo.value)}
                 onTouchEnd={handleTouchEnd}
-                // 🔧 FIX: Use the improved selection handler
                 onClick={() => handleSelectDemographic(demo.value)}
                 style={{
                   minHeight: '44px',
@@ -188,7 +202,6 @@ export default function DemographicDropdown({
                   </div>
                 </div>
 
-                {/* ✅ Selection indicator */}
                 {selectedDemographic === demo.value && (
                   <div style={{
                     width: '20px',
@@ -208,7 +221,6 @@ export default function DemographicDropdown({
                   </div>
                 )}
 
-                {/* Info icon for mobile users (when not selected) */}
                 {isTouch && selectedDemographic !== demo.value && (
                   <div style={{
                     width: '20px',
@@ -227,7 +239,6 @@ export default function DemographicDropdown({
                   </div>
                 )}
 
-                {/* Tooltip for desktop */}
                 {!isTouch && tooltipDemo?.value === demo.value && (
                   <div
                     style={{
@@ -272,7 +283,6 @@ export default function DemographicDropdown({
         )}
       </div>
 
-      {/* Enhanced Selected Audience Description */}
       {selectedDemo && (
         <div style={{
           marginTop: '1rem',
@@ -293,7 +303,6 @@ export default function DemographicDropdown({
         </div>
       )}
 
-      {/* Improved mobile modal */}
       {isTouch && tooltipDemo && (
         <>
           <div
