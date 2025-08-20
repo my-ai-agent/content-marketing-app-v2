@@ -2,8 +2,6 @@ import { openDB } from 'idb';
 
 const isBrowser = typeof window !== 'undefined';
 
-let dbPromise: ReturnType<typeof openDB> | null = null;
-
 // Helper to check IndexedDB support at runtime (including for private mode)
 function isIndexedDBAvailable(): boolean {
   try {
@@ -16,6 +14,8 @@ function isIndexedDBAvailable(): boolean {
 // Fallback: simple in-memory cache if IndexedDB/localStorage unavailable
 const memoryCache = new Map<string, Blob>();
 
+let dbPromise: Promise<IDBPDatabase<unknown>> | null = null;
+
 if (isIndexedDBAvailable()) {
   dbPromise = openDB('tourism-crop-app', 1, {
     upgrade(db) {
@@ -23,9 +23,6 @@ if (isIndexedDBAvailable()) {
         db.createObjectStore('images');
       }
     },
-  }).catch((err) => {
-    console.warn('IndexedDB could not be opened:', err);
-    dbPromise = null;
   });
 } else {
   dbPromise = null;
