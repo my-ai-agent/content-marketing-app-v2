@@ -410,7 +410,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
     setError('Failed to generate your content. Please try again.');
     setIsGenerating(false);
   }
-};
+// Wait for all to complete in background
     
     // Wait for all to complete, but display happens progressively above
     const allContent = await Promise.all(contentPromises);
