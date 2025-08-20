@@ -1,4 +1,4 @@
-import { openDB } from 'idb';
+import { openDB, type IDBPDatabase } from 'idb';
 
 const isBrowser = typeof window !== 'undefined';
 
