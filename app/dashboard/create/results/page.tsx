@@ -346,19 +346,37 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
   }, [])
 
   const generateContent = async (userData: UserData) => {
-    try {
-      setIsGenerating(true)
+  try {
+    setIsGenerating(true)
+    
+    const platforms = userData.platforms || ['instagram']
+    
+    // SPEED OPTIMIZATION: Smart platform prioritization
+    const getPlatformPriority = (platforms: string[]) => {
+      const speedOrder = ['instagram', 'twitter', 'tiktok', 'facebook', 'email', 'linkedin', 'youtube', 'website'];
       
-      const platforms = userData.platforms || ['instagram']
-      const generatedContent: GeneratedContent[] = []
+      return platforms.sort((a, b) => {
+        const aIndex = speedOrder.indexOf(a.toLowerCase());
+        const bIndex = speedOrder.indexOf(b.toLowerCase());
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      });
+    };
+
+    const orderedPlatforms = getPlatformPriority([...platforms]);
+    console.log(`🚀 Generating content in optimized order:`, orderedPlatforms);
+    
+    // SPEED OPTIMIZATION: Parallel processing with progressive display
+    const generatedContent: GeneratedContent[] = []
+    setGeneratedContent([]); // Clear previous content
+    
+    // Start all content generation in parallel
+    const contentPromises = orderedPlatforms.map(async (platform, index) => {
+      console.log(`🚀 Starting ${platform} content generation...`);
       
-      // Generate content for each platform using server-side Claude API
-      for (const platform of platforms) {
-        console.log(`🚀 Generating ${platform} content with Claude API...`)
+      try {
+        const content = await generateClaudeContent(userData, platform);
         
-        const content = await generateClaudeContent(userData, platform)
-        
-        generatedContent.push({
+        const platformContent = {
           platform: platform.charAt(0).toUpperCase() + platform.slice(1),
           content,
           qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
@@ -366,18 +384,36 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
           optimalTime: getOptimalPostingTime(platform),
           culturalAuthenticity: 'High - AI-generated with cultural intelligence framework',
           brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
-        })
+        };
+
+        // PROGRESSIVE DISPLAY: Show each platform as it completes
+        setGeneratedContent(prev => {
+          const updated = [...prev, platformContent];
+          console.log(`✅ ${platform} content ready - displaying immediately`);
+          return updated;
+        });
+
+        return platformContent;
+      } catch (error) {
+        console.error(`❌ Error generating ${platform} content:`, error);
+        // Continue with other platforms even if one fails
+        return null;
       }
-      
-      setGeneratedContent(generatedContent)
-      setIsGenerating(false)
-      
-    } catch (err) {
-      console.error('Content generation error:', err)
-      setError('Failed to generate your content. Please try again.')
-      setIsGenerating(false)
-    }
+    });
+
+    // Wait for all to complete, but display happens progressively above
+    const allContent = await Promise.all(contentPromises);
+    const successfulContent = allContent.filter(content => content !== null);
+    
+    console.log(`✅ All content generation complete! ${successfulContent.length}/${platforms.length} platforms successful`);
+    setIsGenerating(false);
+    
+  } catch (err) {
+    console.error('Content generation error:', err);
+    setError('Failed to generate your content. Please try again.');
+    setIsGenerating(false);
   }
+};
 
   const getPlatformTips = (platform: string): string[] => {
     switch (platform) {
