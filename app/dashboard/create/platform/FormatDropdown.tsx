@@ -23,7 +23,6 @@ export default function FormatDropdown({
 }: Props) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [touchedItem, setTouchedItem] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Detect mobile device
@@ -74,8 +73,60 @@ export default function FormatDropdown({
     )
   }
 
-  // 📱 MOBILE RENDER: Native checkboxes (Multi-select friendly)
+  // Helper to get format emoji
+  const getFormatEmoji = (formatValue: string) => {
+    const emojiMap: { [key: string]: string } = {
+      'social-post': '📱',
+      'marketing-copy': '📢',
+      'cultural-narrative': '📜',
+      'professional-blog': '✍️',
+      'executive-summary': '📊',
+      'eotc-program': '🎓',
+      'educational-korero': '🌿',
+      'teacher-guide': '👩‍🏫',
+      'student-worksheet': '📝',
+      'safety-briefing': '⚠️',
+      'cultural-protocol': '🤝'
+    }
+    return emojiMap[formatValue] || '📄'
+  }
+
+  // Helper to categorize formats
+  const getFormatCategory = (formatValue: string) => {
+    const eotcFormats = ['eotc-program', 'educational-korero', 'teacher-guide', 'student-worksheet']
+    const socialFormats = ['social-post', 'marketing-copy', 'cultural-narrative']
+    const professionalFormats = ['professional-blog', 'executive-summary']
+    const complianceFormats = ['safety-briefing', 'cultural-protocol']
+
+    if (eotcFormats.includes(formatValue)) return 'EOTC'
+    if (socialFormats.includes(formatValue)) return 'Social & Marketing'
+    if (professionalFormats.includes(formatValue)) return 'Professional'
+    if (complianceFormats.includes(formatValue)) return 'Safety & Compliance'
+    return 'Other'
+  }
+
+  // Get category color
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      'EOTC': '#22c55e',
+      'Social & Marketing': '#3b82f6',
+      'Professional': '#6366f1',
+      'Safety & Compliance': '#f59e0b',
+      'Other': '#6b7280'
+    }
+    return colors[category] || '#6b7280'
+  }
+
+  // 📱 MOBILE RENDER: Native checkboxes with categories
   if (isMobile) {
+    // Group formats by category
+    const categorizedFormats = formats.reduce((acc, format) => {
+      const category = getFormatCategory(format.value)
+      if (!acc[category]) acc[category] = []
+      acc[category].push(format)
+      return acc
+    }, {} as { [key: string]: Format[] })
+
     return (
       <>
         <div style={{ position: 'relative' }}>
@@ -95,7 +146,7 @@ export default function FormatDropdown({
             📱 Mobile
           </div>
 
-          {/* Mobile Checkbox List */}
+          {/* Mobile Checkbox List with Categories */}
           <div style={{
             border: '2px solid #e5e7eb',
             borderRadius: '0.75rem',
@@ -111,48 +162,79 @@ export default function FormatDropdown({
               Select Formats ({selectedFormats.length} selected):
             </div>
             
-            {formats.map((format) => (
-              <label
-                key={format.value}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  padding: '0.75rem 0',
-                  borderBottom: '1px solid #f3f4f6',
-                  cursor: 'pointer',
-                  minHeight: '44px'
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedFormats.includes(format.value)}
-                  onChange={(e) => handleMobileChange(format.value, e.target.checked)}
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    marginTop: '2px',
-                    flexShrink: 0,
-                    cursor: 'pointer'
-                  }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.25rem'
-                  }}>
-                    {format.label}
-                  </div>
-                  <div style={{
-                    fontSize: '0.8rem',
-                    color: '#6b7280',
-                    lineHeight: '1.3'
-                  }}>
-                    {format.description}
-                  </div>
+            {Object.entries(categorizedFormats).map(([category, categoryFormats]) => (
+              <div key={category} style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  color: getCategoryColor(category),
+                  marginBottom: '0.5rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {category === 'EOTC' ? '🎓 EDUCATION & LEARNING' : category}
                 </div>
-              </label>
+                
+                {categoryFormats.map((format) => (
+                  <label
+                    key={format.value}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      padding: '0.75rem 0',
+                      borderBottom: '1px solid #f3f4f6',
+                      cursor: 'pointer',
+                      minHeight: '44px'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedFormats.includes(format.value)}
+                      onChange={(e) => handleMobileChange(format.value, e.target.checked)}
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        marginTop: '2px',
+                        flexShrink: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '0.25rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <span>{getFormatEmoji(format.value)}</span>
+                        {format.label}
+                        {category === 'EOTC' && (
+                          <span style={{
+                            fontSize: '0.625rem',
+                            backgroundColor: '#22c55e',
+                            color: 'white',
+                            padding: '0.125rem 0.375rem',
+                            borderRadius: '0.25rem',
+                            fontWeight: '600'
+                          }}>
+                            CURRICULUM
+                          </span>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: '0.8rem',
+                        color: '#6b7280',
+                        lineHeight: '1.3'
+                      }}>
+                        {format.description}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </div>
@@ -165,50 +247,54 @@ export default function FormatDropdown({
             flexWrap: 'wrap',
             gap: '0.5rem'
           }}>
-            {getSelectedFormatLabels().map((label, index) => (
-              <div
-                key={selectedFormats[index]}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: '#dcfce7',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.875rem',
-                  color: '#15803d'
-                }}
-              >
-                <span>{label}</span>
-                <button
-                  onClick={() => removeFormat(selectedFormats[index])}
+            {getSelectedFormatLabels().map((label, index) => {
+              const category = getFormatCategory(selectedFormats[index])
+              return (
+                <div
+                  key={selectedFormats[index]}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    padding: '0.25rem',
-                    minWidth: '24px',
-                    minHeight: '24px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '4px'
+                    gap: '0.5rem',
+                    backgroundColor: category === 'EOTC' ? '#f0fdf4' : '#dcfce7',
+                    border: `1px solid ${category === 'EOTC' ? '#bbf7d0' : '#bbf7d0'}`,
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.875rem',
+                    color: category === 'EOTC' ? '#15803d' : '#15803d'
                   }}
                 >
-                  ×
-                </button>
-              </div>
-            ))}
+                  <span>{getFormatEmoji(selectedFormats[index])}</span>
+                  <span>{label}</span>
+                  <button
+                    onClick={() => removeFormat(selectedFormats[index])}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#6b7280',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      padding: '0.25rem',
+                      minWidth: '24px',
+                      minHeight: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )
+            })}
           </div>
         )}
       </>
     )
   }
 
-  // 🖥️ DESKTOP RENDER: Custom Dropdown (Existing working code)
+  // 🖥️ DESKTOP RENDER: Custom Dropdown with categories
   return (
     <>
       <div style={{ position: 'relative' }} ref={dropdownRef}>
@@ -274,60 +360,167 @@ export default function FormatDropdown({
             border: '2px solid #e5e7eb',
             borderRadius: '0.75rem',
             marginTop: '0.25rem',
-            maxHeight: '300px',
+            maxHeight: '400px',
             overflowY: 'auto',
             zIndex: 10,
             boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
           }}>
-            {formats.map((format, index) => (
-              <div
-                key={format.value}
-                onClick={() => handleDesktopToggle(format.value)}
-                style={{
-                  minHeight: '44px',
-                  padding: '1rem',
-                  cursor: 'pointer',
-                  borderBottom: index < formats.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  backgroundColor: selectedFormats.includes(format.value) ? '#f0f9ff' : 'white',
-                  color: '#374151',
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedFormats.includes(format.value)) {
-                    e.currentTarget.style.backgroundColor = '#f9fafb'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedFormats.includes(format.value)) {
-                    e.currentTarget.style.backgroundColor = 'white'
-                  }
+            {/* Group formats by category for desktop */}
+            {Object.entries(formats.reduce((acc, format) => {
+              const category = getFormatCategory(format.value)
+              if (!acc[category]) acc[category] = []
+              acc[category].push(format)
+              return acc
+            }, {} as { [key: string]: Format[] })).map(([category, categoryFormats]) => (
+              <div key={category}>
+                {/* Category Header */}
+                <div style={{
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.875rem',
+                  color: category === 'EOTC' ? '#15803d' : '#15803d',
+                  minHeight: '36px'
                 }}
               >
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: selectedFormats.includes(format.value) ? BRAND_PURPLE : 'white',
-                  borderColor: selectedFormats.includes(format.value) ? BRAND_PURPLE : '#d1d5db',
-                  flexShrink: 0
+                <span>{getFormatEmoji(selectedFormats[index])}</span>
+                <span>{label}</span>
+                {category === 'EOTC' && (
+                  <span style={{
+                    fontSize: '0.625rem',
+                    backgroundColor: '#22c55e',
+                    color: 'white',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    CURRICULUM
+                  </span>
+                )}
+                <button
+                  onClick={() => removeFormat(selectedFormats[index])}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: '1.125rem',
+                    padding: '0.25rem',
+                    minWidth: '24px',
+                    minHeight: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#dc2626'
+                    e.currentTarget.style.backgroundColor = '#fee2e2'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#6b7280'
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+} 0.5rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  color: getCategoryColor(category),
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  backgroundColor: '#f9fafb',
+                  borderBottom: '1px solid #f3f4f6'
                 }}>
-                  {selectedFormats.includes(format.value) && (
-                    <span style={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>✓</span>
-                  )}
+                  {category === 'EOTC' ? '🎓 EDUCATION & LEARNING' : 
+                   category === 'Social & Marketing' ? '📱 SOCIAL & MARKETING' :
+                   category === 'Professional' ? '💼 PROFESSIONAL' :
+                   category === 'Safety & Compliance' ? '⚠️ SAFETY & COMPLIANCE' : category}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '500', marginBottom: '2px' }}>{format.label}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.3' }}>
-                    {format.description}
+
+                {/* Category Formats */}
+                {categoryFormats.map((format) => (
+                  <div
+                    key={format.value}
+                    onClick={() => handleDesktopToggle(format.value)}
+                    style={{
+                      minHeight: '44px',
+                      padding: '1rem',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #f3f4f6',
+                      backgroundColor: selectedFormats.includes(format.value) ? 
+                        (category === 'EOTC' ? '#f0fdf4' : '#f0f9ff') : 'white',
+                      color: '#374151',
+                      fontSize: '0.95rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selectedFormats.includes(format.value)) {
+                        e.currentTarget.style.backgroundColor = '#f9fafb'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selectedFormats.includes(format.value)) {
+                        e.currentTarget.style.backgroundColor = 'white'
+                      }
+                    }}
+                  >
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      border: '2px solid #d1d5db',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: selectedFormats.includes(format.value) ? 
+                        (category === 'EOTC' ? '#22c55e' : BRAND_PURPLE) : 'white',
+                      borderColor: selectedFormats.includes(format.value) ? 
+                        (category === 'EOTC' ? '#22c55e' : BRAND_PURPLE) : '#d1d5db',
+                      flexShrink: 0
+                    }}>
+                      {selectedFormats.includes(format.value) && (
+                        <span style={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>✓</span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontWeight: '500', 
+                        marginBottom: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <span>{getFormatEmoji(format.value)}</span>
+                        {format.label}
+                        {category === 'EOTC' && (
+                          <span style={{
+                            fontSize: '0.625rem',
+                            backgroundColor: '#22c55e',
+                            color: 'white',
+                            padding: '0.125rem 0.375rem',
+                            borderRadius: '0.25rem',
+                            fontWeight: '600'
+                          }}>
+                            CURRICULUM
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.3' }}>
+                        {format.description}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             ))}
           </div>
@@ -342,55 +535,16 @@ export default function FormatDropdown({
           flexWrap: 'wrap',
           gap: '0.75rem'
         }}>
-          {getSelectedFormatLabels().map((label, index) => (
-            <div
-              key={selectedFormats[index]}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: '#dcfce7',
-                border: '1px solid #bbf7d0',
-                borderRadius: '0.75rem',
-                padding: '0.75rem 1rem',
-                fontSize: '0.875rem',
-                color: '#15803d',
-                minHeight: '36px'
-              }}
-            >
-              <span>{label}</span>
-              <button
-                onClick={() => removeFormat(selectedFormats[index])}
+          {getSelectedFormatLabels().map((label, index) => {
+            const category = getFormatCategory(selectedFormats[index])
+            return (
+              <div
+                key={selectedFormats[index]}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#6b7280',
-                  cursor: 'pointer',
-                  fontSize: '1.125rem',
-                  padding: '0.25rem',
-                  minWidth: '24px',
-                  minHeight: '24px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#dc2626'
-                  e.currentTarget.style.backgroundColor = '#fee2e2'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#6b7280'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
+                  gap: '0.5rem',
+                  backgroundColor: category === 'EOTC' ? '#f0fdf4' : '#dcfce7',
+                  border: `1px solid ${category === 'EOTC' ? '#bbf7d0' : '#bbf7d0'}`,
+                  borderRadius: '0.75rem',
+                  padding: '0.75rem 1rem
