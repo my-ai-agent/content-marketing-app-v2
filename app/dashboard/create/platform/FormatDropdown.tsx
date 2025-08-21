@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const BRAND_PURPLE = '#6B2EFF'
 
@@ -22,7 +22,27 @@ export default function FormatDropdown({
   setSelectedFormats,
 }: Props) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+  const [touchedItem, setTouchedItem] = useState<string | null>(null)
+  const [tooltipFormat, setTooltipFormat] = useState<Format | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on outside click/tap
+  useEffect(() => {
+    if (!isDropdownOpen) return
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false)
+        setTooltipFormat(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isDropdownOpen])
 
   const handleFormatToggle = (formatValue: string) => {
     if (selectedFormats.includes(formatValue)) {
@@ -42,11 +62,31 @@ export default function FormatDropdown({
     )
   }
 
+  // Touch/mobile handlers
+  const handleTouchStart = (formatValue?: string) => {
+    setIsTouch(true)
+    if (formatValue) {
+      setTouchedItem(formatValue)
+      setTooltipFormat(formats.find(f => f.value === formatValue) || null)
+      if (navigator.vibrate) navigator.vibrate(50)
+    }
+  }
+  const handleTouchEnd = () => {
+    setTouchedItem(null)
+  }
+  const handleBackdropClick = () => {
+    setTooltipFormat(null)
+  }
+
   return (
     <>
-      <div style={{ position: 'relative' }} ref={dropdownRef}>
+      <div style={{ position: 'relative' }} ref={dropdownRef} onTouchStart={() => handleTouchStart()}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onTouchStart={() => {
+            setIsTouch(true)
+            if (navigator.vibrate) navigator.vibrate(30)
+          }}
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
@@ -61,10 +101,11 @@ export default function FormatDropdown({
             textAlign: 'left',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
+            touchAction: 'manipulation'
           }}
-          onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          onFocus={(e) => (e.target as HTMLButtonElement).style.borderColor = BRAND_PURPLE}
+          onBlur={(e) => (e.target as HTMLButtonElement).style.borderColor = '#e5e7eb'}
         >
           <span>
             {selectedFormats.length === 0 
@@ -100,26 +141,26 @@ export default function FormatDropdown({
               <div
                 key={format.value}
                 onClick={() => handleFormatToggle(format.value)}
+                onTouchStart={() => handleTouchStart(format.value)}
+                onTouchEnd={handleTouchEnd}
+                onMouseEnter={() => !isTouch && setTooltipFormat(format)}
+                onMouseLeave={() => !isTouch && setTooltipFormat(null)}
                 style={{
                   padding: '0.75rem 1rem',
                   cursor: 'pointer',
                   borderBottom: index < formats.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  backgroundColor: selectedFormats.includes(format.value) ? '#f0f9ff' : 'white',
+                  backgroundColor:
+                    touchedItem === format.value ? '#e0e7ff'
+                    : selectedFormats.includes(format.value) ? '#f0f9ff'
+                    : tooltipFormat?.value === format.value ? '#f9fafb'
+                    : 'white',
                   color: '#374151',
                   fontSize: '0.95rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedFormats.includes(format.value)) {
-                    e.currentTarget.style.backgroundColor = '#f9fafb'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedFormats.includes(format.value)) {
-                    e.currentTarget.style.backgroundColor = 'white'
-                  }
+                  gap: '0.75rem',
+                  outline: tooltipFormat?.value === format.value ? `2px solid ${BRAND_PURPLE}` : 'none',
+                  transition: 'background-color 0.15s ease'
                 }}
               >
                 <div style={{
@@ -139,10 +180,53 @@ export default function FormatDropdown({
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: '500' }}>{format.label}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                    {format.description}
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    display: isTouch ? 'block' : 'none'
+                  }}>
+                    {format.description.substring(0, 50)}...
                   </div>
                 </div>
+                {/* Tooltip for desktop */}
+                {!isTouch && tooltipFormat?.value === format.value && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      top: '-60px',
+                      background: '#1f2937',
+                      color: 'white',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      opacity: 1,
+                      visibility: 'visible',
+                      zIndex: 30,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                      maxWidth: '280px',
+                      minWidth: '200px',
+                      whiteSpace: 'normal',
+                      lineHeight: '1.4',
+                      pointerEvents: 'none',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {format.description}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-6px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderTop: '6px solid #1f2937',
+                      }}
+                    ></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -194,6 +278,67 @@ export default function FormatDropdown({
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal tooltip for mobile */}
+      {isTouch && tooltipFormat && (
+        <>
+          <div
+            onClick={handleBackdropClick}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.25)',
+              zIndex: 50,
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%,-50%)',
+              background: '#1f2937',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '1rem',
+              fontSize: '1rem',
+              zIndex: 60,
+              boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+              maxWidth: '90vw',
+              width: '320px',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ marginBottom: '1rem', fontWeight: 'bold', fontSize: '1.1em' }}>
+              {tooltipFormat.label}
+            </div>
+            <div style={{ marginBottom: '1.5rem', lineHeight: '1.4' }}>
+              {tooltipFormat.description}
+            </div>
+            <button
+              onClick={handleBackdropClick}
+              onTouchStart={() => {
+                if (navigator.vibrate) navigator.vibrate(30)
+              }}
+              style={{
+                backgroundColor: BRAND_PURPLE,
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                minHeight: '44px',
+                minWidth: '100px',
+                touchAction: 'manipulation'
+              }}
+            >
+              Got it!
+            </button>
+          </div>
+        </>
       )}
     </>
   )
