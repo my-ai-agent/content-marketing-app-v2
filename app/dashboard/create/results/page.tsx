@@ -36,6 +36,18 @@ export default function QRDistributionHub() {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+useEffect(() => {
+  const checkMobile = () => {
+    const userAgent = navigator.userAgent.toLowerCase()
+    const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
+    return mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
+           window.innerWidth <= 768 ||
+           ('ontouchstart' in window)
+  }
+  setIsMobile(checkMobile())
+}, [])
 
   // Helper for IndexedDB image loading
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
@@ -343,55 +355,13 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
       }
     }
     loadUserData()
-  }, [])
-
   const generateContent = async (userData: UserData) => {
-    try {
-      setIsGenerating(true)
-      
-      const platforms = userData.platforms || ['instagram']
-      
-      // SPEED OPTIMIZATION: Smart platform prioritization
-      const getPlatformPriority = (platforms: string[]) => {
-        const speedOrder = ['instagram', 'twitter', 'tiktok', 'facebook', 'email', 'linkedin', 'youtube', 'website'];
-        
-        return platforms.sort((a, b) => {
-          const aIndex = speedOrder.indexOf(a.toLowerCase());
-          const bIndex = speedOrder.indexOf(b.toLowerCase());
-          return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
-        });
-      };
-
-      const orderedPlatforms = getPlatformPriority([...platforms]);
-      console.log(`🚀 Generating content in optimized order:`, orderedPlatforms);
-      
-      // CLEAR previous content and prepare for progressive display
-      setGeneratedContent([]);
-      
-      // TRUE PROGRESSIVE DISPLAY: Start all in parallel, display each immediately when ready
-      const contentPromises = orderedPlatforms.map(async (platform) => {
-        console.log(`🚀 Starting ${platform} content generation...`);
-        
-        try {
-          const content = await generateClaudeContent(userData, platform);
-          
-          const platformContent = {
-            platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-            content,
-            qrCode: generateQRCode(`${platform}_${Date.now()}_${userData.story?.substring(0, 20) || 'story'}`),
-            tips: getPlatformTips(platform),
-            optimalTime: getOptimalPostingTime(platform),
-            culturalAuthenticity: 'High - AI-generated with cultural intelligence framework',
-            brandConsistency: userData.businessType ? '90% - Professional tourism voice' : '95% - Authentic personal voice'
-          };
-
-          // IMMEDIATE DISPLAY: Add this platform to the display AS SOON AS it's ready
-          setGeneratedContent(prev => {
-            const updated = [...prev, platformContent];
-            console.log(`✅ ${platform} content ready - displaying immediately (${updated.length}/${platforms.length})`);
-            return updated;
-          });
-
+  // Complex parallel processing that hangs on mobile
+  const contentPromises = orderedPlatforms.map(async (platform) => {
+    // Multiple simultaneous API calls
+  });
+  await Promise.all(contentPromises); // ❌ This overwhelms mobile
+};
           return platformContent;
         } catch (error) {
           console.error(`❌ Error generating ${platform} content:`, error);
