@@ -109,7 +109,7 @@ export default function PlatformFormat() {
     window.location.href = '/dashboard/create/results'
   }
 
-  // Helper function to get EOTC count
+  // Helper function to get EOTC count - FIXED SYNTAX
   const getEOTCSelections = () => {
     const eotcPlatforms = ['teacher-resources', 'school-newsletter']
     const eotcFormats = ['eotc-program', 'educational-korero', 'teacher-guide', 'student-worksheet']
