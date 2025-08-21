@@ -8,27 +8,53 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
 const BRAND_BLUE = '#11B3FF'
 
-// Priority order for tourism/business
+// ENHANCED PLATFORMS - Tourism + EOTC Distribution Channels
 const PLATFORMS: Platform[] = [
+  // Core Social Platforms
   { value: 'instagram', label: 'Instagram', description: 'Visual storytelling, posts & stories' },
   { value: 'facebook', label: 'Facebook', description: 'Broad reach, all demographics' },
   { value: 'website', label: 'Website/Blog', description: 'SEO content, professional presence' },
   { value: 'linkedin', label: 'LinkedIn', description: 'B2B networking, professional credibility' },
+  
+  // Video & Content Platforms
   { value: 'tiktok', label: 'TikTok', description: 'Gen Z/Millennial engagement, video content' },
-  { value: 'email', label: 'Email Newsletter', description: 'Direct audience relationship' },
   { value: 'youtube', label: 'YouTube', description: 'Long-form content, tutorials' },
   { value: 'pinterest', label: 'Pinterest', description: 'Inspiration, planning phase' },
-  { value: 'twitter', label: 'Twitter/X', description: 'News, updates, quick engagement' }
+  
+  // Communication Platforms
+  { value: 'email', label: 'Email Newsletter', description: 'Direct audience relationship' },
+  { value: 'twitter', label: 'Twitter/X', description: 'News, updates, quick engagement' },
+  
+  // Tourism Business Platforms (Moved from Formats)
+  { value: 'press-release', label: 'Press Release', description: 'Media coverage, credibility building' },
+  { value: 'brochure', label: 'Brochure', description: 'Tourism classic, print/digital marketing' },
+  { value: 'flyer', label: 'Flyer', description: 'Events, promotions, marketing material' },
+  
+  // EOTC & Education Platforms
+  { value: 'teacher-resources', label: 'Teacher Resources', description: 'EOTC program materials, curriculum support' },
+  { value: 'school-newsletter', label: 'School Newsletter', description: 'Educational institution communications' },
 ]
 
+// ENHANCED FORMATS - Content Style & Tone with EOTC Focus
 const FORMATS: Format[] = [
-  { value: 'social-post', label: 'Social Post', description: 'Ready-to-post content for social media' },
-  { value: 'blog-article', label: 'Blog Article', description: 'SEO-optimised detailed storytelling' },
-  { value: 'email-newsletter', label: 'Email Newsletter', description: 'Audience retention and engagement' },
-  { value: 'video-script', label: 'Video Script', description: 'Growing demand, high engagement' },
-  { value: 'brochure', label: 'Brochure', description: 'Tourism classic, print/digital' },
-  { value: 'press-release', label: 'Press Release', description: 'Media coverage, credibility building' },
-  { value: 'flyer', label: 'Flyer', description: 'Events, promotions, marketing material' }
+  // Social & Marketing Formats
+  { value: 'social-post', label: 'Social Post', description: 'Casual, engaging, hashtag-optimized' },
+  { value: 'marketing-copy', label: 'Marketing Copy', description: 'Promotional, conversion-focused' },
+  { value: 'cultural-narrative', label: 'Cultural Narrative', description: 'Storytelling, authentic Māori voice' },
+  
+  // Professional & Business Formats  
+  { value: 'professional-blog', label: 'Professional Blog', description: 'SEO-optimized, industry insights' },
+  { value: 'executive-summary', label: 'Executive Summary', description: 'Stakeholder reports, business case' },
+  
+  // EOTC & Education Formats
+  { value: 'eotc-program', label: 'EOTC Program Description', description: 'Curriculum-aligned, learning outcomes focused' },
+  { value: 'educational-korero', label: 'Educational Kōrero', description: 'Cultural learning, traditional knowledge sharing' },
+  { value: 'teacher-guide', label: 'Teacher Resource Guide', description: 'Pre-visit preparation, activity suggestions' },
+  { value: 'student-worksheet', label: 'Student Engagement Content', description: 'Reflection prompts, learning activities' },
+  
+  // Safety & Compliance Formats
+  { value: 'safety-briefing', label: 'Safety Briefing', description: 'Risk management, procedures, compliance' },
+  { value: 'cultural-protocol', label: 'Cultural Protocol Guide', description: 'Respectful engagement, tikanga Māori' },
 ]
 
 export default function PlatformFormat() {
@@ -74,14 +100,28 @@ export default function PlatformFormat() {
   }
 
   const handleSkip = () => {
-    // Set smart defaults for tourism business
-    const defaultPlatforms = ['instagram', 'facebook', 'website']
-    const defaultFormats = ['social-post', 'blog-article', 'brochure']
+    // Enhanced smart defaults for tourism + EOTC business
+    const defaultPlatforms = ['instagram', 'facebook', 'website', 'teacher-resources']
+    const defaultFormats = ['social-post', 'professional-blog', 'eotc-program', 'cultural-narrative']
     
     localStorage.setItem('selectedPlatforms', JSON.stringify(defaultPlatforms))
     localStorage.setItem('selectedFormats', JSON.stringify(defaultFormats))
     window.location.href = '/dashboard/create/results'
   }
+
+  // Helper function to get EOTC count
+  const getEOTCSelections = () => {
+    const eotcPlatforms = ['teacher-resources', 'school-newsletter']
+    const eotcFormats = ['eotc-program', 'educational-korero', 'teacher-guide', 'student-worksheet']
+    
+    const eotcPlatformCount = selectedPlatforms.filter(p => eotcPlatforms.includes(p)).length
+    const eotcFormatCount = selectedFormats.filter(f => eotcFormats.includes(f)).length
+    
+    return { platforms: eotcPlatformCount, formats: eotcFormatCount }
+  }
+
+  const eotcSelections = getEOTCSelections()
+  const hasEOTCContent = eotcSelections.platforms > 0 || eotcSelections.formats > 0
 
   return (
     <div style={{ 
@@ -109,78 +149,20 @@ export default function PlatformFormat() {
           gap: '0.5rem', 
           marginBottom: '1.5rem' 
         }}>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>1</div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>2</div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>3</div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>4</div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>5</div>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>6</div>
+          {[1, 2, 3, 4, 5, 6].map((step) => (
+            <div key={step} style={{ 
+              width: '2rem', 
+              height: '2rem', 
+              borderRadius: '50%', 
+              backgroundColor: step <= 5 ? '#10b981' : '#e5e7eb', 
+              color: step <= 5 ? 'white' : '#9ca3af', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontSize: '0.875rem', 
+              fontWeight: '600' 
+            }}>{step}</div>
+          ))}
         </div>
 
         {/* Title */}
@@ -203,6 +185,37 @@ export default function PlatformFormat() {
         }}>
           Choose where to share your story and in what format
         </p>
+
+        {/* EOTC Indicator */}
+        {hasEOTCContent && (
+          <div style={{
+            marginTop: '1rem',
+            backgroundColor: '#f0fdf4',
+            border: '2px solid #22c55e',
+            borderRadius: '0.75rem',
+            padding: '0.75rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1.25rem' }}>🎓</span>
+            <div>
+              <div style={{ 
+                fontWeight: '600', 
+                color: '#15803d',
+                fontSize: '0.875rem'
+              }}>
+                EOTC Education Content Selected
+              </div>
+              <div style={{ 
+                fontSize: '0.75rem', 
+                color: '#166534'
+              }}>
+                {eotcSelections.platforms} platform(s) + {eotcSelections.formats} format(s) for curriculum-aligned content
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ 
@@ -226,7 +239,7 @@ export default function PlatformFormat() {
             fontSize: '1.125rem',
             fontWeight: '600',
             color: '#374151',
-            marginBottom: '1rem'
+            marginBottom: '0.5rem'
           }}>
             📱 Select Platforms
           </h3>
@@ -235,7 +248,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose where you want to share your content (select multiple), and AI will create content optimised for each platform you select
+            Choose <strong>where</strong> you want to distribute your content. Includes social media, websites, marketing materials, and EOTC resources.
           </p>
           
           <PlatformDropdown
@@ -258,7 +271,7 @@ export default function PlatformFormat() {
             fontSize: '1.125rem',
             fontWeight: '600',
             color: '#374151',
-            marginBottom: '1rem'
+            marginBottom: '0.5rem'
           }}>
             📄 Select Formats
           </h3>
@@ -267,7 +280,7 @@ export default function PlatformFormat() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            Choose the content formats you need (select multiple), and AI will create content optimised for each format you select
+            Choose <strong>how</strong> your content should be written. Content style, tone, and structure for your audience and purpose.
           </p>
           
           <FormatDropdown
@@ -275,6 +288,46 @@ export default function PlatformFormat() {
             selectedFormats={selectedFormats}
             setSelectedFormats={setSelectedFormats}
           />
+        </div>
+
+        {/* EOTC Information Panel */}
+        <div style={{
+          backgroundColor: '#fefce8',
+          border: '2px solid #facc15',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto'
+        }}>
+          <h4 style={{
+            fontSize: '1rem',
+            fontWeight: '600',
+            color: '#a16207',
+            marginBottom: '0.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            🎓 Education Outside The Classroom (EOTC)
+          </h4>
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#a16207',
+            lineHeight: '1.5',
+            marginBottom: '0.75rem'
+          }}>
+            New Zealand's EOTC market is massive! Select education-focused platforms and formats to create curriculum-aligned content that teachers actually want to use.
+          </p>
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#92400e',
+            backgroundColor: '#fef3c7',
+            padding: '0.5rem',
+            borderRadius: '0.5rem'
+          }}>
+            <strong>💡 Pro Tip:</strong> Combining EOTC formats with social platforms creates content that works for both school bookings AND general tourism marketing.
+          </div>
         </div>
 
         {/* Navigation Buttons */}
@@ -310,7 +363,7 @@ export default function PlatformFormat() {
               e.currentTarget.style.color = '#6b7280'
             }}
           >
-            Use Smart Defaults
+            Tourism + EOTC Defaults
           </button>
 
           <button
@@ -346,6 +399,50 @@ export default function PlatformFormat() {
             🚀 Generate My Content
           </button>
         </div>
+
+        {/* Content Generation Preview */}
+        {selectedPlatforms.length > 0 && selectedFormats.length > 0 && (
+          <div style={{
+            backgroundColor: '#f0f9ff',
+            border: '2px solid #3b82f6',
+            borderRadius: '1rem',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
+          }}>
+            <h4 style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#1e40af',
+              marginBottom: '0.75rem'
+            }}>
+              🤖 Content Generation Preview
+            </h4>
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#1e40af',
+              marginBottom: '1rem'
+            }}>
+              AI will create <strong>{selectedPlatforms.length × selectedFormats.length} pieces</strong> of culturally-intelligent content:
+            </p>
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#1e3a8a',
+              backgroundColor: '#dbeafe',
+              padding: '0.75rem',
+              borderRadius: '0.5rem'
+            }}>
+              <div><strong>Platforms:</strong> {selectedPlatforms.length} selected</div>
+              <div><strong>Formats:</strong> {selectedFormats.length} selected</div>
+              {hasEOTCContent && (
+                <div style={{ marginTop: '0.5rem', fontWeight: '600' }}>
+                  🎓 Includes EOTC curriculum-aligned content
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Logo */}
         <div style={{ 
