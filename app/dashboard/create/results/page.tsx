@@ -38,16 +38,16 @@ export default function QRDistributionHub() {
   const [error, setError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
 
-useEffect(() => {
-  const checkMobile = () => {
-    const userAgent = navigator.userAgent.toLowerCase()
-    const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
-    return mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
-           window.innerWidth <= 768 ||
-           ('ontouchstart' in window)
-  }
-  setIsMobile(checkMobile())
-}, [])
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase()
+      const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
+      return mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
+             window.innerWidth <= 768 ||
+             ('ontouchstart' in window)
+    }
+    setIsMobile(checkMobile())
+  }, [])
 
   // Helper for IndexedDB image loading
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
@@ -297,6 +297,59 @@ Witnessing the integration of traditional Māori values with modern tourism prac
 Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTourism #Manaakitanga`
   }
 
+  // FIXED GENERATE CONTENT FUNCTION
+  const generateContent = async (userData: UserData) => {
+    try {
+      setIsGenerating(true)
+      setGeneratedContent([])
+      setError('')
+      
+      const platforms = userData.platforms || ['instagram']
+      const generatedResults: GeneratedContent[] = []
+      
+      console.log('🚀 Starting content generation for platforms:', platforms)
+      
+      // Process platforms one by one (mobile-friendly sequential processing)
+      for (const platform of platforms) {
+        try {
+          console.log(`📝 Generating content for ${platform}...`)
+          
+          const content = await generateClaudeContent(userData, platform)
+          const qrCode = generateQRCode(content)
+          const tips = getPlatformTips(platform)
+          const optimalTime = getOptimalPostingTime(platform)
+          
+          const result: GeneratedContent = {
+            platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+            content,
+            qrCode,
+            tips,
+            optimalTime,
+            culturalAuthenticity: 'Te Tiriti compliant',
+            brandConsistency: 'Aligned with authentic voice'
+          }
+          
+          generatedResults.push(result)
+          setGeneratedContent([...generatedResults]) // Progressive display
+          
+          console.log(`✅ ${platform} content generated successfully`)
+          
+        } catch (error) {
+          console.error(`❌ Error generating ${platform} content:`, error)
+          // Continue with other platforms even if one fails
+        }
+      }
+      
+      console.log(`✅ Content generation complete! ${generatedResults.length}/${platforms.length} platforms successful`)
+      setIsGenerating(false)
+      
+    } catch (error) {
+      console.error('❌ Error in generateContent:', error)
+      setError('Failed to generate content. Please try again.')
+      setIsGenerating(false)
+    }
+  }
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -355,54 +408,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
       }
     }
     loadUserData()
-  // REPLACE lines 358-375 with this corrected version:
-
-const generateContent = async (userData: UserData) => {
-  try {
-    // Complex parallel processing that hangs on mobile
-    const contentPromises = orderedPlatforms.map(async (platform) => {
-      try {
-        // Multiple simultaneous API calls
-        const platformContent = await generatePlatformContent(platform, userData);
-        return platformContent;
-      } catch (error) {
-        console.error(`❌ Error generating ${platform} content:`, error);
-        return null;
-      }
-    });
-
-    // Mobile-optimized: Process sequentially instead of Promise.all
-    // await Promise.all(contentPromises); // ❌ This overwhelms mobile - REMOVED
-    
-    // Sequential processing for mobile reliability
-    const allContent = [];
-    for (const promise of contentPromises) {
-      const content = await promise;
-      if (content) {
-        allContent.push(content);
-      }
-    }
-    
-    const successfulContent = allContent.filter(content => content !== null);
-
-    console.log(`✅ All content generation complete! ${successfulContent.length}/${orderedPlatforms.length} platforms successful`);
-    
-    return successfulContent;
-    
-  } catch (error) {
-    console.error('❌ Error in generateContent:', error);
-    return [];
-  }
-};
-      console.log(`✅ All content generation complete! ${successfulContent.length}/${platforms.length} platforms successful`);
-      setIsGenerating(false);
-      
-    } catch (err) {
-      console.error('Content generation error:', err);
-      setError('Failed to generate your content. Please try again.');
-      setIsGenerating(false);
-    }
-  };
+  }, [])
 
   const getPlatformTips = (platform: string): string[] => {
     switch (platform) {
