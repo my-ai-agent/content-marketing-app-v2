@@ -375,62 +375,7 @@ export default function FormatDropdown({
               <div key={category}>
                 {/* Category Header */}
                 <div style={{
-                  padding: '0.75rem 1rem',
-                  fontSize: '0.875rem',
-                  color: category === 'EOTC' ? '#15803d' : '#15803d',
-                  minHeight: '36px'
-                }}
-              >
-                <span>{getFormatEmoji(selectedFormats[index])}</span>
-                <span>{label}</span>
-                {category === 'EOTC' && (
-                  <span style={{
-                    fontSize: '0.625rem',
-                    backgroundColor: '#22c55e',
-                    color: 'white',
-                    padding: '0.125rem 0.375rem',
-                    borderRadius: '0.25rem',
-                    fontWeight: '600'
-                  }}>
-                    CURRICULUM
-                  </span>
-                )}
-                <button
-                  onClick={() => removeFormat(selectedFormats[index])}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    fontSize: '1.125rem',
-                    padding: '0.25rem',
-                    minWidth: '24px',
-                    minHeight: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '4px',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#dc2626'
-                    e.currentTarget.style.backgroundColor = '#fee2e2'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#6b7280'
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </>
-  )
-} 0.5rem',
+                  padding: '0.75rem 1rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '600',
                   color: getCategoryColor(category),
@@ -547,4 +492,59 @@ export default function FormatDropdown({
                   backgroundColor: category === 'EOTC' ? '#f0fdf4' : '#dcfce7',
                   border: `1px solid ${category === 'EOTC' ? '#bbf7d0' : '#bbf7d0'}`,
                   borderRadius: '0.75rem',
-                  padding: '0.75rem 1rem
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.875rem',
+                  color: category === 'EOTC' ? '#15803d' : '#15803d',
+                  minHeight: '36px'
+                }}
+              >
+                <span>{getFormatEmoji(selectedFormats[index])}</span>
+                <span>{label}</span>
+                {category === 'EOTC' && (
+                  <span style={{
+                    fontSize: '0.625rem',
+                    backgroundColor: '#22c55e',
+                    color: 'white',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    CURRICULUM
+                  </span>
+                )}
+                <button
+                  onClick={() => removeFormat(selectedFormats[index])}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: '1.125rem',
+                    padding: '0.25rem',
+                    minWidth: '24px',
+                    minHeight: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#dc2626'
+                    e.currentTarget.style.backgroundColor = '#fee2e2'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#6b7280'
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
