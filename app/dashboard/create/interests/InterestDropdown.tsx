@@ -27,12 +27,12 @@ export default function InterestDropdown({
   const [isTouch, setIsTouch] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 🔧 FIX: Force re-render when selectedInterest changes
+  // Display value for selected interest
   const [displayValue, setDisplayValue] = useState('')
 
   useEffect(() => {
-    const selectedInterestObj = interests.find(interest => interest.value === selectedInterest)
-    setDisplayValue(selectedInterestObj ? selectedInterestObj.label : '')
+    const selected = interests.find(int => int.value === selectedInterest)
+    setDisplayValue(selected ? selected.label : '')
   }, [selectedInterest, interests])
 
   // Mobile-optimized touch handlers
@@ -41,10 +41,7 @@ export default function InterestDropdown({
     if (interestValue) {
       setTouchedItem(interestValue)
       setTooltipInterest(interests.find(i => i.value === interestValue) || null)
-      // Add haptic feedback if available
-      if (navigator.vibrate) {
-        navigator.vibrate(50)
-      }
+      if (navigator.vibrate) navigator.vibrate(50)
     }
   }
 
@@ -52,27 +49,37 @@ export default function InterestDropdown({
     setTouchedItem(null)
   }
 
-  // Hide tooltip on mobile tap outside
   const handleBackdropClick = () => {
     setTooltipInterest(null)
   }
 
-  // 🔧 FIX: Improved selection handler
   const handleSelectInterest = (interestValue: string) => {
-    console.log('Selecting interest:', interestValue) // Debug log
     setSelectedInterest(interestValue)
     setIsDropdownOpen(false)
     setTooltipInterest(null)
     setTouchedItem(null)
-    
-    // 🔧 FIX: Immediately update display value
-    const selectedInterestObj = interests.find(interest => interest.value === interestValue)
-    if (selectedInterestObj) {
-      setDisplayValue(selectedInterestObj.label)
-    }
+    const selected = interests.find(int => int.value === interestValue)
+    if (selected) setDisplayValue(selected.label)
   }
 
-  const selectedInterestObj = interests.find(interest => interest.value === selectedInterest)
+  const selectedInt = interests.find(int => int.value === selectedInterest)
+
+  // Close dropdown on outside click (mobile and desktop)
+  useEffect(() => {
+    if (!isDropdownOpen) return
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false)
+        setTooltipInterest(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isDropdownOpen])
 
   return (
     <>
@@ -96,7 +103,6 @@ export default function InterestDropdown({
             borderRadius: '0.75rem',
             fontSize: '1rem',
             backgroundColor: 'white',
-            // 🔧 FIX: Better color logic for selected state
             color: displayValue ? '#374151' : '#9ca3af',
             outline: 'none',
             cursor: 'pointer',
@@ -107,12 +113,11 @@ export default function InterestDropdown({
             alignItems: 'center',
             touchAction: 'manipulation'
           }}
-          onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
-          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          onFocus={e => (e.target as HTMLButtonElement).style.borderColor = BRAND_PURPLE}
+          onBlur={e => (e.target as HTMLButtonElement).style.borderColor = '#e5e7eb'}
         >
           <span>
-            {/* 🔧 FIX: Use displayValue instead of complex logic */}
-            {displayValue || 'Select primary interest...'}
+            {displayValue || 'Select an interest...'}
           </span>
           <span
             style={{
@@ -155,7 +160,6 @@ export default function InterestDropdown({
                 onBlur={() => !isTouch && setTooltipInterest(null)}
                 onTouchStart={() => handleTouchStart(interest.value)}
                 onTouchEnd={handleTouchEnd}
-                // 🔧 FIX: Use the improved selection handler
                 onClick={() => handleSelectInterest(interest.value)}
                 style={{
                   minHeight: '44px',
@@ -178,17 +182,16 @@ export default function InterestDropdown({
               >
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: '500', marginBottom: '2px' }}>{interest.label}</div>
-                  <div style={{ 
-                    fontSize: '0.8rem', 
-                    color: '#6b7280', 
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: '#6b7280',
                     lineHeight: '1.3',
                     display: isTouch ? 'block' : 'none'
                   }}>
-                    {interest.description.substring(0, 60)}...
+                    {interest.description.substring(0, 50)}...
                   </div>
                 </div>
 
-                {/* ✅ Selection indicator */}
                 {selectedInterest === interest.value && (
                   <div style={{
                     width: '20px',
@@ -208,7 +211,6 @@ export default function InterestDropdown({
                   </div>
                 )}
 
-                {/* Info icon for mobile users (when not selected) */}
                 {isTouch && selectedInterest !== interest.value && (
                   <div style={{
                     width: '20px',
@@ -227,7 +229,6 @@ export default function InterestDropdown({
                   </div>
                 )}
 
-                {/* Tooltip for desktop */}
                 {!isTouch && tooltipInterest?.value === interest.value && (
                   <div
                     style={{
@@ -272,8 +273,7 @@ export default function InterestDropdown({
         )}
       </div>
 
-      {/* Enhanced Selected Interest Description */}
-      {selectedInterestObj && (
+      {selectedInt && (
         <div style={{
           marginTop: '1rem',
           padding: '1rem',
@@ -288,12 +288,11 @@ export default function InterestDropdown({
             fontWeight: '500',
             lineHeight: '1.4'
           }}>
-            <strong>{selectedInterestObj.label}:</strong> {selectedInterestObj.description}
+            <strong>{selectedInt.label}:</strong> {selectedInt.description}
           </p>
         </div>
       )}
 
-      {/* Improved mobile modal */}
       {isTouch && tooltipInterest && (
         <>
           <div
