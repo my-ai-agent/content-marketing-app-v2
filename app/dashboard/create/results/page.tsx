@@ -355,24 +355,45 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #CulturalTo
       }
     }
     loadUserData()
-  const generateContent = async (userData: UserData) => {
-  // Complex parallel processing that hangs on mobile
-  const contentPromises = orderedPlatforms.map(async (platform) => {
-    // Multiple simultaneous API calls
-  });
-  await Promise.all(contentPromises); // ❌ This overwhelms mobile
-};
-          return platformContent;
-        } catch (error) {
-          console.error(`❌ Error generating ${platform} content:`, error);
-          return null;
-        }
-      });
+  // REPLACE lines 358-375 with this corrected version:
 
-      // Wait for all to complete in background
-      const allContent = await Promise.all(contentPromises);
-      const successfulContent = allContent.filter(content => content !== null);
-      
+const generateContent = async (userData: UserData) => {
+  try {
+    // Complex parallel processing that hangs on mobile
+    const contentPromises = orderedPlatforms.map(async (platform) => {
+      try {
+        // Multiple simultaneous API calls
+        const platformContent = await generatePlatformContent(platform, userData);
+        return platformContent;
+      } catch (error) {
+        console.error(`❌ Error generating ${platform} content:`, error);
+        return null;
+      }
+    });
+
+    // Mobile-optimized: Process sequentially instead of Promise.all
+    // await Promise.all(contentPromises); // ❌ This overwhelms mobile - REMOVED
+    
+    // Sequential processing for mobile reliability
+    const allContent = [];
+    for (const promise of contentPromises) {
+      const content = await promise;
+      if (content) {
+        allContent.push(content);
+      }
+    }
+    
+    const successfulContent = allContent.filter(content => content !== null);
+
+    console.log(`✅ All content generation complete! ${successfulContent.length}/${orderedPlatforms.length} platforms successful`);
+    
+    return successfulContent;
+    
+  } catch (error) {
+    console.error('❌ Error in generateContent:', error);
+    return [];
+  }
+};
       console.log(`✅ All content generation complete! ${successfulContent.length}/${platforms.length} platforms successful`);
       setIsGenerating(false);
       
