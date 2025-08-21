@@ -22,29 +22,41 @@ export default function PlatformDropdown({
   setSelectedPlatforms,
 }: Props) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isTouch, setIsTouch] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [touchedItem, setTouchedItem] = useState<string | null>(null)
-  const [tooltipPlatform, setTooltipPlatform] = useState<Platform | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Close dropdown on outside click/tap
+  // Detect mobile device
   useEffect(() => {
-    if (!isDropdownOpen) return
-    function handleClickOutside(e: MouseEvent | TouchEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false)
-        setTooltipPlatform(null)
-      }
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase()
+      const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
+      return mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
+             window.innerWidth <= 768 ||
+             ('ontouchstart' in window)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('touchstart', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('touchstart', handleClickOutside)
-    }
-  }, [isDropdownOpen])
+    
+    setIsMobile(checkMobile())
+    
+    // Re-check on resize
+    const handleResize = () => setIsMobile(checkMobile())
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
-  const handlePlatformToggle = (platformValue: string) => {
+  // Mobile handler - multiple select with checkboxes
+  const handleMobileChange = (platformValue: string, isChecked: boolean) => {
+    console.log('Mobile platform selection:', platformValue, isChecked)
+    if (isChecked) {
+      setSelectedPlatforms([...selectedPlatforms, platformValue])
+    } else {
+      setSelectedPlatforms(selectedPlatforms.filter(p => p !== platformValue))
+    }
+  }
+
+  // Desktop handler - existing logic
+  const handleDesktopToggle = (platformValue: string) => {
+    console.log('Desktop platform toggle:', platformValue)
     if (selectedPlatforms.includes(platformValue)) {
       setSelectedPlatforms(selectedPlatforms.filter(p => p !== platformValue))
     } else {
@@ -62,33 +74,149 @@ export default function PlatformDropdown({
     )
   }
 
-  // Touch/mobile handlers
-  const handleTouchStart = (platformValue?: string) => {
-    setIsTouch(true)
-    if (platformValue) {
-      setTouchedItem(platformValue)
-      setTooltipPlatform(platforms.find(p => p.value === platformValue) || null)
-      if (navigator.vibrate) navigator.vibrate(50)
-    }
-  }
-  const handleTouchEnd = () => {
-    setTouchedItem(null)
-  }
-  const handleBackdropClick = () => {
-    setTooltipPlatform(null)
+  // 📱 MOBILE RENDER: Native checkboxes (Multi-select friendly)
+  if (isMobile) {
+    return (
+      <>
+        <div style={{ position: 'relative' }}>
+          {/* Mobile indicator */}
+          <div style={{
+            position: 'absolute',
+            top: '-0.5rem',
+            right: '0.5rem',
+            backgroundColor: '#10b981',
+            color: 'white',
+            fontSize: '0.625rem',
+            padding: '0.125rem 0.375rem',
+            borderRadius: '0.25rem',
+            fontWeight: '600',
+            zIndex: 10
+          }}>
+            📱 Mobile
+          </div>
+
+          {/* Mobile Checkbox List */}
+          <div style={{
+            border: '2px solid #e5e7eb',
+            borderRadius: '0.75rem',
+            backgroundColor: 'white',
+            padding: '1rem'
+          }}>
+            <div style={{
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '1rem'
+            }}>
+              Select Platforms ({selectedPlatforms.length} selected):
+            </div>
+            
+            {platforms.map((platform) => (
+              <label
+                key={platform.value}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '0.75rem 0',
+                  borderBottom: '1px solid #f3f4f6',
+                  cursor: 'pointer',
+                  minHeight: '44px'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedPlatforms.includes(platform.value)}
+                  onChange={(e) => handleMobileChange(platform.value, e.target.checked)}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    marginTop: '2px',
+                    flexShrink: 0,
+                    cursor: 'pointer'
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {platform.label}
+                  </div>
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: '#6b7280',
+                    lineHeight: '1.3'
+                  }}>
+                    {platform.description}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Selected Platform Tags - Mobile */}
+        {selectedPlatforms.length > 0 && (
+          <div style={{
+            marginTop: '1rem',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.5rem'
+          }}>
+            {getSelectedPlatformLabels().map((label, index) => (
+              <div
+                key={selectedPlatforms[index]}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.875rem',
+                  color: '#1e40af'
+                }}
+              >
+                <span>{label}</span>
+                <button
+                  onClick={() => removePlatform(selectedPlatforms[index])}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    padding: '0.25rem',
+                    minWidth: '24px',
+                    minHeight: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    )
   }
 
+  // 🖥️ DESKTOP RENDER: Custom Dropdown (Existing working code)
   return (
     <>
-      <div style={{ position: 'relative' }} ref={dropdownRef} onTouchStart={() => handleTouchStart()}>
+      <div style={{ position: 'relative' }} ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          onTouchStart={() => {
-            setIsTouch(true)
-            if (navigator.vibrate) navigator.vibrate(30)
-          }}
           style={{
             width: '100%',
+            minHeight: '44px',
             padding: '0.75rem 1rem',
             border: '2px solid #e5e7eb',
             borderRadius: '0.75rem',
@@ -101,11 +229,10 @@ export default function PlatformDropdown({
             textAlign: 'left',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            touchAction: 'manipulation'
+            alignItems: 'center'
           }}
-          onFocus={(e) => (e.target as HTMLButtonElement).style.borderColor = BRAND_PURPLE}
-          onBlur={(e) => (e.target as HTMLButtonElement).style.borderColor = '#e5e7eb'}
+          onFocus={(e) => e.target.style.borderColor = BRAND_PURPLE}
+          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         >
           <span>
             {selectedPlatforms.length === 0 
@@ -121,6 +248,21 @@ export default function PlatformDropdown({
             ▼
           </span>
         </button>
+
+        {/* Desktop indicator */}
+        <div style={{
+          position: 'absolute',
+          top: '-0.5rem',
+          right: '0.5rem',
+          backgroundColor: '#3b82f6',
+          color: 'white',
+          fontSize: '0.625rem',
+          padding: '0.125rem 0.375rem',
+          borderRadius: '0.25rem',
+          fontWeight: '600'
+        }}>
+          🖥️ Desktop
+        </div>
 
         {isDropdownOpen && (
           <div style={{
@@ -140,106 +282,65 @@ export default function PlatformDropdown({
             {platforms.map((platform, index) => (
               <div
                 key={platform.value}
-                onClick={() => handlePlatformToggle(platform.value)}
-                onTouchStart={() => handleTouchStart(platform.value)}
-                onTouchEnd={handleTouchEnd}
-                onMouseEnter={() => !isTouch && setTooltipPlatform(platform)}
-                onMouseLeave={() => !isTouch && setTooltipPlatform(null)}
+                onClick={() => handleDesktopToggle(platform.value)}
                 style={{
-                  padding: '0.75rem 1rem',
+                  minHeight: '44px',
+                  padding: '1rem',
                   cursor: 'pointer',
                   borderBottom: index < platforms.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  backgroundColor:
-                    touchedItem === platform.value ? '#e0e7ff'
-                    : selectedPlatforms.includes(platform.value) ? '#f0f9ff'
-                    : tooltipPlatform?.value === platform.value ? '#f9fafb'
-                    : 'white',
+                  backgroundColor: selectedPlatforms.includes(platform.value) ? '#f0f9ff' : 'white',
                   color: '#374151',
                   fontSize: '0.95rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  outline: tooltipPlatform?.value === platform.value ? `2px solid ${BRAND_PURPLE}` : 'none',
-                  transition: 'background-color 0.15s ease'
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  if (!selectedPlatforms.includes(platform.value)) {
+                    e.currentTarget.style.backgroundColor = '#f9fafb'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!selectedPlatforms.includes(platform.value)) {
+                    e.currentTarget.style.backgroundColor = 'white'
+                  }
                 }}
               >
                 <div style={{
-                  width: '16px',
-                  height: '16px',
+                  width: '24px',
+                  height: '24px',
                   border: '2px solid #d1d5db',
-                  borderRadius: '3px',
+                  borderRadius: '4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: selectedPlatforms.includes(platform.value) ? BRAND_PURPLE : 'white',
-                  borderColor: selectedPlatforms.includes(platform.value) ? BRAND_PURPLE : '#d1d5db'
+                  borderColor: selectedPlatforms.includes(platform.value) ? BRAND_PURPLE : '#d1d5db',
+                  flexShrink: 0
                 }}>
                   {selectedPlatforms.includes(platform.value) && (
-                    <span style={{ color: 'white', fontSize: '10px' }}>✓</span>
+                    <span style={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>✓</span>
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '500' }}>{platform.label}</div>
-                  <div style={{
-                    fontSize: '0.875rem',
-                    color: '#6b7280',
-                    display: isTouch ? 'block' : 'none'
-                  }}>
-                    {platform.description.substring(0, 50)}...
+                  <div style={{ fontWeight: '500', marginBottom: '2px' }}>{platform.label}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.3' }}>
+                    {platform.description}
                   </div>
                 </div>
-                {/* Tooltip for desktop */}
-                {!isTouch && tooltipPlatform?.value === platform.value && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      top: '-60px',
-                      background: '#1f2937',
-                      color: 'white',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      fontSize: '0.875rem',
-                      opacity: 1,
-                      visibility: 'visible',
-                      zIndex: 30,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                      maxWidth: '280px',
-                      minWidth: '200px',
-                      whiteSpace: 'normal',
-                      lineHeight: '1.4',
-                      pointerEvents: 'none',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {platform.description}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: '-6px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        borderLeft: '6px solid transparent',
-                        borderRight: '6px solid transparent',
-                        borderTop: '6px solid #1f2937',
-                      }}
-                    ></div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Selected Platform Tags */}
+      {/* Selected Platform Tags - Desktop */}
       {selectedPlatforms.length > 0 && (
         <div style={{
           marginTop: '1rem',
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '0.5rem'
+          gap: '0.75rem'
         }}>
           {getSelectedPlatformLabels().map((label, index) => (
             <div
@@ -250,10 +351,11 @@ export default function PlatformDropdown({
                 gap: '0.5rem',
                 backgroundColor: '#eff6ff',
                 border: '1px solid #bfdbfe',
-                borderRadius: '0.5rem',
-                padding: '0.5rem 0.75rem',
+                borderRadius: '0.75rem',
+                padding: '0.75rem 1rem',
                 fontSize: '0.875rem',
-                color: '#1e40af'
+                color: '#1e40af',
+                minHeight: '36px'
               }}
             >
               <span>{label}</span>
@@ -264,81 +366,30 @@ export default function PlatformDropdown({
                   border: 'none',
                   color: '#6b7280',
                   cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  padding: '0',
+                  fontSize: '1.125rem',
+                  padding: '0.25rem',
+                  minWidth: '24px',
+                  minHeight: '24px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  borderRadius: '4px',
+                  transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#dc2626'
+                  e.currentTarget.style.backgroundColor = '#fee2e2'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#6b7280'
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
               >
                 ×
               </button>
             </div>
           ))}
         </div>
-      )}
-
-      {/* Modal tooltip for mobile */}
-      {isTouch && tooltipPlatform && (
-        <>
-          <div
-            onClick={handleBackdropClick}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.25)',
-              zIndex: 50,
-            }}
-          />
-          <div
-            style={{
-              position: 'fixed',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%,-50%)',
-              background: '#1f2937',
-              color: 'white',
-              padding: '1.5rem',
-              borderRadius: '1rem',
-              fontSize: '1rem',
-              zIndex: 60,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
-              maxWidth: '90vw',
-              width: '320px',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ marginBottom: '1rem', fontWeight: 'bold', fontSize: '1.1em' }}>
-              {tooltipPlatform.label}
-            </div>
-            <div style={{ marginBottom: '1.5rem', lineHeight: '1.4' }}>
-              {tooltipPlatform.description}
-            </div>
-            <button
-              onClick={handleBackdropClick}
-              onTouchStart={() => {
-                if (navigator.vibrate) navigator.vibrate(30)
-              }}
-              style={{
-                backgroundColor: BRAND_PURPLE,
-                color: 'white',
-                border: 'none',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                minHeight: '44px',
-                minWidth: '100px',
-                touchAction: 'manipulation'
-              }}
-            >
-              Got it!
-            </button>
-          </div>
-        </>
       )}
     </>
   )
