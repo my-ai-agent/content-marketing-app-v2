@@ -38,6 +38,171 @@ interface SavedStory {
   storyPreview?: string
 }
 
+// MOBILE MESSAGE COMPONENTS - DEFINED OUTSIDE MAIN COMPONENT
+const SlowConnectionMessage = () => (
+  <div style={{
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '12px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    textAlign: 'center',
+    zIndex: 1000,
+    maxWidth: '300px',
+    width: '90%'
+  }}>
+    <div style={{
+      fontSize: '1.5rem',
+      marginBottom: '1rem'
+    }}>
+      📶 Slow connection detected
+    </div>
+    <div style={{
+      fontSize: '1.5rem',
+      color: BRAND_PURPLE,
+      fontWeight: '600'
+    }}>
+      💾 Saving your story...
+    </div>
+  </div>
+)
+
+const StorySavedMessage = () => (
+  <div style={{
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '12px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    textAlign: 'center',
+    zIndex: 1000,
+    maxWidth: '300px',
+    width: '90%'
+  }}>
+    <div style={{
+      fontSize: '1.5rem',
+      marginBottom: '1rem',
+      color: '#10b981'
+    }}>
+      ✅ Story saved safely!
+    </div>
+    <div style={{
+      fontSize: '1.25rem',
+      color: '#6b7280',
+      marginBottom: '1.5rem'
+    }}>
+      🔔 We'll notify you when ready to continue
+    </div>
+    <Link href="/dashboard" style={{
+      display: 'inline-block',
+      backgroundColor: BRAND_PURPLE,
+      color: 'white',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '8px',
+      textDecoration: 'none',
+      fontWeight: '600'
+    }}>
+      Back to Dashboard
+    </Link>
+  </div>
+)
+
+interface WelcomeBackMessageProps {
+  savedStory: SavedStory | null
+  onContinue: () => void
+  onDelete: () => void
+}
+
+const WelcomeBackMessage = ({ savedStory, onContinue, onDelete }: WelcomeBackMessageProps) => (
+  <div style={{
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '12px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    textAlign: 'center',
+    zIndex: 1000,
+    maxWidth: '350px',
+    width: '90%'
+  }}>
+    <div style={{
+      fontSize: '1.5rem',
+      marginBottom: '1rem'
+    }}>
+      👋 Welcome back!
+    </div>
+    <div style={{
+      fontSize: '1.25rem',
+      marginBottom: '1.5rem',
+      color: '#6b7280'
+    }}>
+      📶 Signal improved - continue your story?
+    </div>
+    
+    {savedStory && (
+      <div style={{
+        backgroundColor: '#f9fafb',
+        padding: '1rem',
+        borderRadius: '8px',
+        marginBottom: '1.5rem',
+        fontSize: '0.875rem',
+        color: '#6b7280'
+      }}>
+        {savedStory.location && `📍 From ${savedStory.location}`}
+        <br />
+        {savedStory.storyPreview}
+      </div>
+    )}
+    
+    <div style={{
+      display: 'flex',
+      gap: '1rem',
+      justifyContent: 'center'
+    }}>
+      <button
+        onClick={onContinue}
+        style={{
+          backgroundColor: BRAND_PURPLE,
+          color: 'white',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '8px',
+          border: 'none',
+          fontWeight: '600',
+          cursor: 'pointer',
+          minHeight: '44px'
+        }}
+      >
+        Continue
+      </button>
+      <button
+        onClick={onDelete}
+        style={{
+          backgroundColor: '#6b7280',
+          color: 'white',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '8px',
+          border: 'none',
+          fontWeight: '600',
+          cursor: 'pointer',
+          minHeight: '44px'
+        }}
+      >
+        Later
+      </button>
+    </div>
+  </div>
+)
+
+// MAIN COMPONENT
 export default function QRDistributionHub() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
@@ -100,52 +265,10 @@ export default function QRDistributionHub() {
       }
       
       localStorage.setItem('savedStoryBackup', JSON.stringify(backupData))
-      
-      // Also save to IndexedDB for redundancy
-      await saveToIndexedDB(userData)
-      
       console.log('💾 Story backup saved successfully')
     } catch (error) {
       console.error('❌ Error saving story backup:', error)
     }
-  }
-
-  // IndexedDB backup for redundancy
-  const saveToIndexedDB = (userData: UserData): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('TourismAppBackupDB', 1)
-      
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        if (!db.objectStoreNames.contains('storyBackups')) {
-          db.createObjectStore('storyBackups', { keyPath: 'id' })
-        }
-      }
-      
-      request.onsuccess = () => {
-        const db = request.result
-        const transaction = db.transaction(['storyBackups'], 'readwrite')
-        const store = transaction.objectStore('storyBackups')
-        
-        const backupData = {
-          id: 'currentStory',
-          userData,
-          timestamp: Date.now()
-        }
-        
-        const putRequest = store.put(backupData)
-        putRequest.onsuccess = () => {
-          db.close()
-          resolve()
-        }
-        putRequest.onerror = () => {
-          db.close()
-          reject(putRequest.error)
-        }
-      }
-      
-      request.onerror = () => reject(request.error)
-    })
   }
 
   // Helper for IndexedDB image loading
@@ -171,7 +294,7 @@ export default function QRDistributionHub() {
     })
   }
 
-  // MOBILE-OPTIMIZED CLAUDE API CONTENT GENERATION WITH TIMEOUT
+  // MOBILE-OPTIMIZED CLAUDE API CONTENT GENERATION
   const generateClaudeContent = async (userData: UserData, platform: string): Promise<string> => {
     const isBusinessUser = !!userData.businessType
     
@@ -259,13 +382,8 @@ Generate engaging ${platform} content that shares this story authentically.`
 - Honor kaitiakitanga (environmental guardianship) principles in all content
 
 ${userData.name ? `👤 CONTENT CREATOR: ${userData.name}` : ''}
-${userData.location ? `📍 LOCATION: ${userData.location} ${getLocationContext(userData.location)}` : ''}
+${userData.location ? `📍 LOCATION: ${userData.location}` : ''}
 ${userData.culturalConnection ? `🌱 CULTURAL CONNECTION: ${userData.culturalConnection}` : ''}
-
-${isBusinessUser && userData.businessType ? getBusinessContext(userData.businessType) : getPersonalContext(userData.persona || 'cultural-explorer')}
-
-📱 ${platform.toUpperCase()} PLATFORM OPTIMIZATION:
-${getPlatformOptimization(platform)}
 
 📝 CONTENT REQUIREMENTS:
 - Transform the story into engaging, culturally-intelligent ${platform} content
@@ -274,7 +392,6 @@ ${getPlatformOptimization(platform)}
 - Ensure ALL cultural references are respectful and appropriate
 - Create compelling calls-to-action that drive meaningful engagement
 - Use New Zealand English spelling and terminology (colour, realise, centre, etc.)
-- Include specific location details with proper Māori place names where appropriate
 
 ${userData.audience ? `🎯 PRIMARY TARGET AUDIENCE: ${userData.audience}` : ''}
 ${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
@@ -283,79 +400,6 @@ ${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
 "${userData.story || 'Amazing cultural experience in beautiful Aotearoa New Zealand'}"
 
 🎯 GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
-  }
-
-  // Helper functions for full prompt
-  const getLocationContext = (location: string): string => {
-    const locationLower = location.toLowerCase()
-    
-    if (locationLower.includes('auckland') || locationLower.includes('tāmaki makaurau')) {
-      return '(Tāmaki Makaurau - land of many lovers, traditional home of Ngāti Whātua)'
-    } else if (locationLower.includes('wellington') || locationLower.includes('te whanganui-a-tara')) {
-      return '(Te Whanganui-a-Tara - the great harbour of Tara, traditional home of Taranaki Whānui)'
-    } else if (locationLower.includes('christchurch') || locationLower.includes('ōtautahi')) {
-      return '(Ōtautahi - place of Tautahi, traditional home of Ngāi Tahu)'
-    } else if (locationLower.includes('rotorua')) {
-      return '(Traditional home of Te Arawa iwi, center of Māori culture and geothermal wonders)'
-    } else if (locationLower.includes('queenstown') || locationLower.includes('tāhuna')) {
-      return '(Tāhuna - shallow bay, traditional area of Ngāi Tahu in Central Otago)'
-    }
-    
-    return ''
-  }
-
-  const getBusinessContext = (businessType: string): string => {
-    const businessContexts: { [key: string]: string } = {
-      'visitor-attraction': `🏢 BUSINESS CONTEXT:
-- Business Type: Visitor Attraction
-- Industry Focus: unique cultural experiences and visitor journey
-- Core Expertise: cultural storytelling and heritage preservation`,
-      'accommodation': `🏢 BUSINESS CONTEXT:
-- Business Type: Accommodation
-- Industry Focus: hospitality excellence and guest experience
-- Core Expertise: comfort, service quality, and local connections`,
-      'food-beverage': `🏢 BUSINESS CONTEXT:
-- Business Type: Food & Beverage
-- Industry Focus: culinary journey and local flavors
-- Core Expertise: food quality, local sourcing, and cultural cuisine`
-    }
-    
-    return businessContexts[businessType] || `🏢 BUSINESS CONTEXT: Professional ${businessType.replace('-', ' ')} service provider`
-  }
-
-  const getPersonalContext = (persona: string): string => {
-    const personalContexts: { [key: string]: string } = {
-      'cultural-explorer': `🎭 PERSONAL CONTEXT:
-- Creator Voice: curious and respectful cultural learner
-- Content Focus: deep cultural connections and meaningful experiences`,
-      'adventure-seeker': `🎭 PERSONAL CONTEXT:
-- Creator Voice: enthusiastic and bold experience sharer
-- Content Focus: exciting discoveries and personal challenges`,
-      'content-creator': `🎭 PERSONAL CONTEXT:
-- Creator Voice: creative and engaging digital storyteller
-- Content Focus: visual narratives and shareable moments`
-    }
-    
-    return personalContexts[persona] || personalContexts['cultural-explorer']
-  }
-
-  const getPlatformOptimization = (platform: string): string => {
-    const optimizations: { [key: string]: string } = {
-      'instagram': `- Content Style: visual-first storytelling with engaging captions
-- Target Length: 125-150 words
-- Communication Tone: authentic and inspiring`,
-      'facebook': `- Content Style: community-focused narrative with personal connection
-- Target Length: 150-200 words
-- Communication Tone: conversational and relatable`,
-      'linkedin': `- Content Style: professional storytelling with industry insights
-- Target Length: 200-300 words
-- Communication Tone: authoritative yet personable`,
-      'website': `- Content Style: SEO-optimized informative content
-- Target Length: 200-400 words
-- Communication Tone: professional and trustworthy`
-    }
-    
-    return optimizations[platform] || optimizations['instagram']
   }
 
   const getPlatformLength = (platform: string): string => {
@@ -415,7 +459,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         
         setIsGenerating(false)
         
-        // Hide the "story saved" message after 5 seconds and show dashboard option
+        // Hide the "story saved" message after 5 seconds
         setTimeout(() => {
           setShowStorySaved(false)
         }, 5000)
@@ -611,164 +655,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
     }
   }
 
-  // MOBILE MESSAGE COMPONENTS
-  const SlowConnectionMessage = () => (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      backgroundColor: 'white',
-      padding: '2rem',
-      borderRadius: '12px',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-      textAlign: 'center',
-      zIndex: 1000,
-      maxWidth: '300px',
-      width: '90%'
-    }}>
-      <div style={{
-        fontSize: '1.5rem',
-        marginBottom: '1rem'
-      }}>
-        📶 Slow connection detected
-      </div>
-      <div style={{
-        fontSize: '1.5rem',
-        color: BRAND_PURPLE,
-        fontWeight: '600'
-      }}>
-        💾 Saving your story...
-      </div>
-    </div>
-  )
-
-  const StorySavedMessage = () => (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      backgroundColor: 'white',
-      padding: '2rem',
-      borderRadius: '12px',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-      textAlign: 'center',
-      zIndex: 1000,
-      maxWidth: '300px',
-      width: '90%'
-    }}>
-      <div style={{
-        fontSize: '1.5rem',
-        marginBottom: '1rem',
-        color: '#10b981'
-      }}>
-        ✅ Story saved safely!
-      </div>
-      <div style={{
-        fontSize: '1.25rem',
-        color: '#6b7280',
-        marginBottom: '1.5rem'
-      }}>
-        🔔 We'll notify you when ready to continue
-      </div>
-      <Link href="/dashboard" style={{
-        display: 'inline-block',
-        backgroundColor: BRAND_PURPLE,
-        color: 'white',
-        padding: '0.75rem 1.5rem',
-        borderRadius: '8px',
-        textDecoration: 'none',
-        fontWeight: '600'
-      }}>
-        Back to Dashboard
-      </Link>
-    </div>
-  )
-
-  const WelcomeBackMessage = () => (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      backgroundColor: 'white',
-      padding: '2rem',
-      borderRadius: '12px',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-      textAlign: 'center',
-      zIndex: 1000,
-      maxWidth: '350px',
-      width: '90%'
-    }}>
-      <div style={{
-        fontSize: '1.5rem',
-        marginBottom: '1rem'
-      }}>
-        👋 Welcome back!
-      </div>
-      <div style={{
-        fontSize: '1.25rem',
-        marginBottom: '1.5rem',
-        color: '#6b7280'
-      }}>
-        📶 Signal improved - continue your story?
-      </div>
-      
-      {savedStory && (
-        <div style={{
-          backgroundColor: '#f9fafb',
-          padding: '1rem',
-          borderRadius: '8px',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-          color: '#6b7280'
-        }}>
-          {savedStory.location && `📍 From ${savedStory.location}`}
-          <br />
-          {savedStory.storyPreview}
-        </div>
-      )}
-      
-      <div style={{
-        display: 'flex',
-        gap: '1rem',
-        justifyContent: 'center'
-      }}>
-        <button
-          onClick={handleContinueStory}
-          style={{
-            backgroundColor: BRAND_PURPLE,
-            color: 'white',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '8px',
-            border: 'none',
-            fontWeight: '600',
-            cursor: 'pointer',
-            minHeight: '44px'
-          }}
-        >
-          Continue
-        </button>
-        <button
-          onClick={handleDeleteSavedStory}
-          style={{
-            backgroundColor: '#6b7280',
-            color: 'white',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '8px',
-            border: 'none',
-            fontWeight: '600',
-            cursor: 'pointer',
-            minHeight: '44px'
-          }}
-        >
-          Later
-        </button>
-      </div>
-    </div>
-  )
-
   if (error) {
     return (
       <div style={{
@@ -814,7 +700,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       {/* Mobile Messages */}
       {showSlowConnection && <SlowConnectionMessage />}
       {showStorySaved && <StorySavedMessage />}
-      {showWelcomeBack && <WelcomeBackMessage />}
+      {showWelcomeBack && <WelcomeBackMessage 
+        savedStory={savedStory} 
+        onContinue={handleContinueStory} 
+        onDelete={handleDeleteSavedStory} 
+      />}
       
       {/* Dark overlay when showing messages */}
       {(showSlowConnection || showStorySaved || showWelcomeBack) && (
@@ -829,7 +719,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         }} />
       )}
 
-      {/* Main Content - Rest of your existing component */}
+      {/* Main Content */}
       <div style={{
         maxWidth: '600px',
         margin: '0 auto',
@@ -883,6 +773,46 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
             Your AI-Generated Content
           </h1>
           
+          <div style={{
+            display: 'flex',
+            gap: '0.75rem',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              onClick={generateNewContent}
+              disabled={isGenerating}
+              style={{
+                backgroundColor: isGenerating ? '#9ca3af' : BRAND_ORANGE,
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                fontWeight: '600',
+                cursor: isGenerating ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                minHeight: '44px'
+              }}
+            >
+              ↻ Regenerate
+            </button>
+            <Link href="/dashboard" style={{
+              backgroundColor: '#6b7280',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              Dashboard
+            </Link>
+          </div>
+
           {/* Mobile Platform Limitation Notice */}
           {isMobile && userData?.platforms && userData.platforms.length > 2 && (
             <div style={{
@@ -890,7 +820,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
               padding: '1rem',
               borderRadius: '8px',
               borderLeft: `4px solid ${BRAND_BLUE}`,
-              marginBottom: '1rem'
+              marginTop: '1rem'
             }}>
               <p style={{
                 color: '#0369a1',
@@ -902,6 +832,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
               </p>
             </div>
           )}
+        </div>
 
         {/* Content Area */}
         <div style={{ flex: '1', padding: '1rem' }}>
@@ -984,6 +915,25 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                     padding: '1rem',
                     borderRadius: '8px',
                     marginBottom: '1rem'
+                  }}>
+                    <p style={{
+                      color: '#374151',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                      margin: '0',
+                      fontSize: '0.875rem'
+                    }}>
+                      {item.content}
+                    </p>
+                  </div>
+
+                  {/* Cultural Intelligence Indicator */}
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    borderLeft: '4px solid #10b981'
                   }}>
                     <p style={{
                       fontSize: '0.75rem',
