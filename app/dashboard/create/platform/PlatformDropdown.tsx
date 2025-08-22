@@ -21,6 +21,12 @@ export default function PlatformDropdown({
   selectedPlatforms,
   setSelectedPlatforms,
 }: Props) {
+  export default function PlatformDropdown({
+  platforms,
+  selectedPlatforms,
+  setSelectedPlatforms,
+}: Props) {
+  console.log('Platforms received by dropdown:', platforms) // <-- ADD THIS LINE
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
