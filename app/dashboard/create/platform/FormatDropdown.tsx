@@ -114,7 +114,7 @@ export default function FormatDropdown({
       'Safety & Compliance': '#f59e0b',
       'Other': '#6b7280'
     }
-    return colors[category] || '#6b7280'
+    return colors[category as keyof typeof colors] || '#6b7280'
   }
 
   // 📱 MOBILE RENDER: Native checkboxes with categories
