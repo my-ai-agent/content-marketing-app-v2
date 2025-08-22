@@ -119,7 +119,7 @@ export default function PlatformDropdown({
       'Professional': '#6366f1',
       'Other': '#6b7280'
     }
-    return colors[category] || '#6b7280'
+    return colors[category as keyof typeof colors] || '#6b7280'
   }
 
   // 📱 MOBILE RENDER: Native checkboxes with categories
