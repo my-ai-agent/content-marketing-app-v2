@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import PlatformDropdown, { Platform } from './PlatformDropdown'
 import FormatDropdown, { Format } from './FormatDropdown'
 
@@ -60,8 +61,12 @@ const FORMATS: Format[] = [
 export default function PlatformFormat() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [selectedFormats, setSelectedFormats] = useState<string[]>([])
+  const router = useRouter()
 
   useEffect(() => {
+    // Ensure window is defined for SSR safety
+    if (typeof window === 'undefined') return;
+
     // Get any existing selections
     const existingPlatforms = localStorage.getItem('selectedPlatforms')
     const existingFormats = localStorage.getItem('selectedFormats')
@@ -93,7 +98,7 @@ export default function PlatformFormat() {
     if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
       localStorage.setItem('selectedPlatforms', JSON.stringify(selectedPlatforms))
       localStorage.setItem('selectedFormats', JSON.stringify(selectedFormats))
-      window.location.href = '/dashboard/create/results'
+      router.push('/dashboard/create/results')
     } else {
       alert('Please select at least one platform and one format before continuing.')
     }
@@ -106,7 +111,7 @@ export default function PlatformFormat() {
     
     localStorage.setItem('selectedPlatforms', JSON.stringify(defaultPlatforms))
     localStorage.setItem('selectedFormats', JSON.stringify(defaultFormats))
-    window.location.href = '/dashboard/create/results'
+    router.push('/dashboard/create/results')
   }
 
   // Helper function to get EOTC count
@@ -142,28 +147,7 @@ export default function PlatformFormat() {
       }}>
 
         {/* Step Tracker */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          {[1, 2, 3, 4, 5, 6].map((step) => (
-            <div key={step} style={{ 
-              width: '2rem', 
-              height: '2rem', 
-              borderRadius: '50%', 
-              backgroundColor: step <= 5 ? '#10b981' : '#e5e7eb', 
-              color: step <= 5 ? 'white' : '#9ca3af', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              fontSize: '0.875rem', 
-              fontWeight: '600' 
-            }}>{step}</div>
-          ))}
-        </div>
+        <StepTracker currentStep={5} />
 
         {/* Title */}
         <h1 style={{ 
@@ -227,221 +211,51 @@ export default function PlatformFormat() {
       }}>
 
         {/* Platform Selection */}
-        <div style={{
-          backgroundColor: '#f8fafc',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          maxWidth: '600px',
-          margin: '0 auto 2rem auto'
-        }}>
-          <h3 style={{
-            fontSize: '1.125rem',
-            fontWeight: '600',
-            color: '#374151',
-            marginBottom: '0.5rem'
-          }}>
-            📱 Select Platforms
-          </h3>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            marginBottom: '1rem'
-          }}>
-            Choose <strong>where</strong> you want to distribute your content. Includes social media, websites, marketing materials, and EOTC resources.
-          </p>
-          
+        <Panel
+          title="📱 Select Platforms"
+          description={
+            <>Choose <strong>where</strong> you want to distribute your content. Includes social media, websites, marketing materials, and EOTC resources.</>
+          }
+        >
           <PlatformDropdown
             platforms={PLATFORMS}
             selectedPlatforms={selectedPlatforms}
             setSelectedPlatforms={setSelectedPlatforms}
           />
-        </div>
+        </Panel>
 
         {/* Format Selection */}
-        <div style={{
-          backgroundColor: '#f8fafc',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          maxWidth: '600px',
-          margin: '0 auto 2rem auto'
-        }}>
-          <h3 style={{
-            fontSize: '1.125rem',
-            fontWeight: '600',
-            color: '#374151',
-            marginBottom: '0.5rem'
-          }}>
-            📄 Select Formats
-          </h3>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            marginBottom: '1rem'
-          }}>
-            Choose <strong>how</strong> your content should be written. Content style, tone, and structure for your audience and purpose.
-          </p>
-          
+        <Panel
+          title="📄 Select Formats"
+          description={
+            <>Choose <strong>how</strong> your content should be written. Content style, tone, and structure for your audience and purpose.</>
+          }
+        >
           <FormatDropdown
             formats={FORMATS}
             selectedFormats={selectedFormats}
             setSelectedFormats={setSelectedFormats}
           />
-        </div>
+        </Panel>
 
         {/* EOTC Information Panel */}
-        <div style={{
-          backgroundColor: '#fefce8',
-          border: '2px solid #facc15',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          maxWidth: '600px',
-          margin: '0 auto 2rem auto'
-        }}>
-          <h4 style={{
-            fontSize: '1rem',
-            fontWeight: '600',
-            color: '#a16207',
-            marginBottom: '0.75rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            🎓 Education Outside The Classroom (EOTC)
-          </h4>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#a16207',
-            lineHeight: '1.5',
-            marginBottom: '0.75rem'
-          }}>
-            New Zealand's EOTC market is massive! Select education-focused platforms and formats to create curriculum-aligned content that teachers actually want to use.
-          </p>
-          <div style={{
-            fontSize: '0.75rem',
-            color: '#92400e',
-            backgroundColor: '#fef3c7',
-            padding: '0.5rem',
-            borderRadius: '0.5rem'
-          }}>
-            <strong>💡 Pro Tip:</strong> Combining EOTC formats with social platforms creates content that works for both school bookings AND general tourism marketing.
-          </div>
-        </div>
+        <InfoPanel />
 
         {/* Navigation Buttons */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          gap: '1rem',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-          maxWidth: '600px',
-          margin: '0 auto 2rem auto'
-        }}>
-          <button
-            onClick={handleSkip}
-            style={{
-              padding: '0.75rem 1.5rem',
-              fontSize: '1rem',
-              fontWeight: '500',
-              backgroundColor: 'transparent',
-              color: '#6b7280',
-              border: '2px solid #e5e7eb',
-              borderRadius: '0.75rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#9ca3af'
-              e.currentTarget.style.color = '#374151'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e5e7eb'
-              e.currentTarget.style.color = '#6b7280'
-            }}
-          >
-            Tourism + EOTC Defaults
-          </button>
-
-          <button
-            onClick={handleGenerate}
-            disabled={selectedPlatforms.length === 0 || selectedFormats.length === 0}
-            style={{
-              background: (selectedPlatforms.length > 0 && selectedFormats.length > 0)
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : '#e5e7eb',
-              color: (selectedPlatforms.length > 0 && selectedFormats.length > 0) ? 'white' : '#9ca3af',
-              fontSize: '1.25rem',
-              fontWeight: '700',
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              border: 'none',
-              cursor: (selectedPlatforms.length > 0 && selectedFormats.length > 0) ? 'pointer' : 'not-allowed',
-              boxShadow: (selectedPlatforms.length > 0 && selectedFormats.length > 0) ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedPlatforms.length > 0 && selectedFormats.length > 0) {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
-              }
-            }}
-          >
-            🚀 Generate My Content
-          </button>
-        </div>
+        <NavButtons
+          onSkip={handleSkip}
+          onGenerate={handleGenerate}
+          disableGenerate={selectedPlatforms.length === 0 || selectedFormats.length === 0}
+          canGenerate={selectedPlatforms.length > 0 && selectedFormats.length > 0}
+        />
 
         {/* Content Generation Preview */}
         {selectedPlatforms.length > 0 && selectedFormats.length > 0 && (
-          <div style={{
-            backgroundColor: '#f0f9ff',
-            border: '2px solid #3b82f6',
-            borderRadius: '1rem',
-            padding: '1.5rem',
-            marginBottom: '2rem',
-            maxWidth: '600px',
-            margin: '0 auto 2rem auto'
-          }}>
-            <h4 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#1e40af',
-              marginBottom: '0.75rem'
-            }}>
-              🤖 Content Generation Preview
-            </h4>
-            <p style={{
-              fontSize: '0.875rem',
-              color: '#1e40af',
-              marginBottom: '1rem'
-            }}>
-              AI will create <strong>{selectedPlatforms.length × selectedFormats.length} pieces</strong> of culturally-intelligent content:
-            </p>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#1e3a8a',
-              backgroundColor: '#dbeafe',
-              padding: '0.75rem',
-              borderRadius: '0.5rem'
-            }}>
-              <div><strong>Platforms:</strong> {selectedPlatforms.length} selected</div>
-              <div><strong>Formats:</strong> {selectedFormats.length} selected</div>
-              {hasEOTCContent && (
-                <div style={{ marginTop: '0.5rem', fontWeight: '600' }}>
-                  🎓 Includes EOTC curriculum-aligned content
-                </div>
-              )}
-            </div>
-          </div>
+          <PreviewPanel
+            platforms={selectedPlatforms.length}
+            formats={selectedFormats.length}
+            hasEOTCContent={hasEOTCContent}
+          />
         )}
 
         {/* Logo */}
@@ -492,6 +306,237 @@ export default function PlatformFormat() {
         >
           ← Back to Audience Interests
         </Link>
+      </div>
+    </div>
+  )
+}
+
+// --- Reusable Components for Maintainability ---
+
+function StepTracker({ currentStep }: { currentStep: number }) {
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      gap: '0.5rem', 
+      marginBottom: '1.5rem' 
+    }}>
+      {[1, 2, 3, 4, 5, 6].map((step) => (
+        <div key={step} style={{ 
+          width: '2rem', 
+          height: '2rem', 
+          borderRadius: '50%', 
+          backgroundColor: step <= currentStep ? '#10b981' : '#e5e7eb', 
+          color: step <= currentStep ? 'white' : '#9ca3af', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          fontSize: '0.875rem', 
+          fontWeight: '600' 
+        }}>{step}</div>
+      ))}
+    </div>
+  )
+}
+
+function Panel({ title, description, children }: { title: string, description: React.ReactNode, children: React.ReactNode }) {
+  return (
+    <div style={{
+      backgroundColor: '#f8fafc',
+      borderRadius: '1rem',
+      padding: '1.5rem',
+      marginBottom: '2rem',
+      maxWidth: '600px',
+      margin: '0 auto 2rem auto'
+    }}>
+      <h3 style={{
+        fontSize: '1.125rem',
+        fontWeight: '600',
+        color: '#374151',
+        marginBottom: '0.5rem'
+      }}>
+        {title}
+      </h3>
+      <p style={{
+        fontSize: '0.875rem',
+        color: '#6b7280',
+        marginBottom: '1rem'
+      }}>
+        {description}
+      </p>
+      {children}
+    </div>
+  )
+}
+
+function InfoPanel() {
+  return (
+    <div style={{
+      backgroundColor: '#fefce8',
+      border: '2px solid #facc15',
+      borderRadius: '1rem',
+      padding: '1.5rem',
+      marginBottom: '2rem',
+      maxWidth: '600px',
+      margin: '0 auto 2rem auto'
+    }}>
+      <h4 style={{
+        fontSize: '1rem',
+        fontWeight: '600',
+        color: '#a16207',
+        marginBottom: '0.75rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
+      }}>
+        🎓 Education Outside The Classroom (EOTC)
+      </h4>
+      <p style={{
+        fontSize: '0.875rem',
+        color: '#a16207',
+        lineHeight: '1.5',
+        marginBottom: '0.75rem'
+      }}>
+        New Zealand's EOTC market is massive! Select education-focused platforms and formats to create curriculum-aligned content that teachers actually want to use.
+      </p>
+      <div style={{
+        fontSize: '0.75rem',
+        color: '#92400e',
+        backgroundColor: '#fef3c7',
+        padding: '0.5rem',
+        borderRadius: '0.5rem'
+      }}>
+        <strong>💡 Pro Tip:</strong> Combining EOTC formats with social platforms creates content that works for both school bookings AND general tourism marketing.
+      </div>
+    </div>
+  )
+}
+
+function NavButtons({ onSkip, onGenerate, disableGenerate, canGenerate }: {
+  onSkip: () => void,
+  onGenerate: () => void,
+  disableGenerate: boolean,
+  canGenerate: boolean
+}) {
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      gap: '1rem',
+      marginBottom: '2rem',
+      flexWrap: 'wrap',
+      maxWidth: '600px',
+      margin: '0 auto 2rem auto'
+    }}>
+      <button
+        onClick={onSkip}
+        style={{
+          padding: '0.75rem 1.5rem',
+          fontSize: '1rem',
+          fontWeight: '500',
+          backgroundColor: 'transparent',
+          color: '#6b7280',
+          border: '2px solid #e5e7eb',
+          borderRadius: '0.75rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s'
+        }}
+        aria-label="Use Tourism + EOTC Defaults"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#9ca3af'
+          e.currentTarget.style.color = '#374151'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = '#e5e7eb'
+          e.currentTarget.style.color = '#6b7280'
+        }}
+      >
+        Tourism + EOTC Defaults
+      </button>
+
+      <button
+        onClick={onGenerate}
+        disabled={disableGenerate}
+        style={{
+          background: canGenerate
+            ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
+            : '#e5e7eb',
+          color: canGenerate ? 'white' : '#9ca3af',
+          fontSize: '1.25rem',
+          fontWeight: '700',
+          padding: '1rem 2rem',
+          borderRadius: '1rem',
+          border: 'none',
+          cursor: canGenerate ? 'pointer' : 'not-allowed',
+          boxShadow: canGenerate ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
+          transition: 'all 0.2s'
+        }}
+        aria-label="Generate Content"
+        onMouseEnter={(e) => {
+          if (canGenerate) {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (canGenerate) {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
+          }
+        }}
+      >
+        🚀 Generate My Content
+      </button>
+    </div>
+  )
+}
+
+function PreviewPanel({ platforms, formats, hasEOTCContent }: {
+  platforms: number,
+  formats: number,
+  hasEOTCContent: boolean
+}) {
+  return (
+    <div style={{
+      backgroundColor: '#f0f9ff',
+      border: '2px solid #3b82f6',
+      borderRadius: '1rem',
+      padding: '1.5rem',
+      marginBottom: '2rem',
+      maxWidth: '600px',
+      margin: '0 auto 2rem auto'
+    }}>
+      <h4 style={{
+        fontSize: '1rem',
+        fontWeight: '600',
+        color: '#1e40af',
+        marginBottom: '0.75rem'
+      }}>
+        🤖 Content Generation Preview
+      </h4>
+      <p style={{
+        fontSize: '0.875rem',
+        color: '#1e40af',
+        marginBottom: '1rem'
+      }}>
+        AI will create <strong>{platforms * formats} pieces</strong> of culturally-intelligent content:
+      </p>
+      <div style={{
+        fontSize: '0.75rem',
+        color: '#1e3a8a',
+        backgroundColor: '#dbeafe',
+        padding: '0.75rem',
+        borderRadius: '0.5rem'
+      }}>
+        <div><strong>Platforms:</strong> {platforms} selected</div>
+        <div><strong>Formats:</strong> {formats} selected</div>
+        {hasEOTCContent && (
+          <div style={{ marginTop: '0.5rem', fontWeight: '600' }}>
+            🎓 Includes EOTC curriculum-aligned content
+          </div>
+        )}
       </div>
     </div>
   )
