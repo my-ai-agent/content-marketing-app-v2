@@ -1208,22 +1208,3 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
     </div>
   )
 }
-                      color: '#374151',
-                      lineHeight: '1.5',
-                      whiteSpace: 'pre-wrap',
-                      margin: '0',
-                      fontSize: '0.875rem'
-                    }}>
-                      {item.content}
-                    </p>
-                  </div>
-
-                  {/* Cultural Intelligence Indicator */}
-                  <div style={{
-                    backgroundColor: '#f0fdf4',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    marginBottom: '1rem',
-                    borderLeft: '4px solid #10b981'
-                  }}>
-                    <p style={{
