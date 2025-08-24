@@ -552,7 +552,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
   const loadCurrentSessionData = async () => {
     try {
       const loadCurrentSessionData = async () => {
-  console.log('🔍 Mobile Debug - loadCurrentSessionData started')
+  console.log('🔍 Mobile Debug - loadCurrentSessionData started');
   try {
     console.log('🔍 Mobile Debug - Reading localStorage items...')
     const story = localStorage.getItem('userStoryContext')
@@ -603,20 +603,20 @@ const cleanedFormats = parsedFormats.filter(format =>
         culturalConnection: parsedProfile.pepeha?.culturalBackground
       }
 
-      console.log('Loaded current session data:', userData)
+      console.log('Loaded current session data:', userData);
       setUserData(userData)
     console.log('🔍 Mobile Debug - About to call generateContent with:', userData);
       generateContent(userData)
     } catch (err) {
-      console.error('Error loading current session data:', err)
+      console.error('Error loading current session data:', err);
       setError('Failed to load your content data.')
     }
   }
 
   useEffect(() => {
-  console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack)
+  console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack);
   if (!showWelcomeBack) {
-    console.log('🔍 Mobile Debug - Calling loadCurrentSessionData()')
+    console.log('🔍 Mobile Debug - Calling loadCurrentSessionData()');
     loadCurrentSessionData()
   }
 }, [showWelcomeBack])
