@@ -574,7 +574,12 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
       const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
       const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
-      const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+
+// 🛠️ FIX: Clean up cross-contaminated data
+const cleanedFormats = parsedFormats.filter(format => 
+  !['press-release', 'brochure', 'flyer'].includes(format)
+)
 
       const userData: UserData = {
         photo: photoData ? URL.createObjectURL(photoData) : undefined,
@@ -583,7 +588,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         audience: parsedAudience[0] || 'millennials',
         interests: parsedInterests[0] || 'cultural',
         platforms: parsedPlatforms,
-        formats: parsedFormats,
+        formats: cleanedFormats,
         businessType: parsedProfile.business?.businessType,
         websiteUrl: parsedProfile.business?.websiteUrl,
         name: parsedProfile.profile?.name,
