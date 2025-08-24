@@ -605,7 +605,7 @@ const cleanedFormats = parsedFormats.filter(format =>
 
       console.log('Loaded current session data:', userData)
       setUserData(userData)
-    console.log('🔍 Mobile Debug - About to call generateContent with:', userData)
+    console.log('🔍 Mobile Debug - About to call generateContent with:', userData);
       generateContent(userData)
     } catch (err) {
       console.error('Error loading current session data:', err)
