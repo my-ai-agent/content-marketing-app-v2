@@ -551,6 +551,13 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
   // Load current session data
   const loadCurrentSessionData = async () => {
     try {
+      const loadCurrentSessionData = async () => {
+  console.log('🔍 Mobile Debug - loadCurrentSessionData started')
+  try {
+    console.log('🔍 Mobile Debug - Reading localStorage items...')
+    const story = localStorage.getItem('userStoryContext')
+    const audienceData = localStorage.getItem('selectedDemographics')
+    // ... existing code continues
       const story = localStorage.getItem('userStoryContext')
       const audienceData = localStorage.getItem('selectedDemographics')
       const interests = localStorage.getItem('selectedInterests')
@@ -598,6 +605,7 @@ const cleanedFormats = parsedFormats.filter(format =>
 
       console.log('Loaded current session data:', userData)
       setUserData(userData)
+    console.log('🔍 Mobile Debug - About to call generateContent with:', userData)
       generateContent(userData)
     } catch (err) {
       console.error('Error loading current session data:', err)
@@ -606,10 +614,12 @@ const cleanedFormats = parsedFormats.filter(format =>
   }
 
   useEffect(() => {
-    if (!showWelcomeBack) {
-      loadCurrentSessionData()
-    }
-  }, [showWelcomeBack])
+  console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack)
+  if (!showWelcomeBack) {
+    console.log('🔍 Mobile Debug - Calling loadCurrentSessionData()')
+    loadCurrentSessionData()
+  }
+}, [showWelcomeBack])
 
   const getPlatformTips = (platform: string): string[] => {
     switch (platform) {
