@@ -1102,7 +1102,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           textAlign: 'center'
         }}>
           <Link
-            href="/dashboard/create/platforms"
+            href="/dashboard/create/platform"
             style={{
               color: '#6b7280',
               textDecoration: 'none',
