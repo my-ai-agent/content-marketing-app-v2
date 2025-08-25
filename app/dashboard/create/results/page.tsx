@@ -446,7 +446,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       const slowConnectionTimer = setTimeout(() => {
         console.log('📶 Slow connection detected - showing message')
         setShowSlowConnection(true)
-      }, 30000) // Show slow connection message after 30 seconds
+      }, isMobile ? 45000 : 30000) // 45s mobile, 30s desktop
       
       const saveStoryTimer = setTimeout(async () => {
         console.log('💾 Timeout reached - saving story')
@@ -464,7 +464,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           setShowStorySaved(false)
         }, 5000)
         
-      }, 45000) // Save story after 45 seconds
+      }, isMobile ? 90000 : 45000) // 90s mobile, 45s desktop
       
       setTimeoutTimer(saveStoryTimer)
       
