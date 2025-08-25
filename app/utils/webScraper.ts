@@ -4,6 +4,10 @@
 
 // --- Cache Abstraction with SSR Guard, Fallback, Error Handling ---
 const isBrowser = typeof window !== "undefined";
+const isMobile = typeof window !== 'undefined' && (
+  /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
+  window.innerWidth <= 768
+);
 const inMemoryCache: Record<string, any> = {};
 
 function setCacheItem(key: string, value: any) {
