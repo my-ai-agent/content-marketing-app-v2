@@ -550,68 +550,63 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
 
   // Load current session data
   const loadCurrentSessionData = async () => {
-    try {
-      const loadCurrentSessionData = async () => {
   console.log('🔍 Mobile Debug - loadCurrentSessionData started');
   try {
-    console.log('🔍 Mobile Debug - Reading localStorage items...')
-    const story = localStorage.getItem('userStoryContext')
-    const audienceData = localStorage.getItem('selectedDemographics')
-    // ... existing code continues
-      const story = localStorage.getItem('userStoryContext')
-      const audienceData = localStorage.getItem('selectedDemographics')
-      const interests = localStorage.getItem('selectedInterests')
-      const platforms = localStorage.getItem('selectedPlatforms')
-      const formats = localStorage.getItem('selectedFormats')
-      const profile = localStorage.getItem('userProfile')
+    console.log('🔍 Mobile Debug - Reading localStorage items...');
+    const story = localStorage.getItem('userStoryContext');
+    const audienceData = localStorage.getItem('selectedDemographics');
+    const interests = localStorage.getItem('selectedInterests');
+    const platforms = localStorage.getItem('selectedPlatforms');
+    const formats = localStorage.getItem('selectedFormats');
+    const profile = localStorage.getItem('userProfile');
 
-      let photoData: Blob | null = null
-      try {
-        photoData = await getImageFromIndexedDB('selectedPhoto')
-      } catch (photoErr) {
-        console.log('No photo found in IndexedDB, continuing without photo')
-      }
-
-      if (!story || !audienceData || !platforms) {
-        setError('Missing required content data. Please complete all steps.')
-        return
-      }
-
-      const parsedProfile = profile ? JSON.parse(profile) : {}
-      const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
-      const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
-      const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
-const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
-
-// 🛠️ FIX: Clean up cross-contaminated data
-const cleanedFormats = parsedFormats.filter(format => 
-  !['press-release', 'brochure', 'flyer'].includes(format)
-)
-
-      const userData: UserData = {
-        photo: photoData ? URL.createObjectURL(photoData) : undefined,
-        story,
-        persona: parsedProfile.profile?.role || 'cultural-explorer',
-        audience: parsedAudience[0] || 'millennials',
-        interests: parsedInterests[0] || 'cultural',
-        platforms: parsedPlatforms,
-        formats: cleanedFormats,
-        businessType: parsedProfile.business?.businessType,
-        websiteUrl: parsedProfile.business?.websiteUrl,
-        name: parsedProfile.profile?.name,
-        location: parsedProfile.profile?.location,
-        culturalConnection: parsedProfile.pepeha?.culturalBackground
-      }
-
-      console.log('Loaded current session data:', userData);
-      setUserData(userData)
-    console.log('🔍 Mobile Debug - About to call generateContent with:', userData);
-      generateContent(userData)
-    } catch (err) {
-      console.error('Error loading current session data:', err);
-      setError('Failed to load your content data.')
+    let photoData: Blob | null = null;
+    try {
+      photoData = await getImageFromIndexedDB('selectedPhoto');
+    } catch (photoErr) {
+      console.log('No photo found in IndexedDB, continuing without photo');
     }
+
+    if (!story || !audienceData || !platforms) {
+      setError('Missing required content data. Please complete all steps.');
+      return;
+    }
+
+    const parsedProfile = profile ? JSON.parse(profile) : {};
+    const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials'];
+    const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural'];
+    const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram'];
+    const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post'];
+
+    // 🛠️ FIX: Clean up cross-contaminated data
+    const cleanedFormats = parsedFormats.filter(format =>
+      !['press-release', 'brochure', 'flyer'].includes(format)
+    );
+
+    const userData: UserData = {
+      photo: photoData ? URL.createObjectURL(photoData) : undefined,
+      story,
+      persona: parsedProfile.profile?.role || 'cultural-explorer',
+      audience: parsedAudience[0] || 'millennials',
+      interests: parsedInterests[0] || 'cultural',
+      platforms: parsedPlatforms,
+      formats: cleanedFormats,
+      businessType: parsedProfile.business?.businessType,
+      websiteUrl: parsedProfile.business?.websiteUrl,
+      name: parsedProfile.profile?.name,
+      location: parsedProfile.profile?.location,
+      culturalConnection: parsedProfile.pepeha?.culturalBackground
+    };
+
+    console.log('Loaded current session data:', userData);
+    setUserData(userData);
+    console.log('🔍 Mobile Debug - About to call generateContent with:', userData);
+    generateContent(userData);
+  } catch (err) {
+    console.error('Error loading current session data:', err);
+    setError('Failed to load your content data.');
   }
+};
 
   useEffect(() => {
   console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack);
