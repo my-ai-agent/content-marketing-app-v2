@@ -4,7 +4,6 @@
 
 // --- Cache Abstraction with SSR Guard, Fallback, Error Handling ---
 const isBrowser = typeof window !== "undefined";
-
 const inMemoryCache: Record<string, any> = {};
 
 function setCacheItem(key: string, value: any) {
@@ -41,7 +40,7 @@ function getCacheItem(key: string): any {
 async function fetchWithTimeout(
   resource: RequestInfo,
   options: RequestInit = {},
-  timeout = 20000 // 20s
+  timeout = isMobile ? 40000 : 20000 // 40s mobile, 20s desktop
 ): Promise<Response> {
   return Promise.race([
     fetch(resource, options),
