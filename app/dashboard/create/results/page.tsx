@@ -551,8 +551,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
   // Load current session data
   const loadCurrentSessionData = async () => {
   console.log('🔍 Mobile Debug - loadCurrentSessionData started');
+    alert('🔍 DEBUG 3: loadCurrentSessionData function started'); // ADD THIS LINE
   try {
     console.log('🔍 Mobile Debug - Reading localStorage items...');
+    alert('🔍 DEBUG 4: About to read localStorage'); // AND ADD THIS LINE TOO
     const story = localStorage.getItem('userStoryContext');
     const audienceData = localStorage.getItem('selectedDemographics');
     const interests = localStorage.getItem('selectedInterests');
@@ -610,8 +612,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
 
   useEffect(() => {
   console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack);
+  alert('🔍 DEBUG 1: useEffect triggered - showWelcomeBack is ' + showWelcomeBack); // ADD THIS
   if (!showWelcomeBack) {
     console.log('🔍 Mobile Debug - Calling loadCurrentSessionData()');
+    alert('🔍 DEBUG 2: About to call loadCurrentSessionData()'); // ADD THIS
     loadCurrentSessionData()
   }
 }, [showWelcomeBack])
