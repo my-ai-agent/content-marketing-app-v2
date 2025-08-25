@@ -305,7 +305,7 @@ export default function QRDistributionHub() {
       console.log(`🚀 Generating ${platform} content ${isMobile ? '(Mobile Mode)' : '(Desktop Mode)'}...`)
       
       // MOBILE OPTIMIZATION: Extended timeout and abort controller
-      const timeoutDuration = isMobile ? 45000 : 30000 // 45s for mobile, 30s for desktop
+      const timeoutDuration = isMobile ? 55000 : 30000 // 55s for mobile, 30s for desktop
       const controller = new AbortController()
       const apiTimeoutId = setTimeout(() => controller.abort(), timeoutDuration)
       
