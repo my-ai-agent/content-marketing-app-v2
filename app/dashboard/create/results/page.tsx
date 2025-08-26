@@ -644,9 +644,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       if (isMobile) {
         alert('MOBILE DEBUG: generateContent called successfully');
       }
-    } catch (generateError) {
+    } catch (generateError: unknown) {
       if (isMobile) {
-        alert(`MOBILE ERROR: generateContent failed: ${generateError.message}`);
+        alert(`MOBILE ERROR: generateContent failed: ${generateError instanceof Error ? generateError.message : String(generateError)}`);
       }
       console.error('generateContent failed:', generateError);
       setError('Content generation failed. Please try again.');
