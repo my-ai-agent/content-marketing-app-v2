@@ -599,10 +599,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           }
           
           return blobUrl;
-        } catch (blobError) {
+        } catch (blobError: unknown) {
           // Mobile error surfacing
           if (isMobile) {
-            alert(`MOBILE ERROR: Blob URL creation failed: ${blobError.message}`);
+            alert(`MOBILE ERROR: Blob URL creation failed: ${blobError instanceof Error ? blobError.message : String(blobError)}`);
           }
           console.error('Blob URL creation failed:', blobError);
           return undefined; // Continue without photo
