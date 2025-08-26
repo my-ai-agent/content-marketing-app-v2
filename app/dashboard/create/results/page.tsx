@@ -586,7 +586,29 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
     );
 
     const userData: UserData = {
-      photo: photoData ? URL.createObjectURL(photoData) : undefined,
+      // MOBILE-SAFE PHOTO HANDLING
+      photo: (() => {
+        if (!photoData) return undefined;
+        
+        try {
+          const blobUrl = URL.createObjectURL(photoData);
+          
+          // Mobile debug alert
+          if (isMobile) {
+            alert(`MOBILE DEBUG: Blob URL created successfully`);
+          }
+          
+          return blobUrl;
+        } catch (blobError) {
+          // Mobile error surfacing
+          if (isMobile) {
+            alert(`MOBILE ERROR: Blob URL creation failed: ${blobError.message}`);
+          }
+          console.error('Blob URL creation failed:', blobError);
+          return undefined; // Continue without photo
+        }
+      })(),
+      
       story,
       persona: parsedProfile.profile?.role || 'cultural-explorer',
       audience: parsedAudience[0] || 'millennials',
@@ -599,6 +621,36 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       location: parsedProfile.profile?.location,
       culturalConnection: parsedProfile.pepeha?.culturalBackground
     };
+
+    // MOBILE DEBUG: Validate userData before proceeding
+    if (isMobile) {
+      try {
+        const testJson = JSON.stringify(userData);
+        alert(`MOBILE DEBUG: userData serialization OK, ${testJson.length} chars`);
+      } catch (jsonError) {
+        alert(`MOBILE ERROR: userData serialization failed: ${jsonError.message}`);
+        setError('Mobile data preparation failed. Please try again.');
+        return;
+      }
+    }
+
+    console.log('Loaded current session data:', userData);
+    setUserData(userData);
+    console.log('About to call generateContent with:', userData);
+    
+    // MOBILE DEBUG: Add error handling to generateContent call
+    try {
+      generateContent(userData);
+      if (isMobile) {
+        alert('MOBILE DEBUG: generateContent called successfully');
+      }
+    } catch (generateError) {
+      if (isMobile) {
+        alert(`MOBILE ERROR: generateContent failed: ${generateError.message}`);
+      }
+      console.error('generateContent failed:', generateError);
+      setError('Content generation failed. Please try again.');
+    }
 
     console.log('Loaded current session data:', userData);
     setUserData(userData);
