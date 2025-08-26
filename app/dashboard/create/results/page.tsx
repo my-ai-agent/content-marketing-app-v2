@@ -627,8 +627,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       try {
         const testJson = JSON.stringify(userData);
         alert(`MOBILE DEBUG: userData serialization OK, ${testJson.length} chars`);
-      } catch (jsonError) {
-        alert(`MOBILE ERROR: userData serialization failed: ${jsonError.message}`);
+      } catch (jsonError: unknown) {
+        alert(`MOBILE ERROR: userData serialization failed: ${jsonError instanceof Error ? jsonError.message : String(jsonError)}`);
         setError('Mobile data preparation failed. Please try again.');
         return;
       }
