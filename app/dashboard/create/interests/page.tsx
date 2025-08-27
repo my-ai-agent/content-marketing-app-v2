@@ -7,6 +7,116 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C' 
 const BRAND_BLUE = '#11B3FF'
 
+// Standardized Brand Logo Component
+const BrandLogo = ({ size = 'default', layout = 'inline' }: { size?: 'default' | 'large', layout?: 'stacked' | 'inline' }) => (
+  <div style={{ 
+    display: layout === 'stacked' ? 'block' : 'flex',
+    textAlign: 'center',
+    alignItems: 'center',
+    gap: layout === 'inline' ? '0.25rem' : '0'
+  }}>
+    <span style={{ 
+      color: BRAND_PURPLE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>click</span>
+    <span style={{ 
+      color: BRAND_ORANGE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>speak</span>
+    <span style={{ 
+      color: BRAND_BLUE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>send</span>
+  </div>
+)
+
+// Standardized Primary Button Component
+const PrimaryButton = ({ 
+  onClick, 
+  children, 
+  disabled = false, 
+  size = 'default',
+  style = {} 
+}: { 
+  onClick: () => void
+  children: React.ReactNode
+  disabled?: boolean
+  size?: 'default' | 'large'
+  style?: React.CSSProperties 
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      background: disabled 
+        ? '#e5e7eb' 
+        : `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+      color: disabled ? '#9ca3af' : 'white',
+      padding: size === 'large' ? '1.25rem 2.5rem' : '0.75rem 1.5rem',
+      borderRadius: size === 'large' ? '1rem' : '0.75rem',
+      fontSize: size === 'large' ? '1.25rem' : '1rem',
+      fontWeight: '700',
+      border: 'none',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      boxShadow: disabled ? 'none' : '0 4px 15px rgba(107, 46, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      ...style
+    }}
+    onMouseOver={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.3)'
+      }
+    }}
+    onMouseOut={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.2)'
+      }
+    }}
+  >
+    {children}
+  </button>
+)
+
+// Standardized Step Tracker Component
+const StepTracker = ({ currentStep }: { currentStep: number }) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    gap: '0.5rem', 
+    marginBottom: '1.5rem' 
+  }}>
+    {[1, 2, 3, 4, 5, 6].map((step) => (
+      <div key={step} style={{ 
+        width: '2rem', 
+        height: '2rem', 
+        borderRadius: '50%', 
+        backgroundColor: step <= currentStep ? (step === currentStep ? BRAND_PURPLE : '#10b981') : '#e5e7eb',
+        color: step <= currentStep ? 'white' : '#9ca3af',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: '0.875rem', 
+        fontWeight: '600',
+        transition: 'all 0.3s ease'
+      }}>
+        {step}
+      </div>
+    ))}
+  </div>
+)
+
 const INTERESTS: Interest[] = [
     { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
     { value: 'adventure', label: 'Adventure & Outdoor Activities', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
@@ -70,96 +180,12 @@ export default function Interests() {
         borderBottom: '1px solid #f3f4f6'
       }}>
 
-        {/* Step Tracker */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>1</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>2</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>3</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>4</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>5</div>
-
-         <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>6</div>
-        </div>
+        {/* Standardized Step Tracker */}
+        <StepTracker currentStep={5} />
 
         {/* Title */}
         <h1 style={{ 
-          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+          fontSize: 'clamp(2rem, 6vw, 3rem)', 
           fontWeight: '700',
           color: '#1f2937',
           lineHeight: '1.2',
@@ -212,7 +238,7 @@ export default function Interests() {
             color: '#374151',
             marginBottom: '1rem'
           }}>
-            🎯 Select Primary Interest
+            Select Primary Interest
           </h3>
           <p style={{
             fontSize: '0.875rem',
@@ -245,7 +271,7 @@ export default function Interests() {
             style={{
               padding: '0.75rem 1.5rem',
               fontSize: '1rem',
-              fontWeight: '500',
+              fontWeight: '600',
               backgroundColor: 'transparent',
               color: '#6b7280',
               border: '2px solid #e5e7eb',
@@ -265,38 +291,13 @@ export default function Interests() {
             Skip for now
           </button>
 
-          <button
+          <PrimaryButton
             onClick={handleNext}
             disabled={!selectedInterest}
-            style={{
-              background: selectedInterest 
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : '#e5e7eb',
-              color: selectedInterest ? 'white' : '#9ca3af',
-              fontSize: '1.25rem',
-              fontWeight: '700',
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              border: 'none',
-              cursor: selectedInterest ? 'pointer' : 'not-allowed',
-              boxShadow: selectedInterest ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (selectedInterest) {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedInterest) {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
-              }
-            }}
+            size="large"
           >
             Continue →
-          </button>
+          </PrimaryButton>
         </div>
 
         {/* Logo */}
@@ -306,26 +307,7 @@ export default function Interests() {
           paddingTop: '2rem'
         }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{ 
-              color: BRAND_PURPLE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline'
-            }}>click</div>
-            <div style={{ 
-              color: BRAND_ORANGE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>speak</div>
-            <div style={{ 
-              color: BRAND_BLUE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>send</div>
+            <BrandLogo />
           </Link>
         </div>
       </div>
