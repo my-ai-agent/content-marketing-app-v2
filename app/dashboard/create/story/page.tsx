@@ -231,11 +231,6 @@ export default function TellYourStory() {
         // Detect potential Māori words for clarification
         const potentialWords = detectPotentialMaoriWords(correctedText)
         setPotentialMaoriWords(potentialWords)
-        
-        // Log corrections for debugging
-        if (corrections.length > 0) {
-          console.log('🔧 Applied transcription corrections:', corrections)
-        }
       }
       
       recognition.onerror = () => {
@@ -1278,6 +1273,11 @@ export default function TellYourStory() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.5; }
+          100% { opacity: 1; }
         }
       `}</style>
     </div>
