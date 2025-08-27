@@ -6,27 +6,15 @@ const picaInstance = pica();
 export const calculateDimensions = (originalWidth, originalHeight, maxWidth, maxHeight) => {
   const aspectRatio = originalWidth / originalHeight;
   
-  console.log('🔍 calculateDimensions DEBUG:');
-  console.log('Original:', originalWidth, 'x', originalHeight);
-  console.log('Aspect ratio:', aspectRatio);
-  console.log('Max constraints:', maxWidth, 'x', maxHeight);
-  console.log('Is portrait?', originalHeight > originalWidth);
-  
   let width = maxWidth;
   let height = maxWidth / aspectRatio;
-  
-  console.log('Initial calculation:', width, 'x', height);
   
   if (height > maxHeight) {
     height = maxHeight;
     width = maxHeight * aspectRatio;
-    console.log('Adjusted for maxHeight:', width, 'x', height);
   }
   
-  const result = { width: Math.round(width), height: Math.round(height) };
-  console.log('Final dimensions:', result);
-  
-  return result;
+  return { width: Math.round(width), height: Math.round(height) };
 };
 
 export const processImageWithPica = async (file) => {
@@ -82,9 +70,9 @@ export const processImageWithPica = async (file) => {
           canvas.width = width;
           canvas.height = height;
           
-// 🔧 FIX: Explicitly clear canvas (Copilot's key suggestion)
-const ctx = canvas.getContext('2d');
-ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Explicitly clear canvas
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           
           // Use Pica for mobile-optimized resizing
           await picaInstance.resize(img, canvas, {
@@ -114,18 +102,12 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
                 originalDimensions: { width: img.width, height: img.height }
               };
               
-              console.log('Pica processing successful:', {
-                original: `${(result.originalSize / 1024 / 1024).toFixed(1)}MB`,
-                processed: `${(result.processedSize / 1024).toFixed(0)}KB`,
-                compression: `${result.compressionRatio}%`,
-                size: `${width}x${height}`
-              });
-              
               resolve(result);
-              // Remove debug canvas after processing
-if (canvas.parentNode) {
-  canvas.parentNode.removeChild(canvas);
-}
+              
+              // Clean up canvas
+              if (canvas.parentNode) {
+                canvas.parentNode.removeChild(canvas);
+              }
             };
             
             reader.onerror = () => reject(new Error('Failed to read processed image'));
