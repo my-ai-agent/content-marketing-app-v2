@@ -11,6 +11,12 @@ const BETA_CODES = [
   'WELLNESS2025', 'HERITAGE2025', 'ADVENTURE2025', 'DISCOVER2025', 'AUTHENTIC2025'
 ]
 
+// Mobile detection
+const isMobile = typeof window !== 'undefined' && (
+  /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
+  window.innerWidth <= 768
+)
+
 const businessTypes = {
   'Tourism Business': [
     { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Museums, Theme Parks, Cultural Sites' },
@@ -94,20 +100,62 @@ export default function UnifiedOnboarding() {
     setIsSubmitting(true)
     
     try {
-      const userProfile = {
-        profile: { name, email, location, websiteUrl, linkedInUrl, facebookUrl, instagramUrl, culturalConnection, userType },
+      // MOBILE-SIMPLIFIED DATA COLLECTION
+      const userProfile = isMobile ? {
+        // Mobile: Essential data only
+        profile: { 
+          name, 
+          email, 
+          location, 
+          websiteUrl: websiteUrl || '', // Keep website URL for brand analysis
+          culturalConnection, 
+          userType 
+        },
         business: userType === 'business' ? { category: businessCategory, type: businessType } : null,
         personal: userType === 'personal' ? { persona: personalPersona } : null,
         betaAccess: true,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        deviceType: 'mobile'
+      } : {
+        // Desktop: Full complex data collection
+        profile: { 
+          name, 
+          email, 
+          location, 
+          websiteUrl, 
+          linkedInUrl, 
+          facebookUrl, 
+          instagramUrl, 
+          culturalConnection, 
+          userType 
+        },
+        business: userType === 'business' ? { category: businessCategory, type: businessType } : null,
+        personal: userType === 'personal' ? { persona: personalPersona } : null,
+        betaAccess: true,
+        completedAt: new Date().toISOString(),
+        deviceType: 'desktop'
+      }
+      
+      // Mobile debug
+      if (isMobile) {
+        alert(`MOBILE DEBUG: Simplified profile created - ${Object.keys(userProfile.profile).length} fields`);
       }
       
       localStorage.setItem('userProfile', JSON.stringify(userProfile))
       localStorage.setItem('userToken', 'authenticated')
       localStorage.setItem('userType', userType)
+      
+      // Mobile debug
+      if (isMobile) {
+        alert('MOBILE DEBUG: localStorage operations completed successfully');
+      }
+      
       window.location.href = '/dashboard/create/photo'
     } catch (error) {
       console.error('Failed to save profile:', error)
+      if (isMobile) {
+        alert(`MOBILE ERROR: Profile save failed - ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
       setIsSubmitting(false)
     }
   }
@@ -167,6 +215,13 @@ export default function UnifiedOnboarding() {
         <div style={{ textAlign: 'center', padding: '2rem 0', borderBottom: '1px solid #e5e7eb', marginBottom: '2rem' }}>
           <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: '700', color: '#111827', marginBottom: '0.5rem' }}>Welcome to Click Speak Send</h1>
           <p style={{ color: '#6b7280', fontSize: 'clamp(0.875rem, 2.5vw, 1rem)', margin: '0' }}>Set up your account to create culturally-intelligent content</p>
+          {isMobile && (
+            <div style={{ backgroundColor: '#f0f9ff', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '1rem', border: '1px solid #bae6fd' }}>
+              <p style={{ fontSize: '0.75rem', color: '#0c4a6e', margin: '0' }}>
+                📱 Mobile-optimized setup for faster content creation
+              </p>
+            </div>
+          )}
         </div>
 
         <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -255,46 +310,59 @@ export default function UnifiedOnboarding() {
                 </select>
               )}
               
-              <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginTop: '1rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>🔗 Social Media & Online Presence</h3>
-                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem', lineHeight: '1.4' }}>Add your social media profiles for enhanced brand analysis. We'll analyze your tone, style, and messaging across platforms.</p>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                      <span style={{ color: '#0077b5' }}>💼</span> LinkedIn Profile <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '400' }}>(Recommended)</span>
-                    </label>
-                    <input type="url" value={linkedInUrl} onChange={(e) => setLinkedInUrl(e.target.value)} placeholder="https://linkedin.com/company/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
+              {/* DESKTOP ONLY: Social Media Collection */}
+              {!isMobile && (
+                <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginTop: '1rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>🔗 Social Media & Online Presence</h3>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem', lineHeight: '1.4' }}>Add your social media profiles for enhanced brand analysis. We'll analyze your tone, style, and messaging across platforms.</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                        <span style={{ color: '#0077b5' }}>💼</span> LinkedIn Profile <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '400' }}>(Recommended)</span>
+                      </label>
+                      <input type="url" value={linkedInUrl} onChange={(e) => setLinkedInUrl(e.target.value)} placeholder="https://linkedin.com/company/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                        <span style={{ color: '#1877f2' }}>📘</span> Facebook Page
+                      </label>
+                      <input type="url" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                        <span style={{ color: '#e4405f' }}>📷</span> Instagram Profile
+                      </label>
+                      <input type="url" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
+                    </div>
                   </div>
                   
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                      <span style={{ color: '#1877f2' }}>📘</span> Facebook Page
-                    </label>
-                    <input type="url" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
-                  </div>
-                  
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                      <span style={{ color: '#e4405f' }}>📷</span> Instagram Profile
-                    </label>
-                    <input type="url" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
+                  <div style={{ backgroundColor: '#f0f9ff', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '1rem', border: '1px solid #bae6fd' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#0c4a6e', margin: '0', lineHeight: '1.4' }}>
+                      💡 <strong>Enhanced AI Accuracy:</strong> More platforms = better brand voice analysis = 5x more authentic content
+                    </p>
                   </div>
                 </div>
-                
-                <div style={{ backgroundColor: '#f0f9ff', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '1rem', border: '1px solid #bae6fd' }}>
-                  <p style={{ fontSize: '0.75rem', color: '#0c4a6e', margin: '0', lineHeight: '1.4' }}>
-                    💡 <strong>Enhanced AI Accuracy:</strong> More platforms = better brand voice analysis = 5x more authentic content
+              )}
+
+              {/* MOBILE ONLY: Simplified Message */}
+              {isMobile && (
+                <div style={{ backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #bbf7d0', marginTop: '1rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#166534', marginBottom: '0.5rem' }}>Mobile-Optimized Setup</h3>
+                  <p style={{ fontSize: '0.75rem', color: '#166534', margin: '0', lineHeight: '1.4' }}>
+                    Social media profiles can be added later from desktop for enhanced brand analysis. Mobile setup focuses on essential data for faster content creation.
                   </p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
         {userType === 'personal' && (
           <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>🎭 Choose Your Voice</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>Choose Your Voice</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {personalPersonas.map((persona) => (
                 <div key={persona.id} onClick={() => setPersonalPersona(persona.id)} style={{ display: 'flex', alignItems: 'center', padding: '1rem', border: personalPersona === persona.id ? `2px solid ${BRAND_PURPLE}` : '2px solid #e5e7eb', borderRadius: '0.75rem', backgroundColor: personalPersona === persona.id ? '#f0f9ff' : 'white', cursor: 'pointer' }}>
@@ -320,7 +388,7 @@ export default function UnifiedOnboarding() {
             </label>
           </div>
           <button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} style={{ width: '100%', background: canSubmit ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)` : '#e5e7eb', color: canSubmit ? 'white' : '#9ca3af', fontSize: '1.25rem', fontWeight: '700', padding: '1rem 2rem', borderRadius: '1rem', border: 'none', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
-            {isSubmitting ? 'Setting up your account...' : 'Start Creating →'}
+            {isSubmitting ? (isMobile ? 'Creating mobile profile...' : 'Setting up your account...') : 'Start Creating →'}
           </button>
         </div>
       </div>
