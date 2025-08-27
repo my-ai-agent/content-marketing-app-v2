@@ -1,4 +1,3 @@
-// /app/api/claude/route.ts - FIXED WITH FORMAT INTEGRATION
 import { NextRequest, NextResponse } from 'next/server'
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
@@ -6,7 +5,7 @@ const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
 export async function POST(request: NextRequest) {
   try {
     const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY
-
+    
     if (!CLAUDE_API_KEY || !CLAUDE_API_KEY.startsWith('sk-ant-')) {
       return NextResponse.json(
         { error: 'Claude API key not configured properly' },
@@ -14,11 +13,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Parse request body - NOW INCLUDING FORMATS!
     const body = await request.json()
     const { prompt, platforms, formats, userData } = body
-    //                     ↑        ↑
-    //              NOW CAPTURING BOTH!
 
     if (!prompt) {
       return NextResponse.json(
@@ -27,14 +23,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('🚀 Generating content for:')
-    console.log('📱 Platforms:', platforms)
-    console.log('📝 Formats:', formats)
-    console.log('👤 User story preview:', userData?.story?.substring(0, 50) + '...')
-
-    // Enhanced prompt with BOTH platform AND format data
-    const enhancedPrompt = `
-${prompt}
+    const enhancedPrompt = `${prompt}
 
 PLATFORMS TO OPTIMIZE FOR: ${platforms?.join(', ') || 'Not specified'}
 CONTENT FORMATS REQUESTED: ${formats?.join(', ') || 'Not specified'}
@@ -42,15 +31,14 @@ CONTENT FORMATS REQUESTED: ${formats?.join(', ') || 'Not specified'}
 Please create content optimized for each platform AND in the requested formats.
 For example:
 - If Instagram + Social Post: Create short, hashtag-optimized social post
-- If Website + Blog Article: Create SEO-optimized blog article
+- If Website + Blog Article: Create SEO-optimized blog article  
 - If Email Newsletter: Create email-friendly format with subject line
 
-Ensure each piece of content is specifically tailored for its platform AND format combination.
-`
+Ensure each piece of content is specifically tailored for its platform AND format combination.`
 
     const claudeRequestBody = {
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000, // Increased for multiple formats
+      max_tokens: 2000,
       messages: [{
         role: 'user',
         content: enhancedPrompt
@@ -69,7 +57,7 @@ Ensure each piece of content is specifically tailored for its platform AND forma
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`❌ Claude API error: ${response.status}`, errorText)
+      console.error(`Claude API error: ${response.status}`, errorText)
       return NextResponse.json(
         { error: `Claude API error: ${response.status}`, details: errorText },
         { status: response.status }
@@ -86,12 +74,10 @@ Ensure each piece of content is specifically tailored for its platform AND forma
       )
     }
 
-    console.log('✅ SUCCESS! Generated content for multiple platforms and formats')
-
     return NextResponse.json({
       content: generatedContent,
       platforms,
-      formats, // Now returning format data too
+      formats,
       success: true,
       metadata: {
         contentLength: generatedContent.length,
@@ -102,7 +88,7 @@ Ensure each piece of content is specifically tailored for its platform AND forma
     })
 
   } catch (error) {
-    console.error('❌ Server error:', error)
+    console.error('Server error:', error)
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
