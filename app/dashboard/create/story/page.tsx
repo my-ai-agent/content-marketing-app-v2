@@ -7,6 +7,116 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+// Standardized Brand Logo Component
+const BrandLogo = ({ size = 'default', layout = 'inline' }: { size?: 'default' | 'large', layout?: 'stacked' | 'inline' }) => (
+  <div style={{ 
+    display: layout === 'stacked' ? 'block' : 'flex',
+    textAlign: 'center',
+    alignItems: 'center',
+    gap: layout === 'inline' ? '0.25rem' : '0'
+  }}>
+    <span style={{ 
+      color: BRAND_PURPLE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>click</span>
+    <span style={{ 
+      color: BRAND_ORANGE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>speak</span>
+    <span style={{ 
+      color: BRAND_BLUE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>send</span>
+  </div>
+)
+
+// Standardized Primary Button Component
+const PrimaryButton = ({ 
+  onClick, 
+  children, 
+  disabled = false, 
+  size = 'default',
+  style = {} 
+}: { 
+  onClick: () => void
+  children: React.ReactNode
+  disabled?: boolean
+  size?: 'default' | 'large'
+  style?: React.CSSProperties 
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      background: disabled 
+        ? '#e5e7eb' 
+        : `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+      color: disabled ? '#9ca3af' : 'white',
+      padding: size === 'large' ? '1.25rem 2.5rem' : '0.75rem 1.5rem',
+      borderRadius: size === 'large' ? '1rem' : '0.75rem',
+      fontSize: size === 'large' ? '1.25rem' : '1rem',
+      fontWeight: '700',
+      border: 'none',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      boxShadow: disabled ? 'none' : '0 4px 15px rgba(107, 46, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      ...style
+    }}
+    onMouseOver={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.3)'
+      }
+    }}
+    onMouseOut={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.2)'
+      }
+    }}
+  >
+    {children}
+  </button>
+)
+
+// Standardized Step Tracker Component
+const StepTracker = ({ currentStep }: { currentStep: number }) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    gap: '0.5rem', 
+    marginBottom: '1.5rem' 
+  }}>
+    {[1, 2, 3, 4, 5, 6].map((step) => (
+      <div key={step} style={{ 
+        width: '2rem', 
+        height: '2rem', 
+        borderRadius: '50%', 
+        backgroundColor: step <= currentStep ? (step === currentStep ? BRAND_PURPLE : '#10b981') : '#e5e7eb',
+        color: step <= currentStep ? 'white' : '#9ca3af',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: '0.875rem', 
+        fontWeight: '600',
+        transition: 'all 0.3s ease'
+      }}>
+        {step}
+      </div>
+    ))}
+  </div>
+)
+
 // Story prompts carousel
 const storyPrompts = [
   "Describe this photo in one sentence!",
@@ -371,96 +481,12 @@ export default function TellYourStory() {
         borderBottom: '1px solid #f3f4f6'
       }}>
 
-        {/* Step Tracker */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>1</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>2</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>3</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>4</div>
-          
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>5</div>
-
-          <div style={{ 
-            width: '2rem', 
-            height: '2rem', 
-            borderRadius: '50%', 
-            backgroundColor: '#e5e7eb', 
-            color: '#9ca3af', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.875rem', 
-            fontWeight: '600' 
-          }}>6</div>
-        </div>
+        {/* Standardized Step Tracker */}
+        <StepTracker currentStep={3} />
 
         {/* Title */}
         <h1 style={{ 
-          fontSize: 'clamp(2rem, 6vw, 4rem)', 
+          fontSize: 'clamp(2rem, 6vw, 3rem)', 
           fontWeight: '700',
           color: '#1f2937',
           lineHeight: '1.2',
@@ -519,7 +545,7 @@ export default function TellYourStory() {
             color: '#374151',
             marginBottom: '0.75rem'
           }}>
-            What's the story behind this photo? ✨
+            What's the story behind this photo?
           </label>
 
           {/* Carousel Prompts */}
@@ -543,7 +569,7 @@ export default function TellYourStory() {
               transition: 'opacity 0.5s ease',
               fontStyle: 'italic'
             }}>
-              💡 {storyPrompts[currentPromptIndex]}
+              {storyPrompts[currentPromptIndex]}
             </p>
           </div>
 
@@ -568,7 +594,7 @@ export default function TellYourStory() {
                 transition: 'all 0.2s'
               }}
             >
-              ✍️ Write Your Story
+              Write Your Story
             </button>
             <button
               onClick={() => setInputMethod('speak')}
@@ -585,7 +611,7 @@ export default function TellYourStory() {
                 transition: 'all 0.2s'
               }}
             >
-              🎤 Record Your Story
+              Record Your Story
             </button>
           </div>
 
@@ -649,33 +675,19 @@ export default function TellYourStory() {
                   borderRadius: '0.5rem',
                   animation: 'pulse 1s infinite'
                 }}>
-                  ⏰ Recording ends in {maxRecordingTime - recordingTime} seconds! Perfect length for your story.
+                  Recording ends in {maxRecordingTime - recordingTime} seconds! Perfect length for your story.
                 </div>
               )}
               
-              <button
+              <PrimaryButton
                 onClick={recording ? stopRecording : startRecording}
                 style={{
-                  padding: '1rem 2rem',
-                  borderRadius: '1rem',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  backgroundColor: recording ? '#ef4444' : BRAND_PURPLE,
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: recording ? '0 4px 15px rgba(239, 68, 68, 0.3)' : `0 4px 15px rgba(107, 46, 255, 0.3)`
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
+                  backgroundColor: recording ? '#ef4444' : undefined,
+                  boxShadow: recording ? '0 4px 15px rgba(239, 68, 68, 0.3)' : undefined
                 }}
               >
-                {recording ? '🛑 Stop Recording' : '🎤 Start Recording'}
-              </button>
+                {recording ? 'Stop Recording' : 'Start Recording'}
+              </PrimaryButton>
               
               <p style={{
                 fontSize: '0.875rem',
@@ -738,7 +750,7 @@ export default function TellYourStory() {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                🎤 Review Your Voice-to-Text Story
+                Review Your Voice-to-Text Story
               </h4>
               
               {/* Correction Summary */}
@@ -756,7 +768,7 @@ export default function TellYourStory() {
                     margin: 0,
                     fontWeight: '500'
                   }}>
-                    ✅ Auto-corrected {transcriptionCorrections.length} cultural term(s):
+                    Auto-corrected {transcriptionCorrections.length} cultural term(s):
                   </p>
                   <ul style={{
                     fontSize: '0.75rem',
@@ -792,7 +804,7 @@ export default function TellYourStory() {
                 fontSize: '0.75rem',
                 color: '#64748b'
               }}>
-                💡 Your story will be automatically reviewed for any remaining errors
+                Your story will be automatically reviewed for any remaining errors
               </div>
             </div>
           )}
@@ -822,7 +834,7 @@ export default function TellYourStory() {
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}>
-                  🏛️ Māori Cultural Terms - Please Verify
+                  Māori Cultural Terms - Please Verify
                 </h4>
                 <button
                   onClick={() => setShowMaoriClarification(false)}
@@ -834,7 +846,7 @@ export default function TellYourStory() {
                     color: '#92400e'
                   }}
                 >
-                  ✕
+                  ×
                 </button>
               </div>
               
@@ -931,7 +943,7 @@ export default function TellYourStory() {
             </div>
           )}
 
-          {/* Spell Check Section with Enhanced Instructions */}
+          {/* Spell Check Section */}
           {story && inputMethod === 'write' && (
             <div style={{
               marginTop: '1rem',
@@ -940,7 +952,6 @@ export default function TellYourStory() {
               border: '1px solid #e0f2fe',
               borderRadius: '0.75rem'
             }}>
-              {/* Instruction Text */}
               <div style={{
                 marginBottom: '0.75rem',
                 fontSize: '0.875rem',
@@ -949,64 +960,21 @@ export default function TellYourStory() {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <span>💡</span>
                 <span style={{ fontWeight: '500' }}>
                   Tip: Highlight or select text above to check spelling & grammar
                 </span>
               </div>
               
-              {/* Spell Check Button */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'center'
               }}>
-                <button
+                <PrimaryButton
                   onClick={handleCopilotCheck}
                   disabled={!story.trim() || isCheckingSpelling}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    backgroundColor: story.trim() ? BRAND_PURPLE : '#e5e7eb',
-                    color: story.trim() ? 'white' : '#9ca3af',
-                    border: 'none',
-                    borderRadius: '0.75rem',
-                    cursor: story.trim() ? 'pointer' : 'not-allowed',
-                    transition: 'all 0.2s',
-                    boxShadow: story.trim() ? '0 2px 8px rgba(107, 46, 255, 0.2)' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (story.trim()) {
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(107, 46, 255, 0.3)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (story.trim()) {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(107, 46, 255, 0.2)'
-                    }
-                  }}
                 >
-                  {isCheckingSpelling ? (
-                    <>
-                      <span style={{ 
-                        display: 'inline-block', 
-                        animation: 'spin 1s linear infinite',
-                        fontSize: '1rem'
-                      }}>⏳</span>
-                      Checking...
-                    </>
-                  ) : (
-                    <>
-                      <span>✨</span>
-                      Check Spelling & Grammar
-                    </>
-                  )}
-                </button>
+                  {isCheckingSpelling ? 'Checking...' : 'Check Spelling & Grammar'}
+                </PrimaryButton>
               </div>
             </div>
           )}
@@ -1031,7 +999,7 @@ export default function TellYourStory() {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              ✨ Copilot Suggestions
+              Copilot Suggestions
             </h3>
 
             {copilotSuggestions.suggestions.length > 0 ? (
@@ -1055,7 +1023,7 @@ export default function TellYourStory() {
               </div>
             ) : (
               <p style={{ fontSize: '0.875rem', color: '#10b981', marginBottom: '1rem' }}>
-                ✅ No spelling errors found! Applied some grammar improvements.
+                No spelling errors found! Applied some grammar improvements.
               </p>
             )}
 
@@ -1098,28 +1066,9 @@ export default function TellYourStory() {
               gap: '0.75rem',
               justifyContent: 'center'
             }}>
-              <button
-                onClick={acceptCopilotSuggestions}
-                style={{
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  backgroundColor: BRAND_PURPLE,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#553C9A'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = BRAND_PURPLE
-                }}
-              >
-                ✅ Accept Changes
-              </button>
+              <PrimaryButton onClick={acceptCopilotSuggestions}>
+                Accept Changes
+              </PrimaryButton>
               <button
                 onClick={rejectCopilotSuggestions}
                 style={{
@@ -1164,7 +1113,7 @@ export default function TellYourStory() {
             style={{
               padding: '0.75rem 1.5rem',
               fontSize: '1rem',
-              fontWeight: '500',
+              fontWeight: '600',
               backgroundColor: 'transparent',
               color: '#6b7280',
               border: '2px solid #e5e7eb',
@@ -1184,38 +1133,13 @@ export default function TellYourStory() {
             Skip for now
           </button>
 
-          <button
+          <PrimaryButton
             onClick={handleNext}
             disabled={!story.trim()}
-            style={{
-              background: story.trim()
-                ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`
-                : '#e5e7eb',
-              color: story.trim() ? 'white' : '#9ca3af',
-              fontSize: '1.25rem',
-              fontWeight: '700',
-              padding: '1rem 2rem',
-              borderRadius: '1rem',
-              border: 'none',
-              cursor: story.trim() ? 'pointer' : 'not-allowed',
-              boxShadow: story.trim() ? '0 4px 15px rgba(107, 46, 255, 0.3)' : 'none',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (story.trim()) {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.4)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (story.trim()) {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.3)'
-              }
-            }}
+            size="large"
           >
             Continue →
-          </button>
+          </PrimaryButton>
         </div>
         
         {/* Logo */}
@@ -1225,26 +1149,7 @@ export default function TellYourStory() {
           paddingTop: '2rem'
         }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <div style={{ 
-              color: BRAND_PURPLE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline'
-            }}>click</div>
-            <div style={{ 
-              color: BRAND_ORANGE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>speak</div>
-            <div style={{ 
-              color: BRAND_BLUE, 
-              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
-              fontWeight: '900',
-              display: 'inline',
-              marginLeft: '0.25rem'
-            }}>send</div>
+            <BrandLogo />
           </Link>
         </div>
       </div>
