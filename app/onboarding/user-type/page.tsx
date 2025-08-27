@@ -11,12 +11,6 @@ const BETA_CODES = [
   'WELLNESS2025', 'HERITAGE2025', 'ADVENTURE2025', 'DISCOVER2025', 'AUTHENTIC2025'
 ]
 
-// Mobile detection
-const isMobile = typeof window !== 'undefined' && (
-  /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
-  window.innerWidth <= 768
-)
-
 const businessTypes = {
   'Tourism Business': [
     { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Museums, Theme Parks, Cultural Sites' },
@@ -80,6 +74,12 @@ export default function UnifiedOnboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
+  // Mobile detection with proper error handling
+  const isMobile = typeof window !== 'undefined' && (
+    /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768
+  )
+
   const validateBetaCode = () => {
     const code = betaCode.toUpperCase().trim()
     if (BETA_CODES.includes(code)) {
@@ -100,14 +100,12 @@ export default function UnifiedOnboarding() {
     setIsSubmitting(true)
     
     try {
-      // MOBILE-SIMPLIFIED DATA COLLECTION
       const userProfile = isMobile ? {
-        // Mobile: Essential data only
         profile: { 
           name, 
           email, 
           location, 
-          websiteUrl: websiteUrl || '', // Keep website URL for brand analysis
+          websiteUrl: websiteUrl || '',
           culturalConnection, 
           userType 
         },
@@ -117,7 +115,6 @@ export default function UnifiedOnboarding() {
         completedAt: new Date().toISOString(),
         deviceType: 'mobile'
       } : {
-        // Desktop: Full complex data collection
         profile: { 
           name, 
           email, 
@@ -136,26 +133,13 @@ export default function UnifiedOnboarding() {
         deviceType: 'desktop'
       }
       
-      // Mobile debug
-      if (isMobile) {
-        alert(`MOBILE DEBUG: Simplified profile created - ${Object.keys(userProfile.profile).length} fields`);
-      }
-      
       localStorage.setItem('userProfile', JSON.stringify(userProfile))
       localStorage.setItem('userToken', 'authenticated')
       localStorage.setItem('userType', userType)
       
-      // Mobile debug
-      if (isMobile) {
-        alert('MOBILE DEBUG: localStorage operations completed successfully');
-      }
-      
       window.location.href = '/dashboard/create/photo'
     } catch (error) {
       console.error('Failed to save profile:', error)
-      if (isMobile) {
-        alert(`MOBILE ERROR: Profile save failed - ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
       setIsSubmitting(false)
     }
   }
@@ -172,7 +156,7 @@ export default function UnifiedOnboarding() {
             <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🌟</div>
             <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: '700', color: '#111827', marginBottom: '1rem' }}>Join the Waitlist</h1>
             <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '2rem', lineHeight: '1.6' }}>Click Speak Send is currently in private beta. Join our waitlist to be notified when we launch publicly!</p>
-            <button onClick={() => { alert('Thank you for your interest! We\'ll notify you when Click Speak Send launches.'); window.location.href = '/' }} style={{ background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`, color: 'white', fontSize: '1.125rem', fontWeight: '600', padding: '1rem 2rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer' }}>Join Waitlist</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`, color: 'white', fontSize: '1.125rem', fontWeight: '600', padding: '1rem 2rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer' }}>Join Waitlist</button>
           </div>
         </div>
       </div>
@@ -218,14 +202,14 @@ export default function UnifiedOnboarding() {
           {isMobile && (
             <div style={{ backgroundColor: '#f0f9ff', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '1rem', border: '1px solid #bae6fd' }}>
               <p style={{ fontSize: '0.75rem', color: '#0c4a6e', margin: '0' }}>
-                📱 Mobile-optimized setup for faster content creation
+                Mobile-optimized setup for faster content creation
               </p>
             </div>
           )}
         </div>
 
         <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>👤 Set Up Your Account</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>Set Up Your Account</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Full Name *</label>
@@ -261,7 +245,7 @@ export default function UnifiedOnboarding() {
                 }} 
               />
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                💡 We'll analyze your website to create more authentic, on-brand content
+                We'll analyze your website to create more authentic, on-brand content
               </div>
             </div>
             <div>
@@ -272,14 +256,14 @@ export default function UnifiedOnboarding() {
         </div>
 
         <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>🎯 Select Your Creator Type</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>Select Your Creator Type</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div onClick={() => setUserType('business')} style={{ display: 'flex', alignItems: 'center', padding: '1rem', border: userType === 'business' ? `2px solid ${BRAND_PURPLE}` : '2px solid #e5e7eb', borderRadius: '0.75rem', backgroundColor: userType === 'business' ? '#f0f9ff' : 'white', cursor: 'pointer' }}>
               <div style={{ width: '20px', height: '20px', border: '2px solid #d1d5db', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: userType === 'business' ? BRAND_PURPLE : 'white', borderColor: userType === 'business' ? BRAND_PURPLE : '#d1d5db', marginRight: '1rem' }}>
                 {userType === 'business' && <div style={{ width: '8px', height: '8px', backgroundColor: 'white', borderRadius: '50%' }}></div>}
               </div>
               <div>
-                <div style={{ fontWeight: '600', color: '#111827' }}>🏢 Business Content Creator</div>
+                <div style={{ fontWeight: '600', color: '#111827' }}>Business Content Creator</div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Tourism/Hospitality/Community Business</div>
               </div>
             </div>
@@ -288,7 +272,7 @@ export default function UnifiedOnboarding() {
                 {userType === 'personal' && <div style={{ width: '8px', height: '8px', backgroundColor: 'white', borderRadius: '50%' }}></div>}
               </div>
               <div>
-                <div style={{ fontWeight: '600', color: '#111827' }}>👤 Personal Content Creator</div>
+                <div style={{ fontWeight: '600', color: '#111827' }}>Personal Content Creator</div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Individual Traveller/Content Creator</div>
               </div>
             </div>
@@ -297,7 +281,7 @@ export default function UnifiedOnboarding() {
 
         {userType === 'business' && (
           <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>🏢 Business Details</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>Business Details</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <select value={businessCategory} onChange={(e) => { setBusinessCategory(e.target.value); setBusinessType('') }} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: 'white' }}>
                 <option value="">Select business category...</option>
@@ -310,30 +294,30 @@ export default function UnifiedOnboarding() {
                 </select>
               )}
               
-              {/* DESKTOP ONLY: Social Media Collection */}
               {!isMobile && (
                 <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginTop: '1rem' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>🔗 Social Media & Online Presence</h3>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>Social Media & Online Presence</h3>
                   <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem', lineHeight: '1.4' }}>Add your social media profiles for enhanced brand analysis. We'll analyze your tone, style, and messaging across platforms.</p>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                        <span style={{ color: '#0077b5' }}>💼</span> LinkedIn Profile <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '400' }}>(Recommended)</span>
+                        <span style={{ color: '#0077b5' }}>LinkedIn Profile</span>
+                        <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '400' }}>(Recommended)</span>
                       </label>
                       <input type="url" value={linkedInUrl} onChange={(e) => setLinkedInUrl(e.target.value)} placeholder="https://linkedin.com/company/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
                     </div>
                     
                     <div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                        <span style={{ color: '#1877f2' }}>📘</span> Facebook Page
+                        <span style={{ color: '#1877f2' }}>Facebook Page</span>
                       </label>
                       <input type="url" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
                     </div>
                     
                     <div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                        <span style={{ color: '#e4405f' }}>📷</span> Instagram Profile
+                        <span style={{ color: '#e4405f' }}>Instagram Profile</span>
                       </label>
                       <input type="url" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-business" style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }} />
                     </div>
@@ -341,13 +325,12 @@ export default function UnifiedOnboarding() {
                   
                   <div style={{ backgroundColor: '#f0f9ff', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '1rem', border: '1px solid #bae6fd' }}>
                     <p style={{ fontSize: '0.75rem', color: '#0c4a6e', margin: '0', lineHeight: '1.4' }}>
-                      💡 <strong>Enhanced AI Accuracy:</strong> More platforms = better brand voice analysis = 5x more authentic content
+                      <strong>Enhanced AI Accuracy:</strong> More platforms = better brand voice analysis = 5x more authentic content
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* MOBILE ONLY: Simplified Message */}
               {isMobile && (
                 <div style={{ backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #bbf7d0', marginTop: '1rem' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#166534', marginBottom: '0.5rem' }}>Mobile-Optimized Setup</h3>
@@ -388,7 +371,7 @@ export default function UnifiedOnboarding() {
             </label>
           </div>
           <button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} style={{ width: '100%', background: canSubmit ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)` : '#e5e7eb', color: canSubmit ? 'white' : '#9ca3af', fontSize: '1.25rem', fontWeight: '700', padding: '1rem 2rem', borderRadius: '1rem', border: 'none', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
-            {isSubmitting ? (isMobile ? 'Creating mobile profile...' : 'Setting up your account...') : 'Start Creating →'}
+            {isSubmitting ? 'Setting up your account...' : 'Start Creating'}
           </button>
         </div>
       </div>
