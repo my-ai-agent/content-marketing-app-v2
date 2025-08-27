@@ -38,7 +38,6 @@ interface SavedStory {
   storyPreview?: string
 }
 
-// MOBILE MESSAGE COMPONENTS
 const SlowConnectionMessage = () => (
   <div style={{
     position: 'fixed',
@@ -54,18 +53,15 @@ const SlowConnectionMessage = () => (
     maxWidth: '300px',
     width: '90%'
   }}>
-    <div style={{
-      fontSize: '1.5rem',
-      marginBottom: '1rem'
-    }}>
-      📶 Slow connection detected
+    <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+      Slow connection detected
     </div>
     <div style={{
       fontSize: '1.5rem',
       color: BRAND_PURPLE,
       fontWeight: '600'
     }}>
-      💾 Saving your story...
+      Saving your story...
     </div>
   </div>
 )
@@ -90,14 +86,14 @@ const StorySavedMessage = () => (
       marginBottom: '1rem',
       color: '#10b981'
     }}>
-      ✅ Story saved safely!
+      Story saved safely!
     </div>
     <div style={{
       fontSize: '1.25rem',
       color: '#6b7280',
       marginBottom: '1.5rem'
     }}>
-      🔔 We'll notify you when ready to continue
+      We'll notify you when ready to continue
     </div>
     <Link href="/dashboard" style={{
       display: 'inline-block',
@@ -134,18 +130,15 @@ const WelcomeBackMessage = ({ savedStory, onContinue, onDelete }: WelcomeBackMes
     maxWidth: '350px',
     width: '90%'
   }}>
-    <div style={{
-      fontSize: '1.5rem',
-      marginBottom: '1rem'
-    }}>
-      👋 Welcome back!
+    <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+      Welcome back!
     </div>
     <div style={{
       fontSize: '1.25rem',
       marginBottom: '1.5rem',
       color: '#6b7280'
     }}>
-      📶 Signal improved - continue your story?
+      Signal improved - continue your story?
     </div>
     
     {savedStory && (
@@ -157,7 +150,7 @@ const WelcomeBackMessage = ({ savedStory, onContinue, onDelete }: WelcomeBackMes
         fontSize: '0.875rem',
         color: '#6b7280'
       }}>
-        {savedStory.location && `📍 From ${savedStory.location}`}
+        {savedStory.location && `From ${savedStory.location}`}
         <br />
         {savedStory.storyPreview}
       </div>
@@ -202,7 +195,6 @@ const WelcomeBackMessage = ({ savedStory, onContinue, onDelete }: WelcomeBackMes
   </div>
 )
 
-// MAIN COMPONENT
 export default function QRDistributionHub() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
@@ -210,7 +202,6 @@ export default function QRDistributionHub() {
   const [error, setError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   
-  // Backup system states
   const [showSlowConnection, setShowSlowConnection] = useState(false)
   const [showStorySaved, setShowStorySaved] = useState(false)
   const [showWelcomeBack, setShowWelcomeBack] = useState(false)
@@ -219,44 +210,32 @@ export default function QRDistributionHub() {
   
   useEffect(() => {
     const checkMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase()
-      const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
-      return mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
-             window.innerWidth <= 768 ||
-             ('ontouchstart' in window)
+      return window.innerWidth <= 768 || 
+             /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent)
     }
     setIsMobile(checkMobile())
 
-    // MOBILE vs DESKTOP LOADING STRATEGY
     if (checkMobile()) {
-      // MOBILE: Simplified approach - bypass saved story check
       loadMobileSimplifiedData()
     } else {
-      // DESKTOP: Keep complex approach with saved story check
       checkForSavedStory()
     }
   }, [])
 
-  // BACKUP SYSTEM: Check for existing saved story (DESKTOP ONLY)
   const checkForSavedStory = () => {
     try {
       const saved = localStorage.getItem('savedStoryBackup')
       if (saved) {
         const savedData: SavedStory = JSON.parse(saved)
-        
-        // Check if story is less than 24 hours old
         const hoursSinceBackup = (Date.now() - savedData.timestamp) / (1000 * 60 * 60)
         if (hoursSinceBackup < 24) {
           setSavedStory(savedData)
           setShowWelcomeBack(true)
           return
         } else {
-          // Clean up expired backup
           localStorage.removeItem('savedStoryBackup')
         }
       }
-      
-      // If no saved story, load current session data
       loadDesktopComplexData()
     } catch (error) {
       console.error('Error checking for saved story:', error)
@@ -264,7 +243,6 @@ export default function QRDistributionHub() {
     }
   }
 
-  // BACKUP SYSTEM: Save story data
   const saveStoryBackup = async (userData: UserData) => {
     try {
       const backupData: SavedStory = {
@@ -273,15 +251,12 @@ export default function QRDistributionHub() {
         location: userData.location,
         storyPreview: userData.story?.substring(0, 50) + '...'
       }
-      
       localStorage.setItem('savedStoryBackup', JSON.stringify(backupData))
-      console.log('💾 Story backup saved successfully')
     } catch (error) {
-      console.error('❌ Error saving story backup:', error)
+      console.error('Error saving story backup:', error)
     }
   }
 
-  // Helper for IndexedDB image loading (DESKTOP ONLY)
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open('PhotoAppDB', 1)
@@ -304,12 +279,8 @@ export default function QRDistributionHub() {
     })
   }
 
-  // MOBILE: Simplified data loading - minimal processing
   const loadMobileSimplifiedData = async () => {
     try {
-      console.log('📱 Mobile simplified loading...')
-      
-      // Only essential localStorage reads for mobile
       const story = localStorage.getItem('userStoryContext')
       const audienceData = localStorage.getItem('selectedDemographics')
       const platforms = localStorage.getItem('selectedPlatforms')
@@ -319,37 +290,28 @@ export default function QRDistributionHub() {
         return
       }
       
-      // Simple parsing - no complex profile processing
       const parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
       const parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
       
-      // Mobile-optimized userData - essential fields only
       const mobileUserData: UserData = {
         story: story,
         audience: parsedAudience[0] || 'millennials',
-        platforms: parsedPlatforms.slice(0, 2), // Limit to 2 platforms
-        formats: ['social-post'], // Single format for mobile
-        location: 'New Zealand', // Default location
-        // Skip: photo, businessType, websiteUrl, social URLs, complex profile data
+        platforms: parsedPlatforms.slice(0, 2),
+        formats: ['social-post'],
+        location: 'New Zealand'
       }
       
-      console.log('📱 Mobile data loaded successfully:', mobileUserData)
       setUserData(mobileUserData)
-      
-      // Generate content immediately with simplified data
       await generateContent(mobileUserData)
       
     } catch (error) {
-      console.error('❌ Mobile loading error:', error)
+      console.error('Mobile loading error:', error)
       setError('Failed to load your story. Please try again.')
     }
   }
 
-  // DESKTOP: Complex data loading - full feature set
   const loadDesktopComplexData = async () => {
     try {
-      console.log('💻 Desktop complex loading...')
-      
       const story = localStorage.getItem('userStoryContext')
       const audienceData = localStorage.getItem('selectedDemographics')
       const interests = localStorage.getItem('selectedInterests')
@@ -357,12 +319,11 @@ export default function QRDistributionHub() {
       const formats = localStorage.getItem('selectedFormats')
       const profile = localStorage.getItem('userProfile')
 
-      // Photo processing only for desktop
       let photoData: Blob | null = null
       try {
         photoData = await getImageFromIndexedDB('selectedPhoto')
-      } catch (photoErr) {
-        console.log('No photo found in IndexedDB, continuing without photo')
+      } catch (error) {
+        // Continue without photo if unavailable
       }
 
       if (!story || !audienceData || !platforms) {
@@ -380,7 +341,6 @@ export default function QRDistributionHub() {
         !['press-release', 'brochure', 'flyer'].includes(format)
       )
 
-      // Full desktop userData with all complex fields
       const desktopUserData: UserData = {
         photo: photoData ? URL.createObjectURL(photoData) : undefined,
         story,
@@ -396,29 +356,23 @@ export default function QRDistributionHub() {
         culturalConnection: parsedProfile.pepeha?.culturalBackground
       }
 
-      console.log('💻 Desktop data loaded successfully:', desktopUserData)
       setUserData(desktopUserData)
       await generateContent(desktopUserData)
       
     } catch (error) {
-      console.error('❌ Desktop loading error:', error)
+      console.error('Desktop loading error:', error)
       setError('Failed to load your content data.')
     }
   }
 
-  // CLAUDE API CONTENT GENERATION - Mobile/Desktop Optimized
   const generateClaudeContent = async (userData: UserData, platform: string): Promise<string> => {
     const isBusinessUser = !!userData.businessType
     
     try {
-      console.log(`🚀 Generating ${platform} content ${isMobile ? '(Mobile Mode)' : '(Desktop Mode)'}...`)
-      
-      // Different timeouts for mobile vs desktop
       const timeoutDuration = isMobile ? 45000 : 30000
       const controller = new AbortController()
       const apiTimeoutId = setTimeout(() => controller.abort(), timeoutDuration)
       
-      // Simplified payload for mobile, full payload for desktop
       const payload = isMobile ? {
         prompt: getMobileOptimizedPrompt(userData, platform, isBusinessUser),
         platforms: [platform],
@@ -426,21 +380,18 @@ export default function QRDistributionHub() {
         userData: {
           story: userData.story,
           audience: userData.audience,
-          location: userData.location,
-          // Minimal fields for mobile
+          location: userData.location
         }
       } : {
         prompt: getFullPrompt(userData, platform, isBusinessUser),
         platforms: [platform],
         formats: userData.formats ? userData.formats.slice(0, 3) : ['social-post'],
-        userData: userData // Full complex object for desktop
+        userData: userData
       }
 
       const response = await fetch('/api/claude', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         signal: controller.signal
       })
@@ -452,15 +403,12 @@ export default function QRDistributionHub() {
       }
 
       const data = await response.json()
-      console.log(`✅ Successfully generated ${platform} content`)
       return data.content || getFallbackContent(platform, userData)
       
     } catch (error) {
-      console.error(`❌ Error generating Claude content for ${platform}:`, error)
+      console.error(`Error generating Claude content for ${platform}:`, error)
       
-      // Mobile: Use fallback instead of throwing error
       if (isMobile) {
-        console.log('📱 Mobile: Using fallback content due to API error')
         return getFallbackContent(platform, userData)
       }
       
@@ -468,7 +416,6 @@ export default function QRDistributionHub() {
     }
   }
 
-  // MOBILE-OPTIMIZED PROMPTS (Shorter, simpler)
   const getMobileOptimizedPrompt = (userData: UserData, platform: string, isBusinessUser: boolean): string => {
     return `Create ${platform} content for ${isBusinessUser ? 'tourism business' : 'cultural explorer'} in New Zealand.
 
@@ -487,11 +434,10 @@ Requirements:
 Generate engaging ${platform} content that shares this story authentically.`
   }
 
-  // FULL DESKTOP PROMPT (Keep existing detailed version)
   const getFullPrompt = (userData: UserData, platform: string, isBusinessUser: boolean): string => {
-    return `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content
+    return `ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content
 
-🌿 CULTURAL INTELLIGENCE FRAMEWORK:
+CULTURAL INTELLIGENCE FRAMEWORK:
 - ALWAYS respect Te Tiriti o Waitangi principles and Māori cultural protocols
 - Use appropriate cultural terminology and iwi acknowledgments for specific locations
 - NEVER appropriate sacred or restricted cultural elements (tapu, whakapapa, karakia)  
@@ -499,11 +445,11 @@ Generate engaging ${platform} content that shares this story authentically.`
 - Include proper place name pronunciations and cultural context
 - Honor kaitiakitanga (environmental guardianship) principles in all content
 
-${userData.name ? `👤 CONTENT CREATOR: ${userData.name}` : ''}
-${userData.location ? `📍 LOCATION: ${userData.location}` : ''}
-${userData.culturalConnection ? `🌱 CULTURAL CONNECTION: ${userData.culturalConnection}` : ''}
+${userData.name ? `CONTENT CREATOR: ${userData.name}` : ''}
+${userData.location ? `LOCATION: ${userData.location}` : ''}
+${userData.culturalConnection ? `CULTURAL CONNECTION: ${userData.culturalConnection}` : ''}
 
-📝 CONTENT REQUIREMENTS:
+CONTENT REQUIREMENTS:
 - Transform the story into engaging, culturally-intelligent ${platform} content
 - Maintain authentic voice while optimizing for ${platform} algorithms  
 - Include relevant iwi acknowledgments and cultural context for the location
@@ -511,13 +457,13 @@ ${userData.culturalConnection ? `🌱 CULTURAL CONNECTION: ${userData.culturalCo
 - Create compelling calls-to-action that drive meaningful engagement
 - Use New Zealand English spelling and terminology (colour, realise, centre, etc.)
 
-${userData.audience ? `🎯 PRIMARY TARGET AUDIENCE: ${userData.audience}` : ''}
-${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
+${userData.audience ? `PRIMARY TARGET AUDIENCE: ${userData.audience}` : ''}
+${userData.interests ? `AUDIENCE INTERESTS: ${userData.interests}` : ''}
 
-📖 ORIGINAL STORY TO TRANSFORM:
+ORIGINAL STORY TO TRANSFORM:
 "${userData.story || 'Amazing cultural experience in beautiful Aotearoa New Zealand'}"
 
-🎯 GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
+GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
   }
 
   const getPlatformLength = (platform: string): string => {
@@ -530,17 +476,15 @@ ${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
     return lengths[platform] || '125-150 words'
   }
 
-  // Fallback content
   const getFallbackContent = (platform: string, userData: UserData): string => {
     const story = userData.story || "Amazing experience in beautiful Aotearoa"
     const location = userData.location || "New Zealand"
     
-    return `🌟 ${story}
+    return `${story}
 
 Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #CulturalTourism #${location.replace(/\s+/g, '')}`
   }
 
-  // MAIN GENERATION FUNCTION - Mobile/Desktop Optimized
   const generateContent = async (userData: UserData) => {
     try {
       setIsGenerating(true)
@@ -549,25 +493,18 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       setShowSlowConnection(false)
       setShowStorySaved(false)
       
-      // Platform optimization based on device
       let platforms = userData.platforms || ['instagram']
       if (isMobile && platforms.length > 2) {
-        platforms = platforms.slice(0, 2) // Mobile: limit to 2 platforms
-        console.log('📱 Mobile Mode: Limited to 2 platforms for optimal performance')
+        platforms = platforms.slice(0, 2)
       }
       
       const generatedResults: GeneratedContent[] = []
       
-      console.log(`🚀 Starting content generation for platforms: ${platforms} ${isMobile ? '(Mobile Mode)' : '(Desktop Mode)'}`)
-      
-      // Timeout handling - more generous for mobile
       const slowConnectionTimer = setTimeout(() => {
-        console.log('📶 Slow connection detected - showing message')
         setShowSlowConnection(true)
       }, isMobile ? 30000 : 20000)
       
       const saveStoryTimer = setTimeout(async () => {
-        console.log('💾 Timeout reached - saving story')
         clearTimeout(slowConnectionTimer)
         setShowSlowConnection(false)
         setShowStorySaved(true)
@@ -583,12 +520,9 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       
       setTimeoutTimer(saveStoryTimer)
       
-      // Sequential processing for stability
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i]
         try {
-          console.log(`📝 Generating content for ${platform}... (${i + 1}/${platforms.length})`)
-          
           const content = await generateClaudeContent(userData, platform)
           const qrCode = generateQRCode(content)
           const tips = getPlatformTips(platform)
@@ -607,17 +541,13 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           generatedResults.push(result)
           setGeneratedContent([...generatedResults])
           
-          console.log(`✅ ${platform} content generated successfully`)
-          
-          // Small delay between generations for stability
           if (i < platforms.length - 1) {
             await new Promise(resolve => setTimeout(resolve, isMobile ? 2000 : 1000))
           }
           
         } catch (error) {
-          console.error(`❌ Error generating ${platform} content:`, error)
+          console.error(`Error generating ${platform} content:`, error)
           
-          // Continue with fallback content instead of failing completely
           const fallbackResult: GeneratedContent = {
             platform: platform.charAt(0).toUpperCase() + platform.slice(1),
             content: getFallbackContent(platform, userData),
@@ -633,19 +563,15 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         }
       }
       
-      // Clear timers on completion
       clearTimeout(slowConnectionTimer)
       clearTimeout(saveStoryTimer)
       
-      console.log(`✅ Content generation complete! ${generatedResults.length}/${platforms.length} platforms successful`)
       setIsGenerating(false)
       setShowSlowConnection(false)
-      
-      // Clear backup on success
       localStorage.removeItem('savedStoryBackup')
       
     } catch (error) {
-      console.error('❌ Error in generateContent:', error)
+      console.error('Error in generateContent:', error)
       setError('Failed to generate content. Please try again.')
       setIsGenerating(false)
       
@@ -655,7 +581,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
     }
   }
 
-  // HANDLE WELCOME BACK ACTIONS (DESKTOP ONLY)
   const handleContinueStory = () => {
     if (savedStory) {
       setShowWelcomeBack(false)
@@ -760,11 +685,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb'
-    }}>
-      {/* Mobile Messages */}
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {showSlowConnection && <SlowConnectionMessage />}
       {showStorySaved && <StorySavedMessage />}
       {showWelcomeBack && <WelcomeBackMessage 
@@ -773,7 +694,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         onDelete={handleDeleteSavedStory} 
       />}
       
-      {/* Dark overlay when showing messages */}
       {(showSlowConnection || showStorySaved || showWelcomeBack) && (
         <div style={{
           position: 'fixed',
@@ -786,7 +706,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         }} />
       )}
 
-      {/* Main Content */}
       <div style={{
         maxWidth: '600px',
         margin: '0 auto',
@@ -798,13 +717,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         opacity: (showSlowConnection || showStorySaved || showWelcomeBack) ? 0.3 : 1
       }}>
         
-        {/* Header with Step Tracker */}
         <div style={{
           padding: '2rem 1rem',
           borderBottom: '1px solid #f3f4f6',
           textAlign: 'center'
         }}>
-          {/* Step Tracker */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
@@ -861,7 +778,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                 minHeight: '44px'
               }}
             >
-              ↻ Regenerate
+              Regenerate
             </button>
             <Link href="/dashboard" style={{
               backgroundColor: '#6b7280',
@@ -880,7 +797,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
             </Link>
           </div>
 
-          {/* Mobile Platform Limitation Notice */}
           {isMobile && userData?.platforms && userData.platforms.length > 2 && (
             <div style={{
               backgroundColor: '#f0f9ff',
@@ -895,21 +811,16 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                 margin: '0',
                 fontWeight: '500'
               }}>
-                📱 Mobile Optimization: Generating content for your top 2 platforms for optimal performance
+                Mobile Optimization: Generating content for your top 2 platforms for optimal performance
               </p>
             </div>
           )}
         </div>
 
-        {/* Content Area */}
         <div style={{ flex: '1', padding: '1rem' }}>
           
-          {/* Loading State */}
           {isGenerating && (
-            <div style={{
-              textAlign: 'center',
-              padding: '3rem 1rem'
-            }}>
+            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
               <div style={{
                 width: '60px',
                 height: '60px',
@@ -924,7 +835,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                 marginBottom: '1rem',
                 fontSize: '1.25rem'
               }}>
-                🤖 Claude AI Creating Your Cultural Content
+                Claude AI Creating Your Cultural Content
               </h2>
               <p style={{ 
                 color: '#6b7280', 
@@ -936,7 +847,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
             </div>
           )}
 
-          {/* Generated Content Results */}
           {!isGenerating && generatedContent.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {generatedContent.map((item, index) => (
@@ -947,7 +857,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                   border: '1px solid #e5e7eb'
                 }}>
-                  {/* Platform Header */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -962,7 +871,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                       color: '#111827',
                       margin: '0'
                     }}>
-                      🤖 {item.platform} (Claude AI)
+                      {item.platform} (Claude AI)
                     </h3>
                     <div style={{
                       backgroundColor: '#10b981',
@@ -976,7 +885,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                     </div>
                   </div>
 
-                  {/* Generated Content */}
                   <div style={{
                     backgroundColor: '#f9fafb',
                     padding: '1rem',
@@ -994,7 +902,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                     </p>
                   </div>
 
-                  {/* Cultural Intelligence Indicator */}
                   <div style={{
                     backgroundColor: '#f0fdf4',
                     padding: '0.75rem',
@@ -1008,11 +915,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                       margin: '0',
                       fontWeight: '500'
                     }}>
-                      ✅ Cultural Intelligence: {item.culturalAuthenticity} | Brand Consistency: {item.brandConsistency}
+                      Cultural Intelligence: {item.culturalAuthenticity} | Brand Consistency: {item.brandConsistency}
                     </p>
                   </div>
 
-                  {/* QR Code */}
                   <div style={{
                     textAlign: 'center',
                     marginBottom: '1rem'
@@ -1037,7 +943,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                     </p>
                   </div>
 
-                  {/* Action Buttons */}
                   <div style={{
                     display: 'flex',
                     gap: '0.5rem',
@@ -1059,7 +964,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                         minHeight: '44px'
                       }}
                     >
-                      📋 Copy Content
+                      Copy Content
                     </button>
                     <button
                       onClick={() => downloadQRCode(item.qrCode, item.platform)}
@@ -1076,11 +981,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                         minHeight: '44px'
                       }}
                     >
-                      ⬇️ Download QR
+                      Download QR
                     </button>
                   </div>
 
-                  {/* Platform Tips */}
                   <div style={{
                     backgroundColor: '#fef3c7',
                     padding: '1rem',
@@ -1094,7 +998,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                       marginBottom: '0.5rem',
                       margin: '0 0 0.5rem 0'
                     }}>
-                      💡 {item.platform} Tips:
+                      {item.platform} Tips:
                     </h4>
                     <ul style={{
                       fontSize: '0.75rem',
@@ -1111,25 +1015,20 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                     </ul>
                   </div>
 
-                  {/* Optimal Time */}
                   <div style={{
                     textAlign: 'center',
                     fontSize: '0.75rem',
                     color: '#6b7280'
                   }}>
-                    <strong>⏰ Best posting time:</strong> {item.optimalTime}
+                    <strong>Best posting time:</strong> {item.optimalTime}
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* No Results & Not Generating */}
           {!isGenerating && generatedContent.length === 0 && !showSlowConnection && !showStorySaved && !showWelcomeBack && (
-            <div style={{
-              textAlign: 'center',
-              padding: '3rem 1rem'
-            }}>
+            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
               <h2 style={{ 
                 color: '#6b7280', 
                 marginBottom: '1rem',
@@ -1148,7 +1047,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           )}
         </div>
 
-        {/* Footer Navigation */}
         <div style={{
           padding: '1.5rem',
           borderTop: '1px solid #f3f4f6',
@@ -1168,11 +1066,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
               padding: '0.5rem'
             }}
           >
-            ← Back to Platform Selection
+            Back to Platform Selection
           </Link>
         </div>
 
-        {/* Footer Logo */}
         <div style={{
           textAlign: 'center',
           padding: '1rem',
@@ -1203,7 +1100,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         </div>
       </div>
 
-      {/* CSS Animation */}
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
