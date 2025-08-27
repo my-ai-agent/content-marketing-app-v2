@@ -6,6 +6,87 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+// Standardized Brand Logo Component
+const BrandLogo = ({ size = 'default', layout = 'inline' }: { size?: 'default' | 'large', layout?: 'stacked' | 'inline' }) => (
+  <div style={{ 
+    display: layout === 'stacked' ? 'block' : 'flex',
+    textAlign: 'center',
+    alignItems: 'center',
+    gap: layout === 'inline' ? '0.25rem' : '0'
+  }}>
+    <span style={{ 
+      color: BRAND_PURPLE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>click</span>
+    <span style={{ 
+      color: BRAND_ORANGE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>speak</span>
+    <span style={{ 
+      color: BRAND_BLUE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>send</span>
+  </div>
+)
+
+// Standardized Primary Button Component
+const PrimaryButton = ({ 
+  onClick, 
+  children, 
+  disabled = false, 
+  size = 'default',
+  style = {} 
+}: { 
+  onClick: () => void
+  children: React.ReactNode
+  disabled?: boolean
+  size?: 'default' | 'large'
+  style?: React.CSSProperties 
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      background: disabled 
+        ? '#e5e7eb' 
+        : `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+      color: disabled ? '#9ca3af' : 'white',
+      padding: size === 'large' ? '1.25rem 2.5rem' : '0.75rem 1.5rem',
+      borderRadius: size === 'large' ? '1rem' : '0.75rem',
+      fontSize: size === 'large' ? '1.25rem' : '1rem',
+      fontWeight: '700',
+      border: 'none',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      boxShadow: disabled ? 'none' : '0 4px 15px rgba(107, 46, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      ...style
+    }}
+    onMouseOver={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.3)'
+      }
+    }}
+    onMouseOut={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.2)'
+      }
+    }}
+  >
+    {children}
+  </button>
+)
+
 const BETA_CODES = [
   'CULTURAL2025', 'MAORI2025', 'TOURISM2025', 'KAITIAKI2025', 'AOTEAROA2025',
   'WELLNESS2025', 'HERITAGE2025', 'ADVENTURE2025', 'DISCOVER2025', 'AUTHENTIC2025'
@@ -33,11 +114,11 @@ const businessTypes = {
 }
 
 const personalPersonas = [
-  { id: 'cultural-explorer', title: 'Cultural Explorer', description: 'Heritage & tradition focused', emoji: '🪶' },
-  { id: 'adventure-seeker', title: 'Adventure Seeker', description: 'Active & outdoor focused', emoji: '🌟' },
-  { id: 'content-creator', title: 'Content Creator', description: 'Social media & blog creator', emoji: '📱' },
-  { id: 'family-storyteller', title: 'Family Storyteller', description: 'Multi-generational experiences', emoji: '👨‍👩‍👧‍👦' },
-  { id: 'independent-traveller', title: 'Independent Traveller', description: 'Personal experience sharer', emoji: '🎒' }
+  { id: 'cultural-explorer', title: 'Cultural Explorer', description: 'Heritage & tradition focused' },
+  { id: 'adventure-seeker', title: 'Adventure Seeker', description: 'Active & outdoor focused' },
+  { id: 'content-creator', title: 'Content Creator', description: 'Social media & blog creator' },
+  { id: 'family-storyteller', title: 'Family Storyteller', description: 'Multi-generational experiences' },
+  { id: 'independent-traveller', title: 'Independent Traveller', description: 'Personal experience sharer' }
 ]
 
 const nzLocations = [
@@ -74,7 +155,7 @@ export default function UnifiedOnboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
-  // Mobile detection with proper error handling
+  // Mobile detection
   const isMobile = typeof window !== 'undefined' && (
     /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
     window.innerWidth <= 768
@@ -156,7 +237,9 @@ export default function UnifiedOnboarding() {
             <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🌟</div>
             <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: '700', color: '#111827', marginBottom: '1rem' }}>Join the Waitlist</h1>
             <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '2rem', lineHeight: '1.6' }}>Click Speak Send is currently in private beta. Join our waitlist to be notified when we launch publicly!</p>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`, color: 'white', fontSize: '1.125rem', fontWeight: '600', padding: '1rem 2rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer' }}>Join Waitlist</button>
+            <PrimaryButton onClick={() => window.location.href = '/'}>
+              Join Waitlist
+            </PrimaryButton>
           </div>
         </div>
       </div>
@@ -171,9 +254,32 @@ export default function UnifiedOnboarding() {
             <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🔑</div>
             <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: '700', color: '#111827', marginBottom: '1rem' }}>Beta Access Required</h1>
             <p style={{ color: '#6b7280', fontSize: '1.125rem', marginBottom: '2rem', lineHeight: '1.6' }}>Click Speak Send is currently in private beta testing.<br/>Enter your access code to continue.</p>
-            <input type="text" value={betaCode} onChange={(e) => { setBetaCode(e.target.value); setBetaCodeError('') }} placeholder="Enter your beta access code" style={{ width: '100%', padding: '1rem', border: betaCodeError ? '2px solid #ef4444' : '2px solid #d1d5db', borderRadius: '0.75rem', fontSize: '1.125rem', textAlign: 'center', outline: 'none', textTransform: 'uppercase', marginBottom: '1rem' }} onKeyPress={(e) => e.key === 'Enter' && validateBetaCode()} />
+            <input 
+              type="text" 
+              value={betaCode} 
+              onChange={(e) => { setBetaCode(e.target.value); setBetaCodeError('') }} 
+              placeholder="Enter your beta access code" 
+              style={{ 
+                width: '100%', 
+                padding: '1rem', 
+                border: betaCodeError ? '2px solid #ef4444' : '2px solid #d1d5db', 
+                borderRadius: '0.75rem', 
+                fontSize: '1.125rem', 
+                textAlign: 'center', 
+                outline: 'none', 
+                textTransform: 'uppercase', 
+                marginBottom: '1rem' 
+              }} 
+              onKeyPress={(e) => e.key === 'Enter' && validateBetaCode()} 
+            />
             {betaCodeError && <div style={{ color: '#ef4444', fontSize: '0.875rem', backgroundColor: '#fef2f2', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>{betaCodeError}</div>}
-            <button onClick={validateBetaCode} disabled={!betaCode.trim()} style={{ width: '100%', background: betaCode.trim() ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)` : '#e5e7eb', color: betaCode.trim() ? 'white' : '#9ca3af', fontSize: '1.125rem', fontWeight: '700', padding: '1rem 2rem', borderRadius: '0.75rem', border: 'none', cursor: betaCode.trim() ? 'pointer' : 'not-allowed' }}>Access Beta Platform</button>
+            <PrimaryButton 
+              onClick={validateBetaCode}
+              disabled={!betaCode.trim()}
+              style={{ width: '100%' }}
+            >
+              Access Beta Platform
+            </PrimaryButton>
           </div>
         </div>
       </div>
@@ -190,7 +296,9 @@ export default function UnifiedOnboarding() {
             <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#374151', marginBottom: '2rem' }}>
               <p>Click Speak Send is an AI-powered content creation platform that generates culturally-intelligent tourism content using your photos and stories. Your photos and stories are processed by AI to generate content and all data is deleted from AI memory after processing. We respect cultural protocols and Mātauranga Māori. Generated content remains your intellectual property.</p>
             </div>
-            <button onClick={() => setShowTermsModal(false)} style={{ background: `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`, color: 'white', fontSize: '1rem', fontWeight: '600', padding: '0.75rem 2rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer' }}>Got it</button>
+            <PrimaryButton onClick={() => setShowTermsModal(false)}>
+              Got it
+            </PrimaryButton>
           </div>
         </div>
       )}
@@ -353,7 +461,7 @@ export default function UnifiedOnboarding() {
                     {personalPersona === persona.id && <div style={{ width: '8px', height: '8px', backgroundColor: 'white', borderRadius: '50%' }}></div>}
                   </div>
                   <div>
-                    <div style={{ fontWeight: '600', color: '#111827' }}>{persona.emoji} {persona.title}</div>
+                    <div style={{ fontWeight: '600', color: '#111827' }}>{persona.title}</div>
                     <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>{persona.description}</div>
                   </div>
                 </div>
@@ -370,9 +478,15 @@ export default function UnifiedOnboarding() {
               <button onClick={() => setShowTermsModal(true)} style={{ color: BRAND_PURPLE, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.875rem' }}>Terms & Conditions</button>.
             </label>
           </div>
-          <button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} style={{ width: '100%', background: canSubmit ? `linear-gradient(45deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)` : '#e5e7eb', color: canSubmit ? 'white' : '#9ca3af', fontSize: '1.25rem', fontWeight: '700', padding: '1rem 2rem', borderRadius: '1rem', border: 'none', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
+          
+          <PrimaryButton 
+            onClick={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            size="large"
+            style={{ width: '100%' }}
+          >
             {isSubmitting ? 'Setting up your account...' : 'Start Creating'}
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </div>
