@@ -6,6 +6,127 @@ const BRAND_PURPLE = '#6B2EFF'
 const BRAND_ORANGE = '#FF7B1C'
 const BRAND_BLUE = '#11B3FF'
 
+// Standardized Brand Logo Component
+const BrandLogo = ({ size = 'default', layout = 'stacked' }: { size?: 'default' | 'large', layout?: 'stacked' | 'inline' }) => (
+  <div style={{ 
+    display: layout === 'stacked' ? 'block' : 'flex',
+    textAlign: 'center',
+    alignItems: 'center',
+    gap: layout === 'inline' ? '0.25rem' : '0'
+  }}>
+    <span style={{ 
+      color: BRAND_PURPLE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>click</span>
+    <span style={{ 
+      color: BRAND_ORANGE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>speak</span>
+    <span style={{ 
+      color: BRAND_BLUE, 
+      fontSize: size === 'large' ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(1rem, 2.5vw, 1.25rem)',
+      fontWeight: '900',
+      display: layout === 'stacked' ? 'block' : 'inline',
+      lineHeight: '0.9'
+    }}>send</span>
+  </div>
+)
+
+// Standardized Button Component
+const PrimaryButton = ({ 
+  onClick, 
+  children, 
+  disabled = false, 
+  size = 'default',
+  style = {} 
+}: { 
+  onClick: () => void
+  children: React.ReactNode
+  disabled?: boolean
+  size?: 'default' | 'large'
+  style?: React.CSSProperties 
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      background: disabled 
+        ? '#e5e7eb' 
+        : `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
+      color: disabled ? '#9ca3af' : 'white',
+      padding: size === 'large' ? '1.25rem 2.5rem' : '0.75rem 1.5rem',
+      borderRadius: size === 'large' ? '50px' : '25px',
+      fontSize: size === 'large' ? '1.25rem' : '1rem',
+      fontWeight: '700',
+      border: 'none',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      boxShadow: disabled ? 'none' : '0 4px 15px rgba(107, 46, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      textTransform: size === 'large' ? 'uppercase' : 'none',
+      letterSpacing: size === 'large' ? '1px' : 'normal',
+      ...style
+    }}
+    onMouseOver={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(107, 46, 255, 0.3)'
+      }
+    }}
+    onMouseOut={(e) => {
+      if (!disabled) {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 4px 15px rgba(107, 46, 255, 0.2)'
+      }
+    }}
+  >
+    {children}
+  </button>
+)
+
+// Standardized Secondary Button Component  
+const SecondaryButton = ({ 
+  onClick, 
+  children, 
+  style = {} 
+}: { 
+  onClick: () => void
+  children: React.ReactNode
+  style?: React.CSSProperties 
+}) => (
+  <button
+    onClick={onClick}
+    style={{
+      background: `linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_PURPLE} 100%)`,
+      color: 'white',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '25px',
+      fontSize: '1rem',
+      fontWeight: '600',
+      border: 'none',
+      cursor: 'pointer',
+      boxShadow: '0 4px 15px rgba(17, 179, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      ...style
+    }}
+    onMouseOver={(e) => {
+      e.currentTarget.style.transform = 'translateY(-2px)'
+      e.currentTarget.style.boxShadow = '0 6px 20px rgba(17, 179, 255, 0.3)'
+    }}
+    onMouseOut={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)'
+      e.currentTarget.style.boxShadow = '0 4px 15px rgba(17, 179, 255, 0.2)'
+    }}
+  >
+    {children}
+  </button>
+)
+
 // Platform showcase with real platform names and colors
 const platformSets = [
   [
@@ -114,28 +235,11 @@ function UserMenu({ userName, userProfile }: { userName: string; userProfile: an
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        onClick={() => setShowDropdown(!showDropdown)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: `linear-gradient(45deg, ${BRAND_BLUE}, ${BRAND_PURPLE})`,
-          color: 'white',
-          padding: '0.75rem 1.5rem',
-          borderRadius: '25px',
-          fontSize: '1rem',
-          fontWeight: '600',
-          border: 'none',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-        }}
-      >
+      <SecondaryButton onClick={() => setShowDropdown(!showDropdown)}>
         <span>👤</span>
         <span>{userName}</span>
         <span style={{ fontSize: '0.8rem' }}>▼</span>
-      </button>
+      </SecondaryButton>
       {showDropdown && (
         <div style={{
           position: 'absolute',
@@ -295,31 +399,9 @@ export default function AuthenticatedHome() {
               userProfile={userProfile as any} 
             />
           ) : (
-            <button
-              onClick={handleSignIn}
-              style={{
-                background: `linear-gradient(45deg, ${BRAND_BLUE}, ${BRAND_PURPLE})`,
-                color: 'white',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '25px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)'
-              }}
-            >
+            <SecondaryButton onClick={handleSignIn}>
               Sign In
-            </button>
+            </SecondaryButton>
           )}
         </header>
 
@@ -335,22 +417,13 @@ export default function AuthenticatedHome() {
         }}>
           {/* Brand Logo */}
           <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{
-              fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-              fontWeight: '900',
-              margin: '0 0 1rem 0',
-              lineHeight: '0.9'
-            }}>
-              <span style={{ color: BRAND_PURPLE, display: 'block' }}>click</span>
-              <span style={{ color: BRAND_ORANGE, display: 'block' }}>speak</span>
-              <span style={{ color: BRAND_BLUE, display: 'block' }}>send</span>
-            </h1>
+            <BrandLogo size="large" layout="stacked" />
           </div>
 
           {/* Value Proposition */}
           <div style={{ marginBottom: '2rem' }}>
             <h2 style={{
-              fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
+              fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
               fontWeight: '700',
               color: '#2D3748',
               margin: '0 0 1rem 0',
@@ -364,34 +437,13 @@ export default function AuthenticatedHome() {
           </div>
 
           {/* START Button */}
-          <button
+          <PrimaryButton 
             onClick={handleStart}
-            style={{
-              background: `linear-gradient(135deg, ${BRAND_PURPLE} 0%, ${BRAND_ORANGE} 100%)`,
-              color: 'white',
-              padding: '1.25rem 2.5rem',
-              borderRadius: '50px',
-              fontSize: '1.25rem',
-              fontWeight: '700',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              transition: 'all 0.3s ease',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '3rem'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-5px)'
-              e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.3)'
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'
-            }}
+            size="large"
+            style={{ marginBottom: '3rem' }}
           >
             START
-          </button>
+          </PrimaryButton>
 
           {/* Platform Carousel */}
           <PlatformCarousel />
