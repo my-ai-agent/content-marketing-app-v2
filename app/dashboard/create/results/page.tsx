@@ -38,7 +38,7 @@ interface SavedStory {
   storyPreview?: string
 }
 
-// MOBILE MESSAGE COMPONENTS - DEFINED OUTSIDE MAIN COMPONENT
+// MOBILE MESSAGE COMPONENTS
 const SlowConnectionMessage = () => (
   <div style={{
     position: 'fixed',
@@ -227,11 +227,17 @@ export default function QRDistributionHub() {
     }
     setIsMobile(checkMobile())
 
-    // Check for saved story on load
-    checkForSavedStory()
+    // MOBILE vs DESKTOP LOADING STRATEGY
+    if (checkMobile()) {
+      // MOBILE: Simplified approach - bypass saved story check
+      loadMobileSimplifiedData()
+    } else {
+      // DESKTOP: Keep complex approach with saved story check
+      checkForSavedStory()
+    }
   }, [])
 
-  // BACKUP SYSTEM: Check for existing saved story
+  // BACKUP SYSTEM: Check for existing saved story (DESKTOP ONLY)
   const checkForSavedStory = () => {
     try {
       const saved = localStorage.getItem('savedStoryBackup')
@@ -249,8 +255,12 @@ export default function QRDistributionHub() {
           localStorage.removeItem('savedStoryBackup')
         }
       }
+      
+      // If no saved story, load current session data
+      loadDesktopComplexData()
     } catch (error) {
       console.error('Error checking for saved story:', error)
+      loadDesktopComplexData()
     }
   }
 
@@ -271,7 +281,7 @@ export default function QRDistributionHub() {
     }
   }
 
-  // Helper for IndexedDB image loading
+  // Helper for IndexedDB image loading (DESKTOP ONLY)
   const getImageFromIndexedDB = (key: string): Promise<Blob | null> => {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open('PhotoAppDB', 1)
@@ -294,44 +304,145 @@ export default function QRDistributionHub() {
     })
   }
 
-  // MOBILE-OPTIMIZED CLAUDE API CONTENT GENERATION
+  // MOBILE: Simplified data loading - minimal processing
+  const loadMobileSimplifiedData = async () => {
+    try {
+      console.log('📱 Mobile simplified loading...')
+      
+      // Only essential localStorage reads for mobile
+      const story = localStorage.getItem('userStoryContext')
+      const audienceData = localStorage.getItem('selectedDemographics')
+      const platforms = localStorage.getItem('selectedPlatforms')
+      
+      if (!story) {
+        setError('Please complete your story first.')
+        return
+      }
+      
+      // Simple parsing - no complex profile processing
+      const parsedAudience = audienceData ? JSON.parse(audienceData) : ['millennials']
+      const parsedPlatforms = platforms ? JSON.parse(platforms) : ['instagram']
+      
+      // Mobile-optimized userData - essential fields only
+      const mobileUserData: UserData = {
+        story: story,
+        audience: parsedAudience[0] || 'millennials',
+        platforms: parsedPlatforms.slice(0, 2), // Limit to 2 platforms
+        formats: ['social-post'], // Single format for mobile
+        location: 'New Zealand', // Default location
+        // Skip: photo, businessType, websiteUrl, social URLs, complex profile data
+      }
+      
+      console.log('📱 Mobile data loaded successfully:', mobileUserData)
+      setUserData(mobileUserData)
+      
+      // Generate content immediately with simplified data
+      await generateContent(mobileUserData)
+      
+    } catch (error) {
+      console.error('❌ Mobile loading error:', error)
+      setError('Failed to load your story. Please try again.')
+    }
+  }
+
+  // DESKTOP: Complex data loading - full feature set
+  const loadDesktopComplexData = async () => {
+    try {
+      console.log('💻 Desktop complex loading...')
+      
+      const story = localStorage.getItem('userStoryContext')
+      const audienceData = localStorage.getItem('selectedDemographics')
+      const interests = localStorage.getItem('selectedInterests')
+      const platforms = localStorage.getItem('selectedPlatforms')
+      const formats = localStorage.getItem('selectedFormats')
+      const profile = localStorage.getItem('userProfile')
+
+      // Photo processing only for desktop
+      let photoData: Blob | null = null
+      try {
+        photoData = await getImageFromIndexedDB('selectedPhoto')
+      } catch (photoErr) {
+        console.log('No photo found in IndexedDB, continuing without photo')
+      }
+
+      if (!story || !audienceData || !platforms) {
+        setError('Missing required content data. Please complete all steps.')
+        return
+      }
+
+      const parsedProfile = profile ? JSON.parse(profile) : {}
+      const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials']
+      const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural']
+      const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram']
+      const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post']
+
+      const cleanedFormats = parsedFormats.filter(format =>
+        !['press-release', 'brochure', 'flyer'].includes(format)
+      )
+
+      // Full desktop userData with all complex fields
+      const desktopUserData: UserData = {
+        photo: photoData ? URL.createObjectURL(photoData) : undefined,
+        story,
+        persona: parsedProfile.profile?.role || 'cultural-explorer',
+        audience: parsedAudience[0] || 'millennials',
+        interests: parsedInterests[0] || 'cultural',
+        platforms: parsedPlatforms,
+        formats: cleanedFormats,
+        businessType: parsedProfile.business?.businessType,
+        websiteUrl: parsedProfile.business?.websiteUrl,
+        name: parsedProfile.profile?.name,
+        location: parsedProfile.profile?.location,
+        culturalConnection: parsedProfile.pepeha?.culturalBackground
+      }
+
+      console.log('💻 Desktop data loaded successfully:', desktopUserData)
+      setUserData(desktopUserData)
+      await generateContent(desktopUserData)
+      
+    } catch (error) {
+      console.error('❌ Desktop loading error:', error)
+      setError('Failed to load your content data.')
+    }
+  }
+
+  // CLAUDE API CONTENT GENERATION - Mobile/Desktop Optimized
   const generateClaudeContent = async (userData: UserData, platform: string): Promise<string> => {
     const isBusinessUser = !!userData.businessType
     
-    // MOBILE OPTIMIZATION: Different prompts for mobile vs desktop
-    const prompt = isMobile ? getMobileOptimizedPrompt(userData, platform, isBusinessUser) : getFullPrompt(userData, platform, isBusinessUser)
-
     try {
       console.log(`🚀 Generating ${platform} content ${isMobile ? '(Mobile Mode)' : '(Desktop Mode)'}...`)
       
-      // MOBILE OPTIMIZATION: Extended timeout and abort controller
-      const timeoutDuration = isMobile ? 55000 : 30000 // 55s for mobile, 30s for desktop
+      // Different timeouts for mobile vs desktop
+      const timeoutDuration = isMobile ? 45000 : 30000
       const controller = new AbortController()
       const apiTimeoutId = setTimeout(() => controller.abort(), timeoutDuration)
       
+      // Simplified payload for mobile, full payload for desktop
+      const payload = isMobile ? {
+        prompt: getMobileOptimizedPrompt(userData, platform, isBusinessUser),
+        platforms: [platform],
+        formats: ['social-post'],
+        userData: {
+          story: userData.story,
+          audience: userData.audience,
+          location: userData.location,
+          // Minimal fields for mobile
+        }
+      } : {
+        prompt: getFullPrompt(userData, platform, isBusinessUser),
+        platforms: [platform],
+        formats: userData.formats ? userData.formats.slice(0, 3) : ['social-post'],
+        userData: userData // Full complex object for desktop
+      }
+
       const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt,
-          platforms: [platform],
-          formats: userData.formats ? userData.formats.slice(0, isMobile ? 1 : 3) : ['social-post'], // MOBILE: Limit formats
-          userData: {
-            story: userData.story,
-            persona: userData.persona,
-            audience: userData.audience,
-            interests: userData.interests,
-            businessType: userData.businessType,
-            name: userData.name,
-            location: userData.location
-            // MOBILE: Removed non-essential fields to reduce payload
-          },
-          isMobile: isMobile, // Signal to API that this is mobile
-          simplified: isMobile // Request simplified response for mobile
-        }),
-        signal: controller.signal // MOBILE: Proper abort handling
+        body: JSON.stringify(payload),
+        signal: controller.signal
       })
 
       clearTimeout(apiTimeoutId)
@@ -346,11 +457,18 @@ export default function QRDistributionHub() {
       
     } catch (error) {
       console.error(`❌ Error generating Claude content for ${platform}:`, error)
+      
+      // Mobile: Use fallback instead of throwing error
+      if (isMobile) {
+        console.log('📱 Mobile: Using fallback content due to API error')
+        return getFallbackContent(platform, userData)
+      }
+      
       throw error
     }
   }
 
-  // MOBILE-OPTIMIZED PROMPTS (Shorter, more focused)
+  // MOBILE-OPTIMIZED PROMPTS (Shorter, simpler)
   const getMobileOptimizedPrompt = (userData: UserData, platform: string, isBusinessUser: boolean): string => {
     return `Create ${platform} content for ${isBusinessUser ? 'tourism business' : 'cultural explorer'} in New Zealand.
 
@@ -369,7 +487,7 @@ Requirements:
 Generate engaging ${platform} content that shares this story authentically.`
   }
 
-  // FULL DESKTOP PROMPT (More detailed)
+  // FULL DESKTOP PROMPT (Keep existing detailed version)
   const getFullPrompt = (userData: UserData, platform: string, isBusinessUser: boolean): string => {
     return `🎯 ACT AS: ${isBusinessUser ? 'Professional New Zealand tourism content strategist' : 'Authentic Aotearoa travel storyteller'} creating ${platform.toUpperCase()} content
 
@@ -422,7 +540,7 @@ ${userData.interests ? `🎨 AUDIENCE INTERESTS: ${userData.interests}` : ''}
 Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #CulturalTourism #${location.replace(/\s+/g, '')}`
   }
 
-  // MAIN GENERATION FUNCTION WITH MOBILE OPTIMIZATIONS & BACKUP
+  // MAIN GENERATION FUNCTION - Mobile/Desktop Optimized
   const generateContent = async (userData: UserData) => {
     try {
       setIsGenerating(true)
@@ -431,10 +549,10 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       setShowSlowConnection(false)
       setShowStorySaved(false)
       
-      // MOBILE OPTIMIZATION: Limit platforms on mobile for better performance
+      // Platform optimization based on device
       let platforms = userData.platforms || ['instagram']
       if (isMobile && platforms.length > 2) {
-        platforms = platforms.slice(0, 2) // Limit to 2 platforms on mobile
+        platforms = platforms.slice(0, 2) // Mobile: limit to 2 platforms
         console.log('📱 Mobile Mode: Limited to 2 platforms for optimal performance')
       }
       
@@ -442,11 +560,11 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       
       console.log(`🚀 Starting content generation for platforms: ${platforms} ${isMobile ? '(Mobile Mode)' : '(Desktop Mode)'}`)
       
-      // Set up timeout timer for slow connection detection
+      // Timeout handling - more generous for mobile
       const slowConnectionTimer = setTimeout(() => {
         console.log('📶 Slow connection detected - showing message')
         setShowSlowConnection(true)
-      }, isMobile ? 45000 : 30000) // 45s mobile, 30s desktop
+      }, isMobile ? 30000 : 20000)
       
       const saveStoryTimer = setTimeout(async () => {
         console.log('💾 Timeout reached - saving story')
@@ -454,21 +572,18 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
         setShowSlowConnection(false)
         setShowStorySaved(true)
         
-        // Save the story backup
         await saveStoryBackup(userData)
-        
         setIsGenerating(false)
         
-        // Hide the "story saved" message after 5 seconds
         setTimeout(() => {
           setShowStorySaved(false)
         }, 5000)
         
-      }, isMobile ? 90000 : 45000) // 90s mobile, 45s desktop
+      }, isMobile ? 60000 : 45000)
       
       setTimeoutTimer(saveStoryTimer)
       
-      // MOBILE OPTIMIZATION: Sequential processing with delays to prevent memory overload
+      // Sequential processing for stability
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i]
         try {
@@ -490,22 +605,35 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
           }
           
           generatedResults.push(result)
-          setGeneratedContent([...generatedResults]) // MOBILE: Progressive display
+          setGeneratedContent([...generatedResults])
           
           console.log(`✅ ${platform} content generated successfully`)
           
-          // MOBILE OPTIMIZATION: Small delay between generations to prevent memory issues
-          if (isMobile && i < platforms.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+          // Small delay between generations for stability
+          if (i < platforms.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, isMobile ? 2000 : 1000))
           }
           
         } catch (error) {
           console.error(`❌ Error generating ${platform} content:`, error)
-          // Continue with other platforms even if one fails
+          
+          // Continue with fallback content instead of failing completely
+          const fallbackResult: GeneratedContent = {
+            platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+            content: getFallbackContent(platform, userData),
+            qrCode: generateQRCode(getFallbackContent(platform, userData)),
+            tips: getPlatformTips(platform),
+            optimalTime: getOptimalPostingTime(platform),
+            culturalAuthenticity: 'Te Tiriti compliant',
+            brandConsistency: 'Aligned with authentic voice'
+          }
+          
+          generatedResults.push(fallbackResult)
+          setGeneratedContent([...generatedResults])
         }
       }
       
-      // Clear timers if generation completed successfully
+      // Clear timers on completion
       clearTimeout(slowConnectionTimer)
       clearTimeout(saveStoryTimer)
       
@@ -513,7 +641,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       setIsGenerating(false)
       setShowSlowConnection(false)
       
-      // Clear any backup since generation was successful
+      // Clear backup on success
       localStorage.removeItem('savedStoryBackup')
       
     } catch (error) {
@@ -521,20 +649,18 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       setError('Failed to generate content. Please try again.')
       setIsGenerating(false)
       
-      // Clear timers
       if (timeoutTimer) {
         clearTimeout(timeoutTimer)
       }
     }
   }
 
-  // HANDLE WELCOME BACK ACTIONS
+  // HANDLE WELCOME BACK ACTIONS (DESKTOP ONLY)
   const handleContinueStory = () => {
     if (savedStory) {
       setShowWelcomeBack(false)
       setUserData(savedStory.userData)
       generateContent(savedStory.userData)
-      // Clear the saved story since we're using it
       localStorage.removeItem('savedStoryBackup')
       setSavedStory(null)
     }
@@ -544,133 +670,8 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
     localStorage.removeItem('savedStoryBackup')
     setSavedStory(null)
     setShowWelcomeBack(false)
-    // Load current session data instead
-    loadCurrentSessionData()
+    loadDesktopComplexData()
   }
-
-  // Load current session data
-  const loadCurrentSessionData = async () => {
-  console.log('🔍 Mobile Debug - loadCurrentSessionData started');
-    alert('🔍 DEBUG 3: loadCurrentSessionData function started'); // ADD THIS LINE
-  try {
-    console.log('🔍 Mobile Debug - Reading localStorage items...');
-    alert('🔍 DEBUG 4: About to read localStorage'); // AND ADD THIS LINE TOO
-    const story = localStorage.getItem('userStoryContext');
-    const audienceData = localStorage.getItem('selectedDemographics');
-    const interests = localStorage.getItem('selectedInterests');
-    const platforms = localStorage.getItem('selectedPlatforms');
-    const formats = localStorage.getItem('selectedFormats');
-    const profile = localStorage.getItem('userProfile');
-
-    let photoData: Blob | null = null;
-    try {
-      photoData = await getImageFromIndexedDB('selectedPhoto');
-    } catch (photoErr) {
-      console.log('No photo found in IndexedDB, continuing without photo');
-    }
-
-    if (!story || !audienceData || !platforms) {
-      setError('Missing required content data. Please complete all steps.');
-      return;
-    }
-
-    const parsedProfile = profile ? JSON.parse(profile) : {};
-    const parsedAudience: string[] = audienceData ? JSON.parse(audienceData) : ['millennials'];
-    const parsedInterests: string[] = interests ? JSON.parse(interests) : ['cultural'];
-    const parsedPlatforms: string[] = platforms ? JSON.parse(platforms) : ['instagram'];
-    const parsedFormats: string[] = formats ? JSON.parse(formats) : ['social-post'];
-
-    // 🛠️ FIX: Clean up cross-contaminated data
-    const cleanedFormats = parsedFormats.filter(format =>
-      !['press-release', 'brochure', 'flyer'].includes(format)
-    );
-
-    const userData: UserData = {
-      // MOBILE-SAFE PHOTO HANDLING
-      photo: (() => {
-        if (!photoData) return undefined;
-        
-        try {
-          const blobUrl = URL.createObjectURL(photoData);
-          
-          // Mobile debug alert
-          if (isMobile) {
-            alert(`MOBILE DEBUG: Blob URL created successfully`);
-          }
-          
-          return blobUrl;
-        } catch (blobError: unknown) {
-          // Mobile error surfacing
-          if (isMobile) {
-            alert(`MOBILE ERROR: Blob URL creation failed: ${blobError instanceof Error ? blobError.message : String(blobError)}`);
-          }
-          console.error('Blob URL creation failed:', blobError);
-          return undefined; // Continue without photo
-        }
-      })(),
-      
-      story,
-      persona: parsedProfile.profile?.role || 'cultural-explorer',
-      audience: parsedAudience[0] || 'millennials',
-      interests: parsedInterests[0] || 'cultural',
-      platforms: parsedPlatforms,
-      formats: cleanedFormats,
-      businessType: parsedProfile.business?.businessType,
-      websiteUrl: parsedProfile.business?.websiteUrl,
-      name: parsedProfile.profile?.name,
-      location: parsedProfile.profile?.location,
-      culturalConnection: parsedProfile.pepeha?.culturalBackground
-    };
-
-    // MOBILE DEBUG: Validate userData before proceeding
-    if (isMobile) {
-      try {
-        const testJson = JSON.stringify(userData);
-        alert(`MOBILE DEBUG: userData serialization OK, ${testJson.length} chars`);
-      } catch (jsonError: unknown) {
-        alert(`MOBILE ERROR: userData serialization failed: ${jsonError instanceof Error ? jsonError.message : String(jsonError)}`);
-        setError('Mobile data preparation failed. Please try again.');
-        return;
-      }
-    }
-
-    console.log('Loaded current session data:', userData);
-    setUserData(userData);
-    console.log('About to call generateContent with:', userData);
-    
-    // MOBILE DEBUG: Add error handling to generateContent call
-    try {
-      generateContent(userData);
-      if (isMobile) {
-        alert('MOBILE DEBUG: generateContent called successfully');
-      }
-    } catch (generateError: unknown) {
-      if (isMobile) {
-        alert(`MOBILE ERROR: generateContent failed: ${generateError instanceof Error ? generateError.message : String(generateError)}`);
-      }
-      console.error('generateContent failed:', generateError);
-      setError('Content generation failed. Please try again.');
-    }
-
-    console.log('Loaded current session data:', userData);
-    setUserData(userData);
-    console.log('🔍 Mobile Debug - About to call generateContent with:', userData);
-    generateContent(userData);
-  } catch (err) {
-    console.error('Error loading current session data:', err);
-    setError('Failed to load your content data.');
-  }
-};
-
-  useEffect(() => {
-  console.log('🔍 Mobile Debug - useEffect triggered, showWelcomeBack:', showWelcomeBack);
-  alert('🔍 DEBUG 1: useEffect triggered - showWelcomeBack is ' + showWelcomeBack); // ADD THIS
-  if (!showWelcomeBack) {
-    console.log('🔍 Mobile Debug - Calling loadCurrentSessionData()');
-    alert('🔍 DEBUG 2: About to call loadCurrentSessionData()'); // ADD THIS
-    loadCurrentSessionData()
-  }
-}, [showWelcomeBack])
 
   const getPlatformTips = (platform: string): string[] => {
     switch (platform) {
@@ -930,7 +931,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                 marginBottom: '1rem',
                 lineHeight: '1.5'
               }}>
-                Crafting authentic content that honors Te Tiriti o Waitangi principles...
+                {isMobile ? 'Crafting mobile-optimized content...' : 'Crafting authentic content that honors Te Tiriti o Waitangi principles...'}
               </p>
             </div>
           )}
