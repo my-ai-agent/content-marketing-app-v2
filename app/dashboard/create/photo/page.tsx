@@ -977,16 +977,16 @@ const PhotoUploadPage: React.FC = () => {
         </div>
 
         {/* Logo */}
-        <div style={{ 
-          textAlign: 'center', 
-          marginBottom: '2rem',
-          paddingTop: '2rem'
-        }}>
+<div style={{ 
+  textAlign: 'center', 
+  marginBottom: '2rem',
+  paddingTop: '2rem'
+}}>
+  <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+    <BrandLogo />
+  </Link>
+</div>        
           
-          The world's first culturally-intelligent content creation platform
-          </p>
-        </footer>
-
         {/* Back to Home */}
             ← Back to Home
           </Link>
