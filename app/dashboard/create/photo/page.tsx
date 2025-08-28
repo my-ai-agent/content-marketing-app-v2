@@ -976,42 +976,14 @@ const PhotoUploadPage: React.FC = () => {
           </PrimaryButton>
         </div>
 
-        {/* Branding */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <BrandLogo />
-        </div>
-
-        {/* Back to Home */}
-        <div style={{ textAlign: 'center' }}>
-          <Link 
-            href="/" 
-            style={{ 
-              color: '#6b7280', 
-              textDecoration: 'none',
-              fontSize: '1rem',
-              fontWeight: '600',
-              transition: 'color 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = '#374151'}
-            onMouseOut={(e) => e.currentTarget.style.color = '#6b7280'}
-          >
-            {/* Footer with Logo */}
-        <footer style={{
-          padding: '1.5rem 1rem',
-          textAlign: 'center',
-          borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-          background: 'rgba(255, 255, 255, 0.5)',
-          borderRadius: '0.75rem 0.75rem 0 0'
+        {/* Logo */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
         }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <BrandLogo />
-          </Link>
-          <p style={{
-            color: '#718096',
-            fontSize: '0.875rem',
-            margin: '1rem 0 0 0'
-          }}>
-            The world's first culturally-intelligent content creation platform
+          
+          The world's first culturally-intelligent content creation platform
           </p>
         </footer>
 
