@@ -517,10 +517,16 @@ export default function PlatformSelection() {
           </PrimaryButton>
         </div>
 
-        {/* Branding */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <BrandLogo />
-        </div>
+        {/* Logo */}
+<div style={{ 
+  textAlign: 'center', 
+  marginBottom: '2rem',
+  paddingTop: '2rem'
+}}>
+  <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+    <BrandLogo />
+  </Link>
+</div>
 
         {/* Bottom Navigation */}
         <div style={{ textAlign: 'center' }}>
