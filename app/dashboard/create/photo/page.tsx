@@ -617,7 +617,7 @@ const PhotoUploadPage: React.FC = () => {
           padding: '0.75rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: BRAND_BLUE, marginRight: '0.5rem' }}>📱</span>
+            <span style={{ color: BRAND_BLUE, marginRight: '0.5rem' }}>Offline</span>
             <span style={{ color: '#1e40af', fontSize: '0.875rem' }}>
               Camera not available. You can still upload photos from your gallery.
             </span>
