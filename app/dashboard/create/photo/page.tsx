@@ -104,7 +104,7 @@ const StepTracker = ({ currentStep }: { currentStep: number }) => (
         width: '2rem', 
         height: '2rem', 
         borderRadius: '50%', 
-        backgroundColor: step <= currentStep ? (step === currentStep ? BRAND_PURPLE : '#10b981') : '#e5e7eb',
+        backgroundColor: step < currentStep ? BRAND_ORANGE : (step === currentStep ? BRAND_PURPLE : '#e5e7eb'),
         color: step <= currentStep ? 'white' : '#9ca3af',
         display: 'flex', 
         alignItems: 'center', 
@@ -713,7 +713,7 @@ const PhotoUploadPage: React.FC = () => {
                   right: '-0.25rem',
                   width: '1rem',
                   height: '1rem',
-                  backgroundColor: '#10b981',
+                  backgroundColor: BRAND_ORANGE,
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -995,6 +995,27 @@ const PhotoUploadPage: React.FC = () => {
             onMouseOver={(e) => e.currentTarget.style.color = '#374151'}
             onMouseOut={(e) => e.currentTarget.style.color = '#6b7280'}
           >
+            {/* Footer with Logo */}
+        <footer style={{
+          padding: '1.5rem 1rem',
+          textAlign: 'center',
+          borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+          background: 'rgba(255, 255, 255, 0.5)',
+          borderRadius: '0.75rem 0.75rem 0 0'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <BrandLogo />
+          </Link>
+          <p style={{
+            color: '#718096',
+            fontSize: '0.875rem',
+            margin: '1rem 0 0 0'
+          }}>
+            The world's first culturally-intelligent content creation platform
+          </p>
+        </footer>
+
+        {/* Back to Home */}
             ← Back to Home
           </Link>
         </div>
