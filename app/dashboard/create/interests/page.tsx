@@ -102,7 +102,7 @@ const StepTracker = ({ currentStep }: { currentStep: number }) => (
         width: '2rem', 
         height: '2rem', 
         borderRadius: '50%', 
-        backgroundColor: step <= currentStep ? (step === currentStep ? BRAND_PURPLE : '#10b981') : '#e5e7eb',
+        backgroundColor: step <= currentStep ? (step === currentStep ? BRAND_PURPLE : BRAND_ORANGE) : '#e5e7eb',
         color: step <= currentStep ? 'white' : '#9ca3af',
         display: 'flex', 
         alignItems: 'center', 
