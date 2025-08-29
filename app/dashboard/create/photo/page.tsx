@@ -590,44 +590,42 @@ const PhotoUploadPage: React.FC = () => {
   };
 
   const renderMobileAlerts = () => (
-    <>
-      {isOffline && (
-        <div style={{
-          marginBottom: '1rem',
-          background: 'rgba(251, 191, 36, 0.1)',
-          border: '1px solid rgba(251, 191, 36, 0.3)',
-          borderRadius: '0.75rem',
-          padding: '0.75rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: '#d97706', marginRight: '0.5rem' }}>📴</span>
-            <span style={{ color: '#92400e', fontSize: '0.875rem', fontWeight: '500' }}>
-              You're offline. Your photos will be saved locally and synced when connection returns.
-            </span>
-          </div>
+  <>
+    {isOffline && (
+      <div style={{
+        marginBottom: '1rem',
+        background: 'rgba(251, 191, 36, 0.1)',
+        border: '1px solid rgba(251, 191, 36, 0.3)',
+        borderRadius: '0.75rem',
+        padding: '0.75rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ color: '#d97706', marginRight: '0.5rem' }}>📴</span>
+          <span style={{ color: '#92400e', fontSize: '0.875rem', fontWeight: '500' }}>
+            You're offline. Your photos will be saved locally and synced when connection returns.
+          </span>
         </div>
-      )}
-      
-      {mobileCapabilities.isMobile && !mobileCapabilities.supportsCameraCapture && (
-        <div style={{
-          marginBottom: '1rem',
-          background: 'rgba(59, 130, 246, 0.1)',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
-          borderRadius: '0.75rem',
-          padding: '0.75rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: BRAND_BLUE, marginRight: '0.5rem' }}>Offline</span>
-            <span style={{ color: '#1e40af', fontSize: '0.875rem' }}>
-              Camera not available. You can still upload photos from your gallery.
-            </span>
-          </div>
+      </div>
+    )}
+    
+    {mobileCapabilities.isMobile && !mobileCapabilities.supportsCameraCapture && (
+      <div style={{
+        marginBottom: '1rem',
+        background: 'rgba(59, 130, 246, 0.1)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        borderRadius: '0.75rem',
+        padding: '0.75rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ color: BRAND_BLUE, marginRight: '0.5rem' }}>Offline</span>
+          <span style={{ color: '#1e40af', fontSize: '0.875rem' }}>
+            Camera not available. You can still upload photos from your gallery.
+          </span>
         </div>
-      )}
-    </>
-    )
-  ;
-
+      </div>
+    )}
+  </>
+);
   const photoCount = Object.keys(photos).length;
 
   return (
