@@ -976,7 +976,7 @@ const PhotoUploadPage: React.FC = () => {
           </PrimaryButton>
         </div>
 
-        {/* Logo */}
+         {/* Logo */}
 <div style={{ 
   textAlign: 'center', 
   marginBottom: '2rem',
@@ -985,7 +985,7 @@ const PhotoUploadPage: React.FC = () => {
   <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
     <BrandLogo />
   </Link>
-</div>        
+</div>      
           
         {/* Back to Home */}
             ← Back to Home
