@@ -625,8 +625,8 @@ const PhotoUploadPage: React.FC = () => {
         </div>
       )}
     </>
-    }
-  );
+    )
+  ;
 
   const photoCount = Object.keys(photos).length;
 
