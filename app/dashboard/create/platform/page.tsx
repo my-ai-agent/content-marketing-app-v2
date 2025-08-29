@@ -133,7 +133,7 @@ const platformSets = [
   [
     { name: 'Snapchat', color: '#FFFC00', icon: '👻' },
     { name: 'WhatsApp', color: '#25D366', icon: '💬' },
-    { name: 'Telegram', color: '#0088cc', icon: '✈️' },
+    { name: 'Email Newsletter', color: '#4338ca', icon: '📧' },
     { name: 'Reddit', color: '#FF4500', icon: '🤖' }
   ]
 ]
