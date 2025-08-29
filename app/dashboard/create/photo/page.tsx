@@ -1001,6 +1001,7 @@ const PhotoUploadPage: React.FC = () => {
         }
       `}</style>
     </div>
+      </div>
   );
 };
 
