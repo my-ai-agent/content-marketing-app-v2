@@ -975,22 +975,23 @@ const PhotoUploadPage: React.FC = () => {
           </PrimaryButton>
         </div>
 
-         {/* Logo */}
-<div style={{ 
-  textAlign: 'center', 
-  marginBottom: '2rem',
-  paddingTop: '2rem'
-}}>
-  <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-    <BrandLogo />
-  </Link>
-</div>      
-          
+                 {/* Logo */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '2rem',
+          paddingTop: '2rem'
+        }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <BrandLogo />
+          </Link>
+        </div>
+
         {/* Back to Home */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Link href="/" style={{ color: '#6B2EFF', textDecoration: 'none', fontWeight: '600' }}>
             ← Back to Home
           </Link>
         </div>
-      </div>
 
       {/* CSS Animations */}
       <style jsx>{`
