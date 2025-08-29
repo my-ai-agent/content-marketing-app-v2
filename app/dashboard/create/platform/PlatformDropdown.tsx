@@ -87,7 +87,6 @@ export default function PlatformDropdown({
       'pinterest': '📌',
       'email': '📧',
       'twitter': '🐦',
-      'press-release': '📰',
       'brochure': '📄',
       'flyer': '🗞️',
       'teacher-resources': '🎓',
@@ -99,7 +98,7 @@ export default function PlatformDropdown({
   // Helper to categorize platforms
   const getPlatformCategory = (platformValue: string) => {
     const eotcPlatforms = ['teacher-resources', 'school-newsletter']
-    const marketingPlatforms = ['press-release', 'brochure', 'flyer']
+    const marketingPlatforms = ['brochure', 'flyer']
     const socialPlatforms = ['instagram', 'facebook', 'tiktok', 'youtube', 'pinterest', 'twitter']
     const professionalPlatforms = ['website', 'linkedin', 'email']
 
