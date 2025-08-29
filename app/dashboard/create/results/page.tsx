@@ -494,10 +494,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
       setShowStorySaved(false)
       
       let platforms = userData.platforms || ['instagram']
-      if (isMobile && platforms.length > 2) {
-        platforms = platforms.slice(0, 2)
-      }
-      
+            
       const generatedResults: GeneratedContent[] = []
       
       const slowConnectionTimer = setTimeout(() => {
@@ -797,24 +794,6 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
             </Link>
           </div>
 
-          {isMobile && userData?.platforms && userData.platforms.length > 2 && (
-            <div style={{
-              backgroundColor: '#f0f9ff',
-              padding: '1rem',
-              borderRadius: '8px',
-              borderLeft: `4px solid ${BRAND_BLUE}`,
-              marginTop: '1rem'
-            }}>
-              <p style={{
-                color: '#0369a1',
-                fontSize: '0.875rem',
-                margin: '0',
-                fontWeight: '500'
-              }}>
-                Mobile Optimization: Generating content for your top 2 platforms for optimal performance
-              </p>
-            </div>
-          )}
         </div>
 
         <div style={{ flex: '1', padding: '1rem' }}>
