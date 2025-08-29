@@ -296,7 +296,7 @@ export default function QRDistributionHub() {
       const mobileUserData: UserData = {
         story: story,
         audience: parsedAudience[0] || 'millennials',
-        platforms: parsedPlatforms.slice(0, 2),
+        platforms: parsedPlatforms,
         formats: ['social-post'],
         location: 'New Zealand'
       }
