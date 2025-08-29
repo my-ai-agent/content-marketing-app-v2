@@ -11,61 +11,63 @@ export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState('professional');
 
   const plans = [
-    {
-      id: 'starter',
-      name: 'Starter',
-      price: 47,
-      description: 'Get consistent with professional tourism content',
-      features: [
-        '2 professional stories per week',
-        'Unlimited images per story',
-        '500MB storage with auto-compression',
-        'Photo attribution & location tags',
-        'Universal QR distribution to all platforms',
-        'Basic QR scan analytics',
-        '7-day free trial'
-      ],
-      color: BRAND_BLUE,
-      popular: false
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      price: 147,
-      description: 'Set your week\'s content on Monday, then focus on your guests',
-      features: [
-        '7 stories per week (daily professional content)',
-        'Unlimited images per story',
-        '2GB storage with smart compression',
-        'Week scheduler - "Set and Smile"',
-        'Advanced QR analytics & engagement tracking',
-        'All generational psychology profiles',
-        'Small team collaboration (3 users)',
-        '7-day free trial'
-      ],
-      color: BRAND_PURPLE,
-      popular: true
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: 547,
-      description: 'Complete tourism marketing ecosystem for large operations',
-      features: [
-        'Unlimited stories and content generation',
-        'Unlimited images and storage',
-        'Month scheduler with bulk operations',
-        'Premium analytics dashboard with exports',
-        'White-label QR landing pages',
-        'Unlimited team collaboration',
-        'Priority support with dedicated account manager',
-        'API access for custom integrations',
-        '7-day free trial'
-      ],
-      color: BRAND_ORANGE,
-      popular: false
-    }
-  ];
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 97,
+    description: 'Culturally-intelligent tourism content with Te Tiriti compliance',
+    features: [
+      '3 platforms for cultural content distribution',
+      '20 culturally-compliant stories per month',
+      'Basic Te Tiriti compliance framework',
+      'Māori place name accuracy verification',
+      'QR distribution with cultural context',
+      'Basic analytics and engagement tracking',
+      'Email support',
+      '14-day free trial'
+    ],
+    color: BRAND_BLUE,
+    popular: false
+  },
+  {
+    id: 'professional',
+    name: 'Professional',
+    price: 297,
+    description: 'Complete cultural intelligence toolkit for tourism businesses',
+    features: [
+      '5 platforms for multi-channel distribution',
+      '100 culturally-intelligent stories per month',
+      'Advanced cultural intelligence protocols',
+      'Iwi acknowledgment recommendations',
+      'Cultural sensitivity compliance checking',
+      'Priority support with cultural consultation',
+      'Team collaboration (5 users)',
+      'Advanced analytics dashboard',
+      '14-day free trial'
+    ],
+    color: BRAND_PURPLE,
+    popular: true
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 497,
+    description: 'Full cultural compliance ecosystem for large tourism operations',
+    features: [
+      'Unlimited platforms and content generation',
+      'Complete cultural compliance certification',
+      'Dedicated cultural intelligence consultant',
+      'Custom iwi relationship protocols',
+      'White-label cultural compliance tools',
+      'Unlimited team collaboration',
+      'API access for custom integrations',
+      'Premium analytics with cultural impact metrics',
+      '14-day free trial'
+    ],
+    color: BRAND_ORANGE,
+    popular: false
+  }
+];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
