@@ -736,7 +736,7 @@ Experience the authentic beauty of Aotearoa New Zealand! #NewZealand #Aotearoa #
                 width: '2rem',
                 height: '2rem',
                 borderRadius: '50%',
-                backgroundColor: '#10b981',
+                backgroundColor: BRAND_ORANGE,
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
