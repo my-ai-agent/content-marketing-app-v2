@@ -122,18 +122,14 @@ const DEMOGRAPHICS: Demographic[] = [
   { value: 'gen-x', label: 'Gen X (1965-1980)', description: 'Family-focused, value-conscious, authentic experiences' },
   { value: 'millennials', label: 'Millennials (1981-1996)', description: 'Experience-focused, cultural seekers, social media savvy' },
   { value: 'gen-z', label: 'Gen Z (1997-2012)', description: 'Digital natives prioritising authenticity and sustainability' },
-  { value: 'female-travellers', label: 'Female Travellers', description: 'Solo female adventurers, women\'s groups, safety-conscious' },
-  { value: 'families', label: 'Family Travellers', description: 'Multi-generational groups, child-friendly experiences' },
+  { value: 'female-traveller', label: 'Female Adventurer', description: 'Solo female adventurers, women\'s groups, safety-conscious' },
   { value: 'eco-tourism', label: 'Eco-Tourism Enthusiasts', description: 'Sustainability-focused, environmental conservation minded' },
   { value: 'vfr', label: 'Visiting Friends & Relatives', description: 'Personal connections, local experiences, extended stays' },
   { value: 'conference', label: 'Event/Conference Delegates', description: 'Business travellers, networking opportunities, efficiency-focused' },
   { value: 'independent', label: 'Free & Independent Travellers', description: 'Self-planned journeys, flexibility, off-the-beaten-path' },
-  { value: 'luxury', label: 'Luxury/Premium Travellers', description: 'High-end experiences, personalised service, exclusive access' },
   { value: 'adventure', label: 'Adventure/Active Travellers', description: 'Outdoor experiences, physical activities, adrenaline seekers' },
   { value: 'cultural', label: 'Cultural Heritage Seekers', description: 'History enthusiasts, museum visitors, traditional experiences' },
-  { value: 'digital-nomads', label: 'Digital Nomads', description: 'Remote workers, long-stay travellers, workspace requirements' },
   { value: 'honeymoon', label: 'Honeymoon/Romance Travellers', description: 'Couples experiences, romantic settings, special occasions' },
-  { value: 'solo', label: 'Solo Travellers', description: 'Independent explorers, personal growth focused, flexible schedules' },
   { value: 'accessible', label: 'Accessible Tourism', description: 'Travellers with accessibility needs, inclusive experiences' }
 ]
 
