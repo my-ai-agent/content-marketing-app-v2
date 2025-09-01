@@ -118,14 +118,14 @@ const StepTracker = ({ currentStep }: { currentStep: number }) => (
 )
 
 const INTERESTS: Interest[] = [
-    { value: 'cultural', label: 'Cultural Experiences', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
-    { value: 'adventure', label: 'Adventure & Outdoor Activities', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
-    { value: 'food-wine', label: 'Food & Wine', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
+    { value: 'cultural', label: 'Cultural Engagement', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
+    { value: 'adventure', label: 'Outdoor Adventure', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
+    { value: 'food-wine', label: 'Wine & Foods', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
     { value: 'wellness', label: 'Relaxation & Wellness', description: 'Spa retreats, hot springs, wellness centres, meditation, yoga, luxury resorts' },
-    { value: 'history', label: 'History & Heritage', description: 'Historical sites, battlefields, colonial history, archaeological sites, guided tours' },
-    { value: 'photography', label: 'Photography & Social Media', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
-    { value: 'nature', label: 'Gardens & Nature', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
-    { value: 'arts', label: 'Arts & Creative Experiences', description: 'Art galleries, workshops, creative retreats, local artisans, craft experiences' }
+    { value: 'history', label: 'Heritage Locations', description: 'Historical sites, battlefields, colonial history, archaeological sites, guided tours' },
+    { value: 'photography', label: 'Influencer & Blogging', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
+    { value: 'nature', label: 'International Gardens & Nature Treks', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
+    { value: 'arts', label: 'Creative Arts', description: 'Art galleries, workshops, creative retreats, local artisans, craft experiences' }
 ]
 
 export default function Interests() {
