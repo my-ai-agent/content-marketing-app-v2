@@ -94,21 +94,23 @@ const BETA_CODES = [
 
 const businessTypes = {
   'Tourism Business': [
-    { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Museums, Theme Parks, Cultural Sites' },
-    { value: 'accommodation', label: 'Accommodation', description: 'Hotels, B&Bs, Holiday Parks' },
-    { value: 'food-beverage', label: 'Food & Beverage', description: 'Restaurants, Cafes, Wineries' },
-    { value: 'tours-activities', label: 'Tours & Activities', description: 'Guided Tours, Adventure Activities' },
-    { value: 'cultural-heritage', label: 'Cultural & Heritage', description: 'Marae Visits, Cultural Performances' },
+    { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Tree Top Walks, Gondola Rides, Geothermal Sites, Tram Rides' },
+    { value: 'accommodation', label: 'Accommodation', description: 'Hotels, B&Bs, Holiday Parks, Lodges, Farm Stays' },
+    { value: 'food-beverage', label: 'Restaurants & Bars', description: 'Restaurants, Cafes, Wineries, Food Markets' },
+    { value: 'tours-activities', label: 'Tours & Activities', description: 'Guided Tours, Self Guided Tours, Adventure Activities' },
+    { value: 'maori-culture', label: 'Maori Cultural & History', description: 'Marae Visits, Cultural Performances, Maori Crafts' },
+    { value: 'nature-wildlife', label: 'Nature & Wildlife', description: 'Nature Treks, Wildlife Tours, Zoo' },
+    { value: 'arts-culture', label: 'Arts & Culture', description: 'Museums, Art Galleries, Art Trails' },
     { value: 'wellness-spa', label: 'Wellness & Spa', description: 'Hot Springs, Spa Retreats' }
   ],
   'Small Business': [
-    { value: 'local-retail', label: 'Local Retail', description: 'Shops, Markets, Boutiques' },
-    { value: 'professional-services', label: 'Professional Services', description: 'Legal, Accounting, Consulting' },
+    { value: 'local-retail', label: 'Local Retail', description: 'Shops, Markets, Boutiques, Grocer, Butcher, Bakery, Fashion, Footware, Pharmacy, Second Hand Market' },
+    { value: 'professional-services', label: 'Professional Services', description: 'Legal, Accounting, Consulting, Marketing Agency' },
     { value: 'health-fitness', label: 'Health & Fitness', description: 'Gyms, Clinics, Wellness' }
   ],
   'Community Service': [
     { value: 'non-profit', label: 'Non-Profit', description: 'Charities, Foundations' },
-    { value: 'government-local', label: 'Local Government', description: 'Councils, Public Services' },
+    { value: 'government-local', label: 'Local Government', description: 'Local Councils, Public Services, Department Of Conservation, Visitor Information Centre' },
     { value: 'education', label: 'Education', description: 'Schools, Libraries, Training' }
   ]
 }
