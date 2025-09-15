@@ -430,7 +430,7 @@ export default function AuthenticatedHome() {
               lineHeight: '1.3'
             }}>
               {isAuthenticated 
-                ? 'Transform Your Story into Multiple Global Platforms, Instantly!'
+                ? 'Transform Your Story into Multiple Global Platforms to Drive More Bookings Instantly!'
                 : 'Ready to Transform Another Engaging Story?'
               }
             </h2>
