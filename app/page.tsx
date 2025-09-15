@@ -224,8 +224,8 @@ function UserMenu({ userName, userProfile }: { userName: string; userProfile: an
   }
 
   const handleProfile = () => {
-    window.location.href = '/profile'
-  }
+  window.location.href = '/onboarding/user-type'
+}
 
   const handleSignOut = () => {
     localStorage.removeItem('userToken')
@@ -430,8 +430,8 @@ export default function AuthenticatedHome() {
               lineHeight: '1.3'
             }}>
               {isAuthenticated 
-                ? 'Create Your Next Story + Photo into Global Platforms!'
-                : 'Transform Your Single Story + Photo into Global Platforms Instantly!'
+                ? 'Transform Your Story into Multiple Global Platforms, Instantly!'
+                : 'Ready to Transform Another Engaging Story?'
               }
             </h2>
           </div>
