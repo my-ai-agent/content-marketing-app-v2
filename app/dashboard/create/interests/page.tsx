@@ -118,14 +118,30 @@ const StepTracker = ({ currentStep }: { currentStep: number }) => (
 )
 
 const INTERESTS: Interest[] = [
-    { value: 'cultural', label: 'Cultural Engagement', description: 'Māori experiences, cultural events, traditional arts, heritage sites, museums, festivals' },
-    { value: 'adventure', label: 'Outdoor Adventure', description: 'Hiking, extreme sports, Great Walks, skiing, water sports, adrenaline activities' },
-    { value: 'food-wine', label: 'Wine & Foods', description: 'Wine tours, culinary experiences, local cuisine, cooking classes, food festivals' },
-    { value: 'wellness', label: 'Relaxation & Wellness', description: 'Spa retreats, hot springs, wellness centres, meditation, yoga, luxury resorts' },
-    { value: 'history', label: 'Heritage Locations', description: 'Historical sites, battlefields, colonial history, archaeological sites, guided tours' },
-    { value: 'photography', label: 'Influencer & Blogging', description: 'Instagram spots, scenic viewpoints, photography tours, influencer experiences' },
-    { value: 'nature', label: 'International Gardens & Nature Treks', description: 'Botanical gardens, Great Walks, national parks, wildlife encounters, eco-tours' },
-    { value: 'arts', label: 'Creative Arts', description: 'Art galleries, workshops, creative retreats, local artisans, craft experiences' }
+  // Core Cultural (Your Competitive Advantage)
+  { value: 'maori-culture', label: 'Māori Cultural Experiences', description: 'Marae visits, traditional arts, cultural performances, iwi-led experiences, whakapapa connections' },
+  { value: 'community-immersion', label: 'Local Community Connection', description: 'Traditional lifestyles, local families, authentic cultural exchange, community events' },
+  
+  // Adventure Tourism (Major NZ Market)
+  { value: 'soft-adventure', label: 'Accessible Adventure', description: 'Scenic drives, easy walks, cable cars, boat tours, family-friendly activities' },
+  { value: 'extreme-adventure', label: 'Extreme Adventure', description: 'Bungy jumping, skydiving, extreme sports, mountaineering, adrenaline activities' },
+  
+  // Wellness & Nature (Growing Segments)
+  { value: 'thermal-wellness', label: 'Thermal & Wellness', description: 'Hot springs, geothermal experiences, spa retreats, natural healing, relaxation' },
+  { value: 'nature-conservation', label: 'Nature & Conservation', description: 'Wildlife encounters, conservation projects, eco-tours, national parks, environmental education' },
+  
+  // Food & Wine (Established Market)
+  { value: 'food-wine', label: 'Culinary Experiences', description: 'Wine regions, local cuisine, cooking classes, food tours, artisan producers' },
+
+  { value: 'sports-events', label: 'Sports & Major Events', description: 'Rugby matches, cricket games, marathons, cultural festivals, concerts, sporting events, seasonal celebrations' },
+  
+  // Emerging Segments
+  { value: 'volunteer-contribution', label: 'Community Contribution', description: 'Conservation volunteering, community projects, environmental restoration, local charity work' },
+  { value: 'photography-content', label: 'Photography & Content Creation', description: 'Instagram locations, scenic photography, content creation experiences, influencer spots' },
+  
+  // Specialized Interests
+  { value: 'history-heritage', label: 'History & Heritage', description: 'Historical sites, museums, colonial history, archaeological sites, heritage trails' },
+  { value: 'arts-crafts', label: 'Arts & Creative Experiences', description: 'Local artisans, craft workshops, galleries, creative retreats, traditional crafts' }
 ]
 
 export default function Interests() {
