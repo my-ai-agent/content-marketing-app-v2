@@ -468,11 +468,18 @@ GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPla
 
   const getPlatformLength = (platform: string): string => {
     const lengths: { [key: string]: string } = {
-      'instagram': '125-150 words',
-      'facebook': '150-200 words',
-      'linkedin': '200-300 words',
-      'website': '200-400 words'
-    }
+  'instagram': '125-150 words',
+  'facebook': '150-180 words', 
+  'linkedin': '200-250 words',
+  'website': '200-300 words',
+  'twitter': '40-50 words',
+  'tiktok': '80-100 words',
+  'pinterest': '75-100 words',
+  'youtube': '200-300 words',
+  'snapchat': '50-80 words',
+  'whatsapp': '100-150 words',
+  'reddit': '150-250 words'
+}
     return lengths[platform] || '125-150 words'
   }
 
