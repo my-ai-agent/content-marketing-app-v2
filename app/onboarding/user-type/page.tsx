@@ -147,6 +147,7 @@ const personalPersonas = [
 ]
 
 const nzLocations = [
+  // Major Cities (Current)
   { value: 'auckland', label: 'Auckland (Tāmaki Makaurau)' },
   { value: 'wellington', label: 'Wellington (Te Whanganui-a-Tara)' },
   { value: 'christchurch', label: 'Christchurch (Ōtautahi)' },
@@ -156,7 +157,29 @@ const nzLocations = [
   { value: 'palmerston-north', label: 'Palmerston North (Papaioea)' },
   { value: 'nelson', label: 'Nelson (Whakatū)' },
   { value: 'rotorua', label: 'Rotorua (Te Rotorua-nui-a-Kahumatamomoe)' },
-  { value: 'queenstown', label: 'Queenstown (Tāhuna)' }
+  { value: 'queenstown', label: 'Queenstown (Tāhuna)' },
+  
+  // North Island Tourism Regions
+  { value: 'bay-of-islands', label: 'Bay of Islands (Pēwhairangi)' },
+  { value: 'coromandel', label: 'Coromandel Peninsula (Te Tara-o-te-Ika)' },
+  { value: 'gisborne', label: 'Gisborne (Tūranga-nui-a-Kiwa)' },
+  { value: 'new-plymouth', label: 'New Plymouth (Ngāmotu)' },
+  { value: 'whanganui', label: 'Whanganui' },
+  
+  // South Island Tourism Regions  
+  { value: 'marlborough', label: 'Marlborough (Te Tauihu-o-te-waka)' },
+  { value: 'west-coast', label: 'West Coast (Te Tai Poutini)' },
+  { value: 'canterbury', label: 'Canterbury (Waitaha)' },
+  { value: 'selwyn-district', label: 'Selwyn District' },
+  { value: 'mackenzie-district', label: 'Mackenzie District (Tekapo/Pukaki region)' },
+  { value: 'otago', label: 'Otago (Ō Tākou)' },
+  { value: 'southland', label: 'Southland (Murihiku)' },
+  { value: 'stewart-island', label: 'Stewart Island (Rakiura)' },
+  { value: 'fiordland', label: 'Fiordland (Te Rua-o-te-Moko)' },
+  
+  // Major Tourism Destinations
+  { value: 'lake-taupo', label: 'Lake Taupō (Taupō-nui-a-Tia)' },
+  { value: 'waitomo', label: 'Waitomo' }
 ]
 
 export default function UnifiedOnboarding() {
