@@ -117,6 +117,7 @@ const businessTypes = {
   { value: 'education', label: 'Education', description: 'Schools, libraries, training centers, cultural education' },
   { value: 'community-facilities', label: 'Community Facilities', description: 'Recreation centers, sports complexes, community halls, public facilities' }
 ]
+}
 
 const personalPersonas = [
   // Cultural & Heritage (Your Competitive Advantage)
