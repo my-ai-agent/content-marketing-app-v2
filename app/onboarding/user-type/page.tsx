@@ -94,33 +94,55 @@ const BETA_CODES = [
 
 const businessTypes = {
   'Tourism Business': [
-    { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Tree Top Walks, Gondola Rides, Geothermal Sites, Tram Rides' },
-    { value: 'accommodation', label: 'Accommodation', description: 'Hotels, B&Bs, Holiday Parks, Lodges, Farm Stays' },
-    { value: 'food-beverage', label: 'Restaurants & Bars', description: 'Restaurants, Cafes, Wineries, Food Markets' },
-    { value: 'tours-activities', label: 'Tours & Activities', description: 'Guided Tours, Self Guided Tours, Adventure Activities' },
-    { value: 'maori-culture', label: 'Maori Cultural & History', description: 'Marae Visits, Cultural Performances, Maori Crafts' },
-    { value: 'nature-wildlife', label: 'Nature & Wildlife', description: 'Nature Treks, Wildlife Tours, Zoo' },
-    { value: 'arts-culture', label: 'Arts & Culture', description: 'Museums, Art Galleries, Art Trails' },
-    { value: 'wellness-spa', label: 'Wellness & Spa', description: 'Hot Springs, Spa Retreats' }
+    { value: 'visitor-attraction', label: 'Visitor Attraction', description: 'Museums, theme parks, scenic attractions, cultural sites' },
+    { value: 'accommodation', label: 'Accommodation', description: 'Hotels, B&Bs, holiday parks, lodges, farm stays' },
+    { value: 'food-beverage', label: 'Food & Beverage', description: 'Restaurants, cafes, wineries, food tours' },
+    { value: 'adventure-operators', label: 'Adventure Operators', description: 'Extreme sports, outdoor activities, adrenaline experiences' },
+    { value: 'tours-activities', label: 'Tours & Activities', description: 'Guided tours, cultural experiences, leisure activities' },
+    { value: 'maori-cultural', label: 'Māori Cultural Experiences', description: 'Marae visits, cultural performances, traditional arts' },
+    { value: 'nature-wildlife', label: 'Nature & Wildlife', description: 'Conservation experiences, wildlife encounters, eco-tours' },
+    { value: 'wellness-spa', label: 'Wellness & Spa', description: 'Thermal springs, spa retreats, wellness centers' },
+    { value: 'transport-logistics', label: 'Transport & Logistics', description: 'Rental services, shuttle operators, transport providers' },
+    { value: 'community-facilities', label: 'Community Facilities', description: 'Recreation centers, sports complexes, community halls, public facilities' },
+    { value: 'events-entertainment', label: 'Events & Entertainment', description: 'Venues, festivals, sporting events, concerts' }
   ],
   'Small Business': [
-    { value: 'local-retail', label: 'Local Retail', description: 'Shops, Markets, Boutiques, Grocer, Butcher, Bakery, Fashion, Footware, Pharmacy, Second Hand Market' },
-    { value: 'professional-services', label: 'Professional Services', description: 'Legal, Accounting, Consulting, Marketing Agency' },
-    { value: 'health-fitness', label: 'Health & Fitness', description: 'Gyms, Clinics, Wellness' }
-  ],
-  'Community Service': [
-    { value: 'non-profit', label: 'Non-Profit', description: 'Charities, Foundations' },
-    { value: 'government-local', label: 'Local Government', description: 'Local Councils, Public Services, Department Of Conservation, Visitor Information Centre' },
-    { value: 'education', label: 'Education', description: 'Schools, Libraries, Training' }
-  ]
-}
+  { value: 'local-retail', label: 'Local Retail & Services', description: 'Shops, markets, boutiques, local services' },
+  { value: 'professional-services', label: 'Professional Services', description: 'Legal, accounting, consulting, marketing' },
+  { value: 'health-fitness', label: 'Health & Fitness', description: 'Gyms, clinics, wellness centers' }
+],
+'Community Service': [
+  { value: 'non-profit', label: 'Non-Profit', description: 'Charities, foundations, community organizations' },
+  { value: 'government-local', label: 'Local Government', description: 'Local councils, public services, visitor information centers' },
+  { value: 'education', label: 'Education', description: 'Schools, libraries, training centers, cultural education' },
+  { value: 'community-facilities', label: 'Community Facilities', description: 'Recreation centers, sports complexes, community halls, public facilities' }
+]
 
 const personalPersonas = [
-  { id: 'cultural-explorer', title: 'Cultural Explorer', description: 'Heritage & tradition focused' },
-  { id: 'adventure-seeker', title: 'Adventure Seeker', description: 'Active & outdoor focused' },
-  { id: 'content-creator', title: 'Content Creator', description: 'Social media & blog creator' },
-  { id: 'family-storyteller', title: 'Family Storyteller', description: 'Multi-generational experiences' },
-  { id: 'independent-traveller', title: 'Independent Traveller', description: 'Personal experience sharer' }
+  // Cultural & Heritage (Your Competitive Advantage)
+  { id: 'cultural-connector', title: 'Cultural Connector', description: 'Seeks authentic Māori experiences and meaningful cultural exchange' },
+  { id: 'heritage-explorer', title: 'Heritage Explorer', description: 'Historical sites, museums, and traditional storytelling focused' },
+  
+  // Adventure Segmentation (Major NZ Market)
+  { id: 'soft-adventurer', title: 'Scenic Adventurer', description: 'Accessible outdoor experiences and scenic beauty focused' },
+  { id: 'extreme-thrill-seeker', title: 'Extreme Thrill Seeker', description: 'Adrenaline activities and extreme sports focused' },
+  
+  // Wellness & Contribution (Growing Segments)
+  { id: 'wellness-seeker', title: 'Wellness Seeker', description: 'Thermal springs, spas, and mindful travel experiences' },
+  { id: 'conscious-contributor', title: 'Conscious Contributor', description: 'Community volunteering and conservation project participation' },
+  
+  // Content & Documentation
+  { id: 'content-creator', title: 'Content Creator', description: 'Social media influencer and professional content creation' },
+  { id: 'memory-maker', title: 'Memory Maker', description: 'Capturing and sharing personal travel stories and moments' },
+  
+  // Travel Style Segments
+  { id: 'family-coordinator', title: 'Family Coordinator', description: 'Multi-generational experiences and family-friendly activities' },
+  { id: 'business-networker', title: 'Business Networker', description: 'Professional development and business tourism focused' },
+  { id: 'solo-explorer', title: 'Solo Explorer', description: 'Independent travel with authentic local connections' },
+  
+  // Specialized Segments
+  { id: 'sports-enthusiast', title: 'Sports Enthusiast', description: 'Sporting events, outdoor competitions, and active experiences' },
+  { id: 'community-engager', title: 'Community Engager', description: 'Local community events, social connections, and authentic neighborhood experiences' }
 ]
 
 const nzLocations = [
