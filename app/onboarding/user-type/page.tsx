@@ -107,47 +107,35 @@ const businessTypes = {
     { value: 'events-entertainment', label: 'Events & Entertainment', description: 'Venues, festivals, sporting events, concerts' }
   ],
   'Small Business': [
-  { value: 'local-retail', label: 'Local Retail & Services', description: 'Shops, markets, boutiques, local services' },
-  { value: 'professional-services', label: 'Professional Services', description: 'Legal, accounting, consulting, marketing' },
-  { value: 'health-fitness', label: 'Health & Fitness', description: 'Gyms, clinics, wellness centers' }
-],
-'Community Service': [
-  { value: 'non-profit', label: 'Non-Profit', description: 'Charities, foundations, community organizations' },
-  { value: 'government-local', label: 'Local Government', description: 'Local councils, public services, visitor information centers' },
-  { value: 'education', label: 'Education', description: 'Schools, libraries, training centers, cultural education' },
-  { value: 'community-facilities', label: 'Community Facilities', description: 'Recreation centers, sports complexes, community halls, public facilities' }
-]
+    { value: 'local-retail', label: 'Local Retail & Services', description: 'Shops, markets, boutiques, local services' },
+    { value: 'professional-services', label: 'Professional Services', description: 'Legal, accounting, consulting, marketing' },
+    { value: 'health-fitness', label: 'Health & Fitness', description: 'Gyms, clinics, wellness centers' }
+  ],
+  'Community Service': [
+    { value: 'non-profit', label: 'Non-Profit', description: 'Charities, foundations, community organizations' },
+    { value: 'government-local', label: 'Local Government', description: 'Local councils, public services, visitor information centers' },
+    { value: 'education', label: 'Education', description: 'Schools, libraries, training centers, cultural education' },
+    { value: 'community-facilities', label: 'Community Facilities', description: 'Recreation centers, sports complexes, community halls, public facilities' }
+  ]
 }
 
 const personalPersonas = [
-  // Cultural & Heritage (Your Competitive Advantage)
   { id: 'cultural-connector', title: 'Cultural Connector', description: 'Seeks authentic Māori experiences and meaningful cultural exchange' },
   { id: 'heritage-explorer', title: 'Heritage Explorer', description: 'Historical sites, museums, and traditional storytelling focused' },
-  
-  // Adventure Segmentation (Major NZ Market)
   { id: 'soft-adventurer', title: 'Scenic Adventurer', description: 'Accessible outdoor experiences and scenic beauty focused' },
   { id: 'extreme-thrill-seeker', title: 'Extreme Thrill Seeker', description: 'Adrenaline activities and extreme sports focused' },
-  
-  // Wellness & Contribution (Growing Segments)
   { id: 'wellness-seeker', title: 'Wellness Seeker', description: 'Thermal springs, spas, and mindful travel experiences' },
   { id: 'conscious-contributor', title: 'Conscious Contributor', description: 'Community volunteering and conservation project participation' },
-  
-  // Content & Documentation
   { id: 'content-creator', title: 'Content Creator', description: 'Social media influencer and professional content creation' },
   { id: 'memory-maker', title: 'Memory Maker', description: 'Capturing and sharing personal travel stories and moments' },
-  
-  // Travel Style Segments
   { id: 'family-coordinator', title: 'Family Coordinator', description: 'Multi-generational experiences and family-friendly activities' },
   { id: 'business-networker', title: 'Business Networker', description: 'Professional development and business tourism focused' },
   { id: 'solo-explorer', title: 'Solo Explorer', description: 'Independent travel with authentic local connections' },
-  
-  // Specialized Segments
   { id: 'sports-enthusiast', title: 'Sports Enthusiast', description: 'Sporting events, outdoor competitions, and active experiences' },
   { id: 'community-engager', title: 'Community Engager', description: 'Local community events, social connections, and authentic neighborhood experiences' }
 ]
 
 const nzLocations = [
-  // Major Cities (Current)
   { value: 'auckland', label: 'Auckland (Tāmaki Makaurau)' },
   { value: 'wellington', label: 'Wellington (Te Whanganui-a-Tara)' },
   { value: 'christchurch', label: 'Christchurch (Ōtautahi)' },
@@ -158,15 +146,11 @@ const nzLocations = [
   { value: 'nelson', label: 'Nelson (Whakatū)' },
   { value: 'rotorua', label: 'Rotorua (Te Rotorua-nui-a-Kahumatamomoe)' },
   { value: 'queenstown', label: 'Queenstown (Tāhuna)' },
-  
-  // North Island Tourism Regions
   { value: 'bay-of-islands', label: 'Bay of Islands (Pēwhairangi)' },
   { value: 'coromandel', label: 'Coromandel Peninsula (Te Tara-o-te-Ika)' },
   { value: 'gisborne', label: 'Gisborne (Tūranga-nui-a-Kiwa)' },
   { value: 'new-plymouth', label: 'New Plymouth (Ngāmotu)' },
   { value: 'whanganui', label: 'Whanganui' },
-  
-  // South Island Tourism Regions  
   { value: 'marlborough', label: 'Marlborough (Te Tauihu-o-te-waka)' },
   { value: 'west-coast', label: 'West Coast (Te Tai Poutini)' },
   { value: 'canterbury', label: 'Canterbury (Waitaha)' },
@@ -176,8 +160,6 @@ const nzLocations = [
   { value: 'southland', label: 'Southland (Murihiku)' },
   { value: 'stewart-island', label: 'Stewart Island (Rakiura)' },
   { value: 'fiordland', label: 'Fiordland (Te Rua-o-te-Moko)' },
-  
-  // Major Tourism Destinations
   { value: 'lake-taupo', label: 'Lake Taupō (Taupō-nui-a-Tia)' },
   { value: 'waitomo', label: 'Waitomo' }
 ]
@@ -199,11 +181,12 @@ export default function UnifiedOnboarding() {
   const [businessCategory, setBusinessCategory] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [personalPersona, setPersonalPersona] = useState('')
+  const [culturalAcknowledgment, setCulturalAcknowledgment] = useState(false)
   const [privacyConsent, setPrivacyConsent] = useState(false)
+  const [showCulturalExplainer, setShowCulturalExplainer] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
-  // Mobile detection
   const isMobile = typeof window !== 'undefined' && (
     /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent) ||
     window.innerWidth <= 768
@@ -236,7 +219,9 @@ export default function UnifiedOnboarding() {
           location, 
           websiteUrl: websiteUrl || '',
           culturalConnection, 
-          userType 
+          userType,
+          culturalAcknowledgment: true,
+          acknowledgedAt: new Date().toISOString()
         },
         business: userType === 'business' ? { category: businessCategory, type: businessType } : null,
         personal: userType === 'personal' ? { persona: personalPersona } : null,
@@ -253,7 +238,9 @@ export default function UnifiedOnboarding() {
           facebookUrl, 
           instagramUrl, 
           culturalConnection, 
-          userType 
+          userType,
+          culturalAcknowledgment: true,
+          acknowledgedAt: new Date().toISOString()
         },
         business: userType === 'business' ? { category: businessCategory, type: businessType } : null,
         personal: userType === 'personal' ? { persona: personalPersona } : null,
@@ -273,7 +260,8 @@ export default function UnifiedOnboarding() {
     }
   }
 
-  const canSubmit = name && email && location && userType && privacyConsent &&
+  const canSubmit = name && email && location && userType && 
+    culturalAcknowledgment && privacyConsent &&
     ((userType === 'business' && businessCategory && businessType) ||
      (userType === 'personal' && personalPersona))
 
@@ -339,13 +327,35 @@ export default function UnifiedOnboarding() {
       {showTermsModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
           <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '2rem', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', width: '100%', position: 'relative' }}>
-            <button onClick={() => setShowTermsModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            <button onClick={() => setShowTermsModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280' }}>×</button>
+            
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '1.5rem' }}>Terms & Conditions</h2>
-            <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#374151', marginBottom: '2rem' }}>
-              <p>Click Speak Send is an AI-powered content creation platform that generates culturally-intelligent tourism content using your photos and stories. Your photos and stories are processed by AI to generate content and all data is deleted from AI memory after processing. We respect cultural protocols and Mātauranga Māori. Generated content remains your intellectual property.</p>
+            
+            <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#374151', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#065f46', marginBottom: '0.75rem' }}>
+                Te Tiriti o Kaitiakitanga 2025 Compliance
+              </h3>
+              <p style={{ marginBottom: '1rem' }}>
+                Click Speak Send operates under Te Tiriti o Waitangi (Treaty of Waitangi) principles through our Te Tiriti o Kaitiakitanga 2025 framework:
+              </p>
+              <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem', lineHeight: '1.8' }}>
+                <li>All content respects Māori cultural protocols and traditional knowledge</li>
+                <li>Sacred cultural elements (tapu, whakapapa, karakia) are never commercialized</li>
+                <li>Cultural appropriation safeguards are built into every AI generation</li>
+                <li>Content is validated against iwi-specific cultural guidelines</li>
+                <li>Platform has been reviewed by Māori cultural authorities including Whakarewarewa Thermal Village</li>
+              </ul>
+              
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem', marginTop: '1.5rem' }}>
+                Platform Usage
+              </h3>
+              <p style={{ marginBottom: '1rem' }}>
+                Click Speak Send is an AI-powered content creation platform that generates culturally-intelligent tourism content using your photos and stories. Your photos and stories are processed by AI to generate content and all data is deleted from AI memory after processing. Generated content remains your intellectual property.
+              </p>
             </div>
-            <PrimaryButton onClick={() => setShowTermsModal(false)}>
-              Got it
+            
+            <PrimaryButton onClick={() => setShowTermsModal(false)} style={{ width: '100%' }}>
+              I Understand
             </PrimaryButton>
           </div>
         </div>
@@ -518,12 +528,134 @@ export default function UnifiedOnboarding() {
           </div>
         )}
 
+        {/* TE TIRITI O KAITIAKITANGA ACKNOWLEDGMENT SECTION */}
+        <div style={{
+          backgroundColor: '#f0fdf4',
+          padding: '1.5rem',
+          borderRadius: '0.75rem',
+          border: '2px solid #10b981',
+          marginBottom: '1.5rem'
+        }}>
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#065f46',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>✓</span>
+            Te Tiriti o Waitangi Cultural Commitment
+          </h3>
+          
+          <p style={{
+            fontSize: '0.875rem',
+            color: '#065f46',
+            lineHeight: '1.6',
+            marginBottom: '1rem'
+          }}>
+            Click Speak Send operates under <strong>Te Tiriti o Kaitiakitanga 2025</strong> principles, ensuring all AI-generated content respects Māori cultural protocols and traditional knowledge.
+          </p>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            marginBottom: '0.75rem'
+          }}>
+            <input 
+              type="checkbox" 
+              checked={culturalAcknowledgment} 
+              onChange={(e) => setCulturalAcknowledgment(e.target.checked)}
+              style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer' }}
+            />
+            <label style={{
+              fontSize: '0.875rem',
+              color: '#065f46',
+              lineHeight: '1.5',
+              cursor: 'pointer'
+            }} onClick={() => setCulturalAcknowledgment(!culturalAcknowledgment)}>
+              I acknowledge that my content will be generated with respect for Te Tiriti o Waitangi principles, Māori cultural protocols, and that sacred or restricted cultural elements (tapu, whakapapa, karakia) will not be commercialized.
+            </label>
+          </div>
+
+          <button 
+            onClick={() => setShowCulturalExplainer(!showCulturalExplainer)}
+            style={{ 
+              fontSize: '0.75rem', 
+              color: '#059669', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              marginTop: '0.5rem',
+              padding: '0'
+            }}
+          >
+            What does Te Tiriti compliance mean for my content?
+          </button>
+
+          {showCulturalExplainer && (
+            <div style={{
+              backgroundColor: '#ecfdf5',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              marginTop: '0.75rem',
+              fontSize: '0.75rem',
+              lineHeight: '1.6',
+              color: '#065f46'
+            }}>
+              <p style={{ marginBottom: '0.75rem', margin: '0 0 0.75rem 0' }}>
+                <strong>Partnership Principle:</strong> AI content is created in consultation with cultural authorities, not imposed on communities. Our platform has been validated by Whakarewarewa Thermal Village and other Māori cultural leaders.
+              </p>
+              <p style={{ marginBottom: '0.75rem', margin: '0 0 0.75rem 0' }}>
+                <strong>Protection Principle:</strong> Sacred cultural knowledge (tapu, whakapapa, karakia) is never commercialized. Our AI safeguards prevent inappropriate use of restricted cultural elements.
+              </p>
+              <p style={{ margin: '0' }}>
+                <strong>Participation Principle:</strong> Māori cultural authorities validate our AI safeguards before content reaches you, ensuring every story respects cultural protocols.
+              </p>
+              <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #86efac' }}>
+                <a 
+                  href="https://waitangitribunal.govt.nz/treaty-of-waitangi/" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#059669', textDecoration: 'underline' }}
+                >
+                  Learn more about Te Tiriti o Waitangi
+                </a> from the Waitangi Tribunal
+              </div>
+            </div>
+          )}
+          
+          <div style={{
+            backgroundColor: '#dcfce7',
+            padding: '0.75rem',
+            borderRadius: '0.5rem',
+            marginTop: '0.75rem'
+          }}>
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#065f46',
+              margin: '0',
+              lineHeight: '1.4'
+            }}>
+              <strong>Cultural Authority Validated:</strong> Our platform has been reviewed and endorsed by Whakarewarewa Thermal Village and other Māori cultural authorities to ensure authentic, respectful content generation.
+            </p>
+          </div>
+        </div>
+
         <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.75rem' }}>
-            <input type="checkbox" checked={privacyConsent} onChange={(e) => setPrivacyConsent(e.target.checked)} style={{ width: '18px', height: '18px', marginTop: '2px' }} />
-            <label style={{ fontSize: '0.875rem', color: '#374151', lineHeight: '1.4' }}>
+            <input 
+              type="checkbox" 
+              checked={privacyConsent} 
+              onChange={(e) => setPrivacyConsent(e.target.checked)} 
+              style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer' }} 
+            />
+            <label style={{ fontSize: '0.875rem', color: '#374151', lineHeight: '1.4', cursor: 'pointer' }} onClick={() => setPrivacyConsent(!privacyConsent)}>
               I consent to my story/photo being used for AI content generation, and understand that this will be deleted from AI's memory after processing. I accept the{' '}
-              <button onClick={() => setShowTermsModal(true)} style={{ color: BRAND_PURPLE, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.875rem' }}>Terms & Conditions</button>.
+              <button onClick={(e) => { e.stopPropagation(); setShowTermsModal(true); }} style={{ color: BRAND_PURPLE, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.875rem' }}>Terms & Conditions</button>.
             </label>
           </div>
           
@@ -535,6 +667,20 @@ export default function UnifiedOnboarding() {
           >
             {isSubmitting ? 'Setting up your account...' : 'Start Creating'}
           </PrimaryButton>
+          
+          {!culturalAcknowledgment && userType && (
+            <div style={{ 
+              marginTop: '1rem', 
+              textAlign: 'center', 
+              fontSize: '0.75rem', 
+              color: '#dc2626',
+              padding: '0.5rem',
+              backgroundColor: '#fef2f2',
+              borderRadius: '0.5rem'
+            }}>
+              Please acknowledge Te Tiriti o Waitangi cultural commitment to continue
+            </div>
+          )}
         </div>
       </div>
     </div>
