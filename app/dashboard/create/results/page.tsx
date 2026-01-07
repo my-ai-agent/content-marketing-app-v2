@@ -463,26 +463,64 @@ ${userData.interests ? `AUDIENCE INTERESTS: ${userData.interests}` : ''}
 ORIGINAL STORY TO TRANSFORM:
 "${userData.story || 'Amazing cultural experience in beautiful Aotearoa New Zealand'}"
 
-GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori protocols and traditional knowledge. Include appropriate hashtags and calls-to-action for ${platform}.`
-  }
+GENERATE: Create authentic, culturally-intelligent ${platform} content (${getPlatformLength(platform)}) that resonates with the target audience while respecting Māori cultural protocols.
+
+PLATFORM TONE: ${getPlatformTone(platform)}
+
+HASHTAG GUIDANCE: ${getPlatformHashtags(platform)}
 
   const getPlatformLength = (platform: string): string => {
-    const lengths: { [key: string]: string } = {
-  'instagram': '125-150 words',
-  'facebook': '150-180 words', 
-  'linkedin': '200-250 words',
-  'website': '200-300 words',
-  'twitter': '40-50 words',
-  'tiktok': '80-100 words',
-  'pinterest': '75-100 words',
-  'youtube': '200-300 words',
-  'snapchat': '50-80 words',
-  'whatsapp': '100-150 words',
-  'reddit': '150-250 words'
-}
-    return lengths[platform] || '125-150 words'
+  const lengths: { [key: string]: string } = {
+    'instagram': '80-125 words',
+    'facebook': '40-80 words',
+    'linkedin': '200-300 words',
+    'website': '250-400 words',
+    'twitter': '20-40 words',
+    'tiktok': '40-70 words',
+    'pinterest': '50-75 words',
+    'youtube': '400-600 words',
+    'snapchat': '30-50 words',
+    'whatsapp': '60-100 words',
+    'reddit': '150-300 words',
+    'email newsletter': '150-250 words'
   }
+  return lengths[platform] || '80-125 words'
+}
+const getPlatformTone = (platform: string): string => {
+  const tones: { [key: string]: string } = {
+    'instagram': 'Visual-first storytelling. Hook in FIRST LINE. Use 3-5 hashtags. Emoji-friendly. End with engagement question.',
+    'facebook': 'Community-focused, conversation-starting. Lead with question or bold statement. Shorter is dramatically better.',
+    'linkedin': 'Professional thought leadership. Te Tiriti values. Data-backed claims. Hook in first 2 lines. End with discussion question.',
+    'website': 'SEO-optimized with natural keywords. Scannable paragraphs. Clear value proposition. Subtle call-to-action.',
+    'twitter': 'Punchy and immediate. One idea per tweet. 1-2 hashtags max. Personality-forward.',
+    'tiktok': 'Trend-aware, hook-driven. First 3 seconds critical. Casual, energetic. Behind-the-scenes wins.',
+    'pinterest': 'Inspirational and aspirational. Keyword-rich for search. Save for later value.',
+    'youtube': 'SEO-focused hook in first line. Comprehensive but scannable. Strong subscribe CTA.',
+    'snapchat': 'Urgent, FOMO-inducing. Casual and playful. Behind-the-scenes exclusivity.',
+    'whatsapp': 'Personal and direct like messaging a friend. Conversational warmth. Not broadcast-style.',
+    'reddit': 'Authentic and non-promotional. Community-respectful. Never sound like an ad.',
+    'email newsletter': 'Personal greeting. Value-driven. Clear subject under 50 chars. Strong but gentle CTA.'
+  }
+  return tones[platform] || 'Engaging, authentic, and audience-appropriate'
+}
 
+const getPlatformHashtags = (platform: string): string => {
+  const hashtags: { [key: string]: string } = {
+    'instagram': 'Include 3-5 relevant hashtags. Mix popular (#NewZealand) with niche (#CulturalTourismNZ).',
+    'facebook': 'Use 1-2 hashtags maximum or none. Facebook users engage less with hashtag-heavy posts.',
+    'linkedin': 'Use 3-5 professional hashtags (#TourismIndustry #CulturalTourism #AotearoaNZ).',
+    'twitter': 'Use 1-2 hashtags only. Integrate naturally into the tweet.',
+    'tiktok': 'Use 3-5 hashtags including trending ones. Mix #fyp with niche tourism tags.',
+    'pinterest': 'No hashtags - use keywords naturally in description instead.',
+    'youtube': 'Include relevant keywords. Hashtags in title limited to 3.',
+    'snapchat': 'Minimal hashtags - focus on content and location tags.',
+    'whatsapp': 'No hashtags - keep it conversational.',
+    'reddit': 'No hashtags - they look spammy on Reddit.',
+    'email newsletter': 'No hashtags in emails.',
+    'website': 'No visible hashtags - use meta tags instead.'
+  }
+  return hashtags[platform] || ''
+}
   const getFallbackContent = (platform: string, userData: UserData): string => {
     const story = userData.story || "Amazing experience in beautiful Aotearoa"
     const location = userData.location || "New Zealand"
